@@ -1,95 +1,85 @@
+// import Image from "next/image";
+// import styles from "./ui/page.module.css";
+// Image next
 import Image from "next/image";
-import styles from "./page.module.css";
+// bootstrap
+import "bootstrap/dist/css/bootstrap.css";
+// Estilos de pagina
+// import styles from "./ui/page.module.css";
+import "./ui/home.css";
+
+import type { Viewport } from 'next'
+ 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  // Also supported by less commonly used
+  // interactiveWidget: 'resizes-visual',
+}
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+      <div className="container-fluid container-xl">
+      <div className="row d-flex align-items-center contenedor_principal">
+        <div className="col-md-5">
+          <div className="contenedor_tei_index">
+            <h1 className="titulo_principal_h1">TLAXCALA EN <span className="d-block">IMÁGENES</span></h1>
+            <h6 className="subtitulo_h6">por <span className="span_tad d-block">T A D</span></h6>
+          </div>
         </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <div className="col-md-7">
+          <div className="contenedor_enlaces_index">
+            <div className="contenedor_titulos">
+              <h3 className="subtitulo_h3">Una imagen vale más que mil palabras</h3>
+              <h4 className="subtitulo_h4">Únete Hoy</h4>
+            </div>
+            <div className="contenedor_enlaces">
+              <div className="boton boton_registrarse_google">
+                <a className="a_links" href="">
+                  <Image 
+                    src="/google-icone-symbole-logo-png.ico"
+                    className="google_icon"
+                    width={25}
+                    height={25}
+                    alt="Google Icon"
+                  >
+
+                  </Image>
+                  {/* <img className="google_icon" src="img/index/google-icone-symbole-logo-png.ico" alt="Google Icon"> */}
+                  Registrarse con Google
+                </a>
+              </div>
+              <div className="boton boton_crear_cuenta">
+                <a className="a_links" href="">Crear una cuenta</a>
+              </div>
+              <span className="span_o">O</span>
+              <div className="boton boton_inciar_sesion">
+                <a className="a_links" href="">Iniciar sesión</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-12">
+          <div className="pie_pagina_index fixed-bottom">
+            <ul className="nav justify-content-center">
+              <li className="nav-item">
+                <a className="nav-link pie_pagina_links tad active" aria-current="page" href="#">Tlaxcala Al Descubierto</a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link pie_pagina_links" href="#">Información</a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link pie_pagina_links" href="#">Política de Privacidad</a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link pie_pagina_links" href="#">Condiciones de Servicio</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
