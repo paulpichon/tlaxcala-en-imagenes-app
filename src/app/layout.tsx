@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 import './ui/fonts';
 // metadatos
 export const metadata: Metadata = {
-  title: "Tlaxcala En Imágenes",
+  title: "Tlaxcala En Imágenes | Entrar o registrarse",
   description: "El lugar donde encuentras gente de Tlaxcala",
 };
 
