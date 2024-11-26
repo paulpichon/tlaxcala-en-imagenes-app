@@ -53,7 +53,7 @@ export default function Home() {
                 
               </div>
               <div className="boton boton_crear_cuenta">
-              <Link className="a_links" href="/crear-cuenta">
+              <Link className="a_links" href="/cuentas/crear-cuenta">
                 Crear una cuenta
               </Link>
               </div>
