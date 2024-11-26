@@ -1,5 +1,5 @@
-// import Image from "next/image";
-// import styles from "./ui/page.module.css";
+// Link nextjs
+import Link from "next/link";
 // Image next
 import Image from "next/image";
 // bootstrap
@@ -9,7 +9,9 @@ import "bootstrap/dist/css/bootstrap.css";
 import "./ui/home.css";
 
 import type { Viewport } from 'next'
- 
+// Footer principal
+import FooterPrincipal from "./components/footerPrincipal";
+// viewport
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -37,7 +39,7 @@ export default function Home() {
             </div>
             <div className="contenedor_enlaces">
               <div className="boton boton_registrarse_google">
-                <a className="a_links" href="">
+              <Link className="a_links" href="/google-sign-in">
                   <Image 
                     src="/google-icone-symbole-logo-png.ico"
                     className="google_icon"
@@ -45,40 +47,27 @@ export default function Home() {
                     height={25}
                     alt="Google Icon"
                   >
-
                   </Image>
-                  {/* <img className="google_icon" src="img/index/google-icone-symbole-logo-png.ico" alt="Google Icon"> */}
                   Registrarse con Google
-                </a>
+              </Link>
+                
               </div>
               <div className="boton boton_crear_cuenta">
-                <a className="a_links" href="">Crear una cuenta</a>
+              <Link className="a_links" href="/crear-cuenta">
+                Crear una cuenta
+              </Link>
               </div>
               <span className="span_o">O</span>
               <div className="boton boton_inciar_sesion">
-                <a className="a_links" href="">Iniciar sesión</a>
+                <Link className="a_links" href="iniciar-sesion">
+                  Iniciar sesión
+                </Link>
               </div>
             </div>
           </div>
         </div>
-        <div className="col-md-12">
-          <div className="pie_pagina_index fixed-bottom">
-            <ul className="nav justify-content-center">
-              <li className="nav-item">
-                <a className="nav-link pie_pagina_links tad active" aria-current="page" href="#">Tlaxcala Al Descubierto</a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link pie_pagina_links" href="#">Información</a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link pie_pagina_links" href="#">Política de Privacidad</a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link pie_pagina_links" href="#">Condiciones de Servicio</a>
-              </li>
-            </ul>
-          </div>
-        </div>
+        {/* componente footer principal*/}
+        <FooterPrincipal />
       </div>
     </div>
   );
