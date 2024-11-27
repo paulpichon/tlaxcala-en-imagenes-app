@@ -1,0 +1,251 @@
+/* Estilos de pagina crear cuenta */
+/*
+    font-family: 'League Gothic', sans-serif;
+    font-family: 'Open Sans', sans-serif;
+*/
+/*ESTILOS GENERALES*/
+/*body*/
+/* body{
+    background-color: #FFFFFF;
+} */
+/*contenedor contenedor_tei_index*/
+div.contenedor_tei_index{
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    text-align: center;
+    margin-top: 20px;
+}
+/*Titulo Tlaxcala En Imágenes*/
+h1.titulo_principal_h1{
+    color: #EBCA9A;
+    font-family: 'League Gothic', sans-serif;
+    font-size: 2.7rem;
+}
+/*subtitulo_h6 por tad*/
+h6.subtitulo_h6 {
+    font-family: 'Open Sans', sans-serif;
+}
+/*span_tad TAD*/
+span.span_tad {
+    color: #EBCA9A;
+    font-weight: bold;
+    margin-left: 70px;
+    margin-top: 8px;
+}
+/*contenedor_formulario*/
+div.contenedor_formulario{
+    margin-top: 10%;
+}
+/*contenedor*/
+div.contenedor_titulos {
+    text-align: center;
+}
+/*h3*/
+h3.subtitulo_h3 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 10px 0;
+}
+/*contenedor_formulario*/
+div.contenedor_formulario{
+    text-align: center;
+    margin: 20px 0;
+}
+/*Inputs formulario*/
+input.inputs_crear_cuenta{
+    border-radius: 20px;
+    border: 2px solid #000000;
+}
+input.inputs_crear_cuenta:focus{
+    border: 2px solid #000000;
+    outline:none !important;
+    outline-width: 0 !important;
+    box-shadow: none;
+}
+/*Boton registrarse*/
+button.boton_registrarse {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 1.2rem;
+    background-color: #FFFFFF;
+    border-radius: 20px;
+    padding: 3px 25px;
+    border: 2px solid #EBCA9A;
+    color: #EBCA9A;
+    /*EFECTOS*/
+    transition: all 0.3s ease 0s;
+}
+/*Hover boton*/
+button.boton_registrarse:hover {
+    background-color: #EBCA9A;
+    color: #FFFFFF;
+}
+/*Parrafo Link iniciar sesion*/
+p.pregunta {
+    font-family: 'Open Sans', sans-serif;
+}
+/*Link iniciar sesion*/
+a.enlace_iniciar_sesion {
+    text-decoration: none;
+    color: #EBCA9A;
+    /*EFECTOS*/
+    transition: all 0.3s ease;
+}
+a.enlace_iniciar_sesion:hover {
+    font-weight: bold;
+}
+/*PIE DE PAGINA*/
+/*pie_pagina_index*/
+div.pie_pagina_index{
+    padding: 10px;
+}
+/*Links de pie de pagina*/
+a.pie_pagina_links {
+    color: #000000;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: lighter;
+    font-size: .9rem;
+    /*EFECTOS*/
+    transition: all 0.3s ease 0s;
+}
+/*HOVER A_LINKS*/
+a.pie_pagina_links:hover {
+    color:  #EBCA9A;
+}
+/*FIN HOVER A_LINKS*/
+
+/*Links de pie de pagina*/
+a.tad {
+    color: #EBCA9A!important;
+    font-family: 'Open Sans', sans-serif;
+    /*EFECTOS*/
+    transition: all 0.3s ease 0s;
+}
+/*HOVER*/
+a.tad:hover {
+    color: #000000!important;
+}
+
+/*X-Small devices (portrait phones, less than 576px)*/
+/* No media query for `xs` since this is the default in Bootstrap*/
+
+/*Small devices (landscape phones, 576px and up)*/
+@media (min-width: 576px) { 
+    /*Titulo Tlaxcala En Imágenes*/
+    h1.titulo_principal_h1{
+        font-size: 4rem;
+    }
+    /*subtitulo_h6 POR*/
+    h6.subtitulo_h6 {
+        font-size: 1.1rem;
+    }
+    /*span_tad TAD*/
+    span.span_tad {
+        font-size: 1.1rem;
+        margin-left: 80px;
+        margin-top: 10px;
+    }
+    /*Parrafo Link iniciar sesion*/
+    p.pregunta {
+        font-size: 1.1rem;
+    }
+    /*Link iniciar sesion*/
+    a.enlace_iniciar_sesion {
+        margin-left: 5px;
+    }
+    /*pie_pagina_index*/
+    div.pie_pagina_index{
+        padding: 10px;
+    }
+    /*Links de pie de pagina*/
+    a.pie_pagina_links {
+        font-size: 1rem;
+    }
+}
+/*Medium devices (tablets, 768px and up)*/
+@media (min-width: 768px) { 
+    /*Titulo Tlaxcala En Imágenes*/
+    h1.titulo_principal_h1{
+        font-size: 6rem;
+    }
+    /*subtitulo_h6 POR*/
+    h6.subtitulo_h6 {
+        font-size: 1.2rem;
+    }
+    /*span_tad TAD*/
+    span.span_tad {
+        font-size: 1.3rem;
+    }
+    /*Crear cuenta*/
+    h3.subtitulo_h3 {
+        font-size: 1.4rem;
+    }
+    /*Inputs*/
+    input.inputs_crear_cuenta {
+        font-size: 1.1rem;
+    }
+    /*Boton registrarse*/
+    button.boton_registrarse {
+        font-size: 1.3rem;
+        padding: 4px 30px;
+    }
+    /*Parrafo Link iniciar sesion*/
+    p.pregunta {
+        font-size: 1.2rem;
+    }
+    /*Links de pie de pagina*/
+    a.pie_pagina_links {
+        font-size: 1.2rem;
+    }
+}
+/* Large devices (desktops, 992px and up)*/
+@media (min-width: 992px) {
+    /*Titulo Tlaxcala En Imágenes*/
+    h1.titulo_principal_h1{
+        font-size: 7rem;
+    }
+    /*Crear cuenta*/
+    h3.subtitulo_h3 {
+        font-size: 1.5rem;
+    }
+    /*Inputs*/
+    input.inputs_crear_cuenta {
+        font-size: 1.2rem;
+    }
+    /*Boton registrarse*/
+    button.boton_registrarse {
+        font-size: 1.3rem;
+        padding: 4px 30px;
+    }
+    /*Parrafo Link iniciar sesion*/
+    p.pregunta {
+        font-size: 1.2rem;
+    }
+    /*pie_pagina_index*/
+    div.pie_pagina_index{
+        padding: 10px;
+    }
+    /*Links de pie de pagina*/
+    a.pie_pagina_links {
+        font-size: 1.2rem;
+    }
+    /*Contenedor de pie de pagina index*/
+    div.pie_pagina_index {
+        margin: 50px 0;
+    }
+}
+/*X-Large devices (large desktops, 1200px and up)*/
+@media (min-width: 1200px) { 
+    /*Parrafo Link iniciar sesion*/
+    p.pregunta {
+        margin-top: 40px;
+    }
+}
+/* XX-Large devices (larger desktops, 1400px and up)*/
+@media (min-width: 1400px) { 
+    /*Boton registrarse*/
+    button.boton_registrarse {
+        margin-top: 30px;
+    }
+ }
