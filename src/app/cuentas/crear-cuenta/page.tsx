@@ -6,7 +6,7 @@
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
 // import styles from "./ui/page.module.css";
-import "../../ui/cuentas/crear-cuenta.css";
+import "../../ui/cuentas/crear-cuenta/crear-cuenta.css";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/headerPrincipalTei";
 // Footer principal
