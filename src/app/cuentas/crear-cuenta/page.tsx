@@ -13,6 +13,8 @@ import { HeaderPrincipalTei } from "@/app/components/headerPrincipalTei";
 import FooterPrincipal from "../../components/footerPrincipal";
 // viewport
 import type { Viewport } from 'next';
+// Link nextjs
+import Link from "next/link";
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -37,13 +39,13 @@ export default function CrearCuenta() {
 						<div className="contenedor_formulario">
                             {/* Existe un error debido a que falta el action del form */}
 							<form id="crear_cuenta" className="formulario_crear_cuenta">
-								<div className="mb-4">
+								<div className="mb-3">
 								  <input type="text" className="form-control inputs_crear_cuenta" id="nombre_usuario" aria-describedby="nombre" placeholder="Nombre completo" />
 								</div>
-								<div className="mb-4">
+								<div className="mb-3">
 								  <input type="text" className="form-control inputs_crear_cuenta" id="correo" aria-describedby="correo" placeholder="Correo electrónico" />
 								</div>
-								<div className="mb-4">
+								<div className="mb-3">
 								  <input type="password" className="form-control inputs_crear_cuenta" id="password" placeholder="Contraseña" />
 								</div>
 								<button type="submit" className="boton_registrarse">Registrarse</button>
@@ -52,7 +54,9 @@ export default function CrearCuenta() {
 					</div>
 				</div>
 				<div className="cool-md-12 text-center mt-2">
-					<p className="pregunta">¿Tienes una cuenta? <a href="" className="enlace_iniciar_sesion">Entrar</a></p>
+					<p className="pregunta">¿Tienes una cuenta? 
+                        <Link href="/cuentas/iniciar-sesion" className="enlace_iniciar_sesion">Entrar</Link>
+                    </p>
 				</div>
 				{/* Footer */}
                 <FooterPrincipal />
