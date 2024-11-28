@@ -75,16 +75,12 @@ button.boton_registrarse:hover {
 p.pregunta {
     font-family: 'Open Sans', sans-serif;
 }
-/*Link iniciar sesion*/
-a.enlace_iniciar_sesion {
+/* enlace recuperar contraseña */
+a.enlace_recuperar_password {
+    color: #000000;
     text-decoration: none;
-    color: #EBCA9A;
-    /*EFECTOS*/
-    transition: all 0.3s ease;
 }
-a.enlace_iniciar_sesion:hover {
-    font-weight: bold;
-}
+
 /*PIE DE PAGINA*/
 /*pie_pagina_index*/
 div.pie_pagina_index{
@@ -139,10 +135,6 @@ a.tad:hover {
     /*Parrafo Link iniciar sesion*/
     p.pregunta {
         font-size: 1.1rem;
-    }
-    /*Link iniciar sesion*/
-    a.enlace_iniciar_sesion {
-        margin-left: 5px;
     }
     /*pie_pagina_index*/
     div.pie_pagina_index{
