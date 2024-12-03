@@ -10,7 +10,7 @@ import "./ui/home.css";
 
 import type { Viewport } from 'next'
 // Footer principal
-import FooterPrincipal from "./components/FooterPrincipal";
+import FooterMain from "./components/FooterMain";
 // viewport
 export const viewport: Viewport = {
   width: 'device-width',
@@ -67,7 +67,7 @@ export default function Home() {
           </div>
         </div>
         {/* componente footer principal*/}
-        <FooterPrincipal />
+        <FooterMain />
       </div>
     </div>
   );
