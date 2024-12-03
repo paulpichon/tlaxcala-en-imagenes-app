@@ -2,7 +2,7 @@
 "use client"
 // Reqact, useState
 import React, { useState } from "react";
-// Footer  principal
+// Footer
 import FooterPrincipal from "@/app/components/FooterPrincipal";
 
 export default function CorreoEnviado() {

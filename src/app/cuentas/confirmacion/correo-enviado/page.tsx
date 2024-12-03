@@ -4,7 +4,7 @@
 // import Image from "next/image";
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
-// Componentes
+// Componente
 import CorreoEnviado from "../components/CorreoEnviado";
 // estilos de la pagina;
 import "../../../ui/cuentas/confirmacion/correo-enviado/correo-enviado.css";
