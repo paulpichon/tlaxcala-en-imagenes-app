@@ -9,7 +9,7 @@ import "bootstrap/dist/css/bootstrap.css";
 // import styles from "./ui/page.module.css";
 import "../../ui/cuentas/iniciar-sesion/iniciar-sesion.css";
 // Header principal
-import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
+import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipal";
 // Footer principal
 import FooterPrincipal from "../../components/FooterPrincipal";
 // viewport

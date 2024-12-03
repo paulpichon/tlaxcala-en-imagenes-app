@@ -3,7 +3,7 @@
 // Reqact, useState
 import React, { useState } from "react";
 // Footer
-import FooterPrincipal from "@/app/components/FooterPrincipal";
+import FooterMain from "@/app/components/FooterMain";
 
 export default function CorreoEnviado() {
   const [showModal, setShowModal] = useState(false);
@@ -32,7 +32,7 @@ export default function CorreoEnviado() {
             </div>
         </div>
         {/* Footer */}
-        <FooterPrincipal />
+        <FooterMain />
 
       {/* Modal */}
       {showModal && (

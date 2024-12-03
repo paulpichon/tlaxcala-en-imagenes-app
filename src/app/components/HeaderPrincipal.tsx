@@ -1,4 +1,4 @@
-// Componente header principal de TLAXCALA EN IMAGENES por TAD.
+// Componente header principal de TLAXCALA EN IMAGENES por TAD
 export function HeaderPrincipalTei() {
     return (
         <div className="col-md-12">

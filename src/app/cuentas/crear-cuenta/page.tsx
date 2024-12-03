@@ -8,9 +8,9 @@ import "bootstrap/dist/css/bootstrap.css";
 // import styles from "./ui/page.module.css";
 import "../../ui/cuentas/crear-cuenta/crear-cuenta.css";
 // Header principal
-import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
+import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipal";
 // Footer principal
-import FooterPrincipal from "../../components/FooterPrincipal";
+import FooterMain from "../../components/FooterMain";
 // viewport
 import type { Viewport } from 'next';
 // Link nextjs
@@ -59,7 +59,7 @@ export default function CrearCuenta() {
                     </p>
 				</div>
 				{/* Footer */}
-                <FooterPrincipal />
+                <FooterMain />
 			</div>
 	    </div>
     );
