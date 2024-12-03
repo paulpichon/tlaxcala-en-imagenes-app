@@ -1,4 +1,4 @@
-// Use client
+// Use client.
 "use client"
 // Reqact, useState
 import React, { useState } from "react";

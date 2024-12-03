@@ -1,4 +1,4 @@
-// Link-nextjs
+// Link-nextjs.
 import Link from "next/link";
 
 // componente para mostrar el footer principal
