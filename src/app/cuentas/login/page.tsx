@@ -7,7 +7,7 @@ import Link from "next/link";
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
 // import styles from "./ui/page.module.css";
-import "../../ui/cuentas/iniciar-sesion/iniciar-sesion.css";
+import "../../ui/cuentas/login/login.css";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipal";
 // Footer principal
