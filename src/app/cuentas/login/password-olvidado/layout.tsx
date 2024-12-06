@@ -4,7 +4,7 @@
 // Meta datos NEXTJS
 import { Metadata } from "next";
 // Fonts
-import "../../ui/fonts";
+import "../../../ui/fonts";
 // metadatos
 export const metadata: Metadata = {
     title: "Tlaxcala En Imágenes | Olvidé la contraseña",

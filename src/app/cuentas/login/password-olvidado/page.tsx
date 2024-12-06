@@ -7,7 +7,7 @@
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
 // import styles from "./ui/page.module.css";
-import "../../ui/login/password-olvidado/password-olvidado.css";
+import "../../../ui/cuentas/login/password-olvidado/password-olvidado.css";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipal";
 // Footer principal
