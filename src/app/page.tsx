@@ -59,7 +59,7 @@ export default function Home() {
               </div>
               <span className="span_o">O</span>
               <div className="boton boton_inciar_sesion">
-                <Link className="a_links" href="iniciar-sesion">
+                <Link className="a_links" href="/cuentas/login">
                   Iniciar sesión
                 </Link>
               </div>
