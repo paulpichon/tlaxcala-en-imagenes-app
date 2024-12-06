@@ -55,7 +55,7 @@ export default function CrearCuenta() {
 				</div>
 				<div className="cool-md-12 text-center mt-2">
 					<p className="pregunta">¿Tienes una cuenta? 
-                        <Link href="/cuentas/iniciar-sesion" className="enlace_iniciar_sesion">Entrar</Link>
+                        <Link href="/cuentas/login" className="enlace_iniciar_sesion">Entrar</Link>
                     </p>
 				</div>
 				{/* Footer */}
