@@ -1,21 +1,14 @@
-// Iniciar Sesion
-// Link nextjs
-// import Link from "next/link";
-// Image next
-// import Image from "next/image";
+// Passowrd olvidado
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
-// import styles from "./ui/page.module.css";
 import "../../../ui/cuentas/login/password-olvidado/password-olvidado.css";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipal";
 // Footer principal
-// import FooterMain from "../../components/FooterMain";
+import FooterMain from "../../../components/FooterMain";
 // viewport
 import type { Viewport } from 'next';
-// Link nextjs
-// import Link from "next/link";
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -48,24 +41,8 @@ export default function PasswordOlvidada() {
 						</div>
 					</div>
 				</div>
-				<div className="col-md-12">
-					<div className="pie_pagina_index fixed-bottom">
-						<ul className="nav justify-content-center">
-							<li className="nav-item">
-							  <a className="nav-link pie_pagina_links tad active" aria-current="page" href="#">Tlaxcala Al Descubierto</a>
-							</li>
-							<li className="nav-item">
-							  <a className="nav-link pie_pagina_links" href="#">Información</a>
-							</li>
-							<li className="nav-item">
-							  <a className="nav-link pie_pagina_links" href="#">Política de Privacidad</a>
-							</li>
-							<li className="nav-item">
-							  <a className="nav-link pie_pagina_links" href="#">Condiciones de Servicio</a>
-							</li>
-						</ul>
-					</div>
-				</div>
+				{/* Footer */}
+                <FooterMain />
 			</div>
 		</div>
     );
