@@ -49,7 +49,7 @@ export default function IniciarSesion() {
 							</form>
                             <div className="cool-md-12 text-center mt-2">
                                 <p className="pregunta">
-                                    <Link href="/cuentas/iniciar-sesion" className="enlace_recuperar_password">
+                                    <Link href="/cuentas/login/password-olvidado" className="enlace_recuperar_password">
                                     ¿Se te olvidó la contraseña?
                                     </Link>
                                 </p>
