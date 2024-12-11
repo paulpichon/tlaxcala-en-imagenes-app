@@ -1,8 +1,3 @@
-// Use client.
-"use client"
-// import Link from "next/link";
-// Image next
-// import Image from "next/image";
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Componente
