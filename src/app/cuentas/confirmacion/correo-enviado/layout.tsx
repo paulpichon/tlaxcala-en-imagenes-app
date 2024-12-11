@@ -7,7 +7,7 @@ import { Metadata } from "next";
 import "../../../ui/fonts";
 // metadatos
 export const metadata: Metadata = {
-    title: "Correo enviado | Tlaxcala En Imágenes",
+    title: "Cuenta registrada | Tlaxcala En Imágenes",
     description: "Correo de verificación de cuenta creada, Tlaxcala en imágenes",
   };
 
