@@ -7,8 +7,8 @@ import { Metadata } from "next";
 import "../../../ui/fonts";
 // metadatos
 export const metadata: Metadata = {
-    title: "Restablecer password | Tlaxcala En Imágenes",
-    description: "Restablecer contraseña",
+    title: "Correo enviado para restablecer contraseña | Tlaxcala En Imágenes",
+    description: "Correo enviado para restablecer la contraseña de usuario.",
   };
 
 export default function RootLayout({
