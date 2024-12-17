@@ -4,6 +4,8 @@
 import React, { useState } from "react";// Link nextjs
 // usePathName
 import { usePathname } from 'next/navigation';
+// Header principal
+import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipal";
 // Footer
 import FooterMain from "@/app/components/FooterMain";
 
@@ -38,12 +40,9 @@ export default function CorreoEnviado() {
   // Retornar el componente
   return (
     <>
-      <div className="col-md-12">
-              <div className="contenedor_tei_index">
-                  <h1 className="titulo_principal_h1">TLAXCALA EN <span className="d-block">IMÁGENES</span></h1>
-                  <h6 className="subtitulo_h6">por <span className="span_tad d-block">T A D</span></h6>
-              </div>
-      </div>
+    {/* Hear principal */}
+      <HeaderPrincipalTei />
+      
       <div className="col-sm-9 col-md-7 col-lg-6">
           <div className="contenedor_formulario ">
               <div className="contenedor_titulos">
