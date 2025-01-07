@@ -1,0 +1,419 @@
+/* border menu superior */
+div.contenedor_menu_superior {
+    border-bottom: 1px solid #EBCA9A;
+}
+
+/*contenedor contenedor_tei_index*/
+div.contenedor_menu_superior{
+    text-align: center;
+    /*background: linear-gradient(70deg, white, white);*/
+    background-color: rgba(255,255,255,0.95);
+}
+/*Titulo Tlaxcala En Imágenes*/
+h1.titulo_principal_h1{
+    color: #EBCA9A;
+    font-family: 'League Gothic', sans-serif;
+    font-size: 1.8rem;
+}
+/*subtitulo_h6 por tad*/
+h6.subtitulo_h6 {
+    display: none;
+}
+/*Fin Titulo Tlaxcala En Imágenes*/
+
+/*Menu inferior*/
+/*Los estilos de este menu funcionara hasta antes de llegar al breakpoint de los 768px*/
+/*Pasados los 768px se le dara otros estilos al mismo menu*/
+
+/*.contenedor_menu_lateral_inferior*/
+div.contenedor_menu_lateral_inferior {
+    background-color: rgba(255,255,255,0.95);
+}
+/*Nombre de opciones*/
+span.nombre_opciones_menu {
+    display: none;
+}
+/*etiqueta a*/
+a.opciones_menu {
+    color: #EBCA9A;
+    padding: 10px 15px;
+    /*EFECTOS*/
+    transition: all 0.3s ease 0s;
+}
+/* hover iconos menu*/
+a.opciones_menu:hover {
+    background-color:rgb(235, 202, 154, 0.2);
+    color: #EBCA9A;
+}
+/* Boton POSTEAR */
+a.postear {
+    background-color:#EBCA9A;
+    color: white;
+}
+/*
+*
+*   Fin Menu inferior
+*
+*/
+
+
+
+/*
+*
+* ESTILOS A ENCABEZADO PUBLICACION
+*
+*/
+/* div.contenedor_publicaciones */
+div.contenedor_publicaciones {
+    border-bottom: 1px solid #EBCA9A;
+}
+/* Boton opciones de la publicacion */
+a.btn_opciones_publicaciones {
+    font-family: 'Open Sans', sans-serif;
+    width: 100%;
+    border-bottom: 1px solid rgb(127, 127, 127, 0.2);
+    font-size: 1rem;
+    text-decoration: none;
+    color: #000000;
+    margin: 7px;
+}
+/* btn seguir */
+a.btn_seguir {
+    color: #EBCA9A ;
+}
+/* opcion roja */
+a.btn_rojo {
+    color: red;
+}
+/*Link con imagen de perfil*/
+a.link_perfil_img img {
+    height: 60px;
+    width: 60px;
+}
+/*Nombre de usuario*/
+h5.nombre_usuario_publicacion {
+    font-family: 'League Gothic', sans-serif;
+    letter-spacing: 2px;
+    font-size: 1.3rem;
+    margin: 7px 0;
+}
+/*Link del nombre de perfil*/
+a.link_perfil_usuario {
+    text-decoration: none;
+    color: #000000;
+}
+/*ubicacion nombre del municipio*/
+p.ubicacion {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.8rem;
+}
+/*Boton de opciones en la publicacion*/
+button.btn_opciones_modal {
+    background-color: transparent;
+    border: 0;
+    width: 100%;
+    height: 40px;
+}
+/* Boton me gusta */
+button.like-button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 15px 0 15px 10px;
+    margin: 5px 0;
+}
+/* SVG icon */
+button.like-button svg {
+    color: black;
+    stroke-width: 2px;
+    width: 24px;
+    height: 24px;
+    transition: color 0.3s ease, stroke-width 0.3s ease;
+}
+/* Se agrega la clase para cambiar el color del corazon */
+button.like-button.liked svg {
+    fill: #EBCA9A; /*Relleno del icono*/
+    stroke: #EBCA9A; /* Para cambiar el color de la línea del ícono */
+    stroke-width: 2.5px;
+}
+
+/* IMAGEN PUBLICACION */
+/* Debido al uso de NEXTJS y el coponente IMAGE debemos poner esta propiedad en el CSS para que la imagen se muestre correctamente en los dispositivos */
+.img_publicacion {
+    width: 100%;
+}
+/*
+*
+*   Div publicidad/sugerencias
+*
+*/
+div.sugerencias {
+    display: none;
+}
+
+
+/*X-Small devices (portrait phones, less than 576px)
+No media query for `xs` since this is the default in Bootstrap*/
+
+/*Small devices (landscape phones, 576px and up)*/
+@media (min-width: 576px) { 
+    /*
+    *
+    *Titulo Tlaxcala En Imágenes
+    *
+    */
+    h1.titulo_principal_h1{
+        font-size: 2.4rem;
+    }
+    /*subtitulo_h6 por tad*/
+    h6.subtitulo_h6 {
+        font-size: 1.1rem;
+    }
+    /*span_tad TAD*/
+    span.span_tad {
+        font-size: 1.1rem;
+        margin-top: 7px;
+    }
+    /*Fin Titulo Tlaxcala En Imágenes*/
+
+    /*Menu inferior*/
+    /*etiqueta a*/
+    a.opciones_menu {
+        padding: 10px 35px;
+    }
+    /*Iconos de menu*/
+    img.img_icono_menu {
+        width: 1.8rem;
+    }
+    /*Fin Menu inferior*/
+
+    /*
+    *
+    *   ESTILOS A ENCABEZADO PUBLICACION
+    *
+    */
+    /*Link con imagen de perfil*/
+    a.link_perfil_img img {
+        height: 65px;
+        width: 65px;
+    }
+    /*Nombre de usuario*/
+    h5.nombre_usuario_publicacion {
+        font-size: 1.5rem;
+    }
+    /*ubicacion nombre del municipio*/
+    p.ubicacion {
+        font-size: 0.9rem;
+    }
+}
+
+/*Medium devices (tablets, 768px and up)*/
+@media (min-width: 768px) { 
+    /* border */
+    div.contenedor_central_contenido {
+        border: 2px solid rgb(127, 127, 127, 0.2);
+        border-top: 0;
+        /* Dar un padding al contenedor central */
+        padding: 0 10px 10px 10px;
+    }
+    /*
+    *
+    *Titulo Tlaxcala En Imágenes
+    *
+    */
+    h1.titulo_principal_h1{
+        font-size: 4rem;
+    }
+    /*subtitulo_h6 por tad*/
+    h6.subtitulo_h6 {
+        display: block;
+        font-family: 'Open Sans', sans-serif;
+    }
+    /*Por TAD*/
+    h6.por_tad {
+        font-size: 0.9rem;
+    }
+    /*span_tad TAD*/
+    span.span_tad {
+        color: #EBCA9A;
+        font-weight: bold;
+        margin-left: 70px;
+        font-size: .8rem;
+    }
+    /*Fin Titulo Tlaxcala En Imágenes*/
+
+    /*Menu inferior*/
+    /*etiqueta a*/
+    a.opciones_menu {
+        text-align: center;
+    }
+    /*Iconos de menu*/
+    img.img_icono_menu {
+        width: 1.8rem;
+    }
+    /*Fin Menu inferior*/
+
+    /*
+    *
+    *   ESTILOS A ENCABEZADO PUBLICACION
+    *
+    */
+    /*Link con imagen de perfil*/
+    a.link_perfil_img img {
+        height: 65px;
+        width: 65px;
+    }
+    /*Nombre de usuario*/
+    h5.nombre_usuario_publicacion {
+        font-size: 1.3rem;
+    }
+    /*ubicacion nombre del municipio*/
+    p.ubicacion {
+        font-size: 0.8rem;
+    }
+    /*Contenedor menu lateral-superior*/
+    div.contenedor_menu_lateral_inferior {
+        position: sticky;
+        top: 0;
+    }
+    /* estilos a ul.menu_inferior_lateral */
+    ul.menu_inferior_lateral{
+        flex-direction: column;
+        /* margin-top: 30px ; */
+    }
+    /* li.nav-item */
+    li.nav-item{
+        margin: 15px 0;
+    }
+    /* div contenedor_publicaciones */
+    div.contenedor_publicaciones {
+        margin: 20px 0 30px 0;
+    }
+ }
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) { 
+    /*Menu inferior*/
+    /*Iconos de menu*/
+    img.img_icono_menu {
+        width: 1.8rem;
+    }
+    /*Fin Menu inferior*/
+    
+    /*
+    *
+    *   ESTILOS A ENCABEZADO PUBLICACION
+    *
+    */
+    /* contenedor encabezado_publicacion */
+    div.contenedor_encabezado_publicacion {
+        margin: 15px 0;
+    }
+    /*Link con imagen de perfil*/
+    a.link_perfil_img img {
+        height: 80px;
+        width: 80px;
+    }
+    /*Nombre de usuario*/
+    h5.nombre_usuario_publicacion {
+        font-size: 1.6rem;
+    }
+    /*ubicacion nombre del municipio*/
+    p.ubicacion {
+        font-size: .8rem;
+    }
+}
+
+/* X-Large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) { 
+    /*Menu inferior*/
+    /*Iconos de menu*/
+    img.img_icono_menu {
+        width: 1.8rem;
+    }
+    /*Fin Menu inferior*/
+    
+    /*
+    *
+    *   ESTILOS A ENCABEZADO PUBLICACION
+    *
+    */
+    /* contenedor encabezado_publicacion */
+    div.contenedor_encabezado_publicacion {
+        margin: 15px 0;
+    }
+    /*Link con imagen de perfil*/
+    a.link_perfil_img img {
+        height: 80px;
+        width: 80px;
+    }
+    /*Nombre de usuario*/
+    h5.nombre_usuario_publicacion {
+        font-size: 1.9rem;
+    }
+    /*ubicacion nombre del municipio*/
+    p.ubicacion {
+        font-size: .9rem;
+    }
+
+    /* Div publicidad/sugerencias */
+    /* Se muestra el DIV SUGERENCIAS */
+    div.sugerencias {
+        display: block;
+    }
+    /* Publicidad leyenda */
+    p.publicidad {
+        font-family: 'Open Sans', sans-serif;
+        font-size: .8rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+    /* link imagen mas votadas */
+    a.link_imagen_mas_votadas {
+        text-decoration: none;
+    }
+    /* nombre de usuario imagenes mas votadas */
+    h6.titulo_card {
+        font-weight: bold;
+    }
+    /* numero de me gustas */
+    p.numero_me_gustas {
+        font-size: .8rem;
+    }
+    /* enlaces footer sugerencias */
+    a.enlaces_footer_sugerencias {
+        font-family: 'Open Sans', sans-serif;
+        text-decoration: none;
+        font-size: .8rem;
+        color: rgb(127, 127, 127, 0.4);
+        font-weight: bold; 
+        margin: 15px 0;
+    }
+    /* hover */
+    a.enlaces_footer_sugerencias:hover {
+        text-decoration: underline;
+        color: rgb(127, 127, 127, 0.6);
+    }
+    /* TLAXCALA EN IMAGENES FOOTER */
+    h6.tei_footer_sugerencias {
+        font-size: .8rem;
+        color: rgb(127, 127, 127, 0.5);
+    }
+ }
+
+/* XX-Large devices (larger desktops, 1400px and up)*/
+@media (min-width: 1400px) { 
+    /*este contenedor es igual a container-xxl de bootstrap*/
+    /*Lo cambio porque necesito que se quite el margen del container-xxl en todas las medidas antes de los 1400px*/
+    /*Ademas se puso la clase g-0 para quitar los padding a las columnas en el div del row*/
+    div.contenedor_principal {
+        --bs-gutter-x: 1.5rem;
+        --bs-gutter-y: 0;
+        width: 100%;
+        padding-right: calc(var(--bs-gutter-x) * .5);
+        padding-left: calc(var(--bs-gutter-x) * .5);
+        margin-right: auto;
+        margin-left: auto;
+        max-width: 1320px;
+    }
+ }
