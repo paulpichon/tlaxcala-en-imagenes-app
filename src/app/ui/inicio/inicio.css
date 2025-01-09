@@ -65,10 +65,16 @@ a.postear {
 div.contenedor_publicaciones {
     border-bottom: 1px solid #EBCA9A;
 }
-/* Boton opciones de la publicacion */
-a.btn_opciones_publicaciones {
-    font-family: 'Open Sans', sans-serif;
+/* Quitar los estilos del boton de toldo */
+.btn_toldo {
+    background-color: transparent;
+    border: 0;
     width: 100%;
+}
+/* Boton opciones de la publicacion */
+.btn_opciones_publicaciones {
+    font-family: 'Open Sans', sans-serif;
+    display: block;
     border-bottom: 1px solid rgb(127, 127, 127, 0.2);
     font-size: 1rem;
     text-decoration: none;

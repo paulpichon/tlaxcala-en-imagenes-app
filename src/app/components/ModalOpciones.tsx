@@ -4,10 +4,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 export default function ModalOpciones() {
     return (
         <>
-            {/* <button type="button" className="btn_opciones_modal" data-bs-toggle="modal" data-bs-target="#modalOpciones"> 
-                <FiMoreHorizontal />
-            </button> */}
-            
+            {/* https://toldo.vercel.app/ */}
             <Dialog.Root>
                 <Dialog.Trigger className="btn_opciones_modal">
                     <FiMoreHorizontal />
@@ -18,36 +15,43 @@ export default function ModalOpciones() {
                     {/* <Dialog.Content className="position-fixed top-50 start-50 translate-50 d-flex flex-column overflow-hidden rounded-3 border border-secondary bg-light w-90" */}
                     <Dialog.Content className="position-fixed top-50 start-50 translate-middle d-flex flex-column overflow-hidden rounded-3 border border-secondary bg-light w-100"
                     style={{ maxHeight: '85vh', maxWidth: '450px', width: '385px', zIndex: 1050 }}>
-                    <div className="modal-content">
-            <div className="modal-header">
-              <Dialog.Title className="modal-title">Change Username</Dialog.Title>
-              <Dialog.Close className="btn-close" aria-label="Close"></Dialog.Close>
-            </div>
-            <div className="modal-body">
-              <Dialog.Description className="mb-3 text-muted">
-                Make changes to your username here.
-              </Dialog.Description>
-              <fieldset className="mb-3">
-                <input
-                  id="name"
-                  placeholder="@raphaelsalaja"
-                  className="form-control"
-                />
-              </fieldset>
-            </div>
-            <div className="modal-footer">
-              <Dialog.Close className="btn btn-secondary">
-                Cancel
-              </Dialog.Close>
-              <Dialog.Close className="btn btn-primary">
-                Save Changes
-              </Dialog.Close>
-            </div>
-          </div>
+                        <div className="modal-content">
+                            <div className="modal-header">
+                            <Dialog.Title /> {/* no hay title  */}
+                            </div>
+                            <div className="modal-body">
+                                <div className="row text-center">
+                                    <div className="col-md-12">
+                                        <a id="seguir_usuario" type="button" className="btn_opciones_publicaciones btn_seguir" href="#">
+                                            Seguir
+                                        </a>
+                                    </div>
+                                    <div className="col-md-12">
+                                        <a type="button" className="btn_opciones_publicaciones btn_rojo">
+                                            Denunciar
+                                        </a>
+                                    </div>
+                                    <div className="col-md-12">
+                                        <a type="button" className="btn_opciones_publicaciones" href="#">
+                                            Añadir a favoritos
+                                        </a>
+                                    </div>
+                                    <div className="col-md-12">
+                                        <a href="#" type="button" className="btn_opciones_publicaciones">
+                                            Ir a la publicación
+                                        </a>
+                                    </div>
+                                    <div className="col-md-12">
+                                        <Dialog.Close className="btn_opciones_publicaciones btn_toldo">
+                                            Cancelar
+                                        </Dialog.Close>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </Dialog.Content>
                 </Dialog.Portal>
-                </Dialog.Root>
-
+            </Dialog.Root>
         </>
         
 
