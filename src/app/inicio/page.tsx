@@ -159,7 +159,7 @@ export default function Inicio() {
 										</button>
 										<p id="likeCount" className="d-inline votaciones">10009</p>
 										{/* <!-- Yollots --> */}
-										<strong>Me gusta</strong>
+										<strong className="etiqueta_strong">Me gusta</strong>
 									</div>
 								</div>
 							</div>
@@ -223,7 +223,7 @@ export default function Inicio() {
 										</button>
 										<p id="likeCount" className="d-inline votaciones">10009</p>
 										{/* <!-- Yollots --> */}
-										<strong>Me gusta</strong>
+										<strong className="etiqueta_strong">Me gusta</strong>
 									</div>
 								</div>
 							</div>
