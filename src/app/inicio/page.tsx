@@ -3,9 +3,6 @@
 // import Link from "next/link";
 // Image next
 import Image from "next/image";
-// Toldo - modals
-// import * as Dialog from "@radix-ui/react-dialog";
-// import * as Dialog from "toldo";
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
@@ -20,13 +17,10 @@ import { FiHome,
 		FiPlusCircle, 
 		FiSliders, 
 		FiUser, 
-		FiMoreHorizontal,
 		FiHeart
 } from "react-icons/fi";
 // Modal
 import ModalOpciones from "../components/ModalOpciones";
-// Link nextjs
-// import Link from "next/link";
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -135,15 +129,9 @@ export default function Inicio() {
 												<p className="ubicacion">Tlaxcala, Tlaxcala</p>
 											</div>
 											<div className="col-2 col-lg-2 d-flex justify-content-center align-items-center">
-												{/* <!--Este va a ser un modal--> */}
-												{/* <!-- Button trigger modal --> */}
+												{/* Modal creado con TOLDO : https://toldo.vercel.app/ */}
+												{/* En teoria se debe pasar parametros a este componente */}
 												<ModalOpciones />
-												{/* <button type="button" className="btn_opciones_modal" data-bs-toggle="modal" data-bs-target="#modalOpciones"> 
-													<FiMoreHorizontal />
-												</button> */}
-												
-												
-
 											</div>
 										</div>
 									</div>
@@ -188,7 +176,7 @@ export default function Inicio() {
 										<div className="row">
 											<div className="col-3 col-lg-2 d-flex justify-content-center align-items-center">
 												<a className="link_perfil_img" href="">
-													<Image 
+                                                    <Image 
                                                         src="/usuarios/tania.jpg"
 														className="rounded-circle"
                                                         width={500}
@@ -205,12 +193,9 @@ export default function Inicio() {
 												<p className="ubicacion">Tlaxcala, Tlaxcala</p>
 											</div>
 											<div className="col-2 col-lg-2 d-flex justify-content-center align-items-center">
-												{/* <!--Este va a ser un modal-->
-												<!-- Button trigger modal --> */}
-												<button type="button" className="btn_opciones_modal" data-bs-toggle="modal" data-bs-target="#modalOpciones">
-													{/* <i  data-feather="more-horizontal"></i> */}
-													<FiMoreHorizontal />
-												</button>
+												{/* Modal creado con TOLDO : https://toldo.vercel.app/ */}
+												{/* En teoria se debe pasar parametros a este componente */}
+												<ModalOpciones />
 											</div>
 										</div>
 									</div>
@@ -218,11 +203,11 @@ export default function Inicio() {
 							</div>
 							{/* <!--Imagen publicacion--> */}
 							<div className="publicacion_imagen">
-								<Image 
-                                    src="/publicaciones/publicacion.jpg"                                 
+                                <Image 
+                                    src="/publicaciones/publicacion.jpg"
 									width={700}
                                     height={500}
-                                    className="img-fluid img_publicacion"
+									className="img-fluid img_publicacion"
 									alt="Tania Vazquez"
                                 />
 							</div>
@@ -245,6 +230,8 @@ export default function Inicio() {
 							{/* <!--Fin Publicacion--> */}
 						</div>
 						{/* <!-- div contenedor publicaciones --> */}
+						
+						
 
 					</div>
 					{/* <!-- Contenedor del contenido principal publicacion --> */}
