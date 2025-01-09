@@ -56,8 +56,6 @@ a.postear {
 *
 */
 
-
-
 /*
 *
 * ESTILOS A ENCABEZADO PUBLICACION
@@ -182,9 +180,9 @@ No media query for `xs` since this is the default in Bootstrap*/
         padding: 10px 35px;
     }
     /*Iconos de menu*/
-    img.img_icono_menu {
+    /* img.img_icono_menu {
         width: 1.8rem;
-    }
+    } */
     /*Fin Menu inferior*/
 
     /*
@@ -248,9 +246,9 @@ No media query for `xs` since this is the default in Bootstrap*/
         text-align: center;
     }
     /*Iconos de menu*/
-    img.img_icono_menu {
+    /* img.img_icono_menu {
         width: 1.8rem;
-    }
+    } */
     /*Fin Menu inferior*/
 
     /*
@@ -295,9 +293,9 @@ No media query for `xs` since this is the default in Bootstrap*/
 @media (min-width: 992px) { 
     /*Menu inferior*/
     /*Iconos de menu*/
-    img.img_icono_menu {
+    /* img.img_icono_menu {
         width: 1.8rem;
-    }
+    } */
     /*Fin Menu inferior*/
     
     /*
@@ -328,9 +326,9 @@ No media query for `xs` since this is the default in Bootstrap*/
 @media (min-width: 1200px) { 
     /*Menu inferior*/
     /*Iconos de menu*/
-    img.img_icono_menu {
+    /* img.img_icono_menu {
         width: 1.8rem;
-    }
+    } */
     /*Fin Menu inferior*/
     
     /*

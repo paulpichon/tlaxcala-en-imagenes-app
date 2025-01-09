@@ -3,6 +3,9 @@
 // import Link from "next/link";
 // Image next
 import Image from "next/image";
+// Toldo - modals
+// import * as Dialog from "@radix-ui/react-dialog";
+// import * as Dialog from "toldo";
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
@@ -10,6 +13,18 @@ import "bootstrap/dist/css/bootstrap.css";
 import "../ui/inicio/inicio.css";
 // viewport
 import type { Viewport } from 'next';
+// Feather Icons
+// https://react-icons.github.io/react-icons/icons/fi/
+import { FiHome, 
+		FiBell, 
+		FiPlusCircle, 
+		FiSliders, 
+		FiUser, 
+		FiMoreHorizontal,
+		FiHeart
+} from "react-icons/fi";
+// Modal
+import ModalOpciones from "../components/ModalOpciones";
 // Link nextjs
 // import Link from "next/link";
 
@@ -35,35 +50,40 @@ export default function Inicio() {
 							<li className="nav-item">
 								<a className="nav-link opciones_menu active" aria-current="page" data-bs-toggle="tooltip" data-bs-placement="top" title="Inicio" href="#">
 									{/* <!--https://feathericons.com/--> */}
-									<i  data-feather="home"></i>
+									{/* <i  data-feather="home"></i> */}
+									<FiHome />
 									<span className="nombre_opciones_menu">Home</span>
 								</a>
 							</li>
 							<li className="nav-item">
 							  	<a className="nav-link opciones_menu" data-bs-toggle="tooltip" data-bs-placement="right" title="Notificaciones" href="#">
 									{/* <!--https://feathericons.com/--> */}
-									<i  data-feather="bell"></i>
+									{/* <i  data-feather="bell"></i> */}
+									<FiBell />
 									<span className="nombre_opciones_menu">Notificaciones</span>
 								</a>
 							</li>
 							<li className="nav-item">
 							  	<a className="nav-link opciones_menu postear" data-bs-toggle="tooltip" data-bs-placement="right" title="Postear una imágen" href="#">
 									{/* <!--https://feathericons.com/--> */}
-									<i  data-feather="plus-circle"></i>
+									{/* <i  data-feather="plus-circle"></i> */}
+									<FiPlusCircle />
 									<span className="nombre_opciones_menu">Postear</span>
 								</a>
 							</li>
 							<li className="nav-item">
 							  	<a className="nav-link opciones_menu" data-bs-toggle="tooltip" data-bs-placement="right" title="Configuraciones" href="#">
 									{/* <!--https://feathericons.com/--> */}
-									<i  data-feather="sliders"></i>
+									{/* <i  data-feather="sliders"></i> */}
+									<FiSliders />
 									<span className="nombre_opciones_menu">Configuración</span>
 								</a>
 							</li>
 							<li className="nav-item">
 								<a className="nav-link opciones_menu" data-bs-toggle="tooltip" data-bs-placement="right" title="Perfil de usuario" href="#">
 									{/* <!--https://feathericons.com/--> */}
-									<i  data-feather="user"></i>
+									{/* <i  data-feather="user"></i> */}
+									<FiUser />
 									<span className="nombre_opciones_menu">Magaly Jimenez</span>
 								</a>
 							</li>
@@ -117,9 +137,13 @@ export default function Inicio() {
 											<div className="col-2 col-lg-2 d-flex justify-content-center align-items-center">
 												{/* <!--Este va a ser un modal--> */}
 												{/* <!-- Button trigger modal --> */}
-												<button type="button" className="btn_opciones_modal" data-bs-toggle="modal" data-bs-target="#modalOpciones">
-													<i  data-feather="more-horizontal"></i>
-												</button>
+												<ModalOpciones />
+												{/* <button type="button" className="btn_opciones_modal" data-bs-toggle="modal" data-bs-target="#modalOpciones"> 
+													<FiMoreHorizontal />
+												</button> */}
+												
+												
+
 											</div>
 										</div>
 									</div>
@@ -142,7 +166,8 @@ export default function Inicio() {
 										{/* <!-- Boton para dar like a la publicacion --> */}
 										<button id="likeButton" data-post-id="POST_ID" className="like-button">
 											{/* <!--https://feathericons.com/--> */}
-											<i data-feather="heart"></i>
+											{/* <i data-feather="heart"></i> */}
+											<FiHeart />
 										</button>
 										<p id="likeCount" className="d-inline votaciones">10009</p>
 										{/* <!-- Yollots --> */}
@@ -183,7 +208,8 @@ export default function Inicio() {
 												{/* <!--Este va a ser un modal-->
 												<!-- Button trigger modal --> */}
 												<button type="button" className="btn_opciones_modal" data-bs-toggle="modal" data-bs-target="#modalOpciones">
-													<i  data-feather="more-horizontal"></i>
+													{/* <i  data-feather="more-horizontal"></i> */}
+													<FiMoreHorizontal />
 												</button>
 											</div>
 										</div>
@@ -207,7 +233,8 @@ export default function Inicio() {
 										{/* <!-- Boton para dar like a la publicacion --> */}
 										<button id="likeButton" data-post-id="POST_ID" className="like-button">
 											{/* <!--https://feathericons.com/--> */}
-											<i data-feather="heart"></i>
+											{/* <i data-feather="heart"></i> */}
+											<FiHeart />
 										</button>
 										<p id="likeCount" className="d-inline votaciones">10009</p>
 										{/* <!-- Yollots --> */}
@@ -352,6 +379,5 @@ export default function Inicio() {
 			</div>
 		</div>
 
-        
     );
 }
