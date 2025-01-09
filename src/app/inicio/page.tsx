@@ -42,10 +42,10 @@ export default function Inicio() {
 					<div className="contenedor_menu_lateral_inferior fixed-bottom">
 						<ul className="nav justify-content-center menu_inferior_lateral">
 							<li className="nav-item">
-								<a className="nav-link opciones_menu active" aria-current="page" data-bs-toggle="tooltip" data-bs-placement="top" title="Inicio" href="#">
+								<a className="nav-link opciones_menu" aria-current="page" data-bs-toggle="tooltip" data-bs-placement="top" title="Inicio" href="#">
 									{/* <!--https://feathericons.com/--> */}
 									{/* <i  data-feather="home"></i> */}
-									<FiHome />
+									<FiHome className="icono_menu" />
 									<span className="nombre_opciones_menu">Home</span>
 								</a>
 							</li>
@@ -53,7 +53,7 @@ export default function Inicio() {
 							  	<a className="nav-link opciones_menu" data-bs-toggle="tooltip" data-bs-placement="right" title="Notificaciones" href="#">
 									{/* <!--https://feathericons.com/--> */}
 									{/* <i  data-feather="bell"></i> */}
-									<FiBell />
+									<FiBell className="icono_menu" />
 									<span className="nombre_opciones_menu">Notificaciones</span>
 								</a>
 							</li>
@@ -61,7 +61,7 @@ export default function Inicio() {
 							  	<a className="nav-link opciones_menu postear" data-bs-toggle="tooltip" data-bs-placement="right" title="Postear una imágen" href="#">
 									{/* <!--https://feathericons.com/--> */}
 									{/* <i  data-feather="plus-circle"></i> */}
-									<FiPlusCircle />
+									<FiPlusCircle className="icono_menu" />
 									<span className="nombre_opciones_menu">Postear</span>
 								</a>
 							</li>
@@ -69,7 +69,7 @@ export default function Inicio() {
 							  	<a className="nav-link opciones_menu" data-bs-toggle="tooltip" data-bs-placement="right" title="Configuraciones" href="#">
 									{/* <!--https://feathericons.com/--> */}
 									{/* <i  data-feather="sliders"></i> */}
-									<FiSliders />
+									<FiSliders className="icono_menu" />
 									<span className="nombre_opciones_menu">Configuración</span>
 								</a>
 							</li>
@@ -77,7 +77,7 @@ export default function Inicio() {
 								<a className="nav-link opciones_menu" data-bs-toggle="tooltip" data-bs-placement="right" title="Perfil de usuario" href="#">
 									{/* <!--https://feathericons.com/--> */}
 									{/* <i  data-feather="user"></i> */}
-									<FiUser />
+									<FiUser className="icono_menu" />
 									<span className="nombre_opciones_menu">Magaly Jimenez</span>
 								</a>
 							</li>
