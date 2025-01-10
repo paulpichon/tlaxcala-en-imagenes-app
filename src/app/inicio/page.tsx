@@ -1,8 +1,4 @@
-// Inicio
-// Link nextjs
-// import Link from "next/link";
-// Image next
-// import Image from "next/image";
+// Inicio de la pagina principal de la APP
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
@@ -10,7 +6,7 @@ import "bootstrap/dist/css/bootstrap.css";
 import "../ui/inicio/inicio.css";
 // viewport
 import type { Viewport } from 'next';
-
+// Componentes
 // Menu principal
 import MenuPrincipal from "../components/MenuPrincipal";
 // Header superior
@@ -19,7 +15,10 @@ import HeaderSuperior from "../components/HeaderSuperior";
 import PublicacionUsuario from "../components/inicio/PublicacionUsuario";
 // Imagenes mas votadas por usuarios
 import ImagenesMasVotadas from "../components/ImagenesMasVotadas";
+// Publicidad dentro del div sugerencias
 import Publicidad from "../components/Publicidad";
+// Footer sugerencias
+import FooterSugerencias from "../components/FooterSugerencias";
 
 
 export const viewport: Viewport = {
@@ -101,15 +100,8 @@ export default function Inicio() {
 								{/* <!-- Publicidad --> */}
 								<div className="col-12">
 									<div className="text-center mt-3">
-										<div className="enlaces_informacion_general">
-											<a className="enlaces_footer_sugerencias" href="">Condiciones de servicio</a>
-											<br />
-											<a className="enlaces_footer_sugerencias" href="">Política de Privacidad</a>
-											<br />
-											<a className="enlaces_footer_sugerencias" href="">Información sobre Tlaxcala en Imagénes</a>
-											<br />
-											<h6 className="tei_footer_sugerencias mt-5">© 2024 Tlaxcala En Imágenes</h6>
-										</div>
+										{/* Footer del div sugerencias */}
+										<FooterSugerencias />
 									</div>
 								</div>
 								{/* <!-- Publicidad --> */}
