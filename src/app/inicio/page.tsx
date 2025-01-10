@@ -2,7 +2,7 @@
 // Link nextjs
 // import Link from "next/link";
 // Image next
-import Image from "next/image";
+// import Image from "next/image";
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
@@ -17,6 +17,9 @@ import MenuPrincipal from "../components/MenuPrincipal";
 import HeaderSuperior from "../components/HeaderSuperior";
 // Publicaciones de usuarios
 import PublicacionUsuario from "../components/inicio/PublicacionUsuario";
+// Imagenes mas votadas por usuarios
+import ImagenesMasVotadas from "../components/ImagenesMasVotadas";
+import Publicidad from "../components/Publicidad";
 
 
 export const viewport: Viewport = {
@@ -59,7 +62,7 @@ export default function Inicio() {
 						
 						{/* Publicaciones de usuarios */}
 						<PublicacionUsuario />
-						
+
 					</div>
 					{/* <!-- Contenedor del contenido principal publicacion --> */}
 				</div>
@@ -78,93 +81,17 @@ export default function Inicio() {
 						{/* <!-- contenedor_sugerencias_seguir --> */}
 						<div className="contenedor_sugerencias_seguir mt-4">
 							<div className="row d-flex justify-content-center">
-								{/* <!-- imagenes mas votadas --> */}
-								<div className="col-4">
-									<div className="sugerencias_para_seguir">
-										<a className="link_imagen_mas_votadas" href="">
-											<div className="card text-center">
-                                                <Image 
-                                                    src="/imagenes_votadas/votadas1.jpg" 
-                                                    width={100}
-                                                    height={100}
-													className="card-img-top"
-                                                    alt="Card image cap"
-                                                />
-												<div className="p-1">
-												  <h6 className="titulo_card">Samantha Flowers</h6>
-												  <p className="numero_me_gustas">1872 Me gusta</p>
-												</div>
-											</div>
-										</a>
-									</div>
-								</div>
-								{/* <!-- fin imagenes mas votadas -->
-								 <!-- imagenes mas votadas --> */}
-								<div className="col-4">
-									<div className="sugerencias_para_seguir">
-										<a className="link_imagen_mas_votadas" href="">
-											<div className="card text-center">
-                                                <Image 
-                                                    src="/imagenes_votadas/votadas2.jpg" 
-                                                    width={100}
-                                                    height={100}
-													className="card-img-top"
-                                                    alt="Card image cap"
-                                                />
-												<div className="p-1">
-												  <h6 className="titulo_card">Samantha Flowers</h6>
-												  <p className="numero_me_gustas">1872 Me gusta</p>
-												</div>
-											</div>
-										</a>
-									</div>
-								</div>
-								{/* <!-- fin imagenes mas votadas --> */}
-								 {/* <!-- imagenes mas votadas --> */}
-								<div className="col-4">
-									<div className="sugerencias_para_seguir">
-										<a className="link_imagen_mas_votadas" href="">
-											<div className="card text-center">
-                                                <Image 
-                                                    src="/imagenes_votadas/votadas3.jpg" 
-                                                    width={100}
-                                                    height={100}
-													className="card-img-top"
-                                                    alt="Card image cap"
-                                                />
-												<div className="p-1">
-												  <h6 className="titulo_card">Samantha Flowers</h6>
-												  <p className="numero_me_gustas">1872 Me gusta</p>
-												</div>
-											</div>
-										</a>
-									</div>
-								</div>
-								{/* <!-- fin imagenes mas votadas --> */}
+								{/* IMAGENES MAS VOTADAS */}
+								<ImagenesMasVotadas />
+
 							</div>
 							{/* <!-- row publicidad --> */}
 							<div className="row d-flex justify-content-center">
 								{/* <!-- Publicidad --> */}
 								<div className="col-8 mt-4">
-									{/* <!-- sugerencias_para_seguir --> */}
-									<div className="sugerencias_para_seguir">
-										{/* <!-- leyenda publicidad --> */}
-											<p className="m-0 publicidad">Publicidad...</p>
-										{/* <!-- fin leyenda publicidad --> */}
-										<a href="http://">
-											<div className="card">
-                                                <Image 
-                                                    src="/publicidad/votadas1.jpg" 
-                                                    width={100}
-                                                    height={200}
-													className="card-img-top"
-													alt="Card image cap"
-                                                />
-												{/* <img className="card-img-top" src="img/imagenes_relleno/275700409_335093695238277_3060717699969997284_n.jpg" alt="Card image cap" /> */}
-											</div>
-										</a>
-									</div>
-									{/* <!-- fin sugerencias_para_seguir --> */}
+									{/* <!-- publicidad --> */}
+									<Publicidad />
+									{/* <!-- fin publicidad --> */}
 								</div>
 								{/* <!-- Publicidad --> */}
 							</div>
