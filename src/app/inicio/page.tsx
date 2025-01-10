@@ -19,8 +19,8 @@ import { FiHome,
 		FiUser, 
 		FiHeart
 } from "react-icons/fi";
-// Modal
-import ModalOpciones from "../components/ModalOpciones";
+// Modal toldo
+import ModalOpciones from "../components/inicio/ModalOpciones";
 
 export const viewport: Viewport = {
   width: 'device-width',
