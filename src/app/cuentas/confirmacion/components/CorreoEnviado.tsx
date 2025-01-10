@@ -5,7 +5,7 @@ import React, { useState } from "react";// Link nextjs
 // usePathName
 import { usePathname } from 'next/navigation';
 // Header principal
-import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipal";
+import { HeaderPrincipalTei } from "@/app/components/HeaderAside";
 // Footer
 import FooterMain from "@/app/components/FooterMain";
 

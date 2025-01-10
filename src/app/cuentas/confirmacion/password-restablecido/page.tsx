@@ -4,7 +4,7 @@ import "bootstrap/dist/css/bootstrap.css";
 // estilos de la pagin
 import "../../../ui/cuentas/confirmacion/password-restablecido/password-restablecido.css";
 // Header principal
-import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipal";
+import { HeaderPrincipalTei } from "@/app/components/HeaderAside";
 import FooterPrincipal from "@/app/components/FooterMain";
 
 export default function CrearCuenta() {
