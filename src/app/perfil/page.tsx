@@ -1,6 +1,6 @@
 // Perfil de usuario
 // Recordar que el nombre de este archivo debe ser [], investigar en REACT o NEXT la estrcutura del nombre de este archivo ya que es dinamico, debe ser con el nombre del usuario
-// Image NESTJS
+// Image NEXTJS
 import Image from "next/image";
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
@@ -14,8 +14,8 @@ import type { Viewport } from 'next';
 import MenuPrincipal from "../components/MenuPrincipal";
 // Header superior
 import HeaderSuperior from "../components/HeaderSuperior";
-// Publicaciones de usuarios
-// import PublicacionUsuario from "../components/inicio/PublicacionUsuario";
+// Publicaciones Grid de usuarios
+import PublicacionesUsuarioGrid from "../components/perfil/PublicacionesUsuarioGrid";
 // Imagenes mas votadas por usuarios
 import ImagenesMasVotadas from "../components/ImagenesMasVotadas";
 // Publicidad dentro del div sugerencias
@@ -44,9 +44,6 @@ export default function Inicio() {
 						<MenuPrincipal />
 					</div>
 				</div>
-				
-
-
 				
 				<div className="col-md-10 col-lg-10  col-xl-6 contenedor_central_contenido">
 					<div className="contenedor_menu_superior sticky-top">
@@ -96,64 +93,13 @@ export default function Inicio() {
 							<div className="row">
 								<div className="col-12">
 									<div className="contenedor_publicacion_usuario mb-5">
-
 										<div className=" mt-3">
 											<div className="titulo_contenedor text-center">
 												<h6 className="titulo_publicaciones pt-3 pb-3">PUBLICACIONES</h6>
 											</div>
 											<div className="row g-1">
-												<div className="col-4">
-													<Image 
-														src="/imagenes_votadas/votadas1.jpg" 
-														width={250}
-														height={200}
-														className="imagen_grid_perfil_usuario gallery-image"
-														alt="Magaly Jimenez"
-														loading="lazy"
-													/>
-												</div>
-											
-												<div className="col-4">
-													<Image 
-														src="/imagenes_votadas/votadas2.jpg" 
-														width={250}
-														height={200}
-														className="imagen_grid_perfil_usuario gallery-image"
-														alt="Magaly Jimenez"
-														loading="lazy"
-													/>
-												</div>
-											
-												<div className="col-4">
-													<Image 
-														src="/imagenes_votadas/votadas3.jpg" 
-														width={250}
-														height={200}
-														className="imagen_grid_perfil_usuario gallery-image"
-														alt="Magaly Jimenez"
-														loading="lazy"
-													/>
-												</div>
-												<div className="col-4">
-													<Image 
-														src="/imagenes_votadas/votadas2.jpg" 
-														width={250}
-														height={200}
-														className="imagen_grid_perfil_usuario gallery-image"
-														alt="Magaly Jimenez"
-														loading="lazy"
-													/>
-												</div>
-												<div className="col-4">
-													<Image 
-														src="/imagenes_votadas/votadas1.jpg" 
-														width={250}
-														height={200}
-														className="imagen_grid_perfil_usuario gallery-image"
-														alt="Magaly Jimenez"
-														loading="lazy"
-													/>
-												</div>
+												{/* Publicaciones de usuario en GRID */}
+												<PublicacionesUsuarioGrid />
 											</div>
 										</div>
 									</div>
