@@ -8,7 +8,7 @@ import { Metadata } from "next";
 import "../ui/fonts";
 // metadatos
 export const metadata: Metadata = {
-    title: "Magaly Jimenez",
+    title: "Tlaxcala en imágenes",
     description: "Perfil de usuario - Magali Jimenez",
   };
 
