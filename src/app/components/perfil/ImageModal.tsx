@@ -1,16 +1,22 @@
+'use client';
 // Image nextjs
 import Image from "next/image";
 // Types/interface
-import ImageData from "@/app/types/types";
+// import ImageData from "@/app/types/types";
 // Icono
 import { FiHeart, FiMoreHorizontal } from "react-icons/fi";
-// Interface props del modal
-interface ImageModalProps {
-  image: ImageData;
-  onClose: () => void;
-}
 
-export default function ImageModal({ image, onClose }: ImageModalProps) {
+// type
+type FirstModalProps = {
+  isOpen: boolean;
+  selectedImage: { id: number; src: string } | null;
+  onClose: () => void;
+  onNext: () => void;
+};
+
+const ImageModal: React.FC<FirstModalProps> = ({ isOpen, selectedImage, onClose, onNext }) => {
+  if (!isOpen || !selectedImage) return null;
+
   return (
     <div
       className="modal show d-block"
@@ -25,20 +31,26 @@ export default function ImageModal({ image, onClose }: ImageModalProps) {
               type="button"
               className="btn_opciones_modal"
               aria-label="Options"
+              onClick={onNext}
             >
               <FiMoreHorizontal />
             </button>
             {/* Boton para cerrar la ventana */}
-            <button type="button" className="btn-close" onClick={onClose} aria-label="Close"></button>
+            <button 
+              type="button" 
+              className="btn-close" 
+              onClick={onClose} 
+              aria-label="Close">
+            </button>
           </div>
           <div className="contenedor_imagen_expandida">
             <Image
-              src={image.src}
-              alt={image.title}
+              src={selectedImage.src}
+              alt={`Imagen ${selectedImage.id}`} 
               width={800}
               height={600}
               className="img-fluid"
-              style={{ objectFit: "cover" }}
+              // style={{ objectFit: "cover" }}
             />
             {/* <p>{image.description}</p> */}
           </div>
@@ -55,3 +67,5 @@ export default function ImageModal({ image, onClose }: ImageModalProps) {
     </div>
   );
 }
+// Export
+export default ImageModal;

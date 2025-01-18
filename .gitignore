@@ -48,3 +48,6 @@ public/publicaciones/
 public/publicidad/
 public/usuarios/
 public/imagenes_votadas/
+
+# carpeta de pruebas
+modales/
