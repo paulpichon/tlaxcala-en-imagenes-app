@@ -10,13 +10,11 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
-    "@radix-ui/react-dialog": "^1.1.4",
     "bootstrap": "^5.3.3",
     "next": "15.0.3",
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106",
-    "react-icons": "^5.4.0",
-    "toldo": "^0.1.4"
+    "react-icons": "^5.4.0"
   },
   "devDependencies": {
     "@types/node": "^20",
