@@ -8,8 +8,8 @@ import ImageData from "@/app/types/types";
 import Image from "next/image";
 // Modal de imagen
 import ImageModal from "./ImageModal";
-// Segundo modal
-import SecondModal from "./SecondModal";
+// Modal de opciones de la publicacion: segundo modal
+import ModalOpcionesPublicacion from "../ModalOpcionesPublicacion";
 
 // Images para el grid, estas imagenes son estaticas por el momentos, deben cambiarse por las imagenes traidas por la API
 const images: ImageData[] = [
@@ -22,24 +22,21 @@ export default function PublicacionesUsuarioGrid() {
     // UseState
     const [selectedImage, setSelectedImage] = useState<{ id: number; src: string } | null>(null);
     
-    // codigo nuevo
+    // PRIMER MODAL
     const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
+    // SEGUNDO MODAL
     const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
-
+    // Abre el primer modal, con la imagen seleccionada por el usuario
+    // Al mismo tiempo que habre el primer modal
     const openFirstModal = (image: ImageData) => {
         setSelectedImage(image); // Selecciona la imagen
         setIsFirstModalOpen(true); // Abre el primer modal
     };
+    // Cierra el primer modal
     const closeFirstModal = () => setIsFirstModalOpen(false);
-    // const closeFirstModal = () => setIsFirstModalOpen(false);
-    
-    // const openSecondModal = () => {
-    // setIsFirstModalOpen(false); 
-    // setIsSecondModalOpen(true); 
-    // };
-    
+    // Abre el segundo modal
     const openSecondModal = () => setIsSecondModalOpen(true);
-  
+    // Cierra el segundo modal
     const closeSecondModal = () => setIsSecondModalOpen(false);
 
     return (
@@ -56,6 +53,7 @@ export default function PublicacionesUsuarioGrid() {
                             className="imagen_grid_perfil_usuario gallery-image"
                             style={{ cursor: "pointer" }}
                             priority
+                            // Se pasa la imagen seleccionada al modal
                             onClick={() => openFirstModal(image)}
                         />
                     </div>
@@ -64,7 +62,7 @@ export default function PublicacionesUsuarioGrid() {
 
             {/* Modal para la imagen seleccionada */}
             {selectedImage && (
-                // Se pasan 2 parametros al componente, la imagen seleccionada y el evento para cerrar el modal
+                // Se pasan 4 parametros al modal
                 <ImageModal
                     isOpen={isFirstModalOpen}
                     selectedImage={selectedImage}
@@ -72,7 +70,8 @@ export default function PublicacionesUsuarioGrid() {
                     onNext={openSecondModal}
                 />
             )}
-            <SecondModal 
+            {/* Modal de opciones de publicación */}
+            <ModalOpcionesPublicacion 
                 isOpen={isSecondModalOpen}
                 selectedImage={selectedImage}
                 onClose={closeSecondModal}

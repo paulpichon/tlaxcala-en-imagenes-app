@@ -1,20 +1,18 @@
 'use client';
 // Image nextjs
 import Image from "next/image";
-// Types/interface
-// import ImageData from "@/app/types/types";
 // Icono
 import { FiHeart, FiMoreHorizontal } from "react-icons/fi";
 
-// type
-type FirstModalProps = {
+// Interface prop del primer modal
+interface PropsImageModal {
   isOpen: boolean;
   selectedImage: { id: number; src: string } | null;
   onClose: () => void;
   onNext: () => void;
 };
 
-const ImageModal: React.FC<FirstModalProps> = ({ isOpen, selectedImage, onClose, onNext }) => {
+const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose, onNext }) => {
   if (!isOpen || !selectedImage) return null;
 
   return (
