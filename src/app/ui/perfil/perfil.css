@@ -2,7 +2,6 @@
 div.contenedor_menu_superior {
     border-bottom: 1px solid #EBCA9A;
 }
-
 /*contenedor contenedor_tei_index*/
 div.contenedor_menu_superior{
     text-align: center;
@@ -148,24 +147,36 @@ button.like-button {
     padding: 15px 0 15px 10px;
     margin: 5px 0;
 }
+/* numero me gustas */
+p.votaciones {
+    margin: 0 5px;
+}
+/* Etiqueta strong me gusta y votaciones tamaño de fuente */
+strong.etiqueta_strong, p.votaciones {
+    font-size: 0.9rem;
+}
 /* SVG icon */
 button.like-button svg {
     color: black;
     stroke-width: 2px;
     width: 24px;
     height: 24px;
-    transition: color 0.3s ease, stroke-width 0.3s ease;
+    /* transition: color 0.3s ease, stroke-width 0.3s ease; */
+    transition: transform 0.2s ease-in-out;
 }
-/* Se agrega la clase para cambiar el color del corazon */
-button.like-button.liked svg {
+/* Efecto hover al pasar el apuntador por el corazon */
+/* Debemos mantener el estilo al precionar el boton me gusta */
+button.like-button svg:hover {
+    transform: scale(1.1); /* Agranda ligeramente el botón */
     fill: #EBCA9A; /*Relleno del icono*/
     stroke: #EBCA9A; /* Para cambiar el color de la línea del ícono */
-    stroke-width: 2.5px;
-}
+    stroke-width: 2.5px; 
+  }
 /* Modal opciones */
 /* Boton opciones de la publicacion */
 a.btn_opciones_publicaciones {
     font-family: 'Open Sans', sans-serif;
+    display: block;
     width: 100%;
     border-bottom: 1px solid rgb(127, 127, 127, 0.2);
     font-size: 1rem;

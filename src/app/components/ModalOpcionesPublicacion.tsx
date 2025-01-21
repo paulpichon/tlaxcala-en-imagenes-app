@@ -16,25 +16,41 @@ const ModalOpcionesPublicacion: React.FC<PropsModalOpcionesPublicacion> = ({ isO
       tabIndex={-1}
       style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
     >
-      <div className="modal-dialog">
+      <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Segundo Modal: imagen {selectedImage.id}</h5>
-            <button
-              type="button"
-              className="btn-close"
-              aria-label="Close"
-              onClick={onClose}
-            ></button>
-          </div>
+            {/* <div className="modal-header">
+            // Muestra el ID del usuario con la imagen seleccionada
+            <h5 className="modal-title">{selectedImage.id}</h5>
+            </div> */}
           <div className="modal-body">
-            <p>Este es el segundo modal. Aquí puedes agregar más contenido.</p>
-          </div>
-          <div className="modal-footer">
-            <button className="btn btn-secondary" onClick={onClose}>
-              Cerrar
-            </button>
-          </div>
+					<div className="row text-center">
+						<div className="col-md-12">
+							<a id="seguir_usuario" type="button" className="btn_opciones_publicaciones btn_seguir" href="#">
+								Seguir
+							</a>
+						</div>
+						<div className="col-md-12">
+							<a type="button" className="btn_opciones_publicaciones btn_rojo" data-toggle="modal" data-target="#modalDenuncia">
+								Denunciar
+							</a>
+						</div>
+						<div className="col-md-12">
+							<a type="button" className="btn_opciones_publicaciones" href="#">
+								Añadir a favoritos
+							</a>
+						</div>
+						<div className="col-md-12">
+							<a href="#" type="button" className="btn_opciones_publicaciones">
+								Ir a la publicación
+							</a>
+						</div>
+						<div className="col-md-12">
+							<a type="button" className="btn_opciones_publicaciones" onClick={onClose}>
+                                Cancelar
+                            </a>
+						</div>
+					</div>
+				</div>
         </div>
       </div>
     </div>
