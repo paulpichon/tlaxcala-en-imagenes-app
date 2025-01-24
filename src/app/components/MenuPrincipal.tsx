@@ -1,59 +1,52 @@
 // ***Menu principal de la aplicacion***
 'use client';
+// Link
+import Link from "next/link";
+// Navegacion
+import { usePathname } from "next/navigation";
 // Feather Icons
 // https://react-icons.github.io/react-icons/icons/fi/
 import { FiHome, 
-    FiBell, 
-    FiPlusCircle, 
-    FiSliders, 
-    FiUser, 
+        FiBell, 
+        FiPlusCircle, 
+        FiSliders, 
+        FiUser, 
 } from "react-icons/fi";
 
+// Navegacion
+const links = [
+    {name: 'Home', href:'/inicio', icon: FiHome,},
+    {name: 'Notificaciones', href:'/notificaciones', icon: FiBell,},
+    {name: 'Postear', href:'/postear', icon: FiPlusCircle,},
+    {name: 'Configuraciones', href:'/configuraciones', icon: FiSliders,},
+    {name: 'Perfil', href:'/perfil', icon: FiUser,},
+];
+
 export default function MenuPrincipal() {
+    // Obtenemos la ruta actual
+    const pathname = usePathname();
+
     return (
-        <>
+        <nav>
             <ul className="nav justify-content-center menu_inferior_lateral">
-                <li className="nav-item">
-                    <a className="nav-link opciones_menu" aria-current="page" data-bs-toggle="tooltip" data-bs-placement="top" title="Inicio" href="#">
-                        {/* <!--https://feathericons.com/--> */}
-                        {/* <i  data-feather="home"></i> */}
-                        <FiHome className="icono_menu" />
-                        <span className="nombre_opciones_menu">Home</span>
-                    </a>
-                </li>
-                <li className="nav-item">
-                    <a className="nav-link opciones_menu" data-bs-toggle="tooltip" data-bs-placement="right" title="Notificaciones" href="#">
-                        {/* <!--https://feathericons.com/--> */}
-                        {/* <i  data-feather="bell"></i> */}
-                        <FiBell className="icono_menu" />
-                        <span className="nombre_opciones_menu">Notificaciones</span>
-                    </a>
-                </li>
-                <li className="nav-item">
-                    <a className="nav-link opciones_menu postear" data-bs-toggle="tooltip" data-bs-placement="right" title="Postear una imágen" href="#">
-                        {/* <!--https://feathericons.com/--> */}
-                        {/* <i  data-feather="plus-circle"></i> */}
-                        <FiPlusCircle className="icono_menu" />
-                        <span className="nombre_opciones_menu">Postear</span>
-                    </a>
-                </li>
-                <li className="nav-item">
-                    <a className="nav-link opciones_menu" data-bs-toggle="tooltip" data-bs-placement="right" title="Configuraciones" href="#">
-                        {/* <!--https://feathericons.com/--> */}
-                        {/* <i  data-feather="sliders"></i> */}
-                        <FiSliders className="icono_menu" />
-                        <span className="nombre_opciones_menu">Configuración</span>
-                    </a>
-                </li>
-                <li className="nav-item">
-                    <a className="nav-link opciones_menu" data-bs-toggle="tooltip" data-bs-placement="right" title="Perfil de usuario" href="#">
-                        {/* <!--https://feathericons.com/--> */}
-                        {/* <i  data-feather="user"></i> */}
-                        <FiUser className="icono_menu" />
-                        <span className="nombre_opciones_menu">Magaly Jimenez</span>
-                    </a>
-                </li>
+                {links.map(( { name, href, icon } ) => {
+                    // Creacion de constante con el icono del menu
+                    const LinkIcon = icon;
+                    return(
+                        <li className="nav-item" key={name} title={name}> 
+                            <Link 
+                                href={href}
+                                className={`nav-link opciones_menu ${pathname === href ? 'active' : ''}`}
+                            >
+                                {/* Icono de menu */}
+                                <LinkIcon className="icono_menu" />
+                                <span className="nombre_opciones_menu">{name}</span>
+                            </Link>
+                        </li>
+                    )
+                        
+                })}
             </ul>
-        </>
+        </nav>
     );
 }
