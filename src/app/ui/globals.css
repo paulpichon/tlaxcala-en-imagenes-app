@@ -9,3 +9,7 @@ body{
   font-family: 'League Gothic', sans-serif;
   font-family: 'Open Sans', sans-serif;
 }
+/* Link activo para el menu principal */
+.link-activo {
+  color: #000000!important;
+}
