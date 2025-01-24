@@ -36,7 +36,7 @@ export default function MenuPrincipal() {
                         <li className="nav-item" key={name} title={name}> 
                             <Link 
                                 href={href}
-                                className={`nav-link opciones_menu ${pathname === href ? 'active' : ''}`}
+                                className={`nav-link opciones_menu ${pathname === href ? 'link-activo' : ''}`}
                             >
                                 {/* Icono de menu */}
                                 <LinkIcon className="icono_menu" />
