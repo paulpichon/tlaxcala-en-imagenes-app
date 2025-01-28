@@ -33,7 +33,7 @@ export default function CorreoEnviado() {
                           PÁGINA NO ENCONTRADA
                         </h1>
                         <p className="mt-3">
-                          Lo sentimos, la página que estás buscando no existe. Si cree que algo no funciona, informe un problema.
+                          Lo sentimos, la página que estás buscando no existe, nunca existió y tal vez nunca existirá. Si crees que algo no funciona, informe un problema.
                         </p>
                       </div>
                       <div className="contenedor_formulario">
