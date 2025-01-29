@@ -1,15 +1,108 @@
-/*
-    font-family: 'League Gothic', sans-serif;
-    font-family: 'Open Sans', sans-serif;
-*/
-/*ESTILOS GENERALES*/
+/*ESTILOS GENERALES PARA TODOS LAS PAGINAS(O EN SU MAYORIA PARA TODAS LAS PAGINAS)*/
 /*body*/
 body{
   background-color: #FFFFFF;
   font-family: 'League Gothic', sans-serif;
   font-family: 'Open Sans', sans-serif;
 }
-/* Link activo para el menu principal */
+/* 
+  LINK ACTIVO PARA EL MENU PRINCIPAL
+*/
 .link-activo {
   color: #000000!important;
 }
+/* 
+  FIN LINK ACTIVO PARA EL MENU PRINCIPAL
+*/
+
+
+/* 
+  COMPONENTE FOOTER 
+*/
+
+/*pie_pagina_index*/
+div.pie_pagina_index{
+  padding: 10px;
+}
+/*Links de pie de pagina*/
+a.pie_pagina_links {
+  color: #000000;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: lighter;
+  font-size: .9rem;
+  /*EFECTOS*/
+  transition: all 0.3s ease 0s;
+}
+/*HOVER A_LINKS*/
+a.pie_pagina_links:hover {
+  color:  #EBCA9A;
+}
+/*FIN HOVER A_LINKS*/
+
+/*Links de pie de pagina*/
+a.tad {
+  color: #EBCA9A!important;
+  font-family: 'Open Sans', sans-serif;
+  /*EFECTOS*/
+  transition: all 0.3s ease 0s;
+}
+/*HOVER*/
+a.tad:hover {
+  color: #000000!important;
+}
+
+/* 
+  FIN COMPONENTE FOOTER 
+*/
+
+/***** 
+      MEDIAS QUERYS
+*****/
+/*Small devices (landscape phones, 576px and up)*/
+@media (min-width: 576px) { 
+
+  /* 
+    COMPONENTE FOOTER 
+  */
+  /*pie_pagina_index*/
+  div.pie_pagina_index{
+      padding: 10px;
+  }
+  /*Links de pie de pagina*/
+  a.pie_pagina_links {
+      font-size: 1rem;
+  }
+  /* 
+    FIN COMPONENTE FOOTER 
+  */
+}
+
+/*Medium devices (tablets, 768px and up)*/
+@media (min-width: 768px) { 
+  /*Links de pie de pagina*/
+  a.pie_pagina_links {
+      font-size: 1.2rem;
+  }
+}
+
+/* Large devices (desktops, 992px and up)*/
+@media (min-width: 992px) {
+  /*pie_pagina_index*/
+  div.pie_pagina_index{
+      padding: 10px;
+  }
+  /*Links de pie de pagina*/
+  a.pie_pagina_links {
+      font-size: 1.2rem;
+  }
+  /*Contenedor de pie de pagina index*/
+  div.pie_pagina_index {
+      margin: 50px 0;
+  }
+}
+
+/*X-Large devices (large desktops, 1200px and up)*/
+@media (min-width: 1200px) {}
+
+/* XX-Large devices (larger desktops, 1400px and up)*/
+@media (min-width: 1400px) {}
