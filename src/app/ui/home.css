@@ -1,5 +1,8 @@
 /*ESTILOS GENERALES*/
 
+/******  
+            ESTILOS A HEADER 
+*******/
 /*contenedor contenedor_tei_index*/
 div.contenedor_tei_index{
     width: 100%;
@@ -26,6 +29,14 @@ span.span_tad {
     margin-left: 70px;
     margin-top: 8px;
 }
+/******  
+            FIN ESTILOS A HEADER 
+*******/
+
+/******  
+            SECCION REGISTRARSE-INICIAR SECION
+*******/
+
 /*contenedor_enlaces_index*/
 div.contenedor_enlaces_index{
     padding: 0px 5px 5px 5px;
@@ -49,8 +60,8 @@ h4.subtitulo_h4 {
 /*contenedor_enlaces botones*/
 div.contenedor_enlaces{
     text-align: center;
+    margin-top: 30px;
 }
-
 /*a_links botones links*/
 a.a_links {
     /*estilos del boton*/
@@ -58,69 +69,42 @@ a.a_links {
     border: 2px solid #000000;
     margin: 7px 0;  
     border-radius: 20px; 
-    padding: 6px 0; 
+    padding: 3px 0; 
     /*estilos de texto del boton*/
     color: #000000;
     font-family: 'Open Sans', sans-serif;
     text-decoration: none;
-    font-size: .8rem;
+    font-size: 1rem;
     /*EFECTOS*/
     transition: all 0.3s ease 0s;
-
 }
 /*HOVER A_LINKS*/
 a.a_links:hover {
     transform: translateY(-4px);
 }
 /*FIN HOVER A_LINKS*/
-
 /*Icono Google*/
-img.google_icon {
-    width: 25px;
+.google_icon {
+    width: 15px;
+    height: 15px;
+    margin-right: 3px;
+    margin-bottom: 2px;
 }
-
 /*span_o*/
 span.span_o {
     font-family: 'Open Sans', sans-serif;
     font-size: .8rem;
 }
-/*pie_pagina_index*/
-div.pie_pagina_index{
-    padding: 10px;
-}
-/*Links de pie de pagina*/
-a.pie_pagina_links {
-    color: #000000;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: lighter;
-    font-size: .9rem;
-    /*EFECTOS*/
-    transition: all 0.3s ease 0s;
-}
-/*HOVER A_LINKS*/
-a.pie_pagina_links:hover {
-    color:  #EBCA9A;
-}
-/*FIN HOVER A_LINKS*/
+/******  
+            FIN SECCION REGISTRARSE-INICIAR SECION
+*******/
 
-/*Links de pie de pagina*/
-a.tad {
-    color: #EBCA9A!important;
-    font-family: 'Open Sans', sans-serif;
-    /*EFECTOS*/
-    transition: all 0.3s ease 0s;
-}
-/*HOVER*/
-a.tad:hover {
-    color: #000000!important;
-}
 
 /*X-Small devices (portrait phones, less than 576px)*/
 /* No media query for `xs` since this is the default in Bootstrap*/
 
 /*Small devices (landscape phones, 576px and up)*/
-@media (min-width: 576px) { 
-    
+@media (min-width: 576px) {  
     /*contenedor contenedor_tei_index*/
     div.contenedor_tei_index{
         padding: 20px;
@@ -158,8 +142,7 @@ a.tad:hover {
     }
     /*contenedor_enlaces botones*/
     div.contenedor_enlaces{
-        margin-top: 35px;
-        padding: 10px;
+        margin-top: 30px;
     }
     /*a_links botones links*/
     a.a_links {
@@ -169,16 +152,7 @@ a.tad:hover {
     span.span_o {
         font-size: 1.3rem;
     }
-    /*pie_pagina_index*/
-    div.pie_pagina_index{
-        padding: 10px;
-    }
-    /*Links de pie de pagina*/
-    a.pie_pagina_links {
-        font-size: 1rem;
-    }
 }
-
 /*Medium devices (tablets, 768px and up)*/
 @media (min-width: 768px) { 
     /*Estos estilso nos ayudaran a que el div.row del index puedan tener efecto con las clases d-flex align-items-center*/
@@ -215,27 +189,9 @@ a.tad:hover {
         font-size: 2.5rem;
         padding: 0;
     }
-    /*contenedor_enlaces botones*/
-    div.contenedor_enlaces{
-        margin-top: 40px;
-        padding: 15px;
-    }
-    /*a_links botones links*/
-    a.a_links {
-        font-size: 1.4rem;
-    }
-    /*Icono Google*/
-    img.google_icon {
-        width: 2.2rem;
-        margin-bottom: 3px;
-    }
     /*span_o*/
     span.span_o {
         font-size: 1.4rem;
-    }
-    /*Links de pie de pagina*/
-    a.pie_pagina_links {
-        font-size: 1.2rem;
     }
 }
 
@@ -271,69 +227,23 @@ a.tad:hover {
         font-size: 2.5rem;
         padding: 0;
     }
-    /*contenedor_enlaces botones*/
-    div.contenedor_enlaces{
-        margin-top: 40px;
-        padding: 15px;
-    }
-    /*a_links botones links*/
-    a.a_links {
-        font-size: 1.4rem;
-    }
     /*Icono Google*/
-    img.google_icon {
-        width: 2.2rem;
-        margin-bottom: 3px;
+    .google_icon {
+        width: 20px;
+        height: 20px;
     }
     /*span_o*/
     span.span_o {
         font-size: 1.4rem;
     }
-    /*pie_pagina_index*/
-    div.pie_pagina_index{
-        padding: 10px;
-    }
-    /*Links de pie de pagina*/
-    a.pie_pagina_links {
-        font-size: 1.2rem;
-    }
-    /*Contenedor de pie de pagina index*/
-    div.pie_pagina_index {
-        margin: 50px 0;
-    }
 }
-
 /*X-Large devices (large desktops, 1200px and up)*/
 @media (min-width: 1200px) { 
     /*Titulo Tlaxcala En Imágenes*/
     h1.titulo_principal_h1{
         font-size: 7rem;
     }
-    /*contenedor_enlaces botones*/
-    div.contenedor_enlaces{
-        max-width: 600px;
-        margin: 0 auto;
-    }
-    /*Estilos div botones enlaces */
-    /*div.boton {
-        border: 2px solid #000000;
-        margin: 15px 0;  
-        border-radius: 20px; 
-        padding: 8px 0; 
-    }*/
-    /*Icono Google*/
-    img.google_icon {
-        width: 25px;
-    }
-    /*a_links botones links*/
-    a.a_links {
-        color: #000000;
-        font-family: 'Open Sans', sans-serif;
-        text-decoration: none;
-        font-size: 1rem;
-    }  
 }
-
 /* XX-Large devices (larger desktops, 1400px and up)*/
 @media (min-width: 1400px) { 
     /*Titulo Tlaxcala En Imágenes*/
