@@ -136,11 +136,11 @@ a.tad:hover {
   }
   /*subtitulo_h6 POR*/
   h6.subtitulo_h6 {
-      font-size: 1.2rem;
+      font-size: 1rem;
   }
   /*span_tad TAD*/
   span.span_tad {
-      font-size: 1.3rem;
+      font-size: 1rem;
   }
   /* 
     FIN HEADER PRINCIPAL
@@ -164,11 +164,11 @@ a.tad:hover {
   */
   /*Titulo Tlaxcala En Imágenes*/
   h1.titulo_principal_h1{
-    font-size: 5rem;
+    font-size: 4rem;
   }
   /*span_tad TAD*/
   span.span_tad {
-      font-size: 1rem;
+      font-size: 0.8rem;
       margin-top: 0px;
   }
   /* 
@@ -195,12 +195,11 @@ a.tad:hover {
   */
   /*Titulo Tlaxcala En Imágenes*/
   h1.titulo_principal_h1{
-    font-size: 7rem;
+    font-size: 5rem;
   }
   /*span_tad TAD*/
   span.span_tad {
-      font-size: 1.3rem;
-      margin-top: 10px;
+      font-size: 0.9rem;
   }
   /*  
     FIN HEADER PRINCIPAL
