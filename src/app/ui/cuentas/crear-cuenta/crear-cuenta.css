@@ -145,8 +145,23 @@ a.enlace_iniciar_sesion:hover {
 }
 /* XX-Large devices (larger desktops, 1400px and up)*/
 @media (min-width: 1400px) { 
+    /*Crear cuenta*/
+    h3.subtitulo_h3 {
+        font-size: 1.8rem;
+        /* margin: 10px 0; */
+    }
+    /*Inputs*/
+    input.inputs_crear_cuenta {
+        font-size: 1.3rem;
+        margin: 25px 0;
+    }
     /*Boton registrarse*/
     button.boton_registrarse {
         margin-top: 30px;
     }
+    /*Parrafo Link iniciar sesion*/
+    p.pregunta {
+        margin-top: 40px;
+    }
+    
  }
