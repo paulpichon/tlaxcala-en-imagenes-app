@@ -132,7 +132,7 @@ a.tad:hover {
   */
   /*Titulo Tlaxcala En Imágenes*/
   h1.titulo_principal_h1{
-    font-size: 6rem;
+    font-size: 4rem;
   }
   /*subtitulo_h6 POR*/
   h6.subtitulo_h6 {
@@ -207,4 +207,17 @@ a.tad:hover {
 }
 
 /* XX-Large devices (larger desktops, 1400px and up)*/
-@media (min-width: 1400px) {}
+@media (min-width: 1400px) {
+  /*Titulo Tlaxcala En Imágenes*/
+  h1.titulo_principal_h1{
+    font-size: 6rem;
+  }
+  /*subtitulo_h6 por tad*/
+  h6.subtitulo_h6 {
+    font-size: 1.2rem;
+  }
+  /*span_tad TAD*/
+  span.span_tad {
+    font-size: 1.3rem;
+  }
+}
