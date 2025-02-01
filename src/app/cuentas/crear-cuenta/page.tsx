@@ -1,21 +1,20 @@
+/**  
+ ******* PAGINA CREAR CUENTA
+ **/
+// viewport
+import type { Viewport } from 'next';
 // Link nextjs
-// import Link from "next/link";
-// Image next
-// import Image from "next/image";
+import Link from "next/link";
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
-// import styles from "./ui/page.module.css";
 import "../../ui/cuentas/crear-cuenta/crear-cuenta.css";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderAside";
 // Footer principal
 import FooterMain from "../../components/FooterMain";
-// viewport
-import type { Viewport } from 'next';
-// Link nextjs
-import Link from "next/link";
 
+// ViewPort
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -39,13 +38,13 @@ export default function CrearCuenta() {
 						<div className="contenedor_formulario">
                             {/* Existe un error debido a que falta el action del form */}
 							<form id="crear_cuenta" className="formulario_crear_cuenta">
-								<div className="mb-3">
+								<div className="contenedor_input">
 								  <input type="text" className="form-control inputs_crear_cuenta" id="nombre_usuario" aria-describedby="nombre" placeholder="Nombre completo" />
 								</div>
-								<div className="mb-3">
+								<div className="contenedor_input">
 								  <input type="text" className="form-control inputs_crear_cuenta" id="correo" aria-describedby="correo" placeholder="Correo electrónico" />
 								</div>
-								<div className="mb-3">
+								<div className="contenedor_input">
 								  <input type="password" className="form-control inputs_crear_cuenta" id="password" placeholder="Contraseña" />
 								</div>
 								<button type="submit" className="boton_registrarse">Registrarse</button>
