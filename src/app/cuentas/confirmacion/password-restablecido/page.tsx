@@ -1,16 +1,18 @@
 // Página password restablecida
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
-// estilos de la pagin
+// estilos de la pagina
 import "../../../ui/cuentas/confirmacion/password-restablecido/password-restablecido.css";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderAside";
+// Footer principal
 import FooterPrincipal from "@/app/components/FooterMain";
 
 export default function CrearCuenta() {
   return (
         <div className="container-fluid container-xl">
             <div className="row justify-content-center contenedor_principal">
+                {/* Header principal */}
                 < HeaderPrincipalTei />
                 <div className="col-sm-9 col-md-7 col-lg-6">
                     <div className="contenedor_formulario ">
