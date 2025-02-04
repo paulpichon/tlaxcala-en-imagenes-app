@@ -1,21 +1,17 @@
 // Iniciar Sesion
 // Link nextjs
 import Link from "next/link";
-// Image next
-// import Image from "next/image";
+// viewport
+import type { Viewport } from 'next';
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
-// import styles from "./ui/page.module.css";
 import "../../ui/cuentas/login/login.css";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderAside";
 // Footer principal
 import FooterMain from "../../components/FooterMain";
-// viewport
-import type { Viewport } from 'next';
-// Link nextjs
-// import Link from "next/link";
+
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -39,15 +35,15 @@ export default function IniciarSesion() {
 						</div>
 						<div className="contenedor_formulario">
 							<form className="formulario_crear_cuenta" id="iniciar_sesion">
-								<div className="mb-3">
+								<div className="contenedor_inputs_login">
 								  <input type="text" className="form-control inputs_crear_cuenta" id="correo" aria-describedby="correo" placeholder="Correo electrónico" />
 								</div>
-								<div className="mb-3">
+								<div className="contenedor_inputs_login">
 								  <input type="password" className="form-control inputs_crear_cuenta" id="password" placeholder="Contraseña" />
 								</div>
 								<button type="submit" className="boton_registrarse">Iniciar sesión</button>
 							</form>
-                            <div className="cool-md-12 text-center mt-2">
+                            <div className="cool-md-12 text-center">
                                 <p className="pregunta">
                                     <Link href="/cuentas/login/password-olvidado" className="enlace_recuperar_password">
                                     ¿Se te olvidó la contraseña?
