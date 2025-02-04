@@ -20,7 +20,7 @@ export default function CrearCuenta() {
                         </div>
                         <div className="cool-md-12 text-center mt-2">
                             <p className="pregunta">
-                                <a href="iniciar-sesion.html" className="boton_registrarse">Iniciar sesión</a>
+                                <a href="/cuentas/login" className="boton_registrarse">Iniciar sesión</a>
                             </p>
                         </div>
                     </div>
