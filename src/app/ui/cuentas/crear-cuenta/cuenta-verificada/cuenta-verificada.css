@@ -9,7 +9,7 @@ div.contenedor_titulos {
 h3.subtitulo_h3 {
     font-family: 'Open Sans', sans-serif;
     font-weight: bold;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     padding: 10px 0;
 }
 /*contenedor_formulario*/
@@ -17,10 +17,10 @@ div.contenedor_formulario{
     text-align: center;
     /* margin: 20px 0; */
 }
-/*Parrafo introducir codigo*/
-a.texto {
+/*Parrafo iniciar sesion*/
+p.texto {
     font-family: 'Open Sans', sans-serif;
-    font-size: 2rem;
+    font-size: 1.1rem;
     margin: 10px 0;
     text-decoration: none;
     color: #000000;
@@ -36,10 +36,6 @@ a.link_inciar_sesion {
 
 /*Small devices (landscape phones, 576px and up)*/
 @media (min-width: 576px) { 
-    /*Parrafo introducir codigo*/
-    a.texto {
-        font-size: 1rem;
-    }
     /*Boton verificar*/
     p.pregunta {
         margin-top: 50px;
@@ -47,19 +43,15 @@ a.link_inciar_sesion {
 }
 /*Medium devices (tablets, 768px and up)*/
 @media (min-width: 768px) {
-    /*Te enviamos un codigo*/
+    /*cuenta verificada*/
     h3.subtitulo_h3 {
-        font-size: 1.4rem;
+        font-size: 1.5rem;
     }  
 }
 /* Large devices (desktops, 992px and up)*/
 @media (min-width: 992px) {
-    /*cuenta verificada*/
-    h3.subtitulo_h3 {
-        font-size: 1.2rem;
-    }
-    /*Parrafo introducir codigo*/
-    a.texto {
+    /*Parrafo iniciar sesion*/
+    p.texto {
         font-size: 1.1rem;
     }
 }
@@ -67,8 +59,13 @@ a.link_inciar_sesion {
 @media (min-width: 1200px) {
     /*Crear cuenta*/
     h3.subtitulo_h3 {
-        font-size: 1.5rem;
+        font-size: 2rem;
         margin: 10px 0;
+    }
+    /*Parrafo iniciar sesion*/
+    p.texto {
+        font-size: 1.2rem;
+        margin-top: 20px;
     }
 }
 /* XX-Large devices (larger desktops, 1400px and up)*/
