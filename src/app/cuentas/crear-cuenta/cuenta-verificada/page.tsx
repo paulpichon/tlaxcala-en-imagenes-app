@@ -18,7 +18,7 @@ export default function CrearCuenta() {
                     <div className="contenedor_formulario ">
                         <div className="contenedor_titulos">
                             <h3 className="subtitulo_h3">Cuenta verificada</h3>
-                            <p className="texto">Ahora puedes <a className="link_inciar_sesion" href="iniciar-sesion.html">iniciar sesión</a>.</p>
+                            <p className="texto">Ahora puedes <a className="link_inciar_sesion" href="/cuentas/login">iniciar sesión</a>.</p>
                         </div>
                     </div>
                 </div>
