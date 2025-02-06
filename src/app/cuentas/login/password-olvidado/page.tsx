@@ -1,4 +1,4 @@
-// Passowrd olvidado
+// Página Password olvidado
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
