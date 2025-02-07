@@ -1,12 +1,7 @@
-// Iniciar Sesion
-// Link nextjs
-// import Link from "next/link";
-// Image next
-// import Image from "next/image";
+// Pagina restablecer password
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
-// import styles from "./ui/page.module.css";
 import "../../../ui/cuentas/login/restablecer-password/restablecer-password.css";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderAside";
@@ -14,8 +9,6 @@ import { HeaderPrincipalTei } from "@/app/components/HeaderAside";
 import FooterMain from "../../../components/FooterMain";
 // viewport
 import type { Viewport } from 'next';
-// Link nextjs
-// import Link from "next/link";
 
 export const viewport: Viewport = {
 	width: 'device-width',
