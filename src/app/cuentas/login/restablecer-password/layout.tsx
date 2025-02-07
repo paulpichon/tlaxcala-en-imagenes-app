@@ -1,4 +1,4 @@
-// Iniciar sesión
+// Pagina para restablecer la contraseña
 // Se usara Layouts Anidados en la estructura del proyecto
 // https://chatgpt.com/c/674542f3-d5bc-8002-847c-c817ca29ba97
 
