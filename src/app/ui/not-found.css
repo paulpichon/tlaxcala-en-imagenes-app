@@ -1,165 +1,58 @@
 /* Estilos pagina no encontrada */
-/*ESTILOS GENERALES*/
-/*contenedor contenedor_tei_index*/
-div.contenedor_tei_index{
-  width: 100%;
-  height: 100%;
-  /* padding: 10px; */
-  text-align: center;
-  margin-top: 20px;
-}
-/*Titulo Tlaxcala En Imágenes*/
-h1.titulo_principal_h1{
-  color: #EBCA9A;
-  font-family: 'League Gothic', sans-serif;
-  font-size: 2.7rem;
-}
-/*subtitulo_h6 por tad*/
-h6.subtitulo_h6 {
-  font-family: 'Open Sans', sans-serif;
-}
-/*span_tad TAD*/
-span.span_tad {
-  color: #EBCA9A;
-  font-weight: bold;
-  margin-left: 70px;
-  margin-top: 8px;
-}
-/*contenedor_formulario*/
-/* div.contenedor_formulario{
-  margin-top: 10%;
-} */
 /*contenedor*/
 div.contenedor_titulos {
   text-align: center;
 }
-
 /*contenedor_formulario*/
 div.contenedor_formulario{
   text-align: center;
   /* margin: 20px 0; */
 }
-
-/*Link de regreso a HOME/inicio */
-.links {
-  /*estilos del boton*/
-  display: block;
-  /*estilos de texto del boton*/
-  color: #000000;
+/*h3*/
+h3.subtitulo_h3 {
   font-family: 'Open Sans', sans-serif;
+  font-weight: bold;
+  font-size: 1.2rem;
+  padding: 10px 0;
+}
+/*Boton registrarse*/
+.boton_registrarse {
   text-decoration: none;
-  font-size: 1rem;
-  /*EFECTOS*/
-  transition: all 0.3s ease 0s;
-
-}
-/*HOVER A_LINKS*/
-.links:hover {
-  color: #EBCA9A;
-}
-
-/*PIE DE PAGINA*/
-/*pie_pagina_index*/
-div.pie_pagina_index{
-  padding: 10px;
-}
-/*Links de pie de pagina*/
-a.pie_pagina_links {
-  color: #000000;
   font-family: 'Open Sans', sans-serif;
-  font-weight: lighter;
-  font-size: .9rem;
+  font-size: 1rem;
+  background-color: #FFFFFF;
+  border-radius: 20px;
+  padding: 3px 25px;
+  border: 2px solid #EBCA9A;
+  color: #EBCA9A;
   /*EFECTOS*/
   transition: all 0.3s ease 0s;
 }
-/*HOVER A_LINKS*/
-a.pie_pagina_links:hover {
-  color:  #EBCA9A;
+/*Hover boton*/
+.boton_registrarse:hover {
+  background-color: #EBCA9A;
+  color: #FFFFFF;
 }
 /*FIN HOVER A_LINKS*/
 /*X-Small devices (portrait phones, less than 576px)*/
 /* No media query for `xs` since this is the default in Bootstrap*/
 
 /*Small devices (landscape phones, 576px and up)*/
-@media (min-width: 576px) { 
-  /*Titulo Tlaxcala En Imágenes*/
-  h1.titulo_principal_h1{
-      font-size: 4rem;
-  }
-  /*subtitulo_h6 POR*/
-  h6.subtitulo_h6 {
-      font-size: 1.1rem;
-  }
-  /*span_tad TAD*/
-  span.span_tad {
-      font-size: 1.1rem;
-      margin-left: 80px;
-      margin-top: 10px;
-  }
-
-  /*pie_pagina_index*/
-  div.pie_pagina_index{
-      padding: 10px;
-  }
-  /*Links de pie de pagina*/
-  a.pie_pagina_links {
-      font-size: 1rem;
-  }
-}
+@media (min-width: 576px) { }
 /*Medium devices (tablets, 768px and up)*/
 @media (min-width: 768px) {
-  /*Titulo Tlaxcala En Imágenes*/
-  h1.titulo_principal_h1{
-      font-size: 6rem;
-  }
-  /*subtitulo_h6 POR*/
-  h6.subtitulo_h6 {
-      font-size: 1.2rem;
-  }
-  /*span_tad TAD*/
-  span.span_tad {
-      font-size: 1.3rem;
-  }
-  /*Links de pie de pagina*/
-  a.pie_pagina_links {
-      font-size: 1.2rem;
-  }
+
 }
 /* Large devices (desktops, 992px and up)*/
 @media (min-width: 992px) {
-  /*Titulo Tlaxcala En Imágenes*/
-  h1.titulo_principal_h1{
-      font-size: 5rem;
-  }
-  /*span_tad TAD*/
-  span.span_tad {
-      font-size: 1rem;
-      margin-top: 0px;
-  }
-  
-  /*pie_pagina_index*/
-  div.pie_pagina_index{
-      padding: 10px;
-  }
-  /*Links de pie de pagina*/
-  a.pie_pagina_links {
-      font-size: 1.2rem;
-  }
-  /*Contenedor de pie de pagina index*/
-  div.pie_pagina_index {
-      margin: 50px 0;
-  }
+ 
 }
 /*X-Large devices (large desktops, 1200px and up)*/
 @media (min-width: 1200px) { 
-  /*Titulo Tlaxcala En Imágenes*/
-  h1.titulo_principal_h1{
-      font-size: 7rem;
-  }
-  /*span_tad TAD*/
-  span.span_tad {
-      font-size: 1.3rem;
-      margin-top: 10px;
+  /*Parrafo Link iniciar sesion*/
+  p.texto {
+    /* margin-top: 10px; */
+    font-size: 1.3rem;
   }
 }
 /* XX-Large devices (larger desktops, 1400px and up)*/

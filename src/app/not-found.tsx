@@ -1,4 +1,6 @@
 // Pagina no encontrada
+// Next Link
+import Link from "next/link";
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // estilos pagina not faound
@@ -9,10 +11,9 @@ import { HeaderPrincipalTei } from "@/app/components/HeaderAside";
 import FooterMain from "@/app/components/FooterMain";
 // Metadatos
 import type { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "404 | Página no encontrado",
+  title: "404 | Página no encontrada",
   description: "El lugar donde encuentras gente de Tlaxcala",
 };
 
@@ -28,11 +29,11 @@ export default function CorreoEnviado() {
               <div className="col-sm-9 col-md-7 col-lg-6">
                   <div className="contenedor_formulario ">
                       <div className="contenedor_titulos">
-                        <h3 className="mt-4">Upppsssssss...</h3>
-                        <h1 className="mt-4">
+                        <h3 className="">Upppsssssss...</h3>
+                        <h3 className="subtitulo_h3">
                           PÁGINA NO ENCONTRADA
-                        </h1>
-                        <p className="mt-3">
+                        </h3>
+                        <p className="texto">
                           Lo sentimos, la página que estás buscando no existe, nunca existió y tal vez nunca existirá. Si crees que algo no funciona, informe un problema.
                         </p>
                       </div>
@@ -40,7 +41,7 @@ export default function CorreoEnviado() {
                           {/* Aqui se valida si hay sesion iniciada, ya sea para mostrar la pagina de inicio o la pagina de bienvenida */}
                           <Link 
                             href="/"
-                            className="links"
+                            className="boton_registrarse"
                           >
                             Regresar a un lugar seguro
                           </Link>
