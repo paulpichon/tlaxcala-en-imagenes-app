@@ -1,3 +1,4 @@
+// Esta página no tiene LAYOUT
 'use client' // Error boundaries must be Client Components
 // Pagina no encontrada
 // use effect
@@ -10,14 +11,7 @@ import "./ui/error.css";
 import { HeaderPrincipalTei } from "@/app/components/HeaderAside";
 // Footer
 import FooterMain from "@/app/components/FooterMain";
-// Metadatos
-// import type { Metadata } from "next";
 // Al ser una pagina de error los metadatos no funcionan, se muestran los metadatos de la pagina que intentas acceder
-// export const metadata: Metadata = {
-//   title: "404 | Algo salió mal",
-//   description: "El lugar donde encuentras gente de Tlaxcala",
-// };
-
 
 export default function Error({
   error,
@@ -40,10 +34,10 @@ export default function Error({
               <div className="col-sm-9 col-md-7 col-lg-6">
                   <div className="contenedor_formulario ">
                       <div className="contenedor_titulos">
-                        <h1 className="mt-3">
+                        <h3 className="subtitulo_h3">
                         ¡Algo ha salidó mal!
-                        </h1>
-                        <p className="mt-2">
+                        </h3>
+                        <p className="texto">
                           Lo sentimos, al parecer hubo un problema. 
                           Favor de intentar más tarde.
                         </p>
