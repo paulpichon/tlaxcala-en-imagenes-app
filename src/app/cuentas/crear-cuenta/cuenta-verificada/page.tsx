@@ -4,7 +4,7 @@ import "bootstrap/dist/css/bootstrap.css";
 // estilos de la pagina
 import "../../../ui/cuentas/crear-cuenta/cuenta-verificada/cuenta-verificada.css";
 // Header principal
-import { HeaderPrincipalTei } from "@/app/components/HeaderAside";
+import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer principal
 import FooterPrincipal from "@/app/components/FooterMain";
 

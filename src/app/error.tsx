@@ -8,7 +8,7 @@ import "bootstrap/dist/css/bootstrap.css";
 // estilos pagina not faound
 import "./ui/error.css";
 // Header principal
-import { HeaderPrincipalTei } from "@/app/components/HeaderAside";
+import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer
 import FooterMain from "@/app/components/FooterMain";
 // Al ser una pagina de error los metadatos no funcionan, se muestran los metadatos de la pagina que intentas acceder

@@ -4,7 +4,7 @@ import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
 import "../../../ui/cuentas/login/restablecer-password/restablecer-password.css";
 // Header principal
-import { HeaderPrincipalTei } from "@/app/components/HeaderAside";
+import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer principal
 import FooterMain from "../../../components/FooterMain";
 // viewport

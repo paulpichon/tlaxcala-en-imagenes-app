@@ -6,7 +6,7 @@ import "bootstrap/dist/css/bootstrap.css";
 // estilos pagina not faound
 import "./ui/not-found.css";
 // Header principal
-import { HeaderPrincipalTei } from "@/app/components/HeaderAside";
+import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer
 import FooterMain from "@/app/components/FooterMain";
 // Metadatos

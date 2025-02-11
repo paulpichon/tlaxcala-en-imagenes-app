@@ -10,7 +10,7 @@ import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
 import "../../ui/cuentas/crear-cuenta/crear-cuenta.css";
 // Header principal
-import { HeaderPrincipalTei } from "@/app/components/HeaderAside";
+import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer principal
 import FooterMain from "../../components/FooterMain";
 
