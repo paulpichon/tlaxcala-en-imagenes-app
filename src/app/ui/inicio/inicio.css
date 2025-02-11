@@ -1,22 +1,19 @@
-/* border menu superior */
-div.contenedor_menu_superior {
-    border-bottom: 1px solid #EBCA9A;
-}
-
 /*contenedor contenedor_tei_index*/
 div.contenedor_menu_superior{
     text-align: center;
     /*background: linear-gradient(70deg, white, white);*/
     background-color: rgba(255,255,255,0.95);
+    border-bottom: 1px solid #EBCA9A;
 }
 /*Titulo Tlaxcala En Imágenes*/
-h1.titulo_principal_h1{
+h1.titulo_header_superior_app{
+    margin-top: 10px;
     color: #EBCA9A;
     font-family: 'League Gothic', sans-serif;
     font-size: 1.8rem;
 }
-/*subtitulo_h6 por tad*/
-h6.subtitulo_h6 {
+/*mostrar_h6_por por tad*/
+h6.mostrar_h6_por {
     display: none;
 }
 /*Fin Titulo Tlaxcala En Imágenes*/
@@ -73,11 +70,11 @@ div.contenedor_publicaciones {
     border-bottom: 1px solid #EBCA9A;
 }
 /* Quitar los estilos del boton de toldo */
-.btn_toldo {
+/* .btn_toldo {
     background-color: transparent;
     border: 0;
     width: 100%;
-}
+} */
 /* Boton opciones de la publicacion */
 .btn_opciones_publicaciones {
     font-family: 'Open Sans', sans-serif;
@@ -190,15 +187,15 @@ No media query for `xs` since this is the default in Bootstrap*/
     *Titulo Tlaxcala En Imágenes
     *
     */
-    h1.titulo_principal_h1{
+    h1.titulo_header_superior_app{
         font-size: 2.4rem;
     }
-    /*subtitulo_h6 por tad*/
-    h6.subtitulo_h6 {
+    /*mostrar_h6_por por tad*/
+    h6.mostrar_h6_por {
         font-size: 1.1rem;
     }
-    /*span_tad TAD*/
-    span.span_tad {
+    /*span_tad_header_app TAD*/
+    span.span_tad_header_app {
         font-size: 1.1rem;
         margin-top: 7px;
     }
@@ -248,20 +245,20 @@ No media query for `xs` since this is the default in Bootstrap*/
     *Titulo Tlaxcala En Imágenes
     *
     */
-    h1.titulo_principal_h1{
+    h1.titulo_header_superior_app{
         font-size: 4rem;
     }
-    /*subtitulo_h6 por tad*/
-    h6.subtitulo_h6 {
+    /*mostrar_h6_por por tad*/
+    h6.mostrar_h6_por {
         display: block;
         font-family: 'Open Sans', sans-serif;
     }
     /*Por TAD*/
-    h6.por_tad {
+    h6.mostrar_h6_por {
         font-size: 0.9rem;
     }
-    /*span_tad TAD*/
-    span.span_tad {
+    /*span_tad_header_app TAD*/
+    span.span_tad_header_app {
         color: #EBCA9A;
         font-weight: bold;
         margin-left: 70px;
