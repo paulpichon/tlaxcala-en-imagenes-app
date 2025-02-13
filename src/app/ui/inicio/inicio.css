@@ -119,8 +119,6 @@ p.ubicacion {
 button.btn_opciones_modal {
     background-color: transparent;
     border: 0;
-    width: 100%;
-    height: 40px;
 }
 /* Boton me gusta */
 button.like-button {

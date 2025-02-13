@@ -7,6 +7,7 @@ div.contenedor_menu_superior{
 }
 /*Titulo Tlaxcala En Imágenes*/
 h1.titulo_header_superior_app{
+    margin-top: 10px;
     color: #EBCA9A;
     font-family: 'League Gothic', sans-serif;
     font-size: 1.8rem;
@@ -258,7 +259,7 @@ No media query for `xs` since this is the default in Bootstrap*/
         font-family: 'Open Sans', sans-serif;
     }
     /*Por TAD*/
-    h6.por_tad {
+    h6.mostrar_h6_por {
         font-size: 0.9rem;
     }
     /*span_tad_header_app TAD*/
