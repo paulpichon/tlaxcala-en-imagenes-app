@@ -1,65 +1,3 @@
-/*contenedor contenedor_tei_index*/
-div.contenedor_menu_superior{
-    text-align: center;
-    /*background: linear-gradient(70deg, white, white);*/
-    background-color: rgba(255,255,255,0.95);
-    border-bottom: 1px solid #EBCA9A;
-}
-/*Titulo Tlaxcala En Imágenes*/
-h1.titulo_header_superior_app{
-    margin-top: 10px;
-    color: #EBCA9A;
-    font-family: 'League Gothic', sans-serif;
-    font-size: 1.8rem;
-}
-/*mostrar_h6_por por tad*/
-h6.mostrar_h6_por {
-    display: none;
-}
-/*Fin Titulo Tlaxcala En Imágenes*/
-
-/*Menu inferior*/
-/*Los estilos de este menu funcionara hasta antes de llegar al breakpoint de los 768px*/
-/*Pasados los 768px se le dara otros estilos al mismo menu*/
-
-/*.contenedor_menu_lateral_inferior*/
-div.contenedor_menu_lateral_inferior {
-    background-color: rgba(255,255,255,0.95);
-}
-/*Nombre de opciones*/
-span.nombre_opciones_menu {
-    display: none;
-}
-/*etiqueta a*/
-a.opciones_menu {
-    color: #EBCA9A;
-    padding: 20px 15px;
-    /*EFECTOS*/
-    transition: all 0.3s ease 0s;
-    margin-bottom: 10px;
-}
-/* hover iconos menu*/
-a.opciones_menu:hover {
-    background-color:rgb(235, 202, 154, 0.2);
-    color: #EBCA9A;
-}
-/* Icono del menu react icons */
-.icono_menu {
-    font-size: 1.5rem;
-    margin: 0 5px;
-}
-/* Boton POSTEAR */
-a.postear {
-    background-color:#EBCA9A;
-    color: white;
-    height:100%;
-}
-/*
-*
-*   Fin Menu inferior
-*
-*/
-
 /* 
 *
 Perfil de usuarios
@@ -190,186 +128,21 @@ a.btn_seguir {
 a.btn_rojo {
     color: red;
 }
-/*
-*
-*   Div publicidad/sugerencias
-*
-*/
-div.sugerencias {
-    display: none;
-}
-
-
 /*X-Small devices (portrait phones, less than 576px)
 No media query for `xs` since this is the default in Bootstrap*/
 
 /*Small devices (landscape phones, 576px and up)*/
-@media (min-width: 576px) { 
-    /*
-    *
-    *Titulo Tlaxcala En Imágenes
-    *
-    */
-    h1.titulo_header_superior_app{
-        font-size: 2.4rem;
-    }
-    /*Fin Titulo Tlaxcala En Imágenes*/
-
-    /*Menu inferior*/
-    /*etiqueta a*/
-    a.opciones_menu {
-        padding: 10px 35px;
-    }
-    /*Iconos de menu*/
-    /* img.img_icono_menu {
-        width: 1.8rem;
-    } */
-    /*Fin Menu inferior*/
-}
+@media (min-width: 576px) {}
 
 /*Medium devices (tablets, 768px and up)*/
 @media (min-width: 768px) { 
-    /* border */
-    div.contenedor_central_contenido {
-        border: 2px solid rgb(127, 127, 127, 0.2);
-        border-top: 0;
-        /* Dar un padding al contenedor central */
-        padding: 0 10px 10px 10px;
-    }
-    /*
-    *
-    *Titulo Tlaxcala En Imágenes
-    *
-    */
-    h1.titulo_header_superior_app{
-        font-size: 4rem;
-    }
-    /*mostrar_h6_por por tad*/
-    h6.mostrar_h6_por {
-        display: block;
-        font-family: 'Open Sans', sans-serif;
-    }
-    /*Por TAD*/
-    h6.mostrar_h6_por {
-        font-size: 0.9rem;
-    }
-    /*span_tad_header_app TAD*/
-    span.span_tad_header_app {
-        color: #EBCA9A;
-        font-weight: bold;
-        margin-left: 70px;
-        font-size: .8rem;
-    }
-    /*Fin Titulo Tlaxcala En Imágenes*/
-
-    /*Menu inferior*/
-    /*etiqueta a*/
-    a.opciones_menu {
-        text-align: center;
-    }
-    /* Tamaño iconos del menu */
-    /* Icono del menu react icons */
-    .icono_menu {
-        font-size: 1.8rem;
-    }
-    /*Iconos de menu*/
-    /* img.img_icono_menu {
-        width: 1.8rem;
-    } */
-    /*Fin Menu inferior*/
-
-    /*Contenedor menu lateral-superior*/
-    div.contenedor_menu_lateral_inferior {
-        position: sticky;
-        top: 0;
-    }
-    /* estilos a ul.menu_inferior_lateral */
-    ul.menu_inferior_lateral{
-        flex-direction: column;
-        /* margin-top: 30px ; */
-    }
-    /* li.nav-item */
-    li.nav-item{
-        margin: 15px 0;
-    }
  }
 
 /* Large devices (desktops, 992px and up) */
-@media (min-width: 992px) { 
-    /*Menu inferior*/
-    /*Iconos de menu*/
-    /* img.img_icono_menu {
-        width: 1.8rem;
-    }  */
-}
+@media (min-width: 992px) {}
 
 /* X-Large devices (large desktops, 1200px and up) */
-@media (min-width: 1200px) { 
-    /*Menu inferior*/
-    /*Iconos de menu*/
-    /* img.img_icono_menu {
-        width: 1.8rem;
-    } */
-    /*Fin Menu inferior*/
-
-    /* Div publicidad/sugerencias */
-    /* Se muestra el DIV SUGERENCIAS */
-    div.sugerencias {
-        display: block;
-    }
-    /* Publicidad leyenda */
-    p.publicidad {
-        font-family: 'Open Sans', sans-serif;
-        font-size: .8rem;
-        font-weight: bold;
-        letter-spacing: 1px;
-    }
-    /* link imagen mas votadas */
-    a.link_imagen_mas_votadas {
-        text-decoration: none;
-    }
-    /* nombre de usuario imagenes mas votadas */
-    h6.titulo_card {
-        font-weight: bold;
-    }
-    /* numero de me gustas */
-    p.numero_me_gustas {
-        font-size: .8rem;
-    }
-    /* enlaces footer sugerencias */
-    a.enlaces_footer_sugerencias {
-        font-family: 'Open Sans', sans-serif;
-        text-decoration: none;
-        font-size: .8rem;
-        color: rgb(127, 127, 127, 0.4);
-        font-weight: bold; 
-        margin: 15px 0;
-    }
-    /* hover */
-    a.enlaces_footer_sugerencias:hover {
-        text-decoration: underline;
-        color: rgb(127, 127, 127, 0.6);
-    }
-    /* TLAXCALA EN IMAGENES FOOTER */
-    h6.tei_footer_sugerencias {
-        font-size: .8rem;
-        color: rgb(127, 127, 127, 0.5);
-    }
- }
+@media (min-width: 1200px) {}
 
 /* XX-Large devices (larger desktops, 1400px and up)*/
-@media (min-width: 1400px) { 
-    /*este contenedor es igual a container-xxl de bootstrap*/
-    /*Lo cambio porque necesito que se quite el margen del container-xxl en todas las medidas antes de los 1400px*/
-    /*Ademas se puso la clase g-0 para quitar los padding a las columnas en el div del row*/
-    div.contenedor_principal {
-        --bs-gutter-x: 1.5rem;
-        --bs-gutter-y: 0;
-        width: 100%;
-        padding-right: calc(var(--bs-gutter-x) * .5);
-        padding-left: calc(var(--bs-gutter-x) * .5);
-        margin-right: auto;
-        margin-left: auto;
-        max-width: 1320px;
-    }
- }
+@media (min-width: 1400px) { }
