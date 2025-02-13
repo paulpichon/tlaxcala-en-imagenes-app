@@ -119,6 +119,8 @@ p.ubicacion {
 button.btn_opciones_modal {
     background-color: transparent;
     border: 0;
+    width: 100%;
+    height: 40px;
 }
 /* Boton me gusta */
 button.like-button {
@@ -187,15 +189,6 @@ No media query for `xs` since this is the default in Bootstrap*/
     */
     h1.titulo_header_superior_app{
         font-size: 2.4rem;
-    }
-    /*mostrar_h6_por por tad*/
-    h6.mostrar_h6_por {
-        font-size: 1.1rem;
-    }
-    /*span_tad_header_app TAD*/
-    span.span_tad_header_app {
-        font-size: 1.1rem;
-        margin-top: 7px;
     }
     /*Fin Titulo Tlaxcala En Imágenes*/
 
