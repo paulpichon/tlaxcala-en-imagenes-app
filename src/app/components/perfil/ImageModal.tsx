@@ -27,7 +27,7 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
             {/* <h5 className="modal-title">{image.title}</h5> */}
             <button
               type="button"
-              className="btn_opciones_modal"
+              className="btn_opciones_modal_perfil"
               aria-label="Options"
               onClick={onNext}
             >

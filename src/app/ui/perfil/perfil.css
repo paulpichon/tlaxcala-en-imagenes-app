@@ -71,7 +71,7 @@ img.imagen_grid_perfil_usuario {
 /* MODALES */
 /****** Modal imagen expandida *****/
 /*Boton de opciones en la publicacion*/
-button.btn_opciones_modal {
+button.btn_opciones_modal_perfil {
     background-color: transparent;
     border: 0;
 }
