@@ -82,9 +82,6 @@ export default function Inicio() {
 				</div>
 				<div className="col-xl-4 sugerencias">
 					<div className="contenedor_sugerencias sticky-top p-3">
-						<div className="contenedor_titulo_h5">
-							<h5 className="text-center">Imagénes más votadas</h5>
-						</div>	
 						<div className="contenedor_sugerencias_seguir mt-4">
 							<div className="row d-flex justify-content-center">
 								{/* Imagenes mas votadas */}
