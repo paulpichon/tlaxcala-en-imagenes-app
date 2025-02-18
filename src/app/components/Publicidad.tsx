@@ -5,7 +5,7 @@ export default function Publicidad() {
     return (
         <div className="sugerencias_para_seguir">
             {/* <!-- leyenda publicidad --> */}
-                <p className="m-0 publicidad">Publicidad...</p>
+                <p className="publicidad">Publicidad...</p>
             {/* <!-- fin leyenda publicidad --> */}
             <a href="http://">
                 <div className="card">
