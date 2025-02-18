@@ -377,45 +377,72 @@ li.nav-item{
     div.sugerencias {
       display: block;
   }
-  /* Publicidad leyenda */
-  p.publicidad {
-      font-family: 'Open Sans', sans-serif;
-      font-size: .8rem;
-      font-weight: bold;
-      letter-spacing: 1px;
+  /* contenedor_border_divs_sugerencias */
+  div.contenedor_border_divs_sugerencias {
+    border: 1px solid rgb(127, 127, 127, 0.2);
+    border-radius: 16px;
+    margin: 20px 5px;
+    padding: 15px 5px;
   }
   /* link imagen mas votadas */
   a.link_imagen_mas_votadas {
-      text-decoration: none;
+    text-decoration: none;
   }
   /* nombre de usuario imagenes mas votadas */
   h6.titulo_card {
-      font-weight: bold;
+    font-family: 'League Gothic', sans-serif;
+    /* font-weight: bold; */
+    font-size: 1rem;
   }
   /* numero de me gustas */
   p.numero_me_gustas {
-      font-size: .8rem;
+    /* font-family: 'Open Sans', sans-serif; */
+    font-size: 0.8rem;
+    font-weight: lighter;
   }
-  /* enlaces footer sugerencias */
+  /* Publicidad leyenda */
+  p.publicidad {
+    font-family: 'Open Sans', sans-serif;
+    margin: 5px 0;
+    font-size: .8rem;
+    font-weight: lighter;
+    letter-spacing: 1px;
+  }
+  /* 
+  *
+  enlaces footer sugerencias 
+  *
+  */
   a.enlaces_footer_sugerencias {
-      font-family: 'Open Sans', sans-serif;
-      text-decoration: none;
-      font-size: .8rem;
-      color: rgb(127, 127, 127, 0.4);
-      font-weight: bold; 
-      margin: 15px 0;
+    font-family: 'Open Sans', sans-serif;
+    text-decoration: none;
+    font-size: .8rem;
+    color: rgb(127, 127, 127, 0.4);
+    font-weight: bold; 
+    margin: 15px 0;
   }
   /* hover */
   a.enlaces_footer_sugerencias:hover {
       text-decoration: underline;
       color: rgb(127, 127, 127, 0.6);
   }
+  /* titulo imagenes votadas sugerencias */
+  h5.titulo_h5_sugerencias_imagenesvotadas {
+    font-family: 'Open Sans', sans-serif;
+    margin: 10px 0 30px 0;  
+    font-size: 1rem;
+    font-weight: bold;
+  }
   /* TLAXCALA EN IMAGENES FOOTER */
   h6.tei_footer_sugerencias {
       font-size: .8rem;
       color: rgb(127, 127, 127, 0.5);
   }
-
+/* 
+  *
+  fin enlaces footer sugerencias 
+*
+*/
 }
 
 /* XX-Large devices (larger desktops, 1400px and up)*/
