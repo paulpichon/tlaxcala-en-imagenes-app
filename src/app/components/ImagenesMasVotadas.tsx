@@ -5,7 +5,9 @@ import Image from "next/image";
 export default function ImagenesMasVotadas() {
 
     return (
-        <>
+        <>  
+            {/* <!-- titulo principal de sugerencias --> */}
+            <h5 className="text-center titulo_h5_sugerencias_imagenesvotadas">Imagénes más votadas</h5>
             {/* <!-- imagenes mas votadas --> */}
             <div className="col-4">
                 <div className="sugerencias_para_seguir">
