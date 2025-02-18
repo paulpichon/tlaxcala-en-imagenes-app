@@ -83,12 +83,12 @@ export default function Inicio() {
 				<div className="col-xl-4 sugerencias">
 					<div className="contenedor_sugerencias sticky-top p-3">
 						<div className="contenedor_sugerencias_seguir mt-4">
-							<div className="row d-flex justify-content-center">
+							<div className="row d-flex justify-content-center contenedor_border_divs_sugerencias">
 								{/* Imagenes mas votadas */}
 								<ImagenesMasVotadas />
 							</div>
-							<div className="row d-flex justify-content-center">
-								<div className="col-8 mt-4">
+							<div className="row d-flex justify-content-center contenedor_border_divs_sugerencias">
+								<div className="col-8">
 									{/* Publicidas */}
 									<Publicidad />
 								</div>

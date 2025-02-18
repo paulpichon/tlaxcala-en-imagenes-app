@@ -73,15 +73,15 @@ export default function Inicio() {
 					<div className="contenedor_sugerencias sticky-top p-3">
 						{/* <!-- contenedor_sugerencias_seguir --> */}
 						<div className="contenedor_sugerencias_seguir mt-4">
-							<div className="row d-flex justify-content-center">
+							<div className="row d-flex justify-content-center contenedor_border_divs_sugerencias">
 								{/* IMAGENES MAS VOTADAS */}
 								<ImagenesMasVotadas />
 
 							</div>
 							{/* <!-- row publicidad --> */}
-							<div className="row d-flex justify-content-center">
+							<div className="row d-flex justify-content-center contenedor_border_divs_sugerencias">
 								{/* <!-- Publicidad --> */}
-								<div className="col-8 mt-4">
+								<div className="col-8">
 									{/* <!-- publicidad --> */}
 									<Publicidad />
 									{/* <!-- fin publicidad --> */}
