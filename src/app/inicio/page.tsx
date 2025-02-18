@@ -71,12 +71,6 @@ export default function Inicio() {
 				<div className="col-xl-4 sugerencias">
 					{/* <!-- Contenedor de contenido --> */}
 					<div className="contenedor_sugerencias sticky-top p-3">
-						{/* <!-- contenedor titulo --> */}
-						<div className="contenedor_titulo_h5">
-							{/* <!-- titulo principal de sugerencias --> */}
-							<h5 className="text-center">Imagénes más votadas</h5>
-						</div>	
-						{/* <!--fin contenedor titulo -->					 */}
 						{/* <!-- contenedor_sugerencias_seguir --> */}
 						<div className="contenedor_sugerencias_seguir mt-4">
 							<div className="row d-flex justify-content-center">
