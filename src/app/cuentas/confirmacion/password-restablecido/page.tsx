@@ -1,8 +1,8 @@
 // Página password restablecida
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
-// estilos de la pagina
-import "../../../ui/cuentas/confirmacion/password-restablecido/password-restablecido.css";
+// estilos de la pagina CSS modules
+import styPassRes from "../../../ui/cuentas/confirmacion/password-restablecido/PasswordRestablecido.module.css";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer principal
@@ -15,14 +15,14 @@ export default function CrearCuenta() {
                 {/* Header principal */}
                 < HeaderPrincipalTei />
                 <div className="col-sm-9 col-md-7 col-lg-6">
-                    <div className="contenedor_formulario ">
-                        <div className="contenedor_titulos">
-                            <h3 className="subtitulo_h3">Contraseña restablecida</h3>
-                            <p className="texto">Ahora puedes iniciar sesión</p>
+                    <div className={`${styPassRes.contenedor_formulario}`}>
+                        <div className={`${ styPassRes.contenedor_titulos}`}>
+                            <h3 className={`${ styPassRes.subtitulo_h3}`}>Contraseña restablecida</h3>
+                            <p className={`${ styPassRes.texto}`}>Ahora puedes iniciar sesión</p>
                         </div>
                         <div className="cool-md-12 text-center mt-2">
-                            <p className="pregunta">
-                                <a href="/cuentas/login" className="boton_registrarse">Iniciar sesión</a>
+                            <p className={`${ styPassRes.pregunta}`}>
+                                <a href="/cuentas/login" className={`${ styPassRes.boton_registrarse}`}>Iniciar sesión</a>
                             </p>
                         </div>
                     </div>
