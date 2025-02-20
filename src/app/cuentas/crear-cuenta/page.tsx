@@ -8,7 +8,7 @@ import Link from "next/link";
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
-import "../../ui/cuentas/crear-cuenta/crear-cuenta.css";
+import crearCuenta from "../../ui/cuentas/crear-cuenta/CrearCuenta.module.css";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer principal
@@ -31,30 +31,30 @@ export default function CrearCuenta() {
 				{/* Header principal */}
                 <HeaderPrincipalTei />
 				<div className="col-sm-9 col-md-7 col-lg-6">
-					<div className="contenedor_formulario ">
-						<div className="contenedor_titulos">
-							<h3 className="subtitulo_h3">Crear cuenta</h3>
+					<div className={`${crearCuenta.contenedor_formulario}`}>
+						<div className={`${crearCuenta.contenedor_titulos}`}>
+							<h3 className={`${crearCuenta.subtitulo_h3}`}>Crear cuenta</h3>
 						</div>
-						<div className="contenedor_formulario">
+						<div className={`${crearCuenta.contenedor_formulario}`}>
                             {/* Existe un error debido a que falta el action del form */}
-							<form id="crear_cuenta" className="formulario_crear_cuenta">
-								<div className="contenedor_input">
-								  <input type="text" className="form-control inputs_crear_cuenta" id="nombre_usuario" aria-describedby="nombre" placeholder="Nombre completo" />
+							<form id="crear_cuenta" className={`${crearCuenta.formulario_crear_cuenta}`}>
+								<div className={`${crearCuenta.contenedor_input}`}>
+								  <input type="text" className={`form-control ${crearCuenta.inputs_crear_cuenta}`} id="nombre_usuario" aria-describedby="nombre" placeholder="Nombre completo" />
 								</div>
-								<div className="contenedor_input">
-								  <input type="text" className="form-control inputs_crear_cuenta" id="correo" aria-describedby="correo" placeholder="Correo electrónico" />
+								<div className={`${crearCuenta.contenedor_input}`}>
+								  <input type="text" className={`form-control ${crearCuenta.inputs_crear_cuenta}`} id="correo" aria-describedby="correo" placeholder="Correo electrónico" />
 								</div>
-								<div className="contenedor_input">
-								  <input type="password" className="form-control inputs_crear_cuenta" id="password" placeholder="Contraseña" />
+								<div className={`${crearCuenta.contenedor_input}`}>
+								  <input type="password" className={`form-control ${crearCuenta.inputs_crear_cuenta}`} id="password" placeholder="Contraseña" />
 								</div>
-								<button type="submit" className="boton_registrarse">Registrarse</button>
+								<button type="submit" className={`${crearCuenta.boton_registrarse}`}>Registrarse</button>
 							</form>
 						</div>
 					</div>
 				</div>
 				<div className="cool-md-12 text-center mt-2">
-					<p className="pregunta">¿Tienes una cuenta? 
-                        <Link href="/cuentas/login" className="enlace_iniciar_sesion">Entrar</Link>
+					<p className={`${crearCuenta.pregunta}`}>¿Tienes una cuenta? 
+                        <Link href="/cuentas/login" className={`${crearCuenta.enlace_iniciar_sesion}`}>Entrar</Link>
                     </p>
 				</div>
 				{/* Footer */}
