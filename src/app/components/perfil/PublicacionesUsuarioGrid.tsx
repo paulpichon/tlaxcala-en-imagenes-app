@@ -2,6 +2,8 @@
 "use client";
 // UseState
 import { useState } from "react";
+// Module CSS
+import perfil from "../../ui/perfil/perfil.module.css";
 // Types/interface
 import ImageData from "@/app/types/types";
 // Image NEXTJS
@@ -40,7 +42,7 @@ export default function PublicacionesUsuarioGrid() {
     const closeSecondModal = () => setIsSecondModalOpen(false);
 
     return (
-        <>
+        <div className="row g-1">
             {images.map((image) => (
                 // Debemos poner una KEY al elemento padre
                 <div key={image.id} className="col-4">
@@ -48,9 +50,9 @@ export default function PublicacionesUsuarioGrid() {
                         <Image 
                             src={image.src}
                             alt={image.title}
-                            width={250}
+                            width={200}
                             height={200}
-                            className="imagen_grid_perfil_usuario gallery-image"
+                            className={`${perfil.imagen_grid_perfil_usuario} gallery-image`}
                             style={{ cursor: "pointer" }}
                             priority
                             // Se pasa la imagen seleccionada al modal
@@ -77,6 +79,6 @@ export default function PublicacionesUsuarioGrid() {
                 onClose={closeSecondModal}
             />
             
-        </>
+        </div>
     );
 }
