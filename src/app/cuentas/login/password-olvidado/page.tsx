@@ -2,7 +2,7 @@
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
-import "../../../ui/cuentas/login/password-olvidado/password-olvidado.css";
+import passwordOlvidado from "../../../ui/cuentas/login/password-olvidado/PasswordOlvidado.module.css";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer principal
@@ -26,17 +26,17 @@ export default function PasswordOlvidada() {
 				{/* Header */}
                 <HeaderPrincipalTei />
 				<div className="col-sm-9 col-md-7 col-lg-6">
-					<div className="contenedor_formulario ">
-						<div className="contenedor_titulos">
-							<h3 className="subtitulo_h3">Recuperar contraseña</h3>
-                            <p className="texto">Introduce tu correo electrónico</p>
+					<div className={`${passwordOlvidado.contenedor_formulario}`}>
+						<div className={`${passwordOlvidado.contenedor_titulos}`}>
+							<h3 className={`${passwordOlvidado.subtitulo_h3}`}>Recuperar contraseña</h3>
+                            <p className={`${passwordOlvidado.texto}`}>Introduce tu correo electrónico</p>
 						</div>
-						<div className="contenedor_formulario">
+						<div className={`${passwordOlvidado.contenedor_formulario}`}>
 							<form className="formulario_crear_cuenta" id="iniciar_sesion">
 								<div className="mb-4">
-								  <input type="text" className="form-control inputs_crear_cuenta" id="correo" aria-describedby="correo" placeholder="Correo electrónico" />
+								  <input type="text" className={`form-control ${passwordOlvidado.inputs_crear_cuenta}`} id="correo" aria-describedby="correo" placeholder="Correo electrónico" />
 								</div>
-								<button type="submit" className="boton_registrarse">Recuperar contraseña</button>
+								<button type="submit" className={`${passwordOlvidado.boton_registrarse}`}>Recuperar contraseña</button>
 							  </form>
 						</div>
 					</div>
