@@ -4,7 +4,7 @@
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
 // import styles from "./ui/page.module.css";
-import "../ui/perfil/perfil.css";
+import perfil from "../ui/perfil/perfil.module.css";
 // viewport
 import type { Viewport } from 'next';
 // Componentes
@@ -52,7 +52,7 @@ export default function Inicio() {
 					<div className="contenedor_contenido_principal">
 
 						<div className="container-fluid">
-							<div className="contenedor_info_usuario">
+							<div className={`${perfil.contenedor_info_usuario}`}>
 								{/* Como parametro se debe pasar la informacion de la URL del usuario */}
 								{/* Componente informacion de usuario */}
 								<InformacionUsuarioPerfil />
@@ -67,12 +67,10 @@ export default function Inicio() {
 									<div className="contenedor_publicacion_usuario mb-5">
 										<div className=" mt-3">
 											<div className="titulo_contenedor text-center">
-												<h6 className="titulo_publicaciones pt-3 pb-3">PUBLICACIONES</h6>
+												<h6 className={`${perfil.titulo_publicaciones} pt-3 pb-3`}>PUBLICACIONES</h6>
 											</div>
-											<div className="row g-1">
-												{/* Publicaciones de usuario en GRID */}
-												<PublicacionesUsuarioGrid />
-											</div>
+											{/* Publicaciones de usuario en GRID */}
+											<PublicacionesUsuarioGrid />
 										</div>
 									</div>
 								</div>
