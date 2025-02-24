@@ -1,4 +1,6 @@
 'use client';
+// Module CSS
+import perfil from "../../ui/perfil/perfil.module.css";
 // Image nextjs
 import Image from "next/image";
 // Icono
@@ -27,7 +29,7 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
             {/* <h5 className="modal-title">{image.title}</h5> */}
             <button
               type="button"
-              className="btn_opciones_modal_perfil"
+              className={`${perfil.btn_opciones_modal_perfil}`}
               aria-label="Options"
               onClick={onNext}
             >
@@ -53,11 +55,11 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
             {/* <p>{image.description}</p> */}
           </div>
           <div className="footer_publicacion">
-            <button id="likeButton" data-post-id="POST_ID" className="like-button">
+            <button id="likeButton" data-post-id="POST_ID" className={`${perfil.likeButton}`}>
                 {/* <!--https://feathericons.com/--> */}
                 <FiHeart />
             </button>
-            <p id="likeCount" className="d-inline votaciones">10009</p>
+            <p id="likeCount" className={`d-inline ${perfil.votaciones}`}>10009</p>
             <strong>Me gusta</strong>
 		   		</div>
         </div>
