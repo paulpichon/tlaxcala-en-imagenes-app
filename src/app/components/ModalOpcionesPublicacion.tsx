@@ -1,5 +1,6 @@
 'use client';
-
+// Module CSS
+import perfil from "../ui/perfil/perfil.module.css";
 // Interface props del segundo modal: info del usuario
 interface PropsModalOpcionesPublicacion {
   isOpen: boolean;
@@ -16,43 +17,43 @@ const ModalOpcionesPublicacion: React.FC<PropsModalOpcionesPublicacion> = ({ isO
       tabIndex={-1}
       style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
     >
-      <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content">
-            {/* <div className="modal-header">
-            // Muestra el ID del usuario con la imagen seleccionada
-            <h5 className="modal-title">{selectedImage.id}</h5>
-            </div> */}
-          <div className="modal-body">
+      	<div className="modal-dialog modal-dialog-centered">
+			<div className="modal-content">
+				{/* <div className="modal-header">
+				// Muestra el ID del usuario con la imagen seleccionada
+				<h5 className="modal-title">{selectedImage.id}</h5>
+				</div> */}
+				<div className="modal-body">
 					<div className="row text-center">
 						<div className="col-md-12">
-							<a id="seguir_usuario" type="button" className="btn_opciones_publicaciones btn_seguir" href="#">
+							<a id="seguir_usuario" type="button" className={`${perfil.btn_opciones_publicaciones} ${perfil.btn_seguir}`} href="#">
 								Seguir
 							</a>
 						</div>
 						<div className="col-md-12">
-							<a type="button" className="btn_opciones_publicaciones btn_rojo" data-toggle="modal" data-target="#modalDenuncia">
+							<a type="button" className={`${perfil.btn_opciones_publicaciones} ${perfil.btn_rojo}`} data-toggle="modal" data-target="#modalDenuncia">
 								Denunciar
 							</a>
 						</div>
 						<div className="col-md-12">
-							<a type="button" className="btn_opciones_publicaciones" href="#">
+							<a type="button" className={`${perfil.btn_opciones_publicaciones}`} href="#">
 								Añadir a favoritos
 							</a>
 						</div>
 						<div className="col-md-12">
-							<a href="#" type="button" className="btn_opciones_publicaciones">
+							<a href="#" type="button" className={`${perfil.btn_opciones_publicaciones}`}>
 								Ir a la publicación
 							</a>
 						</div>
 						<div className="col-md-12">
-							<a type="button" className="btn_opciones_publicaciones" onClick={onClose}>
-                                Cancelar
-                            </a>
+							<a type="button" className={`${perfil.btn_opciones_publicaciones}`} onClick={onClose}>
+								Cancelar
+							</a>
 						</div>
 					</div>
 				</div>
-        </div>
-      </div>
+			</div>
+      	</div>
     </div>
   );
 };
