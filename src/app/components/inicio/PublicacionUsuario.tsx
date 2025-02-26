@@ -9,7 +9,7 @@ import { FiHeart, FiMoreHorizontal } from "react-icons/fi";
 // Modal toldo
 // import ModalOpciones from "./ModalOpciones";
 // Types/interface
-import ImageData from "@/app/types/types";
+import ImageData from "@/types/types";
 // Modal opciones de publicación
 import ModalOpcionesPublicacion from "../ModalOpcionesPublicacion";
 
