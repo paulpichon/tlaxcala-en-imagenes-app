@@ -351,7 +351,7 @@ li.nav-item{
   }
   /*Contenedor de pie de pagina index*/
   div.pie_pagina_index {
-      margin: 50px 0;
+    margin: 10px 0;
   }
 }
 
@@ -471,5 +471,9 @@ li.nav-item{
   /*span_tad TAD*/
   span.span_tad {
     font-size: 1.3rem;
+  }
+  /*Contenedor de pie de pagina index*/
+  div.pie_pagina_index {
+    margin: 50px 0;
   }
 }
