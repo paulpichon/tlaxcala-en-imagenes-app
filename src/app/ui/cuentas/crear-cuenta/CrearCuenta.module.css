@@ -13,7 +13,7 @@ h3.subtitulo_h3 {
 }
 /*contenedor_formulario*/
 div.contenedor_formulario{
-    text-align: center;
+    margin-top: 20px;
 }
 /* contenedor del input */
 div.contenedor_input {
@@ -103,8 +103,12 @@ a.enlace_iniciar_sesion:hover {
 @media (min-width: 992px) {
     /*Crear cuenta*/
     h3.subtitulo_h3 {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         margin: 0;
+    }
+    /*contenedor_formulario*/
+    div.contenedor_formulario{
+        margin-top: 0px;
     }
     /*Inputs*/
     input.inputs_crear_cuenta {
@@ -148,12 +152,12 @@ a.enlace_iniciar_sesion:hover {
     /*Crear cuenta*/
     h3.subtitulo_h3 {
         font-size: 1.8rem;
-        /* margin: 10px 0; */
+        margin-top: 15px;
     }
     /*Inputs*/
     input.inputs_crear_cuenta {
         font-size: 1.3rem;
-        margin: 25px 0;
+        /* margin: 25px 0; */
     }
     /*Boton registrarse*/
     button.boton_registrarse {
