@@ -5,7 +5,7 @@ import { useState } from "react";
 // Module CSS
 import perfil from "../../ui/perfil/perfil.module.css";
 // Types/interface
-import ImageData from "@/types/types";
+import {ImageData} from "@/types/types";
 // Image NEXTJS
 import Image from "next/image";
 // Modal de imagen
