@@ -5,6 +5,8 @@
  **/
 // Link nextjs
 import Link from "next/link";
+// para redireccionar a otra pagina
+import { useRouter } from "next/navigation";
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
@@ -19,9 +21,8 @@ import { createUsuario } from '@/lib/actions';
 import { FormEvent, useState } from 'react';
 // interface
 import { IUsuarioData } from "@/types/types";
-// Handle change
+// Handle change, persistencia de datos en los campos
 import handleChange from "@/utils/handleChange";
-import { useRouter } from "next/navigation";
 
 export default function CrearCuenta() {
 	const router = useRouter();
