@@ -18,7 +18,7 @@ export async function createUsuario( formData: IUsuarioData) {
         "password": password
     });
     // Fetch a la API
-    const response = await fetch("https://login-autenticacion.onrender.com/api/usuarios", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios`, {
         method: "POST",
         headers: myHeaders,
         body: raw,
