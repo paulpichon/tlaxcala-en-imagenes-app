@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
-import crearCuenta from "../../ui/cuentas/crear-cuenta/crearCuenta.module.css";
+import crearCuenta from "../../ui/cuentas/crear-cuenta/crearcuenta.module.css";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer principal
