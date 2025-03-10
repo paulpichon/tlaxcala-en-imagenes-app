@@ -108,6 +108,7 @@ export default function CrearCuenta() {
 												placeholder="Nombre" 
 												value={formData.nombre}
 												onChange={ e => handleChange(e, setFormData, formData) } 
+												required
 											/>
 										</div>
 									</div>
@@ -122,6 +123,7 @@ export default function CrearCuenta() {
 												placeholder="Apellido"
 												value={formData.apellido}
 												onChange={ e => handleChange(e, setFormData, formData)  } 
+												required
 											/>
 										</div>
 									</div>
@@ -135,6 +137,7 @@ export default function CrearCuenta() {
 										placeholder="Correo electrónico"
 										value={formData.correo}
 										onChange={ e => handleChange(e, setFormData, formData)  } 
+										required
 									/>
 								</div>
 								<div className={`${crearCuenta.contenedor_input}`}>
@@ -146,6 +149,7 @@ export default function CrearCuenta() {
 										placeholder="Contraseña"
 										value={formData.password}
 										onChange={ e => handleChange(e, setFormData, formData)  } 
+										required
 									/>
 								</div>
 								<button 
