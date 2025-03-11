@@ -17,7 +17,7 @@ import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 import FooterMain from "../../components/FooterMain";
 // Funcion para Crear usuario
 import { createUsuario } from '@/lib/actions';
-// UseState
+// UseState, formEvent
 import { FormEvent, useState } from 'react';
 // interface
 import { IUsuarioData } from "@/types/types";
@@ -28,7 +28,7 @@ export default function CrearCuenta() {
 	const router = useRouter();
 	// Estado de envio del formulario
 	const [isLoading, setIsLoading ] = useState<boolean>(false);
-	// Manejo de error al enviar el formulario
+	// Manejo de error dentro de la pagina: no maneja errores de validacion
 	const [ error, setError ] = useState<string | null>(null);
 
 	// Funcion para enviar el formulario
@@ -38,7 +38,7 @@ export default function CrearCuenta() {
 		correo: '',
 		password: '',
 	});
-
+	
 	// Manejo del envio del formulario
 	const handleSubmit = async ( event: FormEvent<HTMLFormElement>) => {
 		
@@ -108,7 +108,7 @@ export default function CrearCuenta() {
 												placeholder="Nombre" 
 												value={formData.nombre}
 												onChange={ e => handleChange(e, setFormData, formData) } 
-												required
+												
 											/>
 										</div>
 									</div>
@@ -123,7 +123,7 @@ export default function CrearCuenta() {
 												placeholder="Apellido"
 												value={formData.apellido}
 												onChange={ e => handleChange(e, setFormData, formData)  } 
-												required
+												
 											/>
 										</div>
 									</div>
@@ -137,7 +137,7 @@ export default function CrearCuenta() {
 										placeholder="Correo electrónico"
 										value={formData.correo}
 										onChange={ e => handleChange(e, setFormData, formData)  } 
-										required
+										
 									/>
 								</div>
 								<div className={`${crearCuenta.contenedor_input}`}>
@@ -149,7 +149,7 @@ export default function CrearCuenta() {
 										placeholder="Contraseña"
 										value={formData.password}
 										onChange={ e => handleChange(e, setFormData, formData)  } 
-										required
+										
 									/>
 								</div>
 								<button 
