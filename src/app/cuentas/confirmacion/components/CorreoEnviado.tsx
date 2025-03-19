@@ -1,9 +1,9 @@
 // components/DynamicComponent.jsx
 'use client';
 // Reqact, useState
-import React, { useState } from "react";// Link nextjs
+import React, { useEffect, useState } from "react";// Link nextjs
 // usePathName
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 // estilos de la pagina son iguales para correo-enviado y para correo-enviado.restablecer-password
 import estilosCorreoEnviado from "../../../ui/cuentas/confirmacion/correo-enviado/CorreoEnviado.module.css";
 // Header principal
@@ -12,6 +12,10 @@ import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 import FooterMain from "@/app/components/FooterMain";
 
 export default function CorreoEnviado() {
+  // validar session storage
+  const router = useRouter();
+  // validar si hay token
+  const [isValid, setIsValid] = useState(false);
   // Modal
   const [showModal, setShowModal] = useState(false);
   const openModal = () => setShowModal(true);
@@ -19,6 +23,26 @@ export default function CorreoEnviado() {
   // URL usePathname
   const pathname = usePathname();
 
+  // Validar session storage
+  useEffect(() => {
+    // Solo aplicamos la lógica de sessionStorage para la ruta '/cuentas/confirmacion/correo-enviado'
+    if (pathname === '/cuentas/confirmacion/correo-enviado') {
+      const token = sessionStorage.getItem('registroToken');
+      if (!token) {
+        router.replace('/'); // Redirige si no hay token
+      } else {
+        setIsValid(true);
+      }
+    } else {
+      // Si es otra ruta, no hacemos nada y permitimos el acceso normalmente
+      setIsValid(true);
+    }
+  }, [pathname, router]);
+
+  if (!isValid) return null; // No muestra nada hasta que se valide
+
+
+  // contenido del correo enviado
   let content;
   switch (pathname) {
     case '/cuentas/confirmacion/correo-enviado':
@@ -38,6 +62,7 @@ export default function CorreoEnviado() {
       );
       break;
     default:
+      router.replace('/'); // Redirige si la URL no es válida
   }
   // Retornar el componente
   return (

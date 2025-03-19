@@ -113,7 +113,9 @@ export function FormularioRegistro() {
 			const resultado = await createUsuario(formData);
 			// validar que fue un registro exitoso
 			if (resultado.status === 200) {
-				// console.log(resultado.token, 'respuesta 1');
+				console.log(resultado.token, 'token');
+				// Creamos una sessionstorage para guardar el token
+				sessionStorage.setItem('registroToken', resultado.token);
 				// Redireccionar a pagina de registro exitoso
 				router.push(`/cuentas/confirmacion/correo-enviado`);
 			} else {
