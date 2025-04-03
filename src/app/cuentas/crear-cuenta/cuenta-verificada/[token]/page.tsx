@@ -1,8 +1,8 @@
 // Página cuenta verificada
-"use client";
+// "use client";
 // Use effect, use state
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+// import { useEffect, useState } from "react";
+// import { useRouter, useSearchParams } from "next/navigation";
 
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
@@ -13,51 +13,69 @@ import "bootstrap/dist/css/bootstrap.css";
 // Footer principal
 // import FooterPrincipal from "@/app/components/FooterMain";
 
-const CuentaVerificada: React.FC = () => {
 
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const token = searchParams.get("token");
+export default async function CuentaVerificada ({ 
+    params
+ }: { 
+    params: Promise<{ token: string }> 
+}) {
 
-    const [mensaje, setMensaje] = useState<string>("Verificando...");
-    const [error, setError] = useState<boolean>(false);
+    // const router = useRouter();
+    // const searchParams = useSearchParams();
+    // const token = searchParams.get("token");
 
+    // const [mensaje, setMensaje] = useState<string>("Verificando...");
+    // const [error, setError] = useState<boolean>(false);
+    // console.log(token);
+    
 
-    useEffect(() => {
-        if (!token) return; // Esperar a que Next.js obtenga el token
+    // useEffect(() => {
+    //     if (!token) return; // Esperar a que Next.js obtenga el token
 
-        const verificarToken = async () => {
-            try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/verificar-correo/${token}`);
-                console.log(response);
+    //     const verificarToken = async () => {
+    //         try {
+    //             const response = await fetch(`https://login-autenticacion.onrender.com/api/auth/verificar-correo/${token}`);
+    //             console.log(response, "respuesta");
                 
-                const data: { ok: boolean; msg: string } = await response.json();
+    //             const data: { ok: boolean; msg: string } = await response.json();
 
-                if (data.ok) {
-                    setMensaje("¡Correo verificado con éxito! 🎉");
-                    setTimeout(() => router.push("/login"), 3000);
-                } else {
-                    setMensaje("El token no es válido o ha expirado.");
-                    setError(true);
-                }
-            } catch (err) {
-                console.log(err);
+    //             if (data.ok) {
+    //                 setMensaje("¡Correo verificado con éxito! 🎉");
+    //                 setTimeout(() => router.push("/cuentas/crear-cuenta"), 3000);
+    //             } else {
+    //                 setMensaje("El token no es válido o ha expirado.");
+    //                 setError(true);
+    //             }
+    //         } catch (err) {
+    //             console.log(err);
                 
-                setMensaje("Hubo un error al verificar el correo.");
-                setError(true);
-            }
-        };
+    //             setMensaje("Hubo un error al verificar el correo.");
+    //             setError(true);
+    //         }
+    //     };
 
-        verificarToken();
-    }, [token, router]);
+    //     verificarToken();
+    // }, [token, router]);
 
+    const { token } = await params;
+
+    // Verificamos el token con una API
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/verificar-correo/${token}`);
+    const data = await response.json();
 
   return (
-        <div className="flex flex-col items-center justify-center h-screen">
-            <h2 className={`text-xl ${error ? "text-red-500" : "text-green-500"}`}>
-                {mensaje}
-            </h2>
+        <div>
+            {data.success ? (
+                <p>Correo verificado correctamente ✅</p>
+            ) : (
+                <p>Error al verificar el correo ❌</p>
+            )}
         </div>
+        // <div className="flex flex-col items-center justify-center h-screen">
+        //     <h2 className={`text-xl ${error ? "text-red-500" : "text-green-500"}`}>
+        //         {mensaje}
+        //     </h2>
+        // </div>
         // <div className="container-fluid container-xl">
         //     <div className="row justify-content-center contenedor_principal">
         //         {/* Header */}
@@ -78,6 +96,3 @@ const CuentaVerificada: React.FC = () => {
         // </div> 
     );
 }
-
-// export
-export default CuentaVerificada;
