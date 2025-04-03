@@ -7,7 +7,7 @@
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // estilos de la pagina
-import cuentaVerificada from "../../../ui/cuentas/crear-cuenta/cuenta-verificada/CuentaVerificada.module.css";
+import cuentaVerificada from "../../../../ui/cuentas/crear-cuenta/cuenta-verificada/CuentaVerificada.module.css";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer principal
