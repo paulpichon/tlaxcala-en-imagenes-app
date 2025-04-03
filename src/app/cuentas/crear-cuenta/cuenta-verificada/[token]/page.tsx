@@ -28,7 +28,7 @@ const CuentaVerificada: React.FC = () => {
 
         const verificarToken = async () => {
             try {
-                const response = await fetch(`/api/verificar/${token}`);
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/verificar-correo/${token}`);
                 console.log(response);
                 
                 const data: { ok: boolean; msg: string } = await response.json();
