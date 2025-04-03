@@ -1,8 +1,8 @@
 // Página cuenta verificada
+"use client";
 // Use effect, use state
 import { useEffect, useState } from "react";
-// Link nextjs
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
@@ -16,23 +16,26 @@ import "bootstrap/dist/css/bootstrap.css";
 const CuentaVerificada: React.FC = () => {
 
     const router = useRouter();
-    const { token } = router.query;
+    const searchParams = useSearchParams();
+    const token = searchParams.get("token");
 
     const [mensaje, setMensaje] = useState<string>("Verificando...");
     const [error, setError] = useState<boolean>(false);
 
 
     useEffect(() => {
-        if (!token || typeof token !== "string") return; // Esperar a que Next.js cargue el token y validar tipo
+        if (!token) return; // Esperar a que Next.js obtenga el token
 
         const verificarToken = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/verificar-correo/${token}`);
+                const response = await fetch(`/api/verificar/${token}`);
+                console.log(response);
+                
                 const data: { ok: boolean; msg: string } = await response.json();
 
                 if (data.ok) {
                     setMensaje("¡Correo verificado con éxito! 🎉");
-                    setTimeout(() => router.push("/cuentas/crear-cuenta/cuenta-verificada"), 3000);
+                    setTimeout(() => router.push("/login"), 3000);
                 } else {
                     setMensaje("El token no es válido o ha expirado.");
                     setError(true);
