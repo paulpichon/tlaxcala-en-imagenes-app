@@ -65,7 +65,7 @@ export default async function CuentaVerificada ({
 
   return (
         <div>
-            {data.success ? (
+            {data.ok ? (
                 <p>Correo verificado correctamente ✅</p>
             ) : (
                 <p>Error al verificar el correo ❌</p>
