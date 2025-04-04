@@ -9,13 +9,14 @@ import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 import FooterPrincipal from "@/app/components/FooterMain";
 
 export default async function CuentaVerificada ({ 
+    // params ya es un objeto que Next.js pasa automáticamente, no una promesa.
     params
  }: { 
-    params: Promise<{ token: string }> 
+    params: { token: string } 
 }) {
     try {
         // Obtenemos el token de la URL
-        const { token } = await params;
+        const { token } = params;
 
         // Verificamos el token con una API
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/verificar-correo/${token}`, {
