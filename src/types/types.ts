@@ -40,4 +40,14 @@ export interface ImageData {
     title: string;
     description: string;
 }
-
+// Interface props para el reenvio de correo electronico
+export interface ModalReenviarCorreoProps {
+  show: boolean;
+  onClose: () => void;
+  onReenviar: () => void;
+  estilos: { [key: string]: string };
+  mensaje?: string | null;
+  esExito?: boolean | null;
+  bloqueado?: boolean;
+  cuentaVerificada?: boolean;
+}
