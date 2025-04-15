@@ -6,6 +6,8 @@ import React, { useEffect, useState } from "react";// Link nextjs
 import { usePathname, useRouter } from 'next/navigation';
 // estilos de la pagina son iguales para correo-enviado y para correo-enviado.restablecer-password
 import estilosCorreoEnviado from "../../../ui/cuentas/confirmacion/correo-enviado/CorreoEnviado.module.css";
+// Reenviar correo
+import ModalReenviarCorreo from "./ModalReenviarCorreo";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer
@@ -14,14 +16,47 @@ import FooterMain from "@/app/components/FooterMain";
 export default function CorreoEnviado() {
   // validar session storage
   const router = useRouter();
+  // URL usePathname
+  const pathname = usePathname();
   // validar si hay token
   const [isValid, setIsValid] = useState(false);
   // Modal
   const [showModal, setShowModal] = useState(false);
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
-  // URL usePathname
-  const pathname = usePathname();
+  // Mensajes
+  const [mensajeReenvio, setMensajeReenvio] = useState<string | null>(null);
+  const [esExito, setEsExito] = useState<boolean | null>(null);
+  // bloquear el reenvio boton
+  const [bloqueado, setBloqueado] = useState(false);
+  // Quitar boton si status === 400
+  const [cuentaVerificada, setCuentaVerificada] = useState(false);
+
+  useEffect(() => {
+    const tiempoGuardado = localStorage.getItem("bloqueoReenvioCorreo");
+    if (tiempoGuardado) {
+      const tiempoRestante = parseInt(tiempoGuardado) - Date.now();
+      if (tiempoRestante > 0) {
+        setBloqueado(true);
+        setTimeout(() => {
+          setBloqueado(false);
+          localStorage.removeItem("bloqueoReenvioCorreo");
+        }, tiempoRestante);
+      }
+    }
+  }, []);
+  // bloquear el boton de reenvio
+  const iniciarBloqueo = () => {
+    const tiempoDesbloqueo = Date.now() + 5 * 60 * 1000; // 5 minutos desde ahora
+    localStorage.setItem("bloqueoReenvioCorreo", tiempoDesbloqueo.toString());
+    setBloqueado(true);
+  
+    setTimeout(() => {
+      setBloqueado(false);
+      localStorage.removeItem("bloqueoReenvioCorreo");
+    }, 5 * 60 * 1000); // 5 minutos
+  }; 
+
 
   // Validar session storage
   useEffect(() => {
@@ -38,6 +73,51 @@ export default function CorreoEnviado() {
       setIsValid(true);
     }
   }, [pathname, router]);
+
+  
+  // Funcion fetch API
+  const reenviarCorreo = async () => {
+    const token = sessionStorage.getItem('registroToken');
+    if (!token) return;
+
+    try {
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      const body = JSON.stringify({
+        token,
+      });
+      const response = await fetch("http://localhost:5000/api/auth/reenviar-correo", {
+        method: "POST",
+        headers,
+        body,
+        redirect: "follow",
+      });
+      const data = await response.json();
+      if (!response.ok) { 
+          if (data.status === 400 && data.msg === 'Cuenta ya verificada') {
+            setCuentaVerificada(true);
+            setMensajeReenvio("Esta cuenta ya ha sido verificada.");
+            setEsExito(false);
+            return;
+          }
+          setEsExito(false);
+          // setMensajeReenvio(data.msg || 'Error al reenviar el correo');
+          iniciarBloqueo();
+      }else {
+        setEsExito(true);
+        setMensajeReenvio('Correo reenviado con éxito');
+        iniciarBloqueo(); // <- aquí bloqueas si fue exitoso
+      }
+  
+      // setMensaje("Correo reenviado con éxito.");
+
+    } catch (error) {
+      setEsExito(false);
+      setMensajeReenvio('Error de red al reenviar el correo');
+      console.error(error);
+    }
+  };
 
   if (!isValid) return null; // No muestra nada hasta que se valide
 
@@ -84,29 +164,16 @@ export default function CorreoEnviado() {
       <FooterMain />
                 
       {/* MODAL */}
-      {showModal && (
-          <div
-          className={`modal fade ${showModal ? "show" : ""}`}
-            tabIndex={-1}
-            style={{
-              display: showModal ? "block" : "none",
-              backgroundColor: "rgba(0,0,0,0.5)",
-            }}
-            role="dialog"
-          >
-            <div className="modal-dialog modal-dialog-centered">
-                <div className="modal-content">
-                    <div className="modal-header">
-                    <h1 className="modal-title fs-5" id="exampleModalLabel">¿No recibiste el correo electrónico?</h1>
-                    <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" onClick={closeModal}></button>
-                    </div>
-                    <div className="modal-body">
-                        <button id="reenviar_correo" className={`${estilosCorreoEnviado.boton_reenviar_correo}`}>Reenviar correo electrónico</button>
-                    </div>
-                </div>
-            </div>
-          </div>
-      )}
+      <ModalReenviarCorreo
+        show={showModal}
+        onClose={closeModal}
+        onReenviar={reenviarCorreo}
+        estilos={estilosCorreoEnviado}
+        mensaje={mensajeReenvio}
+        esExito={esExito}
+        bloqueado={bloqueado}
+        cuentaVerificada={cuentaVerificada}
+      />
     </>
   );
 };
