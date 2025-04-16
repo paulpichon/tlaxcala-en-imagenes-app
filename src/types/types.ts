@@ -51,3 +51,9 @@ export interface ModalReenviarCorreoProps {
   bloqueado?: boolean;
   cuentaVerificada?: boolean;
 }
+// Interface para ReenviarCorreoResponse
+export interface ReenviarCorreoResponse {
+  mensaje?: string; //El mensaje de la respuesta, es unicamente opcional en el return de (!response.ok)
+  esExito: boolean;
+  cuentaVerificada: boolean;
+}
