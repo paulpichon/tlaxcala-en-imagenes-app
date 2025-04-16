@@ -9,6 +9,8 @@ import "bootstrap/dist/css/bootstrap.css";
 import login from "../../ui/cuentas/login/login.module.css";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
+// Formulario de registro
+import FormularioLogin from "./components/FormularioLogin";
 // Footer principal
 import FooterMain from "../../components/FooterMain";
 
@@ -34,15 +36,8 @@ export default function IniciarSesion() {
 							<h3 className={`${login.subtitulo_h3}`}>Iniciar sesión</h3>
 						</div>
 						<div className={`${login.contenedor_formulario}`}>
-							<form className="formulario_crear_cuenta" id="iniciar_sesion">
-								<div className={`${login.contenedor_inputs_login}`}>
-								  <input type="text" className={`form-control ${login.inputs_crear_cuenta}`} id="correo" aria-describedby="correo" placeholder="Correo electrónico" />
-								</div>
-								<div className={`${login.contenedor_inputs_login}`}>
-								  <input type="password" className={`form-control ${login.inputs_crear_cuenta}`} id="password" placeholder="Contraseña" />
-								</div>
-								<button type="submit" className={`${login.boton_registrarse}`}>Iniciar sesión</button>
-							</form>
+							{/* Componente Formualrio del Login */}
+							<FormularioLogin/>
                             <div className="cool-md-12 text-center">
                                 <p className={`${login.pregunta}`}>
                                     <Link href="/cuentas/login/password-olvidado" className={`${login.enlace_recuperar_password}`}>
