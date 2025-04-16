@@ -12,6 +12,8 @@ import ModalReenviarCorreo from "./ModalReenviarCorreo";
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer
 import FooterMain from "@/app/components/FooterMain";
+// *********PRUEBA DE REENVIAR CORREO********* 
+import { reenviarCorreo } from "@/lib/actions";
 
 export default function CorreoEnviado() {
   // validar session storage
@@ -74,48 +76,20 @@ export default function CorreoEnviado() {
     }
   }, [pathname, router]);
 
-  
-  // Funcion fetch API
-  const reenviarCorreo = async () => {
-    const token = sessionStorage.getItem('registroToken');
+
+  // prueba de reenviar correo separacion
+  const handleReenviarCorreo = async () => {
+    const token = sessionStorage.getItem("registroToken");
     if (!token) return;
-
-    try {
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-      };
-      const body = JSON.stringify({
-        token,
-      });
-      const response = await fetch("http://localhost:5000/api/auth/reenviar-correo", {
-        method: "POST",
-        headers,
-        body,
-        redirect: "follow",
-      });
-      const data = await response.json();
-      if (!response.ok) { 
-          if (data.status === 400 && data.msg === 'Cuenta ya verificada') {
-            setCuentaVerificada(true);
-            setMensajeReenvio("Esta cuenta ya ha sido verificada.");
-            setEsExito(false);
-            return;
-          }
-          setEsExito(false);
-          // setMensajeReenvio(data.msg || 'Error al reenviar el correo');
-          iniciarBloqueo();
-      }else {
-        setEsExito(true);
-        setMensajeReenvio('Correo reenviado con éxito');
-        iniciarBloqueo(); // <- aquí bloqueas si fue exitoso
-      }
+    
+    const resultado = await reenviarCorreo(token);
+    
+    setMensajeReenvio(resultado.mensaje ? resultado.mensaje : null);
+    setEsExito(resultado.esExito);
+    setCuentaVerificada(resultado.cuentaVerificada);
   
-      // setMensaje("Correo reenviado con éxito.");
-
-    } catch (error) {
-      setEsExito(false);
-      setMensajeReenvio('Error de red al reenviar el correo');
-      console.error(error);
+    if (resultado.esExito || (!resultado.cuentaVerificada && !resultado.esExito)) {
+      iniciarBloqueo();
     }
   };
 
@@ -167,7 +141,8 @@ export default function CorreoEnviado() {
       <ModalReenviarCorreo
         show={showModal}
         onClose={closeModal}
-        onReenviar={reenviarCorreo}
+        // onReenviar={reenviarCorreo}
+        onReenviar={handleReenviarCorreo}
         estilos={estilosCorreoEnviado}
         mensaje={mensajeReenvio}
         esExito={esExito}
