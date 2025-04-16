@@ -6,14 +6,15 @@ import React, { useEffect, useState } from "react";// Link nextjs
 import { usePathname, useRouter } from 'next/navigation';
 // estilos de la pagina son iguales para correo-enviado y para correo-enviado.restablecer-password
 import estilosCorreoEnviado from "../../../ui/cuentas/confirmacion/correo-enviado/CorreoEnviado.module.css";
-// Reenviar correo
+// Modal Reenviar correo
 import ModalReenviarCorreo from "./ModalReenviarCorreo";
+// Funcion reenvio de correo electronico API
+import { reenviarCorreo } from "@/lib/actions";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer
 import FooterMain from "@/app/components/FooterMain";
-// *********PRUEBA DE REENVIAR CORREO********* 
-import { reenviarCorreo } from "@/lib/actions";
+
 
 export default function CorreoEnviado() {
   // validar session storage
@@ -33,7 +34,7 @@ export default function CorreoEnviado() {
   const [bloqueado, setBloqueado] = useState(false);
   // Quitar boton si status === 400
   const [cuentaVerificada, setCuentaVerificada] = useState(false);
-
+  // useEffect para verificar el tiempo de bloqueo al cargar el componente
   useEffect(() => {
     const tiempoGuardado = localStorage.getItem("bloqueoReenvioCorreo");
     if (tiempoGuardado) {
@@ -64,6 +65,7 @@ export default function CorreoEnviado() {
   useEffect(() => {
     // Solo aplicamos la lógica de sessionStorage para la ruta '/cuentas/confirmacion/correo-enviado'
     if (pathname === '/cuentas/confirmacion/correo-enviado') {
+      // Obtener TOKEN de sessionstorage
       const token = sessionStorage.getItem('registroToken');
       if (!token) {
         router.replace('/'); // Redirige si no hay token
@@ -77,25 +79,25 @@ export default function CorreoEnviado() {
   }, [pathname, router]);
 
 
-  // prueba de reenviar correo separacion
+  // Handle reenvio de correo electronico
   const handleReenviarCorreo = async () => {
+    // Obtener token de sessionstorgae
     const token = sessionStorage.getItem("registroToken");
+    // Si no hay token, redirigimos a la pagina de inicio
     if (!token) return;
-    
+    // obtener la respuesta de reenviaCorreo
     const resultado = await reenviarCorreo(token);
     
     setMensajeReenvio(resultado.mensaje ? resultado.mensaje : null);
     setEsExito(resultado.esExito);
     setCuentaVerificada(resultado.cuentaVerificada);
-  
+    // Bloquear el boton de reenvio
     if (resultado.esExito || (!resultado.cuentaVerificada && !resultado.esExito)) {
       iniciarBloqueo();
     }
   };
-
-  if (!isValid) return null; // No muestra nada hasta que se valide
-
-
+  // No muestra nada hasta que se valide
+  if (!isValid) return null; 
   // contenido del correo enviado
   let content;
   switch (pathname) {
@@ -123,7 +125,6 @@ export default function CorreoEnviado() {
     <>
     {/* Hear principal */}
       <HeaderPrincipalTei />
-      
       <div className="col-sm-9 col-md-7 col-lg-6">
           <div className={`${estilosCorreoEnviado.contenedor_formulario} d-block`}>
               <div className={`${estilosCorreoEnviado.contenedor_titulos}`}>
