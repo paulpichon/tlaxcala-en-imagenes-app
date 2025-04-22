@@ -1,16 +1,118 @@
+'use client';
 // Estilos de pagina
 import login from "../../../ui/cuentas/login/login.module.css";
 
+import { useState } from 'react';
+import { z } from 'zod';
+
+const schema = z.object({
+    correo: z.string().email('Correo inválido'),
+    password: z.string().min(1, 'La contraseña es obligatoria'),
+});
+
 export default function FormularioLogin() {
+
+    const [formData, setFormData] = useState({ correo: '', password: '' });
+    const [errors, setErrors] = useState<{ correo?: string; password?: string }>({});
+    const [serverError, setServerError] = useState('');
+    const [loading, setLoading] = useState(false);
+  
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData({ ...formData, [e.target.id]: e.target.value });
+      setErrors({ ...errors, [e.target.id]: '' });
+    };
+  
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setServerError('');
+      
+      const result = schema.safeParse(formData);
+  
+      if (!result.success) {
+        const formErrors: typeof errors = {};
+        result.error.errors.forEach((err) => {
+          if (err.path[0]) {
+            formErrors[err.path[0] as keyof typeof errors] = err.message;
+          }
+        });
+        setErrors(formErrors);
+        return;
+      }
+  
+      try {
+        setLoading(true);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+  
+        const data = await res.json();
+        // Manejo de errores de la API
+        if (!res.ok) {
+            // No existe correo en la BD
+            if ( data.status === 401 && data.msg === 'Correo no existe') {
+              setServerError('Correo o contraseña incorrectos.');
+              return;  
+            }
+            // Contraseña incorrecta
+            if ( data.status === 401 && data.msg === 'Password incorrecto') {
+              setServerError('Correo o contraseña incorrectos.');
+              return;
+            }
+            // Cuenta no verificada
+            if (data.status === 403 && data.msg === 'Cuenta no verificada') {
+              setServerError('La cuenta no ha sido verificada, revisa tu correo.');
+              return;
+            }
+            // Cuenta no activada/bloqueada
+            if ( data.status === 403 && data.msg === 'Cuenta no activada') {
+              setServerError('Esta cuenta no está disponible. Contacta a soporte para más información.');
+              return;
+            }
+        }
+  
+        // Aquí iría la lógica para guardar la sesión (ver más abajo)
+        console.log('Usuario autenticado:', data);
+  
+      } catch (error) {
+          console.log(error);
+        
+          setServerError('Error en el servidor');
+      }   finally {
+          setLoading(false);
+      }
+    };
+    
     return (
-        <form className="formulario_crear_cuenta" id="iniciar_sesion">
+        <form className="formulario_crear_cuenta" onSubmit={handleSubmit} noValidate>
             <div className={`${login.contenedor_inputs_login}`}>
-                <input type="text" className={`form-control ${login.inputs_crear_cuenta}`} id="correo" aria-describedby="correo" placeholder="Correo electrónico" />
+                <input 
+                    type="text" 
+                    className={`form-control ${login.inputs_crear_cuenta} ${errors.correo ? 'is-invalid' : ''}`} 
+                    id="correo" 
+                    aria-describedby="correo" 
+                    placeholder="Correo electrónico" 
+                    value={formData.correo}
+                    onChange={handleChange}
+                />
+                {errors.correo && <div className="invalid-feedback">{errors.correo}</div>}
             </div>
             <div className={`${login.contenedor_inputs_login}`}>
-                <input type="password" className={`form-control ${login.inputs_crear_cuenta}`} id="password" placeholder="Contraseña" />
+                <input 
+                    type="password" 
+                    className={`form-control ${login.inputs_crear_cuenta} ${errors.password ? 'is-invalid' : ''}`} 
+                    id="password" 
+                    placeholder="Contraseña" 
+                    value={formData.password}
+                    onChange={handleChange}
+                />
+                {errors.password && <div className="invalid-feedback">{errors.password}</div>}
             </div>
-            <button type="submit" className={`${login.boton_registrarse}`}>Iniciar sesión</button>
+            {serverError && <div className="alert alert-danger">{serverError}</div>}
+            <button type="submit" className={`${login.boton_registrarse}`} disabled={loading}>
+                {loading ? 'Iniciando...' : 'Iniciar sesión'}
+            </button>
         </form>
     );
 }
