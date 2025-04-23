@@ -4,13 +4,28 @@ import {    IUsuarioData,  // interface para tipo de datos de formulario de regi
             ReenviarCorreoResponse  // Interface para el reenvio de correo electronico
 } from "@/types/types";
 
+
+//Headers 
+const myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
+
+// requests options
+// Al usar requestOptions, no es necesario definir el tipo de datos
+// ya que el fetch lo infiere automáticamente: RequestInit
+let requestOptions: RequestInit;
+function funcionRequestOptions(raw: BodyInit) {
+    requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: raw,
+        redirect: "follow",
+    };
+}
+
 // Esta funcion se encarga de crear el usuario en la base de datos
 export async function createUsuario( formData: IUsuarioData) {
     // desestructuracion de formData
     const {nombre, apellido, correo, password} = formData;
-    // headers
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
     // creamos el raw
     const raw = JSON.stringify({
         "nombre_completo": {
@@ -20,13 +35,8 @@ export async function createUsuario( formData: IUsuarioData) {
         "correo": correo,
         "password": password
     });
-    // requests options
-    const requestOptions: RequestInit  = {
-        method: "POST",
-        headers: myHeaders,
-        body: raw,
-        redirect: "follow",
-    };
+    // Request options
+    funcionRequestOptions( raw );
     // Fetch a la API
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios`, requestOptions);
     // convertimos la respuesta en json
@@ -37,21 +47,12 @@ export async function createUsuario( formData: IUsuarioData) {
 // Esta funcion se encarga de reenviar el correo electronico al usuario
 export async function reenviarCorreo(token: string): Promise<ReenviarCorreoResponse> {
     try {
-        // Headers
-        const myHeaders: HeadersInit = {
-            "Content-Type": "application/json",
-        };
         // Convertir el token a JSON
         const raw = JSON.stringify({
             token,
         });
-        // requests options
-        const requestOptions: RequestInit  = {
-            method: "POST",
-            headers: myHeaders,
-            body: raw,
-            redirect: "follow",
-        };
+        // Request options
+        funcionRequestOptions( raw );
         // Cambiar la URL a la de producción
         // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/reenviar-correo`)
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/reenviar-correo`, requestOptions);
@@ -93,22 +94,12 @@ export async function reenviarCorreo(token: string): Promise<ReenviarCorreoRespo
 }
 // Funcion para enviar el correo con el link de restablecer el password
 export const envioCorreoRestablecerPassword = async (correo: string) => {
-    //Headers 
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
     // creamos el raw
     const raw = JSON.stringify({
         "correo": correo
     });
-    // requests options
-    // Al usar requestOptions, no es necesario definir el tipo de datos
-    // ya que el fetch lo infiere automáticamente: RequestInit
-    const requestOptions: RequestInit  = {
-        method: "POST",
-        headers: myHeaders,
-        body: raw,
-        redirect: "follow",
-    };
+    // Request options
+    funcionRequestOptions( raw );
     // debemos cambiar el url por el de la api: NEXT_PUBLIC_API_URL
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/cuentas/password-olvidado`, requestOptions);
     // Respuesta desde la API
