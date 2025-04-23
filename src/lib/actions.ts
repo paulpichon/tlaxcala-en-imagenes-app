@@ -20,12 +20,15 @@ export async function createUsuario( formData: IUsuarioData) {
         "correo": correo,
         "password": password
     });
-    // Fetch a la API
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios`, {
+    // requests options
+    const requestOptions: RequestInit  = {
         method: "POST",
         headers: myHeaders,
         body: raw,
-    });
+        redirect: "follow",
+    };
+    // Fetch a la API
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios`, requestOptions);
     // convertimos la respuesta en json
     const respuesta = await response.json();
     // retornamos la respuesta para obtener el JSON que viene desde la API
@@ -35,21 +38,23 @@ export async function createUsuario( formData: IUsuarioData) {
 export async function reenviarCorreo(token: string): Promise<ReenviarCorreoResponse> {
     try {
         // Headers
-        const headers: HeadersInit = {
+        const myHeaders: HeadersInit = {
             "Content-Type": "application/json",
         };
         // Convertir el token a JSON
-        const body = JSON.stringify({
+        const raw = JSON.stringify({
             token,
         });
+        // requests options
+        const requestOptions: RequestInit  = {
+            method: "POST",
+            headers: myHeaders,
+            body: raw,
+            redirect: "follow",
+        };
         // Cambiar la URL a la de producción
         // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/reenviar-correo`)
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/reenviar-correo`, {
-            method: "POST",
-            headers,
-            body,
-            redirect: "follow",
-        });
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/reenviar-correo`, requestOptions);
         // Resultado de la respuesta
         const data = await response.json();
         // Si la respuesta no es ok, retornamos el mensaje de error
@@ -85,4 +90,29 @@ export async function reenviarCorreo(token: string): Promise<ReenviarCorreoRespo
             cuentaVerificada: false,
         };
     }
+}
+// Funcion para enviar el correo con el link de restablecer el password
+export const envioCorreoRestablecerPassword = async (correo: string) => {
+    //Headers 
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    // creamos el raw
+    const raw = JSON.stringify({
+        "correo": correo
+    });
+    // requests options
+    // Al usar requestOptions, no es necesario definir el tipo de datos
+    // ya que el fetch lo infiere automáticamente: RequestInit
+    const requestOptions: RequestInit  = {
+        method: "POST",
+        headers: myHeaders,
+        body: raw,
+        redirect: "follow",
+    };
+    // debemos cambiar el url por el de la api: NEXT_PUBLIC_API_URL
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/cuentas/password-olvidado`, requestOptions);
+    // Respuesta desde la API
+    const data = await res.json();
+    // retornamos la respuesta
+    return data;
 }
