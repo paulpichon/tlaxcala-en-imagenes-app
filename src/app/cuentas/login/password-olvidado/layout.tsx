@@ -5,6 +5,17 @@
 import { Metadata } from "next";
 // Fonts
 import "../../../ui/fonts";
+// viewport
+import type { Viewport } from 'next';
+// Viewport meta tag for responsive design
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  // Also supported by less commonly used
+  // interactiveWidget: 'resizes-visual',
+}
 // metadatos
 export const metadata: Metadata = {
     title: "Tlaxcala En Imágenes | Olvidé la contraseña",
