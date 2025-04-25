@@ -62,7 +62,7 @@ export default function PasswordOlvidada() {
 	const iniciarContador = (segundos: number) => {
 		setBotonDeshabilitado(true);
 		setTiempoRestante(segundos);
-
+		// Guardar la fecha de la solicitud en localStorage
 		const interval = setInterval(() => {
 			setTiempoRestante((prev) => {
 				if (prev && prev > 1) {
@@ -86,7 +86,7 @@ export default function PasswordOlvidada() {
 		// Validacion de input de correo
 		setValidationError("");
 
-		// Validar el correo
+		// Validar el input del correo
 		const validation = correoSchema.safeParse({ correo });
 		if (!validation.success) {
 			setValidationError(validation.error.errors[0].message);
@@ -106,21 +106,27 @@ export default function PasswordOlvidada() {
 				// Redireccionar a pagina de registro exitoso
 				router.push(`/cuentas/confirmacion/correo-enviado-restablecer-password`);
 			} else {
+				// Si la respuesta es un error, mostrar el mensaje de error
 				if (
 					(data.status === 401 && data.msg === "Correo no existe") ||
 					(data.status === 403 && data.msg === "Cuenta no verificada") ||
-					(data.status === 403 && data.msg === "Cuenta no activada")
+					(data.status === 403 && data.msg === "Cuenta no activada") ||
+					(data.status === 429 && data.msg === "Espera 5 minutos antes de reenviar el correo")
 				) {
+					// Si el error es 401, 403 o 429, mostrar el mensaje de error
 					setError(data.msg === "Correo no existe"
 						? "La cuenta asociada a ese correo no existe."
 						: data.msg === "Cuenta no verificada"
 						? "La cuenta no ha sido verificada."
-						: "La cuenta está desactivada, contacta a soporte.");
-
+						: data.msg === "Cuenta no activada" 
+						? "La cuenta está desactivada, contacta a soporte."
+						: "Espera 5 minutos antes de poder reenviar el correo."
+						
+					);
+					// y guardar la fecha de la solicitud en localStorage
 					// ⚠️ Incluso si hubo error, empieza el contador
 					localStorage.setItem("lastPasswordRequest", Date.now().toString());
 					iniciarContador(FIVE_MINUTES_MS / 1000);
-
 					return;
 				}
 
