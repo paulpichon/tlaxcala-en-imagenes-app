@@ -13,13 +13,9 @@ import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 import FooterMain from "../../../components/FooterMain";
 // Funcion API para enviar el correo de restablecer password
 import { envioCorreoRestablecerPassword } from "@/lib/actions";
-// Validacion de input de correo
-import { z } from "zod";
+// Validacion de correo electronico desde usuarioschema usando un .pick()
+import { correoSchema } from "@/lib/validaciones";
 
-// Schema de validacion para el correo
-const correoSchema = z.object({
-	correo: z.string().email("Ingresa un correo válido"),
-});
 // Tiempo 5 minutos
 const FIVE_MINUTES_MS = 5 * 60 * 1000;
 
@@ -87,6 +83,7 @@ export default function PasswordOlvidada() {
 		setValidationError("");
 
 		// Validar el input del correo
+		// Usando el usarioSchema de mi archivo validaciones.ts
 		const validation = correoSchema.safeParse({ correo });
 		if (!validation.success) {
 			setValidationError(validation.error.errors[0].message);
