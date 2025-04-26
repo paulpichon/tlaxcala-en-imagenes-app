@@ -95,6 +95,7 @@ export default function PasswordOlvidada() {
 			// Consulta de la API para enviar el correo de restablecer password
 			const data = await envioCorreoRestablecerPassword( correo );
 			// Si la respuesta es correcta, creamos el TOKEN y redireccionar a la pagina de confirmacion
+			
 			if (data.status === 200) {
 				// crear token de sesion
 				sessionStorage.setItem('passForgetToken', data.token);
@@ -108,7 +109,7 @@ export default function PasswordOlvidada() {
 					(data.status === 401 && data.msg === "Correo no existe") ||
 					(data.status === 403 && data.msg === "Cuenta no verificada") ||
 					(data.status === 403 && data.msg === "Cuenta no activada") ||
-					(data.status === 429 && data.msg === "Espera 5 minutos antes de reenviar el correo")
+					(data.status === 429)
 				) {
 					// Si el error es 401, 403 o 429, mostrar el mensaje de error
 					setError(data.msg === "Correo no existe"
