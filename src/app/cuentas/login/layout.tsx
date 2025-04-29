@@ -6,11 +6,19 @@
 import { Metadata } from "next";
 // Fonts
 import "../../ui/fonts";
+// viewport
+import type { Viewport } from 'next';
 // metadatos
 export const metadata: Metadata = {
     title: "Tlaxcala En Imágenes | Iniciar sesión",
     description: "El lugar donde encuentras gente de Tlaxcala",
-  };
+};
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  }
 
 export default function RootLayout({
     children,
