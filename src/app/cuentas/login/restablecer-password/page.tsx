@@ -7,17 +7,6 @@ import restaPasssword from "../../../ui/cuentas/login/restablecer-password/Resta
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer principal
 import FooterMain from "../../../components/FooterMain";
-// viewport
-import type { Viewport } from 'next';
-
-export const viewport: Viewport = {
-	width: 'device-width',
-	initialScale: 1,
-	maximumScale: 1,
-	userScalable: false,
-	// Also supported by less commonly used
-	// interactiveWidget: 'resizes-visual',
-}
 
 export default function RestablecerPassword() {
 		return (

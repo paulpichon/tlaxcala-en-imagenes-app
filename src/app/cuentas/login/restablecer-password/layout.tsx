@@ -6,11 +6,21 @@
 import { Metadata } from "next";
 // Fonts
 import "../../../ui/fonts";
+// viewport
+import type { Viewport } from 'next';
+
 // metadatos
 export const metadata: Metadata = {
     title: "Tlaxcala En Imágenes | Restablecer contraseña",
     description: "Restablecer la contraseña, introducir nueva contraseña.",
-  };
+};
+// Viewport
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+}
 
 export default function RootLayout({
     children,
