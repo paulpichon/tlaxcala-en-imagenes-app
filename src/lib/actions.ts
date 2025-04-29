@@ -44,7 +44,7 @@ export async function createUsuario( formData: IUsuarioData) {
     // retornamos la respuesta para obtener el JSON que viene desde la API
     return respuesta;
 }
-// Esta funcion se encarga de reenviar el correo electronico al usuario
+// Esta funcion se encarga de reenviar el correo electronico al usuario cuando se registra en caso de ser necesario
 export async function reenviarCorreo(token: string): Promise<ReenviarCorreoResponse> {
     try {
         // Convertir el token a JSON
@@ -85,6 +85,77 @@ export async function reenviarCorreo(token: string): Promise<ReenviarCorreoRespo
     } catch (error) {
         // En caso de error, retornamos un mensaje de error genérico
         console.error(error);
+        return {
+            mensaje: "Error de red al reenviar el correo",
+            esExito: false,
+            cuentaVerificada: false,
+        };
+    }
+}
+// Esta funcion se encarga de reenviar el correo electronico al usuario cuando quiera restablecer su contraseña, el reenvio es en caso de ser necesario
+export async function reenviarCorreoRestablecerPassword(token: string): Promise<ReenviarCorreoResponse> {
+    try {
+        // Convertir el token a JSON
+        const raw = JSON.stringify({
+            token,
+        });
+        // Request options
+        funcionRequestOptions( raw );
+        // Cambiar la URL a la de producción
+        // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/reenviar-correo`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/reenviar-correo-restablecer-password`, requestOptions);
+        // Resultado de la respuesta   
+        const data = await response.json();
+        // Si la respuesta no es ok, retornamos el mensaje de error
+        // Dependiendo del error que venga desde la API
+        // Si el error es 400 y el mensaje es "Cuenta ya verificada", retornamos un mensaje diferente
+        if (!response.ok) {
+            // Correo no existe
+            if (data.status === 401 && data.msg === 'Correo no existe') {
+                return {
+                    mensaje: "El correo no esta asociado a ninguna cuenta.",
+                    esExito: false,
+                    cuentaVerificada: true,
+                };
+            }
+            // Cuenta no verificada
+            if (data.status === 403 && data.msg === 'Cuenta no verificada') {
+                return {
+                    mensaje: "Esta cuenta no ha sido verificada.",
+                    esExito: false,
+                    cuentaVerificada: true,
+                };
+            }
+            // Cuenta no activada
+            if (data.status === 403 && data.msg === 'Cuenta no activada') {
+                return {
+                    mensaje: "Esta cuenta esta desactivada, contactar a soporte.",
+                    esExito: false,
+                    cuentaVerificada: true,
+                };
+            }
+            // Esperar 5 minutos
+            if (data.status === 429) {
+                return {
+                    mensaje: "Espera 5 minutos para poder reenviar el correo.",
+                    esExito: false,
+                    cuentaVerificada: true,
+                };
+            }
+            return {
+                // mensaje: data.msg || "Error al reenviar el correo",
+                esExito: false,
+                cuentaVerificada: false,
+            };
+        }
+        // Si el correo fue reenviado correctamente, retornamos el mensaje de éxito
+        return {
+            mensaje: "Correo reenviado con éxito",
+            esExito: true,
+            cuentaVerificada: false,
+        };
+    }catch (error) {
+        console.log(error);
         return {
             mensaje: "Error de red al reenviar el correo",
             esExito: false,
