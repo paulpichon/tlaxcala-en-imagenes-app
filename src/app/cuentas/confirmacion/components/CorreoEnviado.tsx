@@ -9,7 +9,9 @@ import estilosCorreoEnviado from "../../../ui/cuentas/confirmacion/correo-enviad
 // Modal Reenviar correo
 import ModalReenviarCorreo from "./ModalReenviarCorreo";
 // Funcion reenvio de correo electronico API
-import { reenviarCorreo } from "@/lib/actions";
+// Funcion reenvio de correo electronico API. para restablecer contraseña
+import {  reenviarCorreo, 
+          reenviarCorreoRestablecerPassword } from "@/lib/actions";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer
@@ -72,6 +74,21 @@ export default function CorreoEnviado() {
       } else {
         setIsValid(true);
       }
+      // Correo para restablecer password
+    } else {
+      // Si es otra ruta, no hacemos nada y permitimos el acceso normalmente
+      setIsValid(true);
+    }
+
+    // Solo aplicamos la lógica de sessionStorage para la ruta '/cuentas/confirmacion/correo-enviado-restablecer-password'
+    if (pathname === '/cuentas/confirmacion/correo-enviado-restablecer-password') {
+      // Obtener TOKEN de sessionstorage
+      const token = sessionStorage.getItem('passForgetToken');
+      if (!token) {
+        router.replace('/'); // Redirige si no hay token
+      } else {
+        setIsValid(true);
+      }
     } else {
       // Si es otra ruta, no hacemos nada y permitimos el acceso normalmente
       setIsValid(true);
@@ -81,20 +98,42 @@ export default function CorreoEnviado() {
 
   // Handle reenvio de correo electronico
   const handleReenviarCorreo = async () => {
-    // Obtener token de sessionstorgae
-    const token = sessionStorage.getItem("registroToken");
-    // Si no hay token, redirigimos a la pagina de inicio
-    if (!token) return;
-    // obtener la respuesta de reenviaCorreo
-    const resultado = await reenviarCorreo(token);
-    
-    setMensajeReenvio(resultado.mensaje ? resultado.mensaje : null);
-    setEsExito(resultado.esExito);
-    setCuentaVerificada(resultado.cuentaVerificada);
-    // Bloquear el boton de reenvio
-    if (resultado.esExito || (!resultado.cuentaVerificada && !resultado.esExito)) {
-      iniciarBloqueo();
+
+    // Solo aplicamos la lógica de sessionStorage para la ruta '/cuentas/confirmacion/correo-enviado'
+    if (pathname === '/cuentas/confirmacion/correo-enviado') {
+      // Obtener token de sessionstorgae
+      const token = sessionStorage.getItem("registroToken");
+      // Si no hay token, redirigimos a la pagina de inicio
+      if (!token) return;
+      // obtener la respuesta de reenviaCorreo
+      const resultado = await reenviarCorreo(token);
+      
+      setMensajeReenvio(resultado.mensaje ? resultado.mensaje : null);
+      setEsExito(resultado.esExito);
+      setCuentaVerificada(resultado.cuentaVerificada);
+      // Bloquear el boton de reenvio
+      if (resultado.esExito || (!resultado.cuentaVerificada && !resultado.esExito)) {
+        iniciarBloqueo();
+      }
     }
+    
+    // Solo aplicamos la lógica de sessionStorage para la ruta '/cuentas/confirmacion/correo-enviado-restablecer-password'
+    if (pathname === '/cuentas/confirmacion/correo-enviado-restablecer-password') {
+      // Obtener token de sessionstorgae
+      const token = sessionStorage.getItem("passForgetToken");
+      // Si no hay token, redirigimos a la pagina de inicio
+      if (!token) return;
+      // obtener la respuesta de reenviaCorreo
+      const resultado = await reenviarCorreoRestablecerPassword(token);
+      
+      setMensajeReenvio(resultado.mensaje ? resultado.mensaje : null);
+      setEsExito(resultado.esExito);
+      setCuentaVerificada(resultado.cuentaVerificada);
+      // Bloquear el boton de reenvio
+      if (resultado.esExito || (!resultado.cuentaVerificada && !resultado.esExito)) {
+        iniciarBloqueo();
+      }
+    }    
   };
   // No muestra nada hasta que se valide
   if (!isValid) return null; 
@@ -142,7 +181,6 @@ export default function CorreoEnviado() {
       <ModalReenviarCorreo
         show={showModal}
         onClose={closeModal}
-        // onReenviar={reenviarCorreo}
         onReenviar={handleReenviarCorreo}
         estilos={estilosCorreoEnviado}
         mensaje={mensajeReenvio}
