@@ -6,10 +6,10 @@ import restaPasssword from "../../../ui/cuentas/login/restablecer-password/Resta
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer principal
-import FooterMain from "../../../components/FooterMain";
+import FooterMain from "../../../../components/FooterMain";
 
 export default function RestablecerPassword() {
-		return (
+	return (
 		<div className="container-fluid container-xl">
 			<div className="row justify-content-center contenedor_principal">
 				<HeaderPrincipalTei />
@@ -25,7 +25,7 @@ export default function RestablecerPassword() {
 									<input type="password" className={`form-control ${restaPasssword.inputs_crear_cuenta}`} id="password" placeholder="Nueva contraseña" />
 								</div>
 								<button type="submit" className={`${restaPasssword.boton_registrarse}`}>Confirmar</button>
-							  </form>
+							</form>
 						</div>
 					</div>
 				</div>
@@ -33,5 +33,5 @@ export default function RestablecerPassword() {
 				<FooterMain />
 			</div>
 		</div>
-		);
+	);
 }

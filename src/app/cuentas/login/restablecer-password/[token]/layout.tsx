@@ -5,7 +5,7 @@
 // Meta datos NEXTJS
 import { Metadata } from "next";
 // Fonts
-import "../../../ui/fonts";
+import "../../../../ui/fonts";
 // viewport
 import type { Viewport } from 'next';
 
