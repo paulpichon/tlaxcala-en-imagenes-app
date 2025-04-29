@@ -1,8 +1,6 @@
 // Iniciar Sesion
 // Link nextjs
 import Link from "next/link";
-// viewport
-import type { Viewport } from 'next';
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
@@ -14,15 +12,6 @@ import FormularioLogin from "./components/FormularioLogin";
 // Footer principal
 import FooterMain from "../../components/FooterMain";
 
-
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  // Also supported by less commonly used
-  // interactiveWidget: 'resizes-visual',
-}
 
 export default function IniciarSesion() {
     return (
