@@ -11,7 +11,8 @@ const ModalReenviarCorreo: React.FC<ModalReenviarCorreoProps> = ({
     mensaje,
     esExito,
     bloqueado,
-    cuentaVerificada
+    cuentaVerificada,
+    tiempoRestante
 }) => {
     // Modal
     if (!show) return null;
@@ -56,7 +57,12 @@ const ModalReenviarCorreo: React.FC<ModalReenviarCorreoProps> = ({
                                 disabled={bloqueado}
                             >
                                 {bloqueado
-                                    ? "Espera 5 minutos para volver a reenviar el correo..."
+                                    ? (
+                                        <p className={`text-danger`}>
+                                          Puedes reenviar en {Math.floor((tiempoRestante || 0) / 60)}:{String((tiempoRestante || 0) % 60).padStart(2, '0')} minutos
+                                          
+                                        </p>
+                                      )
                                     : "Reenviar correo electrónico"
                                 }
                             </button>
@@ -64,7 +70,7 @@ const ModalReenviarCorreo: React.FC<ModalReenviarCorreoProps> = ({
                         {mensaje && (
                             // Si hay mensaje, se muestra
                             // Se cambia el color del mensaje dependiendo de la respuesta de la API
-                            <p style={{ marginTop: '1rem', ...mensajeEstilo }}>{mensaje}</p>
+                            <p style={{ ...mensajeEstilo }}>{mensaje}</p>
                         )} 
                     </div>
                 </div>
