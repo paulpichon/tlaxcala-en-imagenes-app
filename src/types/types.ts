@@ -50,6 +50,7 @@ export interface ModalReenviarCorreoProps {
   esExito?: boolean | null;
   bloqueado?: boolean;
   cuentaVerificada?: boolean;
+  tiempoRestante?: number | null;
 }
 // Interface para ReenviarCorreoResponse
 export interface ReenviarCorreoResponse {
