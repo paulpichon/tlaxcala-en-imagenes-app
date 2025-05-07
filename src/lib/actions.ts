@@ -134,6 +134,15 @@ export async function reenviarCorreoRestablecerPassword(token: string): Promise<
                     cuentaVerificada: true, //Quitar boton si status === 400
                 };
             }
+            // Error 500, token invalido o a expirado
+            if (data.status === 500 && data.error === 'jwt expired') {
+                // Token invalido o a expirado
+                return {
+                    mensaje: "Reinicia el proceso para restablecer contraseña.",
+                    esExito: false, //sirve para cambiar el color de el mensaje
+                    cuentaVerificada: true, //Quitar boton si status === 400
+                };
+            }
             // Esperar 5 minutos
             // if (data.status === 429) {
             //     return {
