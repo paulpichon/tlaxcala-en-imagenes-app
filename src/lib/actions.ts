@@ -65,14 +65,14 @@ export async function reenviarCorreo(token: string): Promise<ReenviarCorreoRespo
             if (data.status === 400 && data.msg === 'Cuenta ya verificada') {
                 return {
                     mensaje: "Esta cuenta ya ha sido verificada.",
-                    esExito: false,
-                    cuentaVerificada: true,
+                    esExito: false, //sirve para cambiar el color de el mensaje
+                    cuentaVerificada: true, //Quita el boton de reenvio si status === a algun codigo de error/exito
                 };
             }
             return {
                 // mensaje: data.msg || "Error al reenviar el correo",
-                esExito: false,
-                cuentaVerificada: false,
+                esExito: false, //sirve para cambiar el color de el mensaje
+                cuentaVerificada: false, //Quitar boton si status === 400
             };
         }
         // En caso de respuesta OK, retornamos el mensaje de éxito
@@ -80,15 +80,15 @@ export async function reenviarCorreo(token: string): Promise<ReenviarCorreoRespo
         return {
             mensaje: "Correo reenviado con éxito",
             esExito: true,
-            cuentaVerificada: false,
+            cuentaVerificada: false, //Quitar boton si status === 400
         };
     } catch (error) {
         // En caso de error, retornamos un mensaje de error genérico
         console.error(error);
         return {
             mensaje: "Error de red al reenviar el correo",
-            esExito: false,
-            cuentaVerificada: false,
+            esExito: false, //sirve para cambiar el color de el mensaje
+            cuentaVerificada: false, //Quitar boton si status === 400
         };
     }
 }
@@ -114,52 +114,52 @@ export async function reenviarCorreoRestablecerPassword(token: string): Promise<
             if (data.status === 401 && data.msg === 'Correo no existe') {
                 return {
                     mensaje: "El correo no esta asociado a ninguna cuenta.",
-                    esExito: false,
-                    cuentaVerificada: true,
+                    esExito: false, //sirve para cambiar el color de el mensaje
+                    cuentaVerificada: true, //Quitar boton si status === 400
                 };
             }
             // Cuenta no verificada
             if (data.status === 403 && data.msg === 'Cuenta no verificada') {
                 return {
                     mensaje: "Esta cuenta no ha sido verificada.",
-                    esExito: false,
-                    cuentaVerificada: true,
+                    esExito: false, //sirve para cambiar el color de el mensaje
+                    cuentaVerificada: true, //Quitar boton si status === 400
                 };
             }
             // Cuenta no activada
             if (data.status === 403 && data.msg === 'Cuenta no activada') {
                 return {
                     mensaje: "Esta cuenta esta desactivada, contactar a soporte.",
-                    esExito: false,
-                    cuentaVerificada: true,
+                    esExito: false, //sirve para cambiar el color de el mensaje 
+                    cuentaVerificada: true, //Quitar boton si status === 400
                 };
             }
             // Esperar 5 minutos
-            if (data.status === 429) {
-                return {
-                    mensaje: "Espera 5 minutos para poder reenviar el correo.",
-                    esExito: false,
-                    cuentaVerificada: true,
-                };
-            }
+            // if (data.status === 429) {
+            //     return {
+            //         mensaje: "Espera 5 minutos para poder reenviar el correo.",
+            //         esExito: false, //sirve para cambiar el color de el mensaje
+            //         cuentaVerificada: true, //Quitar boton si status === 400
+            //     };
+            // }
             return {
                 // mensaje: data.msg || "Error al reenviar el correo",
-                esExito: false,
-                cuentaVerificada: false,
+                esExito: false, //sirve para cambiar el color de el mensaje
+                cuentaVerificada: false, //Quitar boton si status === 400
             };
         }
         // Si el correo fue reenviado correctamente, retornamos el mensaje de éxito
         return {
             mensaje: "Correo reenviado con éxito",
             esExito: true,
-            cuentaVerificada: false,
+            cuentaVerificada: false, //Quitar boton si status === 400
         };
     }catch (error) {
         console.log(error);
         return {
             mensaje: "Error de red al reenviar el correo",
-            esExito: false,
-            cuentaVerificada: false,
+            esExito: false, //sirve para cambiar el color de el mensaje
+            cuentaVerificada: false, //Quitar boton si status === 400
         };
     }
 }
