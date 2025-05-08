@@ -29,6 +29,8 @@ function obtenerToken(pathname: string): string | null {
   // Se verifica de donde viene el token, si es de registro o de restablecer contraseña
   if (pathname === rutas.registro) return sessionStorage.getItem("registroToken");
   if (pathname === rutas.restablecer) return sessionStorage.getItem("passForgetToken");
+  // Si no existe el token, se retorna null
+  // Si no existe el token, se redirecciona a la pagina de inicio
   return null;
 }
 
