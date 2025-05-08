@@ -1,35 +1,52 @@
-// Componente para: reenvio de correo electronico
 'use client';
-// Interface ModalReenviarCorreoProps
+// interface ModalReenviarCorreoProps 
 import { ModalReenviarCorreoProps } from "@/types/types";
 
 const ModalReenviarCorreo: React.FC<ModalReenviarCorreoProps> = ({
-    show,
-    onClose,
-    onReenviar,
-    estilos,
-    mensaje,
-    esExito,
-    bloqueado,
-    cuentaVerificada,
-    tiempoRestante
+  show,
+  onClose,
+  onReenviar,
+  estilos,
+  mensaje,
+  esExito,
+  bloqueado,
+  cuentaVerificada,
+  tiempoRestante,
 }) => {
-    // Modal
+    // Si el modal no se debe mostrar, se retorna null
     if (!show) return null;
+    // estilos del mensaje dependiendo de si es un error o un exito
+    const estiloMensaje = esExito == null ? {} : { color: esExito ? 'green' : 'red' };
 
-    //mensaje cambia color dependiendo de la respuesta de la API
-    const mensajeEstilo = esExito === null
-    ? ''
-    : esExito
-        ? { color: 'green' }
-        : { color: 'red' };   
+    const renderBotonReenvio = () => {
+        // Si la cuenta ya fue verificada, no se muestra el boton de reenvio
+        if (cuentaVerificada) return null;
+        // Boton de reenvio
+        return (
+            <button
+                id="reenviar_correo"
+                className={`btn ${estilos.boton_reenviar_correo}`}
+                onClick={onReenviar}
+                disabled={bloqueado}
+            >
+                {bloqueado ? (
+                <span className="text-danger">
+                    Puedes reenviar en {Math.floor((tiempoRestante || 0) / 60)}:
+                    {String((tiempoRestante || 0) % 60).padStart(2, '0')} minutos
+                </span>
+                ) : (
+                "Reenviar correo electrónico"
+                )}
+            </button>
+        );
+    };
 
     return (
         <div
-        className={`modal fade ${show ? 'show' : ''}`}
+        className={`modal fade show`}
         tabIndex={-1}
         style={{
-            display: show ? 'block' : 'none',
+            display: 'block',
             backgroundColor: 'rgba(0,0,0,0.5)',
         }}
         role="dialog"
@@ -37,41 +54,17 @@ const ModalReenviarCorreo: React.FC<ModalReenviarCorreoProps> = ({
             <div className="modal-dialog modal-dialog-centered">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h1 className="modal-title fs-5" id="exampleModalLabel">
-                        ¿No recibiste el correo electrónico?
-                        </h1>
+                        <h1 className="modal-title fs-5">¿No recibiste el correo electrónico?</h1>
                         <button
                         type="button"
                         className="btn-close"
                         aria-label="Close"
                         onClick={onClose}
-                        ></button>
+                        />
                     </div>
                     <div className="modal-body text-center">
-                        {!cuentaVerificada && (
-                            // Si la cuenta ya esta verificada, se quita el boton de reenvio de correo 
-                            <button
-                                id="reenviar_correo"
-                                className={`btn ${estilos.boton_reenviar_correo}`}
-                                onClick={onReenviar}
-                                disabled={bloqueado}
-                            >
-                                {bloqueado
-                                    ? (
-                                        <p className={`text-danger`}>
-                                          Puedes reenviar en {Math.floor((tiempoRestante || 0) / 60)}:{String((tiempoRestante || 0) % 60).padStart(2, '0')} minutos
-                                          
-                                        </p>
-                                      )
-                                    : "Reenviar correo electrónico"
-                                }
-                            </button>
-                        )}
-                        {mensaje && (
-                            // Si hay mensaje, se muestra
-                            // Se cambia el color del mensaje dependiendo de la respuesta de la API
-                            <p style={{ ...mensajeEstilo }}>{mensaje}</p>
-                        )} 
+                        {renderBotonReenvio()}
+                        {mensaje && <p style={estiloMensaje}>{mensaje}</p>}
                     </div>
                 </div>
             </div>
