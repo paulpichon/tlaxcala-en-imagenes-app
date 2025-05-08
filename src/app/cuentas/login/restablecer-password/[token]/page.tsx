@@ -2,11 +2,11 @@
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
-import restaPasssword from "../../../../ui/cuentas/login/restablecer-password/RestablecerPassword.module.css";
+import restaPasssword from "@/app/ui/cuentas/login/restablecer-password/RestablecerPassword.module.css";
 // Header principal
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer principal
-import FooterMain from "../../../../components/FooterMain";
+import FooterMain from "@/app/components/FooterMain";
 
 export default function RestablecerPassword() {
 	return (
