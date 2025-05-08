@@ -177,7 +177,7 @@ export default function PasswordOlvidada() {
 								{botonDeshabilitado && tiempoRestante !== null && (
 								<p className="text-danger mt-2">
 									Puedes volver a intentarlo en {Math.floor(tiempoRestante / 60)}:
-									{String(tiempoRestante % 60).padStart(2, '0')}
+									{String(tiempoRestante % 60).padStart(2, '0')} minutos
 								</p>
 							)}
 								{mensaje && <div className="alert alert-success mt-3">{mensaje}</div>}
