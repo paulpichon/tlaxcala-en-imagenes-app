@@ -62,11 +62,28 @@ export async function reenviarCorreo(token: string): Promise<ReenviarCorreoRespo
         // Dependiendo del error que venga desde la API
         // Si el error es 400 y el mensaje es "Cuenta ya verificada", retornamos un mensaje diferente
         if (!response.ok) {
-            if (data.status === 400 && data.msg === 'Cuenta ya verificada') {
+            // Correo no existe
+            if (data.status === 401 && data.msg === 'Correo no existe') {
+                return {
+                    mensaje: "El correo no esta asociado a ninguna cuenta.",
+                    esExito: false, //sirve para cambiar el color de el mensaje
+                    cuentaVerificada: true, //Quitar boton si status === 400
+                };
+            }
+            // Cuenta no verificada
+            if (data.status === 403 && data.msg === 'Cuenta ya verificada') {
                 return {
                     mensaje: "Esta cuenta ya ha sido verificada.",
                     esExito: false, //sirve para cambiar el color de el mensaje
-                    cuentaVerificada: true, //Quita el boton de reenvio si status === a algun codigo de error/exito
+                    cuentaVerificada: true, //Quitar boton si status === 400
+                };
+            }
+            if (data.status === 500 && data.error === 'jwt expired') {
+                // Token invalido o a expirado
+                return {
+                    mensaje: "El token ha expirado. Si no te llego el correo, contacta a soporte.",
+                    esExito: false, //sirve para cambiar el color de el mensaje
+                    cuentaVerificada: true, //Quitar boton si status === 400
                 };
             }
             return {
@@ -75,8 +92,7 @@ export async function reenviarCorreo(token: string): Promise<ReenviarCorreoRespo
                 cuentaVerificada: false, //Quitar boton si status === 400
             };
         }
-        // En caso de respuesta OK, retornamos el mensaje de éxito
-        // y el estado de la cuenta verificada
+        // Si el correo fue reenviado correctamente, retornamos el mensaje de éxito
         return {
             mensaje: "Correo reenviado con éxito",
             esExito: true,
@@ -84,7 +100,7 @@ export async function reenviarCorreo(token: string): Promise<ReenviarCorreoRespo
         };
     } catch (error) {
         // En caso de error, retornamos un mensaje de error genérico
-        console.error(error);
+        console.log(error);
         return {
             mensaje: "Error de red al reenviar el correo",
             esExito: false, //sirve para cambiar el color de el mensaje
