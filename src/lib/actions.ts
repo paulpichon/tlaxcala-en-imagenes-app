@@ -78,7 +78,7 @@ export async function reenviarCorreo(token: string): Promise<ReenviarCorreoRespo
                     cuentaVerificada: true, //Quitar boton si status === 400
                 };
             }
-            if (data.status === 500 && data.error === 'jwt expired') {
+            if ( data.status === 500 && data.error === 'jwt expired') {
                 // Token invalido o a expirado
                 return {
                     mensaje: "El token ha expirado. Si no te llego el correo, contacta a soporte.",
