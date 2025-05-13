@@ -15,3 +15,17 @@ export type UsuarioSchema = z.infer<typeof usuarioSchema>;
 // Validar el input para envio de correo para restablecer la contraseña 
 // extencion del esquema de usuarioSchema
 export const correoSchema = usuarioSchema.pick({ correo: true });
+// Validar la contraseña de la pagina para restablecer contraseña
+// extension del esquema de usuarioSchema
+export const passwordSchema = usuarioSchema.pick({ password: true });
+// Confirmar la contraseña
+// extension del esquema de usuarioSchema
+export const resetPasswordSchema = passwordSchema.extend({
+	confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+	message: "Las contraseñas no coinciden",
+	path: ["confirmPassword"],
+});
+// tipo de resetPasswordSchema
+// Restablecer contraseña
+export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>;
