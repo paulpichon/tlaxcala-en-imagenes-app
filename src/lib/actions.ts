@@ -159,14 +159,6 @@ export async function reenviarCorreoRestablecerPassword(token: string): Promise<
                     cuentaVerificada: true, //Quitar boton si status === 400
                 };
             }
-            // Esperar 5 minutos
-            // if (data.status === 429) {
-            //     return {
-            //         mensaje: "Espera 5 minutos para poder reenviar el correo.",
-            //         esExito: false, //sirve para cambiar el color de el mensaje
-            //         cuentaVerificada: true, //Quitar boton si status === 400
-            //     };
-            // }
             return {
                 // mensaje: data.msg || "Error al reenviar el correo",
                 esExito: false, //sirve para cambiar el color de el mensaje
@@ -203,3 +195,14 @@ export const envioCorreoRestablecerPassword = async (correo: string) => {
     // retornamos la respuesta
     return data;
 }
+// Funcion hacer la peticion a la API para validar el token
+export const validarTokenRestablecerPassword = async (token: string) => {
+    // hacer la peticion a la API
+    const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth//cuentas/restablecer-password/validar-token-reset-password/${token}`, {
+		method: "GET",
+		cache: "no-store",
+	});
+    // devolver la respuesta
+    return respuesta;
+}
+
