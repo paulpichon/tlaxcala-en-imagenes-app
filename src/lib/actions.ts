@@ -197,12 +197,19 @@ export const envioCorreoRestablecerPassword = async (correo: string) => {
 }
 // Funcion hacer la peticion a la API para validar el token
 export const validarTokenRestablecerPassword = async (token: string) => {
-    // hacer la peticion a la API
-    const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth//cuentas/restablecer-password/validar-token-reset-password/${token}`, {
-		method: "GET",
-		cache: "no-store",
-	});
+    try {
+        // hacer la peticion a la API
+        const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth//cuentas/restablecer-password/validar-token-reset-password/${token}`, {
+            method: "GET",
+            cache: "no-store",
+        });
     // devolver la respuesta
     return respuesta;
+
+    } catch (error) {
+        // Buscar una mejor amnera de manejar los errores
+        console.error("Error al validar el token:", error);
+        throw new Error("Error al validar el token");
+    }
 }
 
