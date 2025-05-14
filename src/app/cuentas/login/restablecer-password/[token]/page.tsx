@@ -22,10 +22,10 @@ import { validarTokenRestablecerPassword } from "@/lib/actions";
 export default async function RestablecerPassword({ 
     params
  }: { 
-    params: Promise<{ token: string }> 
+    params: { token: string } 
 }) {
 	// Extraer el token de la URL
-	const { token } = await params;
+	const { token } = params;
 	// Funcion para verificar el token
 	// La fguncion validarTokenRestablecerPassword se encarga de hacer la peticion a la API para validar si el token que esta en la URL es valido o no
 	const res = await validarTokenRestablecerPassword(token);
