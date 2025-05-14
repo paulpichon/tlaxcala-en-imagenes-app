@@ -12,7 +12,13 @@ import FormularioNuevaPassword from "../components/Formulario";
 // Importar la funcion para validar el token
 import { validarTokenRestablecerPassword } from "@/lib/actions";
 
-export default async function RestablecerPassword({ params }: { params: { token: string } }) {
+type Props = {
+	params: {
+	  token: string;
+	};
+};
+
+export default async function RestablecerPassword({ params }: Props) {
 	// Extraer el token de la URL
 	const { token } = params;
 	// Funcion para verificar el token
