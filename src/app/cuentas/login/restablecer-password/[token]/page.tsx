@@ -12,15 +12,20 @@ import FormularioNuevaPassword from "../components/Formulario";
 // Importar la funcion para validar el token
 import { validarTokenRestablecerPassword } from "@/lib/actions";
 
-type Props = {
-	params: {
-	  token: string;
-	};
-};
+// type Props = {
+// 	params: {
+// 	  token: string;
+// 	};
+// };
 
-export default async function RestablecerPassword({ params }: Props) {
+// export default async function RestablecerPassword({ params }: Props) {
+export default async function RestablecerPassword({ 
+    params
+ }: { 
+    params: Promise<{ token: string }> 
+}) {
 	// Extraer el token de la URL
-	const { token } = params;
+	const { token } = await params;
 	// Funcion para verificar el token
 	// La fguncion validarTokenRestablecerPassword se encarga de hacer la peticion a la API para validar si el token que esta en la URL es valido o no
 	const res = await validarTokenRestablecerPassword(token);
