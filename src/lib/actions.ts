@@ -16,6 +16,7 @@ let requestOptions: RequestInit;
 function funcionRequestOptions(raw: BodyInit) {
     requestOptions = {
         method: "POST",
+        credentials: 'include', // 🔑 esto es vital para enviar y recibir cookies
         headers: myHeaders,
         body: raw,
         redirect: "follow",
@@ -46,7 +47,7 @@ export async function createUsuario( formData: IUsuarioData) {
 }
 // Esta funcion se encarga de reenviar el correo electronico al usuario cuando se registra en caso de ser necesario
 export async function reenviarCorreo(token: string): Promise<ReenviarCorreoResponse> {
-    try {
+         try {
         // Convertir el token a JSON
         const raw = JSON.stringify({
             token,
@@ -56,8 +57,10 @@ export async function reenviarCorreo(token: string): Promise<ReenviarCorreoRespo
         // Cambiar la URL a la de producción
         // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/reenviar-correo`)
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/reenviar-correo`, requestOptions);
+        
         // Resultado de la respuesta
         const data = await response.json();
+        
         // Si la respuesta no es ok, retornamos el mensaje de error
         // Dependiendo del error que venga desde la API
         // Si el error es 400 y el mensaje es "Cuenta ya verificada", retornamos un mensaje diferente
@@ -199,7 +202,7 @@ export const envioCorreoRestablecerPassword = async (correo: string) => {
 export const validarTokenRestablecerPassword = async (token: string) => {
     try {
         // hacer la peticion a la API
-        const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth//cuentas/restablecer-password/validar-token-reset-password/${token}`, {
+        const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/cuentas/restablecer-password/validar-token-reset-password/${token}`, {
             method: "GET",
             cache: "no-store",
         });
