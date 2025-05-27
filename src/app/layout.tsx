@@ -1,3 +1,5 @@
+// AuthProvider
+import { AuthProvider } from '@/context/AuthContext';
 // Estilos globales
 import "./ui/globals.css";
 // metadatos
@@ -24,7 +26,7 @@ export default function RootLayout({
         content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
       />
       <body>
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

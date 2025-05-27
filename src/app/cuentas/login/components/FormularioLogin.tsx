@@ -1,6 +1,10 @@
 'use client';
+// Auth context
+import { useAuth } from '@/context/AuthContext';
+// Userouter redirigir al usuario
+import { useRouter } from 'next/navigation';
 // Estilos de pagina
-import login from "../../../ui/cuentas/login/login.module.css";
+import loginEstilos from "../../../ui/cuentas/login/login.module.css";
 
 import { useState } from 'react';
 import { z } from 'zod';
@@ -11,6 +15,10 @@ const schema = z.object({
 });
 
 export default function FormularioLogin() {
+    // 
+    const { login } = useAuth();
+    // Redirigir al usuario
+    const router = useRouter();
 
     const [formData, setFormData] = useState({ correo: '', password: '' });
     const [errors, setErrors] = useState<{ correo?: string; password?: string }>({});
@@ -41,10 +49,11 @@ export default function FormularioLogin() {
   
       try {
         setLoading(true);
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData),
+          credentials: 'include'
         });
   
         const data = await res.json();
@@ -74,7 +83,9 @@ export default function FormularioLogin() {
   
         // Aquí iría la lógica para guardar la sesión (ver más abajo)
         console.log('Usuario autenticado:', data);
-  
+        login(data.usuario); // el backend debe devolver los datos del usuario
+        // Redirigir al usuario a la página de inicio
+        router.push('/inicio');
       } catch (error) {
           console.log(error);
         
@@ -86,10 +97,10 @@ export default function FormularioLogin() {
     
     return (
         <form className="formulario_crear_cuenta" onSubmit={handleSubmit} noValidate>
-            <div className={`${login.contenedor_inputs_login}`}>
+            <div className={`${loginEstilos.contenedor_inputs_login}`}>
                 <input 
                     type="text" 
-                    className={`form-control ${login.inputs_crear_cuenta} ${errors.correo ? 'is-invalid' : ''}`} 
+                    className={`form-control ${loginEstilos.inputs_crear_cuenta} ${errors.correo ? 'is-invalid' : ''}`} 
                     id="correo" 
                     aria-describedby="correo" 
                     placeholder="Correo electrónico" 
@@ -98,10 +109,10 @@ export default function FormularioLogin() {
                 />
                 {errors.correo && <div className="invalid-feedback">{errors.correo}</div>}
             </div>
-            <div className={`${login.contenedor_inputs_login}`}>
+            <div className={`${loginEstilos.contenedor_inputs_login}`}>
                 <input 
                     type="password" 
-                    className={`form-control ${login.inputs_crear_cuenta} ${errors.password ? 'is-invalid' : ''}`} 
+                    className={`form-control ${loginEstilos.inputs_crear_cuenta} ${errors.password ? 'is-invalid' : ''}`} 
                     id="password" 
                     placeholder="Contraseña" 
                     value={formData.password}
@@ -110,7 +121,7 @@ export default function FormularioLogin() {
                 {errors.password && <div className="invalid-feedback">{errors.password}</div>}
             </div>
             {serverError && <div className="alert alert-danger">{serverError}</div>}
-            <button type="submit" className={`${login.boton_registrarse}`} disabled={loading}>
+            <button type="submit" className={`${loginEstilos.boton_registrarse}`} disabled={loading}>
                 {loading ? 'Iniciando...' : 'Iniciar sesión'}
             </button>
         </form>

@@ -6,6 +6,7 @@
 import { Metadata } from "next";
 // Fonts
 import "../ui/fonts";
+import ProtectedRoute from "@/components/ProtectedRoute";
 // metadatos
 export const metadata: Metadata = {
     title: "Tlaxcala en imágenes",
@@ -27,7 +28,9 @@ export default function RootLayout({
         </head>
         
         <body>
-          {children}
+          <ProtectedRoute>
+            {children}
+          </ProtectedRoute>
         </body>
       </html>
     );
