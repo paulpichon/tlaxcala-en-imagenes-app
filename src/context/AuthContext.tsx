@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchUser = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/me`, { credentials: 'include' });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         console.log(data, "desde API login");
@@ -29,11 +29,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(data.usuario);
       } else if (res.status === 401) {
         // Intenta refrescar token
-        const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/refresh`, 
+        const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`, 
             { credentials: 'include' }
         );
         if (refreshRes.ok) {
-          const meRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/me`, 
+          const meRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, 
             { credentials: 'include' }
         );
           if (meRes.ok) {
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = async () => {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/logout`, 
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, 
         { method: 'POST', credentials: 'include' }
     );
     setUser(null);
