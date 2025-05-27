@@ -22,9 +22,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchUser = async () => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, { credentials: 'include' });
+      console.log(res, "res de API login");
+      
       if (res.ok) {
         const data = await res.json();
-        console.log(data, "desde API login");
+        console.log(data, "data API login");
         
         setUser(data.usuario);
       } else if (res.status === 401) {
