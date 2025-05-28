@@ -19,37 +19,62 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUser = async () => {
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, { credentials: 'include' });
-      console.log(res, "res de API login");
-      
-      if (res.ok) {
-        const data = await res.json();
-        console.log(data, "data API login");
+    const fetchUser = async () => {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, { credentials: 'include' });
+            console.log(res, "res de API login");
+
+            if (res.ok) {
+                const data = await res.json();
+                console.log(data, "data API login");
+                
+                setUser(data.usuario);
+            }
+
+            if (res.status === 401) {
+                // Intenta refrescar token
+                const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`, {
+                    credentials: 'include',
+                });
+
+                if (refreshRes.ok) {
+                    const meRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
+                    credentials: 'include',
+                    });
+                    if (meRes.ok) {
+                    const data = await meRes.json();
+                    setUser(data.usuario);
+                    }
+                }
+            }
         
-        setUser(data.usuario);
-      } else if (res.status === 401) {
-        // Intenta refrescar token
-        const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`, 
-            { credentials: 'include' }
-        );
-        if (refreshRes.ok) {
-          const meRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, 
-            { credentials: 'include' }
-        );
-          if (meRes.ok) {
-            const data = await meRes.json();
-            setUser(data.usuario);
-          }
+            // if (res.ok) {
+            //     const data = await res.json();
+            //     console.log(data, "data API login");
+                
+            //     setUser(data.usuario);
+            // } 
+            // if (res.status === 401) {
+            //     // Intenta refrescar token
+            //     const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`, 
+            //         { credentials: 'include' }
+            //     );
+            //     if (refreshRes.ok) {
+            //     const meRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, 
+            //         { credentials: 'include' }
+            //     );
+            //     if (meRes.ok) {
+            //         const data = await meRes.json();
+            //         setUser(data.usuario);
+            //     }
+            //     }
+            // }
+        } catch (err) {
+        console.error('Error recuperando sesión:', err);
+        } finally {
+        setLoading(false);
         }
-      }
-    } catch (err) {
-      console.error('Error recuperando sesión:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
   useEffect(() => {
     fetchUser();
