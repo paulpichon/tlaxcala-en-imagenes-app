@@ -15,7 +15,7 @@ const schema = z.object({
 });
 
 export default function FormularioLogin() {
-    // 
+    // useAuth: Hook para acceder al contexto de autenticación
     const { login } = useAuth();
     // Redirigir al usuario
     const router = useRouter();
@@ -49,7 +49,7 @@ export default function FormularioLogin() {
   
       try {
         setLoading(true);
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData),
@@ -81,8 +81,6 @@ export default function FormularioLogin() {
             }
         }
   
-        // Aquí iría la lógica para guardar la sesión (ver más abajo)
-        console.log('Usuario autenticado:', data);
         login(data.usuario); // el backend debe devolver los datos del usuario
         // Redirigir al usuario a la página de inicio
         router.push('/inicio');
