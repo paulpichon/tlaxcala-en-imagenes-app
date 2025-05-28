@@ -8,7 +8,6 @@ import type { Metadata } from "next";
 // Hay 2 formas de important las fuentes
 // import { open_sans, league_gothic } from './ui/fonts';
 import './ui/fonts';
-import AlreadyAuthRedirect from '@/components/AlreadyAuthRedirect';
 // metadatos
 export const metadata: Metadata = {
   title: "Tlaxcala En Imágenes | Entrar o registrarse",
@@ -28,9 +27,7 @@ export default function RootLayout({
       />
       <body>
         <AuthProvider>
-          <AlreadyAuthRedirect>
             {children}
-          </AlreadyAuthRedirect>
         </AuthProvider>
       </body>
     </html>
