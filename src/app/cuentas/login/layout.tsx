@@ -8,6 +8,7 @@ import { Metadata } from "next";
 import "../../ui/fonts";
 // viewport
 import type { Viewport } from 'next';
+import AlreadyAuthRedirect from "@/components/AlreadyAuthRedirect";
 // metadatos
 export const metadata: Metadata = {
     title: "Tlaxcala En Imágenes | Iniciar sesión",
@@ -32,7 +33,9 @@ export default function RootLayout({
           content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
         />
         <body>
-          {children}
+          <AlreadyAuthRedirect>
+            {children}
+          </AlreadyAuthRedirect>
         </body>
       </html>
     );
