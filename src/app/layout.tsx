@@ -27,11 +27,11 @@ export default function RootLayout({
         content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
       />
       <body>
-        <AlreadyAuthRedirect>
-          <AuthProvider>
+        <AuthProvider>
+          <AlreadyAuthRedirect>
             {children}
-          </AuthProvider>
-        </AlreadyAuthRedirect>
+          </AlreadyAuthRedirect>
+        </AuthProvider>
       </body>
     </html>
   );
