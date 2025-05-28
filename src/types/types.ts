@@ -58,3 +58,15 @@ export interface ReenviarCorreoResponse {
   esExito: boolean;
   cuentaVerificada: boolean;
 }
+// Tipos de dato para el usuario que inicia sesión
+export interface IUserLogin {
+  nombre: string;
+  correo: string;
+};
+// Tipo de datos para el contexto de autenticación
+export interface IAuthContext {
+  user: IUserLogin | null;
+  loading: boolean;
+  login: (user: IUserLogin) => void;
+  logout: () => void;
+};
