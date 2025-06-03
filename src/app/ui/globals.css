@@ -163,7 +163,21 @@ a.tad {
 a.tad:hover {
   color: #000000!important;
 }
+/* 
+Spinner de carga
+*/
+.spinner {
+  animation: spin 1s linear infinite;
+}
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* 
+  FIN SPINNER DE CARGA
+*/
 /* 
   FIN COMPONENTE FOOTER 
 */
