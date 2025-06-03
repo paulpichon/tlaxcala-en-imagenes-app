@@ -1,6 +1,8 @@
 // Se usara Layouts Anidados en la estructura del proyecto
 // https://chatgpt.com/c/674542f3-d5bc-8002-847c-c817ca29ba97
 
+// Redireccion de usuario autenticado
+import AlreadyAuthRedirect from "@/components/AlreadyAuthRedirect";
 // Meta datos NEXTJS
 import { Metadata } from "next";
 // Fonts
@@ -34,7 +36,9 @@ export default function RootLayout({
           content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
         />
         <body>
-          {children}
+          <AlreadyAuthRedirect>
+            {children}
+          </AlreadyAuthRedirect>
         </body>
       </html>
     );
