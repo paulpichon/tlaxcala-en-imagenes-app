@@ -3,6 +3,8 @@
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+// Spinner de carga
+import Spinner from '@/app/components/spinner';
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -19,7 +21,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   if (loading || !user) {
     return (
       <div style={{ textAlign: 'center', marginTop: '4rem' }}>
-        <p>Cargando sesión...</p>
+        <Spinner />
       </div>
     );
   }
