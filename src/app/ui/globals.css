@@ -78,8 +78,11 @@ div.contenedor_menu_lateral_inferior {
 span.nombre_opciones_menu {
   display: none;
 }
-/*etiqueta a*/
-a.opciones_menu {
+button.opciones_menu {
+  width: 100%;
+}
+/*etiqueta a y button*/
+a.opciones_menu, button.opciones_menu {
   color: #EBCA9A;
   padding: 20px 15px;
   /*EFECTOS*/
@@ -89,7 +92,13 @@ a.opciones_menu {
 /* hover iconos menu*/
 a.opciones_menu:hover {
   background-color:rgb(235, 202, 154, 0.2);
-  color: #EBCA9A;
+  color: #000000;
+}
+/* hover iconos menu*/
+/* Focus para boton de opciones */
+button.opciones_menu:hover, button.opciones_menu:focus {
+  background-color:rgb(235, 202, 154, 0.2);
+  color: #000000;
 }
 /* Icono del menu react icons */
 .icono_menu {
