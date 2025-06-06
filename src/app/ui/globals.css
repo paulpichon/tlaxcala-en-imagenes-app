@@ -89,6 +89,7 @@ a.opciones_menu, button.opciones_menu {
   transition: all 0.3s ease 0s;
   margin-bottom: 10px;
 }
+
 /* hover iconos menu*/
 a.opciones_menu:hover {
   background-color:rgb(235, 202, 154, 0.2);
@@ -110,6 +111,24 @@ a.postear {
   background-color:#EBCA9A;
   color: white;
   height:100%;
+}
+/* Submenu */
+.dropdown-menu {
+  font-family: 'Open Sans', sans-serif;
+  width: 100%;
+  bottom: 70px;
+  right: 0px;
+  border: 1px solid #EBCA9A!important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-radius: 0.5rem; /* opcional para que se vea más suave */
+}
+/* Letras del dropdown*/
+.buttonDropDown {
+  font-weight: bold!important;
+}
+.buttonDropDown:active {
+  /* color: red!important; */
+  background-color: #EBCA9A!important;
 }
 /*
 *
@@ -222,11 +241,10 @@ Spinner de carga
   /*Fin Titulo Tlaxcala En Imágenes*/
 
   /*Menu inferior*/
-  /*etiqueta a*/
-  a.opciones_menu {
-      padding: 10px 35px;
+  /*etiqueta a y button*/
+  a.opciones_menu, button.opciones_menu  {
+      padding: 10px 25px;
   }
-  
   /*
   *
     Fin Menu inferior
@@ -321,16 +339,20 @@ ul.menu_inferior_lateral{
 li.nav-item{
   margin: 15px 0;
 }
-
 /*Menu inferior*/
   /*etiqueta a*/
-  a.opciones_menu {
+  a.opciones_menu, button.opciones_menu {
     text-align: center;
 }
 /* Tamaño iconos del menu */
 /* Icono del menu react icons */
 .icono_menu {
     font-size: 1.8rem;
+}
+/* Submenu */
+.dropdown-menu {
+  bottom: 60px;
+  left: 50px;
 }
 /*Fin Menu inferior*/
 
