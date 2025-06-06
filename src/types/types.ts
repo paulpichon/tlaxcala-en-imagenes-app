@@ -58,15 +58,25 @@ export interface ReenviarCorreoResponse {
   esExito: boolean;
   cuentaVerificada: boolean;
 }
-// Tipos de dato para el usuario que inicia sesión
-export interface IUserLogin {
-  nombre: string;
+// Tipos de dato para el usuario que esta logueado
+// Se puede modificar los atributos que se pueden traer desde la API: quitar o agregar atributos, dependiendo de lo que queremos mostrar en el FRONTEND
+export interface UsuarioLogueado {
+  nombre_completo?: {
+    nombre: string;
+    apellido: string;
+  };
+  lugar_radicacion?: {
+    nombre_estado: string;
+  };
   correo: string;
+  imagen_perfil?: string;
+  url?: string;
+  uid: string;
 };
 // Tipo de datos para el contexto de autenticación
 export interface IAuthContext {
-  user: IUserLogin | null;
+  user: UsuarioLogueado | null;
   loading: boolean;
-  login: (user: IUserLogin) => void;
+  login: (user: UsuarioLogueado) => void;
   logout: () => void;
 };
