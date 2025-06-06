@@ -5,9 +5,9 @@ import {    createContext,
             useEffect, 
             useState 
         } from 'react';
-// Interface IuserLogin define la estructura de los datos del usuario que se almacenarán en el contexto.
+// Interface UsuarioLogueado define la estructura de los datos del usuario que se almacenarán en el contexto.
 // Interface para el contexto de autenticación, define las propiedades que estarán disponibles en el contexto.
-import {    IUserLogin, 
+import {    UsuarioLogueado, 
             IAuthContext 
         } from '@/types/types';
         
@@ -16,7 +16,7 @@ const AuthContext = createContext<IAuthContext | undefined>(undefined);
 // Este componente envolverá toda la app, permitiendo que cualquier componente acceda al estado de autenticación.
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // user: representa al usuario logueado.
-    const [user, setUser] = useState<IUserLogin | null>(null);
+    const [user, setUser] = useState<UsuarioLogueado | null>(null);
     // loading: indica si se está cargando la sesión del usuario.
     const [loading, setLoading] = useState(true);
     
@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         fetchUser();
     }, []);
     // Actualiza el estado user. Útil para cuando el usuario inicia sesión manualmente.
-    const login = (user: IUserLogin) => {
+    const login = (user: UsuarioLogueado) => {
         setUser(user);
     };
     // Llama al endpoint /logout del backend y borra el usuario en frontend.
