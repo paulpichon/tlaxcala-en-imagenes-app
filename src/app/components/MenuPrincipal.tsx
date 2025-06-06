@@ -96,16 +96,16 @@ export default function MenuPrincipal() {
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">Confirmar cierre de sesión</h5>
-                                <button type="button" className="btn-close" aria-label="Close" onClick={() => setShowModal(false)}></button>
+                                {/* <button type="button" className="btn-close" aria-label="Close" onClick={() => setShowModal(false)}></button> */}
                             </div>
-                            <div className="modal-body">
+                            <div className="modal-body text-center">
                                 <p>¿Estás seguro de que quieres cerrar sesión?</p>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                                <button type="button" className="btn btnCancelar" onClick={() => setShowModal(false)}>
                                     Cancelar
                                 </button>
-                                <button type="button" className="btn btn-danger" onClick={handleLogout}>
+                                <button type="button" className="btn btnCerrarSesion" onClick={handleLogout}>
                                     Cerrar sesión
                                 </button>
                             </div>
