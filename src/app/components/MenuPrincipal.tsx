@@ -1,3 +1,8 @@
+// Este componente:
+// Muestra un menú con íconos e identificación de ruta activa.
+// Tiene un botón para desplegar un submenú ("Cuenta") con opciones adicionales.
+// Usa un modal para confirmar antes de cerrar sesión.
+// Usa useEffect para mejorar la experiencia UX (cerrar dropdowns automáticamente y bloquear scroll cuando hay modales)
 'use client';
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
