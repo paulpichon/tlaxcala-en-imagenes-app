@@ -10,27 +10,29 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { FiHome, FiBell, FiPlusCircle, FiSliders, FiUser, FiAlignJustify  } from "react-icons/fi";
 
-const links = [
-    { name: 'Home', href: '/inicio', icon: FiHome },
-    { name: 'Notificaciones', href: '/notificaciones', icon: FiBell },
-    { name: 'Postear', href: '/postear', icon: FiPlusCircle },
-    { name: 'Configuraciones', href: '/configuraciones', icon: FiSliders },
-    { name: 'Perfil', href: '/perfil', icon: FiUser },
-];
+
 
 export default function MenuPrincipal() {
     const pathname = usePathname();
     const router = useRouter();
-    const { logout } = useAuth();
+    // Extraemos el usuario y logout que vienen del AuthContext
+    const { user, logout } = useAuth();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLLIElement>(null);
     const [showModal, setShowModal] = useState(false);
-
+    
     const handleLogout = async () => {
         await logout();
         router.push('/cuentas/login');
     };
-
+    const links = [
+        { name: 'Inicio', href: '/inicio', icon: FiHome },
+        { name: 'Notificaciones', href: '/notificaciones', icon: FiBell },
+        { name: 'Postear', href: '/postear', icon: FiPlusCircle },
+        { name: 'Configuraciones', href: '/configuraciones', icon: FiSliders },
+        // Nombre del usuario logueado
+        { name: `${user?.nombre_completo?.nombre} ${user?.nombre_completo?.apellido}`, href: '/perfil', icon: FiUser },
+    ];
     // Cierra el dropdown al hacer clic fuera
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
