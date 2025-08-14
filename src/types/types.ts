@@ -79,4 +79,5 @@ export interface IAuthContext {
   loading: boolean;
   login: (user: UsuarioLogueado) => void;
   logout: () => void;
-};
+  fetchWithAuth: (input: RequestInfo, init?: RequestInit) => Promise<Response>; // <-- agregamos esto
+}
