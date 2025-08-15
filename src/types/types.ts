@@ -43,6 +43,12 @@ export interface Posteo {
   fecha_actualizacion?: string;
   idPost: string;
 }
+// Interface para ModalOpcionesPublicacion
+export interface PropsModalOpcionesPublicacion {
+  isOpen: boolean;
+  selectedImage: Posteo | null;
+  onClose: () => void;
+};
 // Interface props para el reenvio de correo electronico
 export interface ModalReenviarCorreoProps {
   show: boolean;
