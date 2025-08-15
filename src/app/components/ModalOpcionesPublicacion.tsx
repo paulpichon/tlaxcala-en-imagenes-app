@@ -1,12 +1,8 @@
 'use client';
+import { PropsModalOpcionesPublicacion } from "@/types/types";
 // Module CSS
 import perfil from "../ui/perfil/perfil.module.css";
-// Interface props del segundo modal: info del usuario
-interface PropsModalOpcionesPublicacion {
-  isOpen: boolean;
-  selectedImage: { id: number; src: string } | null;
-  onClose: () => void;
-};
+
 
 const ModalOpcionesPublicacion: React.FC<PropsModalOpcionesPublicacion> = ({ isOpen, selectedImage, onClose }) => {
     if (!isOpen || !selectedImage) return null;
