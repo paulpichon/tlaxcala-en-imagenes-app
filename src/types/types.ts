@@ -32,13 +32,16 @@ export interface APIResponse {
     data?: APIResponseData;
     token?: string;
   }
-// Interface de datos de imagenes para perfil de usuario
-// Estos datos deben de ser cambios despues por los datos traidos por la API
-export interface ImageData {
-    id: number;
-    src: string;
-    title: string;
-    description: string;
+// Interface de Posteo
+export interface Posteo {
+  _idUsuario: string;
+  public_id_img: string;
+  texto: string;
+  img: string;
+  posteo_publico: boolean;
+  fecha_creacion: string;
+  fecha_actualizacion?: string;
+  idPost: string;
 }
 // Interface props para el reenvio de correo electronico
 export interface ModalReenviarCorreoProps {
