@@ -39,7 +39,7 @@ export async function createUsuario( formData: IUsuarioData) {
     // Request options
     funcionRequestOptions( raw );
     // Fetch a la API
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios`, requestOptions);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/usuarios`, requestOptions);
     // convertimos la respuesta en json
     const respuesta = await response.json();
     // retornamos la respuesta para obtener el JSON que viene desde la API
@@ -202,7 +202,7 @@ export const envioCorreoRestablecerPassword = async (correo: string) => {
 export const validarTokenRestablecerPassword = async (token: string) => {
     try {
         // hacer la peticion a la API
-        const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/cuentas/restablecer-password/validar-token-reset-password/${token}`, {
+        const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/cuentas/restablecer-password/validar-token-reset-password/${token}`, {
             method: "GET",
             cache: "no-store",
         });
