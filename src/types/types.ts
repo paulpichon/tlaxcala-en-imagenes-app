@@ -33,8 +33,9 @@ export interface APIResponse {
     token?: string;
   }
 // Interface de Posteo
+// Usamos la interface UsuarioLogueado para _idUsuario
 export interface Posteo {
-  _idUsuario: string;
+  _idUsuario: UsuarioLogueado;
   public_id_img: string;
   texto: string;
   img: string;
@@ -70,7 +71,7 @@ export interface ReenviarCorreoResponse {
 // Tipos de dato para el usuario que esta logueado
 // Se puede modificar los atributos que se pueden traer desde la API: quitar o agregar atributos, dependiendo de lo que queremos mostrar en el FRONTEND
 export interface UsuarioLogueado {
-  nombre_completo?: {
+  nombre_completo: {
     nombre: string;
     apellido: string;
   };
@@ -78,10 +79,12 @@ export interface UsuarioLogueado {
     nombre_estado: string;
   };
   correo: string;
-  imagen_perfil?: string;
-  url?: string;
+  imagen_perfil?: {
+    url: string;
+  };
+  url?: string; // slug del perfil
   uid: string;
-};
+}
 // Tipo de datos para el contexto de autenticación
 export interface IAuthContext {
   user: UsuarioLogueado | null;
