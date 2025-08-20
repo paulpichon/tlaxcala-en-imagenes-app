@@ -6,6 +6,8 @@ import ModalOpcionesPublicacion from "../ModalOpcionesPublicacion";
 import { useState } from "react";
 import { useInfinitePosts } from "@/app/hooks/useInfinitePosts";
 import { Posteo } from "@/types/types";
+// Spinner de carga de publicaciones
+import Spinner from "../spinner";
 
 export default function PublicacionUsuario() {
   const { posts, loading, observerRef, finished } = useInfinitePosts(
@@ -95,9 +97,12 @@ export default function PublicacionUsuario() {
       {/* Div invisible para Intersection Observer */}
       <div ref={observerRef} />
 
+      {/* Spinner mientras se cargan más publicaciones */}
+      {loading && !finished && <Spinner />}
+
       {/* Mensaje cuando ya no hay más publicaciones */}
       {finished && posts.length > 0 && (
-        <p className="text-center mt-3 pb-5 text-muted">No hay más publicaciones</p>
+        <p className="text-center mt-3 mb-5 pb-5 text-muted">No hay más publicaciones</p>
       )}
 
       {/* Modal opciones */}
