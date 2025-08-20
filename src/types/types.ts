@@ -44,6 +44,18 @@ export interface Posteo {
   fecha_actualizacion?: string;
   idPost: string;
 }
+// Response de la API para los posteos
+// Esta interface es la que se espera recibir de la API al hacer una petición para obtener los posteos
+// Contiene un array de posteos, y las URLs para paginación
+export interface ApiResponsePosteos {
+  page: number;
+  next: string | null;
+  prev: string | null;
+  limite: number;
+  total_registros: number;
+  mostrando: number;
+  posteos: Posteo[];
+}
 // Interface para ModalOpcionesPublicacion
 export interface PropsModalOpcionesPublicacion {
   isOpen: boolean;
