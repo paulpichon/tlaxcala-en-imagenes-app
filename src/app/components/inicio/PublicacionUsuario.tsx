@@ -1,18 +1,16 @@
 'use client';
 
-import { useState, useEffect } from "react";
 import Image from "next/image";
 import { FiHeart, FiMoreHorizontal } from "react-icons/fi";
 import ModalOpcionesPublicacion from "../ModalOpcionesPublicacion";
-import { useAuth } from "@/context/AuthContext"; // Para usar fetchWithAuth
+import { useState } from "react";
+import { useInfinitePosts } from "@/app/hooks/useInfinitePosts";
 import { Posteo } from "@/types/types";
 
 export default function PublicacionUsuario() {
-  const { fetchWithAuth } = useAuth(); // Usamos tu función personalizada
-
-  const [posteos, setPosteos] = useState<Posteo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { posts, loading, observerRef, finished } = useInfinitePosts(
+    `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos`
+  );
 
   const [selectedPost, setSelectedPost] = useState<Posteo | null>(null);
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
@@ -23,41 +21,14 @@ export default function PublicacionUsuario() {
   };
   const closeFirstModal = () => setIsFirstModalOpen(false);
 
-  useEffect(() => {
-    const fetchPosteos = async () => {
-      try {
-        const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos`
-        );
-
-        if (!res.ok) throw new Error("Error al cargar posteos");
-
-        const data = await res.json();
-        setPosteos(data.posteos || []);
-        console.log(data.posteos);
-        
-      } catch (err) {
-        console.error(err);
-        setError("No se pudieron cargar los posteos");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPosteos();
-  }, [fetchWithAuth]); // Dependencia para evitar problemas con ESLint
-
-  if (loading) {
+  if (loading && posts.length === 0)
     return <p className="text-center mt-5">Cargando publicaciones...</p>;
-  }
 
-  if (error) {
-    return <p className="text-center mt-5 text-danger">{error}</p>;
-  }
   return (
     <>
-      {posteos.map((post) => (
+      {posts.map((post) => (
         <div key={post.idPost} className="contenedor_publicaciones">
+          {/* Contenido de la publicación */}
           <div className="container-fluid">
             <div className="contenedor_publicacion">
               <div className="contenedor_encabezado_publicacion">
@@ -77,7 +48,7 @@ export default function PublicacionUsuario() {
                   <div className="col-7 col-lg-8">
                     <h5 className="nombre_usuario_publicacion">
                       <a className="link_perfil_usuario" href={`perfil/${post._idUsuario.url}`}>
-                        {post._idUsuario.nombre_completo.nombre + ' ' +  post._idUsuario.nombre_completo.apellido }
+                        {post._idUsuario.nombre_completo.nombre + " " + post._idUsuario.nombre_completo.apellido}
                       </a>
                     </h5>
                     <p className="ubicacion">{post.texto}</p>
@@ -97,7 +68,6 @@ export default function PublicacionUsuario() {
             </div>
           </div>
 
-          {/* Imagen principal */}
           <div className="publicacion_imagen">
             <Image
               src={post.img}
@@ -108,15 +78,10 @@ export default function PublicacionUsuario() {
             />
           </div>
 
-          {/* Footer */}
           <div className="container-fluid">
             <div className="contenedor_publicacion">
               <div className="footer_publicacion">
-                <button
-                  id="likeButton"
-                  data-post-id={post.idPost}
-                  className="like-button"
-                >
+                <button id="likeButton" data-post-id={post.idPost} className="like-button">
                   <FiHeart />
                 </button>
                 <p id="likeCount" className="d-inline votaciones">0</p>
@@ -127,7 +92,15 @@ export default function PublicacionUsuario() {
         </div>
       ))}
 
-      {/* Modal opciones de publicación */}
+      {/* Div invisible para Intersection Observer */}
+      <div ref={observerRef} />
+
+      {/* Mensaje cuando ya no hay más publicaciones */}
+      {finished && posts.length > 0 && (
+        <p className="text-center mt-3 pb-5 text-muted">No hay más publicaciones</p>
+      )}
+
+      {/* Modal opciones */}
       <ModalOpcionesPublicacion
         isOpen={isFirstModalOpen}
         selectedImage={selectedPost}
@@ -136,4 +109,3 @@ export default function PublicacionUsuario() {
     </>
   );
 }
-
