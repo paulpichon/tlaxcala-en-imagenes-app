@@ -34,6 +34,8 @@ export default function PublicacionUsuario() {
 
         const data = await res.json();
         setPosteos(data.posteos || []);
+        console.log(data.posteos);
+        
       } catch (err) {
         console.error(err);
         setError("No se pudieron cargar los posteos");
@@ -61,9 +63,9 @@ export default function PublicacionUsuario() {
               <div className="contenedor_encabezado_publicacion">
                 <div className="row">
                   <div className="col-3 col-lg-2 d-flex justify-content-center align-items-center">
-                    <a className="link_perfil_img" href="">
+                    <a className="link_perfil_img" href={`perfil/${post._idUsuario.url}`}>
                       <Image
-                        src={post.img}
+                        src={post._idUsuario.imagen_perfil!.url}
                         className="rounded-circle"
                         width={500}
                         height={500}
@@ -74,11 +76,11 @@ export default function PublicacionUsuario() {
                   </div>
                   <div className="col-7 col-lg-8">
                     <h5 className="nombre_usuario_publicacion">
-                      <a className="link_perfil_usuario" href="">
-                        Usuario {post._idUsuario.slice(0, 6)}...
+                      <a className="link_perfil_usuario" href={`perfil/${post._idUsuario.url}`}>
+                        {post._idUsuario.nombre_completo.nombre + ' ' +  post._idUsuario.nombre_completo.apellido }
                       </a>
                     </h5>
-                    <p className="ubicacion">Tlaxcala, Tlaxcala</p>
+                    <p className="ubicacion">{post.texto}</p>
                   </div>
                   <div className="col-2 col-lg-2 d-flex justify-content-center align-items-center">
                     <button
