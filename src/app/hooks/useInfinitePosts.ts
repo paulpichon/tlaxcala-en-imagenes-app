@@ -20,7 +20,7 @@ export function useInfinitePosts(initialUrl: string) {
 
     try {
       const res = await fetchWithAuth(
-        nextUrl.startsWith("http") ? nextUrl : `${process.env.NEXT_PUBLIC_API_URL_LOCAL}${nextUrl}`
+        nextUrl.startsWith("http") ? nextUrl : `${process.env.NEXT_PUBLIC_API_URL}${nextUrl}`
       );
 
       if (!res.ok) throw new Error("Error al cargar los posteos");

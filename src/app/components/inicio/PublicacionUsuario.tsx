@@ -12,7 +12,7 @@ import ModalLikesUsuarios from "../ModalLikesUsuarios";
 
 export default function PublicacionUsuario() {
   const { posts, loading, observerRef, finished } = useInfinitePosts(
-    `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos`
+    `${process.env.NEXT_PUBLIC_API_URL}/api/posteos`
   );
 
   const { fetchWithAuth, user } = useAuth();
@@ -35,14 +35,14 @@ export default function PublicacionUsuario() {
       try {
         // Número total de likes
         const resCount = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${post.idPost}/likes`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/posteos/${post.idPost}/likes`
         );
         if (!resCount.ok) return;
         const dataCount = await resCount.json();
 
         // Lista de usuarios que dieron like
         const resUsers = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${post.idPost}/likes/usuarios`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/posteos/${post.idPost}/likes/usuarios`
         );
         if (!resUsers.ok) return;
         const dataUsers: LikesUsuariosResponse = await resUsers.json();
@@ -65,7 +65,7 @@ export default function PublicacionUsuario() {
   const toggleLike = async (postId: string) => {
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${postId}/like`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/posteos/${postId}/like`,
         { method: "PUT" }
       );
       if (!res.ok) return;
@@ -95,7 +95,7 @@ export default function PublicacionUsuario() {
   const openLikesModal = async (postId: string) => {
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${postId}/likes/usuarios`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/posteos/${postId}/likes/usuarios`
       );
       if (!res.ok) return;
       const data: LikesUsuariosResponse = await res.json();
