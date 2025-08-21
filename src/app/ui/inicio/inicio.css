@@ -64,7 +64,9 @@ button.like-button {
 }
 /* numero me gustas */
 p.votaciones {
-    margin: 0 5px;
+    margin: 0 0 0 8px;
+    font-weight: bold;
+    font-size: 15px!important;
 }
 /* Etiqueta strong me gusta y votaciones tamaño de fuente */
 strong.etiqueta_strong, p.votaciones {
