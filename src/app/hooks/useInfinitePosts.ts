@@ -54,11 +54,14 @@ export function useInfinitePosts(initialUrl: string) {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          fetchPosts();
+          fetchPosts(); // cargar más posts
         }
       },
-      { threshold: 1.0 }
-    );
+      {
+        rootMargin: "200px", // margen extra alrededor del viewport
+        threshold: 0.1,      // basta con que el 10% del div sea visible
+      }
+    );    
 
     observer.observe(currentRef);
 
