@@ -1,18 +1,23 @@
 // Publicaciones de usuario en Grid
 "use client";
 // UseState
-import { useState } from "react";
+// import { useState } from "react";
 // Module CSS
 import perfil from "../../ui/perfil/perfil.module.css";
 // Types/interface
-import {ImageData} from "@/types/types";
+// import {ImageData} from "@/types/types";
 // Image NEXTJS
 import Image from "next/image";
 // Modal de imagen
-import ImageModal from "./ImageModal";
+// import ImageModal from "./ImageModal";
 // Modal de opciones de la publicacion: segundo modal
-import ModalOpcionesPublicacion from "../ModalOpcionesPublicacion";
-
+// import ModalOpcionesPublicacion from "../ModalOpcionesPublicacion";
+export interface ImageData {
+    id: number;
+    src: string;
+    title: string;
+    description: string;
+}
 // Images para el grid, estas imagenes son estaticas por el momentos, deben cambiarse por las imagenes traidas por la API
 const images: ImageData[] = [
   { id: 1, src: "/imagenes_votadas/votadas1.jpg", title: "Imagen 1", description: "Descripción de la imagen 1" },
@@ -22,24 +27,24 @@ const images: ImageData[] = [
 
 export default function PublicacionesUsuarioGrid() {
     // UseState
-    const [selectedImage, setSelectedImage] = useState<{ id: number; src: string } | null>(null);
+    // const [selectedImage, setSelectedImage] = useState<{ id: number; src: string } | null>(null);
     
     // PRIMER MODAL
-    const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
+    // const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
     // SEGUNDO MODAL
-    const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
+    // const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
     // Abre el primer modal, con la imagen seleccionada por el usuario
     // Al mismo tiempo que habre el primer modal
-    const openFirstModal = (image: ImageData) => {
-        setSelectedImage(image); // Selecciona la imagen
-        setIsFirstModalOpen(true); // Abre el primer modal
-    };
+    // const openFirstModal = (image: ImageData) => {
+    //     setSelectedImage(image); // Selecciona la imagen
+    //     setIsFirstModalOpen(true); // Abre el primer modal
+    // };
     // Cierra el primer modal
-    const closeFirstModal = () => setIsFirstModalOpen(false);
+    // const closeFirstModal = () => setIsFirstModalOpen(false);
     // Abre el segundo modal
-    const openSecondModal = () => setIsSecondModalOpen(true);
+    // const openSecondModal = () => setIsSecondModalOpen(true);
     // Cierra el segundo modal
-    const closeSecondModal = () => setIsSecondModalOpen(false);
+    // const closeSecondModal = () => setIsSecondModalOpen(false);
 
     return (
         <div className="row g-1">
@@ -56,14 +61,14 @@ export default function PublicacionesUsuarioGrid() {
                             style={{ cursor: "pointer" }}
                             priority
                             // Se pasa la imagen seleccionada al modal
-                            onClick={() => openFirstModal(image)}
+                            // onClick={() => openFirstModal(image)}
                         />
                     </div>
                 </div>
             ))}
 
             {/* Modal para la imagen seleccionada */}
-            {selectedImage && (
+            {/* {selectedImage && (
                 // Se pasan 4 parametros al modal
                 <ImageModal
                     isOpen={isFirstModalOpen}
@@ -71,13 +76,13 @@ export default function PublicacionesUsuarioGrid() {
                     onClose={closeFirstModal}
                     onNext={openSecondModal}
                 />
-            )}
+            )} */}
             {/* Modal de opciones de publicación */}
-            <ModalOpcionesPublicacion 
+            {/* <ModalOpcionesPublicacion 
                 isOpen={isSecondModalOpen}
                 selectedImage={selectedImage}
                 onClose={closeSecondModal}
-            />
+            /> */}
             
         </div>
     );
