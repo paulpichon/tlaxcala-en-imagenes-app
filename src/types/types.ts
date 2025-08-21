@@ -105,3 +105,29 @@ export interface IAuthContext {
   logout: () => void;
   fetchWithAuth: (input: RequestInfo, init?: RequestInit) => Promise<Response>; // <-- agregamos esto
 }
+// Interface para el usuario que da like a un posteo
+// Esta interface representa a un usuario que ha dado like a un posteo
+// Contiene el ID del usuario, el nombre completo, la imagen de perfil y el ID del posteo al que le dio like
+export interface LikeUsuario {
+  _id: string;
+  _idUsuario: {
+    nombre_completo: {
+      nombre: string;
+      apellido: string;
+    };
+    imagen_perfil: {
+      url: string;
+    };
+    uid: string;
+  };
+  _idPosteo: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+// Respuesta de la API para likes de un posteo
+// Esta interface representa la respuesta de la API al solicitar los likes de un posteo
+// Contiene un array de usuarios que han dado like al posteo
+export interface LikesUsuariosResponse {
+  likes_usuarios_posteo: LikeUsuario[];
+}
