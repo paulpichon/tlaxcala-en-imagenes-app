@@ -1,13 +1,14 @@
 'use client';
 
 import Image from "next/image";
-import { FiHeart } from "react-icons/fi";
+import { FiHeart, FiMoreHorizontal } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import { useInfinitePosts } from "@/app/hooks/useInfinitePosts";
-import { LikesUsuariosResponse, Posteo } from "@/types/types";
+import { Posteo, LikesUsuariosResponse, LikeUsuario } from "@/types/types";
 import Spinner from "../spinner";
 import ModalOpcionesPublicacion from "../ModalOpcionesPublicacion";
 import { useAuth } from "@/context/AuthContext";
+import ModalLikesUsuarios from "../ModalLikesUsuarios";
 
 export default function PublicacionUsuario() {
   const { posts, loading, observerRef, finished } = useInfinitePosts(
@@ -20,38 +21,45 @@ export default function PublicacionUsuario() {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
 
   // Estado de likes para cada post
-  const [likesState, setLikesState] = useState<Record<string, { count: number; hasLiked: boolean }>>({});
+  const [likesState, setLikesState] = useState<
+    Record<string, { count: number; hasLiked: boolean }>
+  >({});
+
+  // Estado para modal de usuarios que dieron like
+  const [isLikesModalOpen, setIsLikesModalOpen] = useState(false);
+  const [likesUsuarios, setLikesUsuarios] = useState<LikeUsuario[]>([]);
 
   // Inicializa el estado de likes al cargar posts
-useEffect(() => {
-  posts.forEach(async (post) => {
-    try {
-      // Número total de likes
-      const resCount = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${post.idPost}/likes`
-      );
-      if (!resCount.ok) return;
-      const dataCount = await resCount.json();
-      // Lista de usuarios que dieron like
-      const resUsers = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${post.idPost}/likes/usuarios`
-      );
-      if (!resUsers.ok) return;
-      const dataUsers: LikesUsuariosResponse = await resUsers.json();
+  useEffect(() => {
+    posts.forEach(async (post) => {
+      try {
+        // Número total de likes
+        const resCount = await fetchWithAuth(
+          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${post.idPost}/likes`
+        );
+        if (!resCount.ok) return;
+        const dataCount = await resCount.json();
 
-      const alreadyLiked = dataUsers.likes_usuarios_posteo.some(
-        (like) => like._idUsuario.uid === user?.uid
-      );
+        // Lista de usuarios que dieron like
+        const resUsers = await fetchWithAuth(
+          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${post.idPost}/likes/usuarios`
+        );
+        if (!resUsers.ok) return;
+        const dataUsers: LikesUsuariosResponse = await resUsers.json();
 
-      setLikesState((prev) => ({
-        ...prev,
-        [post.idPost]: { count: dataCount.likes, hasLiked: alreadyLiked },
-      }));
-    } catch (err) {
-      console.error("Error cargando likes:", err);
-    }
-  });
-}, [posts, user, fetchWithAuth]);
+        const alreadyLiked = dataUsers.likes_usuarios_posteo.some(
+          (like) => like._idUsuario.uid === user?.uid
+        );
+
+        setLikesState((prev) => ({
+          ...prev,
+          [post.idPost]: { count: dataCount.likes, hasLiked: alreadyLiked },
+        }));
+      } catch (err) {
+        console.error("Error cargando likes:", err);
+      }
+    });
+  }, [posts, user, fetchWithAuth]);
 
   // Función para dar / quitar like
   const toggleLike = async (postId: string) => {
@@ -60,7 +68,9 @@ useEffect(() => {
         `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${postId}/like`,
         { method: "PUT" }
       );
+      if (!res.ok) return;
       const data = await res.json();
+
       setLikesState((prev) => {
         const prevData = prev[postId] || { count: 0, hasLiked: false };
         if (data.msg === "Like añadido") {
@@ -81,6 +91,24 @@ useEffect(() => {
     }
   };
 
+  // Abrir modal con usuarios que dieron like
+  const openLikesModal = async (postId: string) => {
+    try {
+      const res = await fetchWithAuth(
+        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${postId}/likes/usuarios`
+      );
+      if (!res.ok) return;
+      const data: LikesUsuariosResponse = await res.json();
+      
+      setLikesUsuarios(data.likes_usuarios_posteo);
+      setIsLikesModalOpen(true);
+    } catch (err) {
+      console.error("Error cargando usuarios de likes:", err);
+    }
+  };
+
+  const closeLikesModal = () => setIsLikesModalOpen(false);
+
   const openFirstModal = (post: Posteo) => {
     setSelectedPost(post);
     setIsFirstModalOpen(true);
@@ -93,7 +121,10 @@ useEffect(() => {
   return (
     <>
       {posts.map((post) => {
-        const likeInfo = likesState[post.idPost] || { count: 0, hasLiked: false };
+        const likeInfo = likesState[post.idPost] || {
+          count: 0,
+          hasLiked: false,
+        };
 
         return (
           <div key={post.idPost} className="contenedor_publicaciones">
@@ -103,7 +134,10 @@ useEffect(() => {
                 <div className="contenedor_encabezado_publicacion">
                   <div className="row">
                     <div className="col-3 col-lg-2 d-flex justify-content-center align-items-center">
-                      <a className="link_perfil_img" href={`perfil/${post._idUsuario.url}`}>
+                      <a
+                        className="link_perfil_img"
+                        href={`perfil/${post._idUsuario.url}`}
+                      >
                         <Image
                           src={post._idUsuario.imagen_perfil!.url}
                           className="rounded-circle"
@@ -116,8 +150,13 @@ useEffect(() => {
                     </div>
                     <div className="col-7 col-lg-8">
                       <h5 className="nombre_usuario_publicacion">
-                        <a className="link_perfil_usuario" href={`perfil/${post._idUsuario.url}`}>
-                          {post._idUsuario.nombre_completo.nombre + " " + post._idUsuario.nombre_completo.apellido}
+                        <a
+                          className="link_perfil_usuario"
+                          href={`perfil/${post._idUsuario.url}`}
+                        >
+                          {post._idUsuario.nombre_completo.nombre +
+                            " " +
+                            post._idUsuario.nombre_completo.apellido}
                         </a>
                       </h5>
                       <p className="ubicacion">{post.texto}</p>
@@ -129,7 +168,7 @@ useEffect(() => {
                         aria-label="Options"
                         onClick={() => openFirstModal(post)}
                       >
-                        ⋮
+                        <FiMoreHorizontal />
                       </button>
                     </div>
                   </div>
@@ -154,12 +193,22 @@ useEffect(() => {
                 <div className="footer_publicacion">
                   <button
                     onClick={() => toggleLike(post.idPost)}
-                    className={`like-button ${likeInfo.hasLiked ? "liked" : ""}`}
+                    className={`like-button ${
+                      likeInfo.hasLiked ? "liked" : ""
+                    }`}
                   >
                     <FiHeart color={likeInfo.hasLiked ? "red" : "black"} />
                   </button>
-                  <p className="d-inline votaciones">{likeInfo.count}</p>
-                  <strong className="etiqueta_strong">Me gusta</strong>
+
+                  <div
+                    className="d-inline cursor-pointer"
+                    onClick={() => openLikesModal(post.idPost)}
+                    style={{cursor:"pointer"}}
+                  >
+                    <p className="d-inline votaciones mb-0">{likeInfo.count}</p>{" "}
+                    <strong className="etiqueta_strong">Me gusta</strong>
+                  </div>
+
                 </div>
               </div>
             </div>
@@ -172,13 +221,23 @@ useEffect(() => {
 
       {loading && !finished && <Spinner />}
       {finished && posts.length > 0 && (
-        <p className="text-center mt-3 mb-5 pb-5 text-muted">No hay más publicaciones</p>
+        <p className="text-center mt-3 mb-5 pb-5 text-muted">
+          No hay más publicaciones
+        </p>
       )}
 
+      {/* Modal opciones de publicación */}
       <ModalOpcionesPublicacion
         isOpen={isFirstModalOpen}
         selectedImage={selectedPost}
         onClose={closeFirstModal}
+      />
+
+      {/* Modal usuarios que dieron like */}
+      <ModalLikesUsuarios
+        isOpen={isLikesModalOpen}
+        onClose={closeLikesModal}
+        usuarios={likesUsuarios}
       />
     </>
   );
