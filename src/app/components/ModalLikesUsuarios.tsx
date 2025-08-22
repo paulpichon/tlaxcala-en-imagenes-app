@@ -29,7 +29,7 @@ export default function ModalLikesUsuarios({
   }, [isOpen]);
 
   if (!isOpen) return null;
-
+  
   return (
     <div
       className={`modal fade ${isOpen ? "show d-block" : ""}`}
@@ -54,23 +54,25 @@ export default function ModalLikesUsuarios({
             {usuarios.length === 0 ? (
               <p className="text-muted text-center">Nadie ha dado like aún</p>
             ) : (
-              <ul className="list-unstyled">
-                {usuarios.map((like) => (
-                  <li key={like._id} className="d-flex align-items-center mb-3">
-                    <Image
-                      src={like._idUsuario.imagen_perfil.url}
-                      alt={`${like._idUsuario.nombre_completo.nombre}`}
-                      width={40}
-                      height={40}
-                      className="rounded-circle me-3"
-                    />
-                    <span>
-                      {like._idUsuario.nombre_completo.nombre}{" "}
-                      {like._idUsuario.nombre_completo.apellido}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+                <ul className="list-unstyled">
+                  {usuarios.map((like) => (
+                    <a href={`perfil/${like._idUsuario.url}`} key={like._id} className="text-decoration-none text-dark">
+                      <li className="d-flex align-items-center mb-3">
+                        <Image
+                          src={like._idUsuario.imagen_perfil.url}
+                          alt={`${like._idUsuario.nombre_completo.nombre}`}
+                          width={40}
+                          height={40}
+                          className="rounded-circle me-3"
+                        />
+                        <span>
+                          {like._idUsuario.nombre_completo.nombre}{" "}
+                          {like._idUsuario.nombre_completo.apellido}
+                        </span>
+                      </li>
+                     </a>
+                  ))}
+                </ul>
             )}
           </div>
 
