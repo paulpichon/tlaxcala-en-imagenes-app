@@ -118,6 +118,7 @@ export interface LikeUsuario {
     imagen_perfil: {
       url: string;
     };
+    url: string; // URL del perfil del usuario
     uid: string;
   };
   _idPosteo: string;
