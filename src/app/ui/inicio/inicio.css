@@ -68,6 +68,14 @@ p.votaciones {
     font-weight: bold;
     font-size: 15px!important;
 }
+/* Boton para cerrar el modal Persona a las que les gusto */
+.btnCerrarModal {
+    background-color: #EBCA9A;
+    color: white;
+}
+.btnCerrarModal:hover {
+    border: 1px solid #EBCA9A;
+}
 /* Etiqueta strong me gusta y votaciones tamaño de fuente */
 strong.etiqueta_strong, p.votaciones {
     font-size: 0.9rem;
