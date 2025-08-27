@@ -96,6 +96,7 @@ export interface UsuarioLogueado {
   };
   url?: string; // slug del perfil
   uid: string;
+  _id: string;
 }
 // Tipo de datos para el contexto de autenticación
 export interface IAuthContext {
