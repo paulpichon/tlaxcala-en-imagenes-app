@@ -111,8 +111,9 @@ button.likeButton svg:hover {
   }
 /* Modal opciones */
 /* Boton opciones de la publicacion */
-a.btn_opciones_publicaciones {
+a.btn_opciones_publicaciones, button.btn_opciones_publicaciones {
     font-family: 'Open Sans', sans-serif;
+    background-color: transparent;
     display: block;
     width: 100%;
     border-bottom: 1px solid rgb(127, 127, 127, 0.2);
@@ -120,13 +121,16 @@ a.btn_opciones_publicaciones {
     text-decoration: none;
     color: #000000;
     margin: 7px;
+    border: none;
+    border-bottom: 1px solid rgb(127, 127, 127, 0.2);
 }
+
 /* btn seguir */
-a.btn_seguir {
+a.btn_seguir, button.btn_seguir {
     color: #EBCA9A ;
 }
 /* opcion roja */
-a.btn_rojo {
+a.btn_rojo, button.btn_rojo {
     color: red;
 }
 /*X-Small devices (portrait phones, less than 576px)
