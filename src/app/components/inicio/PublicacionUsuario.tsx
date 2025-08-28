@@ -1,92 +1,105 @@
-'use client';
+// Archivo: Se renderizan las publicaciones de los usuarios con likes y modales
+'use client'; // 👈 Indica a Next.js que este componente es del lado del cliente
 
-import Image from "next/image";
-import { FiHeart, FiMoreHorizontal } from "react-icons/fi";
-import { useState, useEffect } from "react";
-import { useInfinitePosts } from "@/app/hooks/useInfinitePosts";
-import { Posteo, LikesUsuariosResponse, LikeUsuario } from "@/types/types";
-import Spinner from "../spinner";
-import ModalOpcionesPublicacion from "../ModalOpcionesPublicacion";
-import { useAuth } from "@/context/AuthContext";
-import ModalLikesUsuarios from "../ModalLikesUsuarios";
+// Importaciones necesarias
+import Image from "next/image"; // Para imágenes optimizadas en Next.js
+import { FiHeart, FiMoreHorizontal } from "react-icons/fi"; // Íconos de Feather (corazón y opciones)
+import { useState, useEffect } from "react"; // Hooks de React
+import { useInfinitePosts } from "@/app/hooks/useInfinitePosts"; // Hook para cargar posts con scroll infinito
+import { Posteo, LikesUsuariosResponse, LikeUsuario } from "@/types/types"; // Tipos de TypeScript
+import Spinner from "../spinner"; // Spinner de carga
+import ModalOpcionesPublicacion from "../ModalOpcionesPublicacion"; // Modal para opciones de una publicación
+import { useAuth } from "@/context/AuthContext"; // Contexto de autenticación (usuario logueado + fetch con auth)
+import ModalLikesUsuarios from "../ModalLikesUsuarios"; // Modal para mostrar usuarios que dieron like
 
+// Componente principal
 export default function PublicacionUsuario() {
+  // Hook que trae publicaciones de la API y maneja scroll infinito
   const { posts, loading, observerRef, finished } = useInfinitePosts(
     `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos`
   );
 
+  // Trae funciones y datos del contexto de autenticación
   const { fetchWithAuth, user } = useAuth();
 
+  // Estado para manejar el modal de opciones de publicación
   const [selectedPost, setSelectedPost] = useState<Posteo | null>(null);
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
 
-  // Estado de likes para cada post
+  // Estado local para likes por cada post
+  // Ejemplo: { "idDelPost": { count: 5, hasLiked: true } }
   const [likesState, setLikesState] = useState<
     Record<string, { count: number; hasLiked: boolean }>
   >({});
 
-  // Estado para modal de usuarios que dieron like
+  // Estado para manejar el modal de usuarios que dieron like
   const [isLikesModalOpen, setIsLikesModalOpen] = useState(false);
   const [likesUsuarios, setLikesUsuarios] = useState<LikeUsuario[]>([]);
 
-  // Inicializa el estado de likes al cargar posts
-  // Inicializa el estado de likes al cargar posts
-useEffect(() => {
-  if (!user || posts.length === 0) return;
+  // 🟢 useEffect: Inicializa el estado de likes de cada post cuando se cargan posts o cambia el usuario logueado
+  useEffect(() => {
+    if (!user || posts.length === 0) return; // Si no hay usuario o posts, no hacer nada
 
-  let cancelled = false;
+    let cancelled = false; // Flag para cancelar si el componente se desmonta
 
-  (async () => {
-    try {
-      // Traemos SOLO /likes/usuarios y derivamos count + hasLiked
-      const pairs = await Promise.all(
-        posts.map(async (post) => {
-          const resUsers = await fetchWithAuth(
-            `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${post.idPost}/likes/usuarios`
-          );
-          if (!resUsers.ok) return null;
+    (async () => {
+      try {
+        // Para cada post, obtenemos los usuarios que dieron like
+        const pairs = await Promise.all(
+          posts.map(async (post) => {
+            const resUsers = await fetchWithAuth(
+              `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${post.idPost}/likes/usuarios`
+            );
+            if (!resUsers.ok) return null;
 
-          const dataUsers: LikesUsuariosResponse = await resUsers.json();
+            const dataUsers: LikesUsuariosResponse = await resUsers.json();
 
-          const count = dataUsers.likes_usuarios_posteo.length || 0;
-          const hasLiked = dataUsers.likes_usuarios_posteo.some(
-            (like) => like._idUsuario._id === user.uid            
-          );
-          return [post.idPost, { count, hasLiked }] as const;
-        })
-      );
-      if (cancelled) return;
+            // Número total de likes
+            const count = dataUsers.likes_usuarios_posteo.length || 0;
 
-      const entries = pairs
-        .filter(Boolean) as [string, { count: number; hasLiked: boolean }][];
-      setLikesState((prev) => ({
-        ...prev,
-        ...Object.fromEntries(entries),
-      }));
-    } catch (err) {
-      console.error("Error cargando likes:", err);
-    }
-  })();
-  
+            // Verificamos si el usuario actual está en la lista de likes
+            const hasLiked = dataUsers.likes_usuarios_posteo.some(
+              (like) => like._idUsuario._id === user.uid // 👈 compara el uid del usuario logueado con los de la lista
+            );
 
-  return () => {
-    cancelled = true;
-  };
-}, [posts, user, fetchWithAuth]);
+            // Devolvemos un par: [idPost, { count, hasLiked }]
+            return [post.idPost, { count, hasLiked }] as const;
+          })
+        );
 
+        if (cancelled) return; // Si el componente se desmontó, no actualizamos estado
 
-  // Función para dar / quitar like
-  // Función para dar / quitar like
+        // Filtramos null y convertimos el array en objeto para setLikesState
+        const entries = pairs
+          .filter(Boolean) as [string, { count: number; hasLiked: boolean }][];
+        setLikesState((prev) => ({
+          ...prev,
+          ...Object.fromEntries(entries),
+        }));
+      } catch (err) {
+        console.error("Error cargando likes:", err);
+      }
+    })();
+
+    // Cleanup → si el componente se desmonta, cancelamos la actualización
+    return () => {
+      cancelled = true;
+    };
+  }, [posts, user, fetchWithAuth]);
+
+  // 🟢 Función para dar o quitar like a un post
   const toggleLike = async (postId: string) => {
     try {
+      // Llamada al endpoint para dar/quitar like
       const res = await fetchWithAuth(
         `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${postId}/like`,
-        { method: "PUT" }
+        { method: "PUT" } // ⚠️ Aquí asegúrate de usar el método correcto según tu backend
       );
       if (!res.ok) return;
 
       const data = await res.json();
 
+      // Actualizamos el estado local según la respuesta
       setLikesState((prev) => {
         const prevData = prev[postId] || { count: 0, hasLiked: false };
         if (data.msg === "Like añadido") {
@@ -107,16 +120,17 @@ useEffect(() => {
     }
   };
 
-
-  // Abrir modal con usuarios que dieron like
+  // 🟢 Abre el modal con la lista de usuarios que dieron like a un post
   const openLikesModal = async (postId: string) => {
     try {
       const res = await fetchWithAuth(
         `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${postId}/likes/usuarios`
       );
       if (!res.ok) return;
+
       const data: LikesUsuariosResponse = await res.json();
-      
+
+      // Guardamos los usuarios en el estado y abrimos el modal
       setLikesUsuarios(data.likes_usuarios_posteo);
       setIsLikesModalOpen(true);
     } catch (err) {
@@ -124,20 +138,25 @@ useEffect(() => {
     }
   };
 
+  // Cierra el modal de likes
   const closeLikesModal = () => setIsLikesModalOpen(false);
 
+  // 🟢 Funciones para abrir/cerrar modal de opciones de publicación
   const openFirstModal = (post: Posteo) => {
     setSelectedPost(post);
     setIsFirstModalOpen(true);
   };
   const closeFirstModal = () => setIsFirstModalOpen(false);
 
+  // 🟢 Si está cargando y aún no hay posts, mostramos un mensaje
   if (loading && posts.length === 0)
     return <p className="text-center mt-5">Cargando publicaciones...</p>;
 
+  // 🟢 Render principal
   return (
     <>
       {posts.map((post) => {
+        // Recuperamos info de likes del estado local
         const likeInfo = likesState[post.idPost] || {
           count: 0,
           hasLiked: false,
@@ -145,11 +164,12 @@ useEffect(() => {
 
         return (
           <div key={post.idPost} className="contenedor_publicaciones">
-            {/* Encabezado */}
+            {/* Encabezado con info del usuario */}
             <div className="container-fluid">
               <div className="contenedor_publicacion">
                 <div className="contenedor_encabezado_publicacion">
                   <div className="row">
+                    {/* Imagen de perfil */}
                     <div className="col-3 col-lg-2 d-flex justify-content-center align-items-center">
                       <a
                         className="link_perfil_img"
@@ -165,6 +185,7 @@ useEffect(() => {
                         />
                       </a>
                     </div>
+                    {/* Nombre y texto */}
                     <div className="col-7 col-lg-8">
                       <h5 className="nombre_usuario_publicacion">
                         <a
@@ -178,6 +199,7 @@ useEffect(() => {
                       </h5>
                       <p className="ubicacion">{post.texto}</p>
                     </div>
+                    {/* Botón de opciones */}
                     <div className="col-2 col-lg-2 d-flex justify-content-center align-items-center">
                       <button
                         type="button"
@@ -193,7 +215,7 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* Imagen */}
+            {/* Imagen de la publicación */}
             <div className="publicacion_imagen">
               <Image
                 src={post.img}
@@ -204,10 +226,11 @@ useEffect(() => {
               />
             </div>
 
-            {/* Footer: Likes */}
+            {/* Footer con likes */}
             <div className="container-fluid">
               <div className="contenedor_publicacion">
                 <div className="footer_publicacion">
+                  {/* Botón de like */}
                   <button
                     onClick={() => toggleLike(post.idPost)}
                     className={`like-button ${
@@ -217,6 +240,7 @@ useEffect(() => {
                     <FiHeart color={likeInfo.hasLiked ? "red" : "black"} />
                   </button>
 
+                  {/* Número de likes + palabra "Me gusta" → abre modal */}
                   <div
                     className="d-inline"
                     onClick={() => openLikesModal(post.idPost)}
@@ -233,25 +257,26 @@ useEffect(() => {
         );
       })}
 
-      {/* Observer */}
-      {/* Se usa para cargar mas publicaciones conforme se llegue al final de la pantalla */}
+      {/* Div invisible usado por IntersectionObserver para el scroll infinito */}
       <div ref={observerRef} />
 
+      {/* Spinner mientras carga más posts */}
       {loading && !finished && <Spinner />}
+      {/* Mensaje cuando no hay más publicaciones */}
       {finished && posts.length > 0 && (
         <p className="text-center mt-3 mb-5 pb-5 text-muted">
           No hay más publicaciones
         </p>
       )}
 
-      {/* Modal opciones de publicación */}
+      {/* Modal de opciones de publicación */}
       <ModalOpcionesPublicacion
         isOpen={isFirstModalOpen}
         selectedImage={selectedPost}
         onClose={closeFirstModal}
       />
 
-      {/* Modal usuarios que dieron like */}
+      {/* Modal con la lista de usuarios que dieron like */}
       <ModalLikesUsuarios
         isOpen={isLikesModalOpen}
         onClose={closeLikesModal}
