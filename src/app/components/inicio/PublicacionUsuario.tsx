@@ -30,37 +30,52 @@ export default function PublicacionUsuario() {
   const [likesUsuarios, setLikesUsuarios] = useState<LikeUsuario[]>([]);
 
   // Inicializa el estado de likes al cargar posts
-  useEffect(() => {
-    posts.forEach(async (post) => {
-      try {
-        // Número total de likes
-        const resCount = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${post.idPost}/likes`
-        );
-        if (!resCount.ok) return;
-        const dataCount = await resCount.json();
+  // Inicializa el estado de likes al cargar posts
+useEffect(() => {
+  if (!user || posts.length === 0) return;
 
-        // Lista de usuarios que dieron like
-        const resUsers = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${post.idPost}/likes/usuarios`
-        );
-        if (!resUsers.ok) return;
-        const dataUsers: LikesUsuariosResponse = await resUsers.json();
+  let cancelled = false;
 
-        const alreadyLiked = dataUsers.likes_usuarios_posteo.some(
-          (like) => like._idUsuario.uid === user?.uid
-        );
+  (async () => {
+    try {
+      // Traemos SOLO /likes/usuarios y derivamos count + hasLiked
+      const pairs = await Promise.all(
+        posts.map(async (post) => {
+          const resUsers = await fetchWithAuth(
+            `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${post.idPost}/likes/usuarios`
+          );
+          if (!resUsers.ok) return null;
 
-        setLikesState((prev) => ({
-          ...prev,
-          [post.idPost]: { count: dataCount.likes, hasLiked: alreadyLiked },
-        }));
-      } catch (err) {
-        console.error("Error cargando likes:", err);
-      }
-    });
-  }, [posts, user, fetchWithAuth]);
+          const dataUsers: LikesUsuariosResponse = await resUsers.json();
 
+          const count = dataUsers.likes_usuarios_posteo.length || 0;
+          const hasLiked = dataUsers.likes_usuarios_posteo.some(
+            (like) => like._idUsuario._id === user.uid            
+          );
+          return [post.idPost, { count, hasLiked }] as const;
+        })
+      );
+      if (cancelled) return;
+
+      const entries = pairs
+        .filter(Boolean) as [string, { count: number; hasLiked: boolean }][];
+      setLikesState((prev) => ({
+        ...prev,
+        ...Object.fromEntries(entries),
+      }));
+    } catch (err) {
+      console.error("Error cargando likes:", err);
+    }
+  })();
+  
+
+  return () => {
+    cancelled = true;
+  };
+}, [posts, user, fetchWithAuth]);
+
+
+  // Función para dar / quitar like
   // Función para dar / quitar like
   const toggleLike = async (postId: string) => {
     try {
@@ -69,6 +84,7 @@ export default function PublicacionUsuario() {
         { method: "PUT" }
       );
       if (!res.ok) return;
+
       const data = await res.json();
 
       setLikesState((prev) => {
@@ -81,7 +97,7 @@ export default function PublicacionUsuario() {
         } else if (data.msg === "Like eliminado") {
           return {
             ...prev,
-            [postId]: { count: prevData.count - 1, hasLiked: false },
+            [postId]: { count: Math.max(prevData.count - 1, 0), hasLiked: false },
           };
         }
         return prev;
@@ -90,6 +106,7 @@ export default function PublicacionUsuario() {
       console.error("Error al dar like:", err);
     }
   };
+
 
   // Abrir modal con usuarios que dieron like
   const openLikesModal = async (postId: string) => {
@@ -201,7 +218,7 @@ export default function PublicacionUsuario() {
                   </button>
 
                   <div
-                    className="d-inline cursor-pointer"
+                    className="d-inline"
                     onClick={() => openLikesModal(post.idPost)}
                     style={{cursor:"pointer"}}
                   >
@@ -217,6 +234,7 @@ export default function PublicacionUsuario() {
       })}
 
       {/* Observer */}
+      {/* Se usa para cargar mas publicaciones conforme se llegue al final de la pantalla */}
       <div ref={observerRef} />
 
       {loading && !finished && <Spinner />}
