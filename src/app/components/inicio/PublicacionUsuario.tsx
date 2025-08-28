@@ -93,7 +93,7 @@ export default function PublicacionUsuario() {
       // Llamada al endpoint para dar/quitar like
       const res = await fetchWithAuth(
         `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${postId}/like`,
-        { method: "PUT" } // ⚠️ Aquí asegúrate de usar el método correcto según tu backend
+        { method: "POST" } 
       );
       if (!res.ok) return;
 
