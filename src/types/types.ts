@@ -121,6 +121,7 @@ export interface LikeUsuario {
     };
     url: string; // URL del perfil del usuario
     uid: string;
+    _id: string;
   };
   _idPosteo: string;
   createdAt: string;
