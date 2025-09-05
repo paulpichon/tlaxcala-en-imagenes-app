@@ -22,9 +22,8 @@ export function useFollow(userId?: string, isOpen: boolean = true) {
 
         if (res.ok) {
           const data = await res.json();
-          setIsFollowing(data.sigueUsuario); // { "sigueUsuario": true/false }
+          setIsFollowing(data.sigueUsuario);
         } else {
-          console.warn("No se pudo verificar follow");
           setIsFollowing(false);
         }
       } catch (error) {
@@ -61,7 +60,6 @@ export function useFollow(userId?: string, isOpen: boolean = true) {
 
       if (!res.ok) throw new Error("Error en follow/unfollow");
       await res.json();
-
       setIsFollowing(!isFollowing);
     } catch (error) {
       console.error("Error follow/unfollow:", error);
