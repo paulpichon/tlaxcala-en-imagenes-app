@@ -29,7 +29,6 @@ export default function ModalLikesUsuarios({
   }, [isOpen]);
 
   if (!isOpen) return null;
-  
   return (
     <div
       className={`modal fade ${isOpen ? "show d-block" : ""}`}
@@ -56,7 +55,7 @@ export default function ModalLikesUsuarios({
             ) : (
                 <ul className="list-unstyled">
                   {usuarios.map((like) => (
-                    <a href={`perfil/${like._idUsuario.url}`} key={like._id} className="text-decoration-none text-dark">
+                    <a href={`perfil/${like._idUsuario.url}`} key={like._idUsuario._id} className="text-decoration-none text-dark">
                       <li className="d-flex align-items-center mb-3">
                         <Image
                           src={like._idUsuario.imagen_perfil.url}
