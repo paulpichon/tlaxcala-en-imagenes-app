@@ -15,10 +15,16 @@ import ModalLikesUsuarios from "../ModalLikesUsuarios"; // Modal para mostrar us
 // Componente principal
 export default function PublicacionUsuario() {
   // Hook que trae publicaciones de la API y maneja scroll infinito
-  const { posts, loading, observerRef, finished } = useInfinitePosts(
+  const { posts, 
+          loading, 
+          observerRef, 
+          finished,
+          updateFollowState,   // ✅ ahora sí existe
+          updateFavoritoState  // ✅ ahora sí existe
+        } = useInfinitePosts(
     `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos`
   );
-
+  
   // Trae funciones y datos del contexto de autenticación
   const { fetchWithAuth, user } = useAuth();
 
@@ -39,7 +45,7 @@ export default function PublicacionUsuario() {
   // 🟢 useEffect: Inicializa el estado de likes de cada post cuando se cargan posts o cambia el usuario logueado
   useEffect(() => {
     if (!user || posts.length === 0) return; // Si no hay usuario o posts, no hacer nada
-
+    
     let cancelled = false; // Flag para cancelar si el componente se desmonta
 
     (async () => {
@@ -48,7 +54,7 @@ export default function PublicacionUsuario() {
         const pairs = await Promise.all(
           posts.map(async (post) => {
             const resUsers = await fetchWithAuth(
-              `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${post.idPost}/likes/usuarios`
+              `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${post._id}/likes/usuarios`
             );
             if (!resUsers.ok) return null;
 
@@ -62,8 +68,8 @@ export default function PublicacionUsuario() {
               (like) => like._idUsuario._id === user.uid // 👈 compara el uid del usuario logueado con los de la lista
             );
 
-            // Devolvemos un par: [idPost, { count, hasLiked }]
-            return [post.idPost, { count, hasLiked }] as const;
+            // Devolvemos un par: [_id, { count, hasLiked }]
+            return [post._id, { count, hasLiked }] as const;
           })
         );
 
@@ -98,7 +104,6 @@ export default function PublicacionUsuario() {
       if (!res.ok) return;
 
       const data = await res.json();
-
       // Actualizamos el estado local según la respuesta
       setLikesState((prev) => {
         const prevData = prev[postId] || { count: 0, hasLiked: false };
@@ -157,13 +162,13 @@ export default function PublicacionUsuario() {
     <>
       {posts.map((post) => {
         // Recuperamos info de likes del estado local
-        const likeInfo = likesState[post.idPost] || {
+        const likeInfo = likesState[post._id] || {
           count: 0,
           hasLiked: false,
         };
 
         return (
-          <div key={post.idPost} className="contenedor_publicaciones">
+          <div key={post._id} className="contenedor_publicaciones">
             {/* Encabezado con info del usuario */}
             <div className="container-fluid">
               <div className="contenedor_publicacion">
@@ -232,7 +237,7 @@ export default function PublicacionUsuario() {
                 <div className="footer_publicacion">
                   {/* Botón de like */}
                   <button
-                    onClick={() => toggleLike(post.idPost)}
+                    onClick={() => toggleLike(post._id)}
                     className={`like-button ${
                       likeInfo.hasLiked ? "liked" : ""
                     }`}
@@ -243,7 +248,7 @@ export default function PublicacionUsuario() {
                   {/* Número de likes + palabra "Me gusta" → abre modal */}
                   <div
                     className="d-inline"
-                    onClick={() => openLikesModal(post.idPost)}
+                    onClick={() => openLikesModal(post._id)}
                     style={{cursor:"pointer"}}
                   >
                     <p className="d-inline votaciones mb-0">{likeInfo.count}</p>{" "}
@@ -274,6 +279,8 @@ export default function PublicacionUsuario() {
         isOpen={isFirstModalOpen}
         selectedImage={selectedPost}
         onClose={closeFirstModal}
+        updateFollowState={updateFollowState}
+        updateFavoritoState={updateFavoritoState} // 👈 nuevo
       />
 
       {/* Modal con la lista de usuarios que dieron like */}
