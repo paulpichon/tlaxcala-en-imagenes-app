@@ -2,42 +2,40 @@ import { ApiResponsePosteos, Posteo } from "@/types/types";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 
-
 export function useInfinitePosts(initialUrl: string) {
   const { fetchWithAuth } = useAuth();
   const [posts, setPosts] = useState<Posteo[]>([]);
   const [nextUrl, setNextUrl] = useState<string | null>(initialUrl);
   const [loading, setLoading] = useState(false);
-  const [finished, setFinished] = useState(false); // ✅ nuevo estado para indicar que ya no hay más posts
+  const [finished, setFinished] = useState(false);
 
   const observerRef = useRef<HTMLDivElement | null>(null);
 
   const fetchPosts = useCallback(async () => {
-    // ✅ Si no hay URL, ya cargamos todos los posts, o ya estamos cargando, no hacemos nada
     if (!nextUrl || loading || finished) return;
 
     setLoading(true);
 
     try {
       const res = await fetchWithAuth(
-        nextUrl.startsWith("http") ? nextUrl : `${process.env.NEXT_PUBLIC_API_URL_LOCAL}${nextUrl}`
+        nextUrl.startsWith("http")
+          ? nextUrl
+          : `${process.env.NEXT_PUBLIC_API_URL_LOCAL}${nextUrl}`
       );
 
       if (!res.ok) throw new Error("Error al cargar los posteos");
 
       const data: ApiResponsePosteos = await res.json();
 
-      // ✅ Si la respuesta viene vacía, indicamos que ya terminamos
-      if (!data.posteos || data.posteos.length === 0) {
+      if (!data.posteosConEstado || data.posteosConEstado.length === 0) {
         setFinished(true);
         setNextUrl(null);
         return;
       }
 
-      setPosts((prev) => [...prev, ...data.posteos]);
+      setPosts((prev) => [...prev, ...data.posteosConEstado]);
       setNextUrl(data.next || null);
 
-      // Si la próxima página es null, marcamos finished
       if (!data.next) setFinished(true);
     } catch (error) {
       console.error(error);
@@ -45,6 +43,28 @@ export function useInfinitePosts(initialUrl: string) {
       setLoading(false);
     }
   }, [nextUrl, loading, finished, fetchWithAuth]);
+
+  // 🔹 Función para actualizar follow
+  const updateFollowState = useCallback((userId: string, newState: boolean) => {
+    setPosts((prev) =>
+      prev.map((post) =>
+        post._idUsuario._id === userId
+          ? { ...post, isFollowing: newState  }
+          : post
+      )
+    );
+  }, []);
+
+  // 🔹 Función para actualizar favorito
+  const updateFavoritoState = useCallback((postId: string, newState: boolean) => {
+    setPosts((prev) =>
+      prev.map((post) =>
+        post._id === postId
+          ? { ...post, isFavorito: newState  }
+          : post
+      )
+    );
+  }, []);
 
   useEffect(() => {
     if (loading || finished) return;
@@ -54,14 +74,14 @@ export function useInfinitePosts(initialUrl: string) {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          fetchPosts(); // cargar más posts
+          fetchPosts();
         }
       },
       {
-        rootMargin: "200px", // margen extra alrededor del viewport
-        threshold: 0.1,      // basta con que el 10% del div sea visible
+        rootMargin: "200px",
+        threshold: 0.1,
       }
-    );    
+    );
 
     observer.observe(currentRef);
 
@@ -70,5 +90,12 @@ export function useInfinitePosts(initialUrl: string) {
     };
   }, [fetchPosts, loading, finished]);
 
-  return { posts, loading, observerRef, finished };
+  return {
+    posts,
+    loading,
+    observerRef,
+    finished,
+    updateFollowState,   // 👈 expuesto
+    updateFavoritoState, // 👈 expuesto
+  };
 }
