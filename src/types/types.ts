@@ -32,8 +32,6 @@ export interface APIResponse {
     data?: APIResponseData;
     token?: string;
   }
-// Interface de Posteo
-// Usamos la interface UsuarioLogueado para _idUsuario
 export interface Posteo {
   _idUsuario: UsuarioLogueado;
   public_id_img: string;
@@ -43,7 +41,11 @@ export interface Posteo {
   fecha_creacion: string;
   fecha_actualizacion?: string;
   idPost: string;
+  _id: string;
+  isFollowing: boolean;   // 👈 añadido
+  isFavorito: boolean;    // 👈 añadido
 }
+
 // Response de la API para los posteos
 // Esta interface es la que se espera recibir de la API al hacer una petición para obtener los posteos
 // Contiene un array de posteos, y las URLs para paginación
@@ -54,7 +56,7 @@ export interface ApiResponsePosteos {
   limite: number;
   total_registros: number;
   mostrando: number;
-  posteos: Posteo[];
+  posteosConEstado: Posteo[];
 }
 // Interface para ModalOpcionesPublicacion
 export interface PropsModalOpcionesPublicacion {
@@ -133,4 +135,18 @@ export interface LikeUsuario {
 // Contiene un array de usuarios que han dado like al posteo
 export interface LikesUsuariosResponse {
   likes_usuarios_posteo: LikeUsuario[];
+}
+// Interface para las props del componente FollowButton
+export interface FavoritoButtonProps {
+  posteoId: string;
+  autorId: string;
+  imagenUrl: string;
+  initialFavorito: boolean; // 👈 estado inicial desde el post
+  onToggle?: (newState: boolean) => void; // ✅ nueva prop opcional
+}
+// Interface para las props del componente FollowButton
+export interface FollowButtonProps {
+  userId: string;
+  initialFollowing: boolean;
+  onToggle?: (newState: boolean) => void; // 👈 notificación
 }
