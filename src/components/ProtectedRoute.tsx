@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 // Spinner de carga
 import Spinner from '@/app/components/spinner';
+// Bootstrap
+import "bootstrap/dist/css/bootstrap.css";
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -20,7 +22,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   // Puedes mostrar una pantalla de carga mientras se verifica
   if (loading || !user) {
     return (
-      <div style={{ textAlign: 'center', marginTop: '4rem' }}>
+      <div className="d-flex justify-content-center align-items-center vh-100">
         <Spinner />
       </div>
     );
