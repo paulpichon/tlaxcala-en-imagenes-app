@@ -5,6 +5,7 @@ import { PropsModalOpcionesPublicacion } from "@/types/types";
 import perfil from "../ui/perfil/perfil.module.css";
 import FollowButton from "./FollowButton";
 import FavoritoButton from "./FavoritoButton";
+import Link from "next/link";
 
 interface ModalOpcionesPublicacionProps extends PropsModalOpcionesPublicacion {
   updateFollowState: (userId: string, isFollowing: boolean) => void;
@@ -19,7 +20,7 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   updateFavoritoState,
 }) => {
   if (!isOpen || !selectedImage) return null;
-
+  
   return (
     <div
       className="modal show d-block"
@@ -55,13 +56,12 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
               </div>
 
               <div className="col-md-12">
-                <a
-                  href={`post/${selectedImage._id}`}
-                  type="button"
-                  className={`${perfil.btn_opciones_publicaciones}`}
-                >
-                  Ir a la publicación
-                </a>
+                <Link
+                  href={`/posteo/${selectedImage._id}/`} 
+                  className={`${perfil.btn_opciones_publicaciones}`}  
+                  >
+                    Ir a la publicación
+                </Link>
               </div>
 
               <div className="col-md-12">
