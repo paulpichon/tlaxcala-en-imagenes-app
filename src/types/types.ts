@@ -64,6 +64,14 @@ export interface PropsModalOpcionesPublicacion {
   selectedImage: Posteo | null;
   onClose: () => void;
 };
+// 
+// 📌 Respuesta para un post en detalle
+export interface PosteoDetalleResponse {
+  posteo: Posteo;        // El post en sí
+  isFollowing: boolean;  // Si el usuario actual sigue al autor
+  isFavorito: boolean;   // Si el usuario actual tiene en favoritos este post
+}
+
 // Interface props para el reenvio de correo electronico
 export interface ModalReenviarCorreoProps {
   show: boolean;
