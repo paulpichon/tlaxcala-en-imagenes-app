@@ -1,15 +1,16 @@
-import FooterSugerencias from "@/app/components/FooterSugerencias";
-import HeaderSuperior from "@/app/components/HeaderSuperior";
-import ImagenesMasVotadas from "@/app/components/ImagenesMasVotadas";
-import MenuPrincipal from "@/app/components/MenuPrincipal";
-import Publicidad from "@/app/components/Publicidad";
+// Pagina de Posteo de usuario
+// Muestra la informacion de un posteo en detalle
 import { Viewport } from "next";
+import HeaderSuperior from "@/app/components/HeaderSuperior";
+import MenuPrincipal from "@/app/components/MenuPrincipal";
+import ImagenesMasVotadas from "@/app/components/ImagenesMasVotadas";
+import Publicidad from "@/app/components/Publicidad";
+import FooterSugerencias from "@/app/components/FooterSugerencias";
 
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
-// Estilos de pagina
-// import styles from "./ui/page.module.css";
-// import "../ui/inicio/inicio.css";
+// Componente PosteoDelete, traer informacion del POSTEO
+import PosteoDetalle from "@/app/components/PosteoDetalle";
 
 export const viewport: Viewport = {
     width: 'device-width',
@@ -21,13 +22,7 @@ export const viewport: Viewport = {
   }
 
 
-export default async function Posteo({
-    params,
-  }: {
-    params: Promise<{ idposteo: string }>
-  }) {
-    const { idposteo } = await params
-
+export default async function Posteo() {
     return (
            // <!--Contenedor-->
         <div className="contenedor_principal">
@@ -55,11 +50,9 @@ export default async function Posteo({
                     
                     {/* <!-- Contenedor del contenido principal publicacion --> */}
                     <div className="contenedor_contenido_principal">
-                        
-                        {/* Publicaciones de usuarios */}
-                        {/* <PublicacionUsuario /> */}
-                        <h1>usuario: { idposteo }</h1>
-   
+                        {/* Publicacion de usuario */}
+                        <PosteoDetalle />
+
                     </div>
                     {/* <!-- Contenedor del contenido principal publicacion --> */}
                 </div>
