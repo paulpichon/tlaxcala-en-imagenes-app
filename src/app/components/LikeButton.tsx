@@ -1,40 +1,54 @@
+// Componentes de LikeButton
 // Archivo: components/LikeButton.tsx
-// Botón de Like reutilizable con contador y modal opcional
-
 'use client';
-
-import { FiHeart } from "react-icons/fi";
+// Hook personalizado para manejar likes
 import { useLikes } from "@/app/hooks/useLikes";
+import { FiHeart } from "react-icons/fi";
 
 interface LikeButtonProps {
   postId: string;
-  onOpenLikesModal?: () => void; // opcional: abre el modal con usuarios
+  onOpenLikesModal?: () => void;
 }
 
 export default function LikeButton({ postId, onOpenLikesModal }: LikeButtonProps) {
   const { likeState, toggleLike, loading } = useLikes(postId);
 
-  if (loading) return null; // opcional: puedes poner un Spinner aquí
+  const handleClick = () => {
+    toggleLike();
+  };
 
   return (
     <div className="d-flex align-items-center gap-2">
       {/* Botón corazón */}
       <button
-        onClick={toggleLike}
+        onClick={handleClick}
+        disabled={loading}
         className={`like-button ${likeState.hasLiked ? "liked" : ""}`}
       >
-        <FiHeart color={likeState.hasLiked ? "red" : "black"} />
+        {loading ? (
+          <span className="spinner-border spinner-border-sm" role="status" />
+        ) : (
+          <FiHeart className="cursor-pointer" color={likeState.hasLiked ? "red" : "black"} />
+        )}
       </button>
 
-      {/* Contador de likes (abre modal si existe onOpenLikesModal) */}
+      {/* Contador de likes */}
       <div
         className="d-inline"
         onClick={onOpenLikesModal}
         style={{ cursor: "pointer" }}
       >
-        <p className="d-inline votaciones mb-0">{likeState.count}</p>{" "}
-        <strong className="etiqueta_strong">Me gusta</strong>
+        {loading ? (
+          // spinner pequeño de Bootstrap mientras carga
+          <span className="spinner-border spinner-border-sm align-middle" role="status" />
+        ) : (
+          <>
+            <p className="d-inline votaciones mb-0">{likeState.count}</p>{" "}
+            <strong className="etiqueta_strong">Me gusta</strong>
+          </>
+        )}
       </div>
+
     </div>
   );
 }

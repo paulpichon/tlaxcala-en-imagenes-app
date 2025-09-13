@@ -60,7 +60,7 @@ export default function PublicacionUsuario() {
   const closeFirstModal = () => setIsFirstModalOpen(false);
 
   if (loading && posts.length === 0)
-    return <p className="text-center mt-5">Cargando publicaciones...</p>;
+    return <div className="d-flex justify-content-center align-items-center vh-100"><Spinner /></div>;
 
   return (
     <>
