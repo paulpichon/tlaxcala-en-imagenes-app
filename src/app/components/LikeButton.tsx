@@ -28,7 +28,7 @@ export default function LikeButton({ postId, onOpenLikesModal }: LikeButtonProps
         {loading ? (
           <span className="spinner-border spinner-border-sm" role="status" />
         ) : (
-          <FiHeart color={likeState.hasLiked ? "red" : "black"} />
+          <FiHeart className="cursor-pointer" color={likeState.hasLiked ? "red" : "black"} />
         )}
       </button>
 
