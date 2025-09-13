@@ -6,6 +6,8 @@ import MenuPrincipal from "@/app/components/MenuPrincipal";
 import ImagenesMasVotadas from "@/app/components/ImagenesMasVotadas";
 import Publicidad from "@/app/components/Publicidad";
 import FooterSugerencias from "@/app/components/FooterSugerencias";
+// estilos 
+import "../../ui/inicio/inicio.css";
 
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
