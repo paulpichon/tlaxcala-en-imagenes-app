@@ -1,4 +1,6 @@
-// 📌 ModalOpcionesPublicacion.tsx
+// Se intenta impolementar la funcionalidad de compartir usando la Web Share API, si el navegador no la soporta, se copia el enlace al portapapeles como fallback.
+// Para que funcione al parecer se debe servir la app sobre HTTPS (excepto en localhost para desarrollo).
+// para mas informacion: https://chatgpt.com/c/68c33ef8-60b4-8329-ad4f-3bb056557a13
 'use client';
 
 import { PropsModalOpcionesPublicacion } from "@/types/types";
@@ -6,6 +8,7 @@ import perfil from "../ui/perfil/perfil.module.css";
 import FollowButton from "./FollowButton";
 import FavoritoButton from "./FavoritoButton";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface ModalOpcionesPublicacionProps extends PropsModalOpcionesPublicacion {
   updateFollowState: (userId: string, isFollowing: boolean) => void;
@@ -19,8 +22,40 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   updateFollowState,
   updateFavoritoState,
 }) => {
+  const pathname = usePathname();
   if (!isOpen || !selectedImage) return null;
-  
+
+  const isDetallePage = pathname.startsWith(`/posteo/`);
+  const link = `${process.env.NEXT_PUBLIC_BASE_URL}/posteo/${selectedImage._id}`;
+
+  // Copiar enlace al portapapeles
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(link);
+      alert("✅ Enlace copiado al portapapeles");
+    } catch {
+      alert("❌ No se pudo copiar el enlace");
+    }
+  };
+
+  // Compartir con Web Share API
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Mira esta publicación",
+          text: selectedImage.texto ?? "Publicación interesante",
+          url: link,
+        });
+      } catch (err) {
+        console.warn("El usuario canceló el compartir o hubo un error:", err);
+      }
+    } else {
+      // fallback: copiar al portapapeles
+      handleCopyLink();
+    }
+  };
+
   return (
     <div
       className="modal show d-block"
@@ -32,7 +67,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
           <div className="modal-body">
             <div className="row text-center">
               <div className="col-md-12">
-                {/* Botón Seguir/Dejar de seguir */}
                 <FollowButton
                   userId={selectedImage._idUsuario._id}
                   initialFollowing={selectedImage.isFollowing}
@@ -43,7 +77,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
               </div>
 
               <div className="col-md-12">
-                {/* Botón Añadir/Quitar de favoritos */}
                 <FavoritoButton
                   posteoId={selectedImage._id}
                   autorId={selectedImage._idUsuario._id}
@@ -55,14 +88,29 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                 />
               </div>
 
-              <div className="col-md-12">
-                <Link
-                  href={`/posteo/${selectedImage._id}/`} 
-                  className={`${perfil.btn_opciones_publicaciones}`}  
+              {!isDetallePage ? (
+                <div className="col-md-12">
+                  <Link
+                    href={`/posteo/${selectedImage._id}/`}
+                    className={`${perfil.btn_opciones_publicaciones}`}
                   >
                     Ir a la publicación
-                </Link>
-              </div>
+                  </Link>
+                </div>
+              ) : (
+                <div className="col-md-12">
+                  <button
+                    type="button"
+                    className={`${perfil.btn_opciones_publicaciones}`}
+                    onClick={handleShare}
+                  >
+                    {"share" in navigator
+                      ? "Compartir publicación"
+                      : "Copiar enlace de la publicación"}
+                  </button>
+
+                </div>
+              )}
 
               <div className="col-md-12">
                 <a
