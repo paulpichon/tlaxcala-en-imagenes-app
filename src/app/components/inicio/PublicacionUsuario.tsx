@@ -6,12 +6,12 @@ import Image from "next/image";
 import { FiMoreHorizontal } from "react-icons/fi";
 import { useState } from "react";
 import { useInfinitePosts } from "@/app/hooks/useInfinitePosts";
-import { Posteo, LikeUsuario, LikesUsuariosResponse } from "@/types/types";
+import { Posteo } from "@/types/types";
 import Spinner from "../spinner";
 import ModalOpcionesPublicacion from "../ModalOpcionesPublicacion";
-import { useAuth } from "@/context/AuthContext";
 import ModalLikesUsuarios from "../ModalLikesUsuarios";
 import LikeButton from "../LikeButton"; // 👈 Nuevo componente reutilizable
+import { useLikesModal } from "@/app/hooks/useLikesModal";
 
 export default function PublicacionUsuario() {
   // Hook para cargar publicaciones con scroll infinito
@@ -24,33 +24,18 @@ export default function PublicacionUsuario() {
     updateFavoritoState,
   } = useInfinitePosts(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos`);
 
-  const { fetchWithAuth } = useAuth();
-
   // Estado para modal de opciones de publicación
   const [selectedPost, setSelectedPost] = useState<Posteo | null>(null);
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
 
-  // Estado para modal de usuarios que dieron like
-  const [isLikesModalOpen, setIsLikesModalOpen] = useState(false);
-  const [likesUsuarios, setLikesUsuarios] = useState<LikeUsuario[]>([]);
-
   // Abrir modal con usuarios que dieron like
-  const openLikesModal = async (postId: string) => {
-    try {
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${postId}/likes/usuarios`
-      );
-      if (!res.ok) return;
-
-      const data: LikesUsuariosResponse = await res.json();
-      setLikesUsuarios(data.likes_usuarios_posteo);
-      setIsLikesModalOpen(true);
-    } catch (err) {
-      console.error("Error cargando usuarios de likes:", err);
-    }
-  };
-
-  const closeLikesModal = () => setIsLikesModalOpen(false);
+  const {
+    isLikesOpen,
+    likesUsuarios,
+    loading: likesLoading,
+    openLikesModal,
+    closeLikesModal,
+  } = useLikesModal();
 
   // Abrir/cerrar modal de opciones de publicación
   const openFirstModal = (post: Posteo) => {
@@ -166,7 +151,7 @@ export default function PublicacionUsuario() {
 
       {/* Modal con la lista de usuarios que dieron like */}
       <ModalLikesUsuarios
-        isOpen={isLikesModalOpen}
+        isOpen={isLikesOpen}
         onClose={closeLikesModal}
         usuarios={likesUsuarios}
       />

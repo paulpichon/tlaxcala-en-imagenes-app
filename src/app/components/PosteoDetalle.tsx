@@ -12,9 +12,10 @@ import LikeButton from "./LikeButton";
 import ModalOpcionesPublicacion from "./ModalOpcionesPublicacion";
 import ModalLikesUsuarios from "./ModalLikesUsuarios";
 
-import { PosteoDetalleResponse, Posteo, LikeUsuario } from "@/types/types";
+import { PosteoDetalleResponse, Posteo } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 import Spinner from "./spinner";
+import { useLikesModal } from "../hooks/useLikesModal";
 
 export default function PosteoDetalle() {
   const params = useParams() as { idposteo?: string } | null;
@@ -27,8 +28,6 @@ export default function PosteoDetalle() {
 
   // Modales
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
-  const [isLikesOpen, setIsLikesOpen] = useState(false);
-  const [likesUsuarios, setLikesUsuarios] = useState<LikeUsuario[]>([]);
 
   const fetchPost = useCallback(async () => {
     if (!id) {
@@ -75,25 +74,14 @@ export default function PosteoDetalle() {
   }, [fetchPost, fetchWithAuth]);
 
   // Abrir modal de likes (carga usuarios que dieron like)
-  const openLikesModal = async (postId: string) => {
-    try {
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${postId}/likes/usuarios`
-      );
-      if (!res.ok) {
-        console.error("No se pudieron cargar los likes:", res.status);
-        return;
-      }
-      const data = await res.json();
-      setLikesUsuarios(data.likes_usuarios_posteo ?? []);
-      setIsLikesOpen(true);
-    } catch (err) {
-      console.error("Error cargando usuarios de likes:", err);
-    }
-  };
-
-  const closeLikesModal = () => setIsLikesOpen(false);
-
+  const {
+    isLikesOpen,
+    likesUsuarios,
+    loading: likesLoading,
+    openLikesModal,
+    closeLikesModal,
+  } = useLikesModal();
+  
   // Abrir/cerrar modal de opciones
   const openOptions = () => setIsOptionsOpen(true);
   const closeOptions = () => setIsOptionsOpen(false);
@@ -170,6 +158,7 @@ export default function PosteoDetalle() {
         <div className="card-body">
           {/* Likes */}
           <div className="d-flex align-items-center mb-2">
+            {/* Boton LIKE */}
             <LikeButton
               postId={post._id}
               onOpenLikesModal={() => openLikesModal(post._id)}
