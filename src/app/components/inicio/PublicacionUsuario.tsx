@@ -2,16 +2,14 @@
 // Renderiza las publicaciones de los usuarios con likes y modales
 'use client';
 
-import Image from "next/image";
-import { FiMoreHorizontal } from "react-icons/fi";
 import { useState } from "react";
 import { useInfinitePosts } from "@/app/hooks/useInfinitePosts";
 import { Posteo } from "@/types/types";
 import Spinner from "../spinner";
 import ModalOpcionesPublicacion from "../ModalOpcionesPublicacion";
 import ModalLikesUsuarios from "../ModalLikesUsuarios";
-import LikeButton from "../LikeButton"; // 👈 Nuevo componente reutilizable
 import { useLikesModal } from "@/app/hooks/useLikesModal";
+import PosteoCard from "../PosteoCard";
 
 export default function PublicacionUsuario() {
   // Hook para cargar publicaciones con scroll infinito
@@ -37,11 +35,6 @@ export default function PublicacionUsuario() {
     closeLikesModal,
   } = useLikesModal();
 
-  // Abrir/cerrar modal de opciones de publicación
-  const openFirstModal = (post: Posteo) => {
-    setSelectedPost(post);
-    setIsFirstModalOpen(true);
-  };
   const closeFirstModal = () => setIsFirstModalOpen(false);
 
   if (loading && posts.length === 0)
@@ -50,82 +43,14 @@ export default function PublicacionUsuario() {
   return (
     <>
       {posts.map((post) => (
-        <div key={post._id} className="contenedor_publicaciones">
-          {/* Encabezado con info del usuario */}
-          <div className="container-fluid">
-            <div className="contenedor_publicacion">
-              <div className="contenedor_encabezado_publicacion">
-                <div className="row">
-                  {/* Imagen de perfil */}
-                  <div className="col-3 col-lg-2 d-flex justify-content-center align-items-center">
-                    <a
-                      className="link_perfil_img"
-                      href={`perfil/${post._idUsuario.url}`}
-                    >
-                      <Image
-                        src={post._idUsuario.imagen_perfil!.url}
-                        className="rounded-circle"
-                        width={500}
-                        height={500}
-                        alt={post.texto}
-                        title={post.texto}
-                      />
-                    </a>
-                  </div>
-                  {/* Nombre y texto */}
-                  <div className="col-7 col-lg-8">
-                    <h5 className="nombre_usuario_publicacion">
-                      <a
-                        className="link_perfil_usuario"
-                        href={`perfil/${post._idUsuario.url}`}
-                      >
-                        {post._idUsuario.nombre_completo.nombre +
-                          " " +
-                          post._idUsuario.nombre_completo.apellido}
-                      </a>
-                    </h5>
-                    <p className="ubicacion">{post.texto}</p>
-                  </div>
-                  {/* Botón de opciones */}
-                  <div className="col-2 col-lg-2 d-flex justify-content-center align-items-center">
-                    <button
-                      type="button"
-                      className="btn_opciones_modal"
-                      aria-label="Options"
-                      onClick={() => openFirstModal(post)}
-                    >
-                      <FiMoreHorizontal />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Imagen de la publicación */}
-          <div className="publicacion_imagen">
-            <Image
-              src={post.img}
-              width={700}
-              height={500}
-              className="img-fluid img_publicacion"
-              alt={post.texto}
-            />
-          </div>
-
-          {/* Footer con likes */}
-          <div className="container-fluid">
-            <div className="contenedor_publicacion">
-              <div className="footer_publicacion">
-                <LikeButton
-                  postId={post._id}
-                  onOpenLikesModal={() => openLikesModal(post._id)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+        <PosteoCard
+          key={post._id}
+          post={post}
+          updateFollowState={updateFollowState}
+          updateFavoritoState={updateFavoritoState}
+        />
       ))}
+
 
       {/* Div invisible usado por IntersectionObserver para el scroll infinito */}
       <div ref={observerRef} />
