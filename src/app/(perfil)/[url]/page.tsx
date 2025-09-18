@@ -1,39 +1,31 @@
+'use client';
 // Perfil de usuario
 // Recordar que el nombre de este archivo debe ser [], investigar en REACT o NEXT la estrcutura del nombre de este archivo ya que es dinamico, debe ser con el nombre del usuario
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
 // import styles from "./ui/page.module.css";
-import perfil from "../ui/perfil/perfil.module.css";
-// viewport
-import type { Viewport } from 'next';
+import perfil from "../../ui/perfil/perfil.module.css";
 // Componentes
 // Menu principal
-import MenuPrincipal from "../components/MenuPrincipal";
+import MenuPrincipal from "../../components/MenuPrincipal";
 // Header superior
-import HeaderSuperior from "../components/HeaderSuperior";
+import HeaderSuperior from "../../components/HeaderSuperior";
 // Informacion del usuario
-import InformacionUsuarioPerfil from "../components/perfil/InformacionUsuarioPerfil";
+import InformacionUsuarioPerfil from "../../components/perfil/InformacionUsuarioPerfil";
 // Publicaciones Grid de usuarios
-import PublicacionesUsuarioGrid from "../components/perfil/PublicacionesUsuarioGrid";
+import PublicacionesUsuarioGrid from "../../components/perfil/PublicacionesUsuarioGrid";
 // Imagenes mas votadas por usuarios
-import ImagenesMasVotadas from "../components/ImagenesMasVotadas";
+import ImagenesMasVotadas from "../../components/ImagenesMasVotadas";
 // Publicidad dentro del div sugerencias
-import Publicidad from "../components/Publicidad";
+import Publicidad from "../../components/Publicidad";
 // Footer sugerencias
-import FooterSugerencias from "../components/FooterSugerencias";
-
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  // Also supported by less commonly used
-  // interactiveWidget: 'resizes-visual',
-}
+import FooterSugerencias from "../../components/FooterSugerencias";
 
 
-export default function Inicio() {
+
+export default function PerfilUsuario() {
+
     return (
 		<div className="contenedor_principal">
 			<div className="row g-0">
