@@ -50,12 +50,14 @@ export default function PosteoCard({
   const openOptions = () => setIsOptionsOpen(true);
   const closeOptions = () => setIsOptionsOpen(false);
 
-  // ✅ Formatear fecha
+  // ✅ Formatear la fecha (ej: 11 de septiembre de 2025, 15:30)
+  // Por el momento solo tendremos fecha sin hora
   const fechaFormateada = new Intl.DateTimeFormat("es-MX", {
     day: "numeric",
     month: "short",
     year: "numeric",
-    ...(isDetail && { hour: "2-digit", minute: "2-digit" }), // 👈 más detalle en vista detalle
+    // hour: "2-digit",
+    // minute: "2-digit",
   }).format(new Date(post.fecha_creacion));
 
   return (
