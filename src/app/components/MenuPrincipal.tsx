@@ -26,7 +26,7 @@ export default function MenuPrincipal() {
         { name: 'Configuraciones', href: '/configuraciones', icon: FiSliders },
         { 
             name: `${user?.nombre_completo?.nombre} ${user?.nombre_completo?.apellido}`, 
-            href: `/perfil/${user?.url}`, 
+            href: `/${user?.url}`, 
             // guardamos la URL de la imagen en lugar del icono
             image: user?.imagen_perfil?.url 
         },
@@ -88,7 +88,7 @@ export default function MenuPrincipal() {
                     {dropdownOpen && (
                         <ul className="dropdown-menu show position-absolute" style={{ minWidth: '10rem' }}>
                             <li>
-                                <Link className="dropdown-item" href={`/perfil/${user?.url}`}>Ver perfil</Link>
+                                <Link className="dropdown-item" href={`/${user?.url}`}>Mi perfil</Link>
                             </li>
                             <button className="dropdown-item buttonDropDown" onClick={() => setShowModal(true)}>
                                 Cerrar sesión
