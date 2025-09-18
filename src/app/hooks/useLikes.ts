@@ -22,8 +22,9 @@ export function useLikes(postId: string) {
     let cancelled = false;
     (async () => {
       try {
+        // Endpoint: api/likes/${postId}/likes/usuarios --> Mostrar usuarios que dieron LIKE a un posteo
         const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${postId}/likes/usuarios`
+          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/likes/${postId}/likes/usuarios`
         );
         if (!res.ok) return;
 
@@ -54,8 +55,9 @@ export function useLikes(postId: string) {
 
   const toggleLike = async () => {
     try {
+      // Endpoint: api/likes/${postId}/like --> Dar/Quitar LIKE a un posteo
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${postId}/like`,
+        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/likes/${postId}/like`,
         { method: "POST" }
       );
       if (!res.ok) return;

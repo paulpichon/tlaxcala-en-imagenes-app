@@ -16,8 +16,9 @@ export function useLikesModal() {
   const openLikesModal = async (postId: string) => {
     setLoading(true);
     try {
+      // Endpoint: api/likes/${postId}/likes/usuarios --> Mostrar usuarios que dieron LIKE a un posteo
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${postId}/likes/usuarios`
+        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/likes/${postId}/likes/usuarios`
       );
       if (!res.ok) {
         console.error("No se pudieron cargar los likes:", res.status);
