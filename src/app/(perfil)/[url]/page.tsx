@@ -1,101 +1,119 @@
-'use client';
-// Perfil de usuario
-// Recordar que el nombre de este archivo debe ser [], investigar en REACT o NEXT la estrcutura del nombre de este archivo ya que es dinamico, debe ser con el nombre del usuario
-// bootstrap
+"use client";
+
 import "bootstrap/dist/css/bootstrap.css";
-// Estilos de pagina
-// import styles from "./ui/page.module.css";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import perfil from "../../ui/perfil/perfil.module.css";
+
 // Componentes
-// Menu principal
 import MenuPrincipal from "../../components/MenuPrincipal";
-// Header superior
 import HeaderSuperior from "../../components/HeaderSuperior";
-// Informacion del usuario
 import InformacionUsuarioPerfil from "../../components/perfil/InformacionUsuarioPerfil";
-// Publicaciones Grid de usuarios
 import PublicacionesUsuarioGrid from "../../components/perfil/PublicacionesUsuarioGrid";
-// Imagenes mas votadas por usuarios
 import ImagenesMasVotadas from "../../components/ImagenesMasVotadas";
-// Publicidad dentro del div sugerencias
 import Publicidad from "../../components/Publicidad";
-// Footer sugerencias
 import FooterSugerencias from "../../components/FooterSugerencias";
-
-
+import { useAuth } from "@/context/AuthContext";
+import { UsuarioLogueado } from "@/types/types";
 
 export default function PerfilUsuario() {
+	const { url } = useParams<{ url: string }>();
+	const { fetchWithAuth } = useAuth(); // 👈 usamos fetchWithAuth
+	const [usuario, setUsuario] = useState<UsuarioLogueado | null>(null);
+	const [loading, setLoading] = useState(true);
+  
+	useEffect(() => {
+	  if (!url) return;
+  
+	  const fetchUsuario = async () => {
+		try {
+		  const res = await fetchWithAuth(
+			`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/usuarios/${url}`
+		  );
+		  if (!res.ok) throw new Error("Error al obtener usuario");
+		  const data = await res.json();
+		  setUsuario(data.usuario);
+		} catch (error) {
+		  console.error("Error al cargar usuario:", error);
+		} finally {
+		  setLoading(false);
+		}
+	  };
+  
+	  fetchUsuario();
+	}, [url, fetchWithAuth]);
+  
+	if (loading) return <p className="text-center mt-5">Cargando perfil...</p>;
+	if (!usuario) return <p className="text-center mt-5">Usuario no encontrado</p>;
+  
 
-    return (
-		<div className="contenedor_principal">
-			<div className="row g-0">
-				<div className="col-md-2 col-lg-2 col-xl-2">
-					<div className="contenedor_menu_lateral_inferior fixed-bottom">
-						{/* Menu principal */}
-						<MenuPrincipal />
-					</div>
-				</div>
-				
-				<div className="col-md-10 col-lg-10  col-xl-6 contenedor_central_contenido">
-					<div className="contenedor_menu_superior sticky-top">
-						{/* Menu principal superior */}
-						<HeaderSuperior />
-					</div>
-					<div className="contenedor_contenido_principal">
+  return (
+    <div className="contenedor_principal">
+      <div className="row g-0">
+        {/* Menú lateral */}
+        <div className="col-md-2 col-lg-2 col-xl-2">
+          <div className="contenedor_menu_lateral_inferior fixed-bottom">
+            <MenuPrincipal />
+          </div>
+        </div>
 
-						<div className="container-fluid">
-							<div className={`${perfil.contenedor_info_usuario}`}>
-								{/* Como parametro se debe pasar la informacion de la URL del usuario */}
-								{/* Componente informacion de usuario */}
-								<InformacionUsuarioPerfil />
-							</div>
-						</div>
-					</div>
-					<div className="publicaciones_usuario">
-						
-						<div className="container-fluid">
-							<div className="row">
-								<div className="col-12">
-									<div className="contenedor_publicacion_usuario mb-5">
-										<div className=" mt-3">
-											<div className="titulo_contenedor text-center">
-												<h6 className={`${perfil.titulo_publicaciones} pt-3 pb-3`}>PUBLICACIONES</h6>
-											</div>
-											{/* Publicaciones de usuario en GRID */}
-											<PublicacionesUsuarioGrid />
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div className="col-xl-4 sugerencias">
-					<div className="contenedor_sugerencias sticky-top p-3">
-						<div className="contenedor_sugerencias_seguir mt-4">
-							<div className="row d-flex justify-content-center contenedor_border_divs_sugerencias">
-								{/* Imagenes mas votadas */}
-								<ImagenesMasVotadas />
-							</div>
-							<div className="row d-flex justify-content-center contenedor_border_divs_sugerencias">
-								<div className="col-8">
-									{/* Publicidas */}
-									<Publicidad />
-								</div>
-							</div>
+        {/* Contenido principal */}
+        <div className="col-md-10 col-lg-10 col-xl-6 contenedor_central_contenido">
+          <div className="contenedor_menu_superior sticky-top">
+            <HeaderSuperior />
+          </div>
+          <div className="contenedor_contenido_principal">
+            <div className="container-fluid">
+              <div className={`${perfil.contenedor_info_usuario}`}>
+                <InformacionUsuarioPerfil usuario={usuario} />
+              </div>
+            </div>
+          </div>
 
-							<div className="row d-flex justify-content-center mt-4">
-								<div className="col-12">
-									<div className="text-center mt-3">
-										{/* Footer DEL DIV SUGERENCIAS */}
-										<FooterSugerencias />
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-    );
+          {/* Publicaciones */}
+          <div className="publicaciones_usuario">
+            <div className="container-fluid">
+              <div className="row">
+                <div className="col-12">
+                  <div className="contenedor_publicacion_usuario mb-5">
+                    <div className="mt-3">
+                      <div className="titulo_contenedor text-center">
+                        <h6 className={`${perfil.titulo_publicaciones} pt-3 pb-3`}>
+                          PUBLICACIONES
+                        </h6>
+                      </div>
+                      <PublicacionesUsuarioGrid usuarioId={usuario.uid} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Columna sugerencias */}
+        <div className="col-xl-4 sugerencias">
+          <div className="contenedor_sugerencias sticky-top p-3">
+            <div className="contenedor_sugerencias_seguir mt-4">
+              <div className="row d-flex justify-content-center contenedor_border_divs_sugerencias">
+                <ImagenesMasVotadas />
+              </div>
+              <div className="row d-flex justify-content-center contenedor_border_divs_sugerencias">
+                <div className="col-8">
+                  <Publicidad />
+                </div>
+              </div>
+              <div className="row d-flex justify-content-center mt-4">
+                <div className="col-12">
+                  <div className="text-center mt-3">
+                    <FooterSugerencias />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
