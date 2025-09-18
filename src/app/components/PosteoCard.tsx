@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FiMoreHorizontal, FiMessageCircle, FiSend, FiBookmark } from "react-icons/fi";
+import { FiMoreHorizontal } from "react-icons/fi";
 import { useState } from "react";
 import LikeButton from "./LikeButton";
 import ModalOpcionesPublicacion from "./ModalOpcionesPublicacion";
