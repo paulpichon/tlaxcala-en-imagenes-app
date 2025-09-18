@@ -65,7 +65,7 @@ export default function PosteoCard({
       <div className="card shadow-sm mb-4 border-0 rounded-3 overflow-hidden">
         {/* Header */}
         <div className="card-header bg-white d-flex align-items-center border-0">
-          <Link className="link_perfil_img" href={`perfil/${post._idUsuario.url}`}>
+          <Link className="link_perfil_img" href={`/${post._idUsuario.url}`}>
             <Image
               src={post._idUsuario.imagen_perfil!.url}
               alt={post.texto}
@@ -78,7 +78,7 @@ export default function PosteoCard({
           <strong>
             <Link
               className="link_perfil_usuario text-dark text-decoration-none"
-              href={`perfil/${post._idUsuario.url}`}
+              href={`/${post._idUsuario.url}`}
             >
               {post._idUsuario.nombre_completo.nombre}{" "}
               {post._idUsuario.nombre_completo.apellido}
@@ -123,10 +123,15 @@ export default function PosteoCard({
 
           {/* Texto */}
           <p className="mb-1">
-            <strong className="me-1">
-              {post._idUsuario.nombre_completo.nombre}{" "}
-              {post._idUsuario.nombre_completo.apellido}
-            </strong>
+            <Link
+                className="link_perfil_usuario text-dark text-decoration-none"
+                href={`/${post._idUsuario.url}`}
+            >
+                <strong className="me-1">
+                    {post._idUsuario.nombre_completo.nombre}{" "}
+                    {post._idUsuario.nombre_completo.apellido}
+                </strong>
+            </Link>
             {post.texto}
           </p>
 
