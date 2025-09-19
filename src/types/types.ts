@@ -114,6 +114,7 @@ export interface UsuarioPerfil extends UsuarioLogueado {
   totaltPosteos: number;
   totalSeguidores: number;
   totalSeguidos: number;
+  isFollowing: boolean; // Si el usuario actual sigue a este usuario
 }
 // Tipo de datos para el contexto de autenticación
 export interface IAuthContext {
