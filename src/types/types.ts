@@ -92,7 +92,7 @@ export interface ReenviarCorreoResponse {
 }
 // Tipos de dato para el usuario que esta logueado
 // Se puede modificar los atributos que se pueden traer desde la API: quitar o agregar atributos, dependiendo de lo que queremos mostrar en el FRONTEND
-export interface UsuarioLogueado {
+export interface UsuarioLogueado { 
   nombre_completo: {
     nombre: string;
     apellido: string;
@@ -107,6 +107,13 @@ export interface UsuarioLogueado {
   url?: string; // slug del perfil
   uid: string;
   _id: string;
+}
+// Tipo de datos para el perfil de usuario
+// Extiende de UsuarioLogueado y agrega estadísticas adicionales 
+export interface UsuarioPerfil extends UsuarioLogueado {
+  totaltPosteos: number;
+  totalSeguidores: number;
+  totalSeguidos: number;
 }
 // Tipo de datos para el contexto de autenticación
 export interface IAuthContext {
