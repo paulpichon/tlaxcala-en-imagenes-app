@@ -1,30 +1,57 @@
 import Image from "next/image";
 import perfil from "../../ui/perfil/perfil.module.css";
-import { UsuarioLogueado } from "@/types/types";
+import { UsuarioPerfil } from "@/types/types";
+import FollowButton from "../FollowButton";
+import { useAuth } from "@/context/AuthContext";
 
-export default function InformacionUsuarioPerfil({ usuario }: { usuario: UsuarioLogueado }) {
+export default function InformacionUsuarioPerfil({ usuario }: { usuario: UsuarioPerfil }) {
+  const { user } = useAuth(); // 👈 usuario logueado
+  const isOwnProfile = user?.uid === usuario._id; // 👈 validar si es el mismo perfil del usuario logueado
+  
   return (
-    <div className="row">
-      <div className="col-4 col-sm-3 text-center">
-        <Image
-          src={usuario.imagen_perfil?.url || "/usuarios/default.jpg"}
-          width={100}
-          height={100}
-          className={`${perfil.img_perfil_usuario} rounded-circle`}
-          alt={usuario.nombre_completo.nombre}
-        />
-      </div>
-      <div className="col-5 col-sm-7">
-        <div className="informacion_usuario text-center">
-          <h6 className={`${perfil.nombre_usuario_perfil}`}>
-            {usuario.nombre_completo.nombre} {usuario.nombre_completo.apellido}
-          </h6>
-          <p>{usuario.lugar_radicacion?.nombre_estado || "Sin ubicación"}</p>
+    <div className="container mt-4">
+      <div className="row align-items-center">
+        {/* Imagen de perfil */}
+        <div className="col-4 col-md-3 text-center">
+          <Image
+            src={usuario.imagen_perfil?.url || "/default-profile.png"}
+            width={150}
+            height={150}
+            className={`${perfil.img_perfil_usuario} rounded-circle`}
+            alt={usuario.nombre_completo.nombre}
+          />
         </div>
-      </div>
-      <div className="col-3 col-sm-2">
-        <div className={`${perfil.seguir_usuario} text-center`}>
-          <button className={`${perfil.btn_seguir_usuario}`}>Seguir</button>
+
+        {/* Info del usuario */}
+        <div className="col-8 col-md-9">
+          {/* Primera fila: nombre + botón */}
+          <div className="d-flex align-items-center flex-wrap gap-2 mb-3">
+            <h2 className="mb-0 fw-normal">{usuario.url || usuario.correo}</h2>
+
+            {/* 👇 Solo mostrar si NO es su propio perfil */}
+            {!isOwnProfile && (
+              // Se puede pasar className como parametro para cambiar el estilo del boton de cuando esta en Perfil de usuario o en opciones del modal
+              <FollowButton
+                userId={usuario._id}
+                initialFollowing={usuario.isFollowing} 
+              />
+            )}
+          </div>
+
+          {/* Segunda fila: estadísticas */}
+          <div className="d-flex flex-wrap gap-4 mb-2">
+            <span><strong>{usuario.totaltPosteos}</strong> publicaciones</span>
+            <span><strong>{usuario.totalSeguidores}</strong> seguidores</span>
+            <span><strong>{usuario.totalSeguidos}</strong> seguidos</span>
+          </div>
+
+          {/* Tercera fila: nombre completo y ubicación */}
+          <div>
+            <p className="mb-0 fw-bold">
+              {usuario.nombre_completo.nombre} {usuario.nombre_completo.apellido}
+            </p>
+            <p className="text-muted">{usuario.lugar_radicacion?.nombre_estado || "Sin ubicación"}</p>
+          </div>
         </div>
       </div>
     </div>

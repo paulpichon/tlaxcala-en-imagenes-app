@@ -14,12 +14,14 @@ import ImagenesMasVotadas from "../../components/ImagenesMasVotadas";
 import Publicidad from "../../components/Publicidad";
 import FooterSugerencias from "../../components/FooterSugerencias";
 import { useAuth } from "@/context/AuthContext";
-import { UsuarioLogueado } from "@/types/types";
+// Se usa el tipo UsuarioPerfil que extiende de UsuarioLogueado ya que se agregan estadisticas adicionales  totaltPosteos, totalSeguidores, totalSeguidos
+import { UsuarioPerfil } from "@/types/types";
 
 export default function PerfilUsuario() {
 	const { url } = useParams<{ url: string }>();
 	const { fetchWithAuth } = useAuth(); // 👈 usamos fetchWithAuth
-	const [usuario, setUsuario] = useState<UsuarioLogueado | null>(null);
+  // Se usa el tipo UsuarioPerfil que extiende de UsuarioLogueado ya que se agregan estadisticas adicionales  totaltPosteos, totalSeguidores, totalSeguidos
+	const [usuario, setUsuario] = useState<UsuarioPerfil | null>(null);
 	const [loading, setLoading] = useState(true);
   
 	useEffect(() => {
@@ -82,7 +84,7 @@ export default function PerfilUsuario() {
                           PUBLICACIONES
                         </h6>
                       </div>
-                      <PublicacionesUsuarioGrid usuarioId={usuario.uid} />
+                      <PublicacionesUsuarioGrid usuarioId={usuario._id} />
                     </div>
                   </div>
                 </div>
