@@ -39,21 +39,14 @@ p.cantidad_likes svg {
 }
 /* boton seguir usuario */
 button.btn_seguir_usuario {
-    background-color: #EBCA9A;
-    color: #ffffff;
+    background-color: transparent;
+    color: #EBCA9A;
     margin-top: 10px;
     border: 1px solid #EBCA9A;
     border-radius: 5px;
     padding: 3px 4px;
     
 }
-/* hover */
-button.btn_seguir_usuario:hover {
-    background-color: #ffffff;
-    transition: all .3s ease-in-out;
-    color: #EBCA9A;
-}
-
 /* Publicaciones GRID */
 /* titulo publicaciones */
 h6.titulo_publicaciones {
