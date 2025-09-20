@@ -67,9 +67,13 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
           <div className="modal-body">
             <div className="row text-center">
               <div className="col-md-12">
+                {/* Se pasa className como parametro para cambiar el estilo dle boton de cuando esta en Perfil de usuario o en opciones del modal */}
                 <FollowButton
                   userId={selectedImage._idUsuario._id}
                   initialFollowing={selectedImage.isFollowing}
+                  className={`${perfil.btn_opciones_publicaciones} ${
+                    selectedImage.isFollowing ? perfil.btn_rojo : perfil.btn_seguir
+                  }`}
                   onToggle={(newState) =>
                     updateFollowState(selectedImage._idUsuario._id, newState)
                   }
