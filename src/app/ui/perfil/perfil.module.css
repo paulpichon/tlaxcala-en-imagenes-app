@@ -41,11 +41,24 @@ p.cantidad_likes svg {
 button.btn_seguir_usuario {
     background-color: transparent;
     color: #EBCA9A;
-    margin-top: 10px;
+    /* margin-top: 10px; */
     border: 1px solid #EBCA9A;
     border-radius: 5px;
     padding: 3px 4px;
     
+}
+button.btn_dejarSeguir_usuario {
+    background-color: transparent;
+    color: red;
+    /* margin-top: 10px; */
+    border: 1px solid red;
+    border-radius: 5px;
+    padding: 3px 4px;
+    transition: all 0.3s ease;   
+}
+button.btn_dejarSeguir_usuario:hover {
+    background-color: red;
+    color: white;   
 }
 /* Publicaciones GRID */
 /* titulo publicaciones */
