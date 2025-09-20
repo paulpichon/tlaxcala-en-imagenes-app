@@ -2,17 +2,16 @@
 // Se usara Layouts Anidados en la estructura del proyecto
 // https://chatgpt.com/c/674542f3-d5bc-8002-847c-c817ca29ba97
 // Link_activo: color del link activo
-import "../ui/globals.css";
+import "../../ui/globals.css";
 // Meta datos NEXTJS
 import { Metadata } from "next";
 // Fonts
-import "../ui/fonts";
+import "../../ui/fonts";
 // Ruta potegida
 import ProtectedRoute from "@/components/ProtectedRoute";
 // metadatos
 export const metadata: Metadata = {
-    title: "Tlaxcala en imágenes",
-    description: "Perfil de usuario - Magali Jimenez",
+    title: "Tlaxcala en imágenes"
   };
 
 export default function RootLayout({
