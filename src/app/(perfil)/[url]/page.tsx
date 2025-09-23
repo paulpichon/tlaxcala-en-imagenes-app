@@ -24,6 +24,18 @@ export default function PerfilUsuario() {
 	const [usuario, setUsuario] = useState<UsuarioPerfil | null>(null);
 	const [loading, setLoading] = useState(true);
   
+  const updateFollowState = (userId: string, isFollowing: boolean) => {
+    setUsuario(prev => {
+        if (!prev) return prev;
+        return {
+            ...prev,
+            isFollowing: isFollowing,
+        };
+    });
+};
+
+
+
 	useEffect(() => {
 	  if (!url) return;
   
@@ -67,7 +79,7 @@ export default function PerfilUsuario() {
           <div className="contenedor_contenido_principal">
             <div className="container-fluid">
               <div className={`${perfil.contenedor_info_usuario}`}>
-                <InformacionUsuarioPerfil usuario={usuario} />
+                <InformacionUsuarioPerfil usuario={usuario} updateFollowState={updateFollowState}/>
               </div>
             </div>
           </div>

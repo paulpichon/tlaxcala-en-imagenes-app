@@ -4,7 +4,7 @@ import { UsuarioPerfil } from "@/types/types";
 import FollowButton from "../FollowButton";
 import { useAuth } from "@/context/AuthContext";
 
-export default function InformacionUsuarioPerfil({ usuario }: { usuario: UsuarioPerfil }) {
+export default function InformacionUsuarioPerfil({ usuario, updateFollowState }: { usuario: UsuarioPerfil, updateFollowState: (userId: string, isFollowing: boolean) => void }) {
   const { user } = useAuth(); // 👈 usuario logueado
   const isOwnProfile = user?.uid === usuario._id; // 👈 validar si es el mismo perfil del usuario logueado
   
@@ -34,6 +34,7 @@ export default function InformacionUsuarioPerfil({ usuario }: { usuario: Usuario
               <FollowButton
                 userId={usuario._id}
                 initialFollowing={usuario.isFollowing} 
+                onToggle={newState => updateFollowState(usuario._id, newState)}
               />
             )}
           </div>
