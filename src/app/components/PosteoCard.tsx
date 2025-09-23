@@ -101,6 +101,8 @@ export default function PosteoCard({
           <Image
             src={post.img}
             alt={post.texto}
+            // width={100}
+            // height={100}
             fill
             className="object-fit-cover"
           />

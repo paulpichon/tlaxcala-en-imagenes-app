@@ -9,6 +9,7 @@ import { Metadata } from "next";
 import "../../ui/fonts";
 // Ruta potegida
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { FollowProvider } from "@/context/FollowContext";
 // metadatos
 export const metadata: Metadata = {
     title: "Tlaxcala en imágenes"
@@ -30,7 +31,9 @@ export default function RootLayout({
         
         <body>
           <ProtectedRoute>
-            {children}
+            <FollowProvider>
+              {children}
+            </FollowProvider>
           </ProtectedRoute>
         </body>
       </html>
