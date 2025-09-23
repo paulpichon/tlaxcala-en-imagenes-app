@@ -20,12 +20,14 @@ export const FollowProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const toggleFollow = async (userId: string, shouldFollow: boolean) => {
     try {
       const endpoint = shouldFollow
-        ? `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/follows/${userId}`
-        : `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/follows/${userId}/unfollow`;
+        ? `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/followers/follow/${userId}, {
+            method: "POST",
+          }`
+        : `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/followers/unfollow/${userId}, {
+            method: "DELETE",
+          }`;
 
-      const res = await fetchWithAuth(endpoint, {
-        method: "POST",
-      });
+      const res = await fetchWithAuth(endpoint);
 
       if (!res.ok) {
         throw new Error("Error al actualizar follow");
