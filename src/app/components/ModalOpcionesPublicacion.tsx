@@ -1,26 +1,22 @@
-// Se intenta impolementar la funcionalidad de compartir usando la Web Share API, si el navegador no la soporta, se copia el enlace al portapapeles como fallback.
-// Para que funcione al parecer se debe servir la app sobre HTTPS (excepto en localhost para desarrollo).
-// para mas informacion: https://chatgpt.com/c/68c33ef8-60b4-8329-ad4f-3bb056557a13
-'use client';
+"use client";
 
-import { PropsModalOpcionesPublicacion } from "@/types/types";
 import perfil from "../ui/perfil/perfil.module.css";
 import FollowButton from "./FollowButton";
 import FavoritoButton from "./FavoritoButton";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Posteo } from "@/types/types";
 
-interface ModalOpcionesPublicacionProps extends PropsModalOpcionesPublicacion {
-  updateFollowState: (userId: string, isFollowing: boolean) => void;
-  updateFavoritoState: (postId: string, isFavorito: boolean) => void;
+interface ModalOpcionesPublicacionProps {
+  isOpen: boolean;
+  selectedImage: Posteo | null;
+  onClose: () => void;
 }
 
 const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   isOpen,
   selectedImage,
   onClose,
-  updateFollowState,
-  updateFavoritoState,
 }) => {
   const pathname = usePathname();
   if (!isOpen || !selectedImage) return null;
@@ -28,7 +24,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   const isDetallePage = pathname.startsWith(`/posteo/`);
   const link = `${process.env.NEXT_PUBLIC_BASE_URL}/posteo/${selectedImage._id}`;
 
-  // Copiar enlace al portapapeles
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(link);
@@ -38,7 +33,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
     }
   };
 
-  // Compartir con Web Share API
   const handleShare = async () => {
     if (navigator.share) {
       try {
@@ -51,7 +45,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
         console.warn("El usuario canceló el compartir o hubo un error:", err);
       }
     } else {
-      // fallback: copiar al portapapeles
       handleCopyLink();
     }
   };
@@ -67,17 +60,14 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
           <div className="modal-body">
             <div className="row text-center">
               <div className="col-md-12">
-                {/* Se pasa className como parametro para cambiar el estilo dle boton de cuando esta en Perfil de usuario o en opciones del modal */}
+                {/* ✅ Ahora el botón usa FollowContext directamente */}
                 <FollowButton
                   userId={selectedImage._idUsuario._id}
                   initialFollowing={selectedImage.isFollowing}
-                  className={`${perfil.btn_opciones_publicaciones} ${
-                    selectedImage.isFollowing ? perfil.btn_rojo : perfil.btn_seguir
-                  }`}
-                  onToggle={(newState) =>
-                    updateFollowState(selectedImage._idUsuario._id, newState)
-                  }
-                />
+                  className={perfil.btn_opciones_publicaciones} // solo estilos base
+
+                 />
+
               </div>
 
               <div className="col-md-12">
@@ -86,9 +76,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                   autorId={selectedImage._idUsuario._id}
                   imagenUrl={selectedImage.img}
                   initialFavorito={selectedImage.isFavorito}
-                  onToggle={(newState) =>
-                    updateFavoritoState(selectedImage._id, newState)
-                  }
                 />
               </div>
 
@@ -112,7 +99,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                       ? "Compartir publicación"
                       : "Copiar enlace de la publicación"}
                   </button>
-
                 </div>
               )}
 
@@ -120,8 +106,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                 <a
                   type="button"
                   className={`${perfil.btn_opciones_publicaciones} ${perfil.btn_rojo}`}
-                  data-toggle="modal"
-                  data-target="#modalDenuncia"
                 >
                   Denunciar
                 </a>

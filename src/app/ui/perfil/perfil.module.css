@@ -37,29 +37,31 @@ p.cantidad_likes svg {
     color: #EBCA9A;
     margin-right: 4px;
 }
+/* Botón base Seguir/Dejar de usuario*/
+button.btn_base_usuario {
+  border-radius: 5px;
+  padding: 3px 8px; /* un poco más de espacio */
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: transparent;
+}
 /* boton seguir usuario */
 button.btn_seguir_usuario {
-    background-color: transparent;
     color: #EBCA9A;
     /* margin-top: 10px; */
     border: 1px solid #EBCA9A;
-    border-radius: 5px;
-    padding: 3px 4px;
     
 }
 button.btn_dejarSeguir_usuario {
-    background-color: transparent;
     color: red;
-    /* margin-top: 10px; */
     border: 1px solid red;
-    border-radius: 5px;
-    padding: 3px 4px;
-    transition: all 0.3s ease;   
+    /* transition: all 0.3s ease;    */
 }
-button.btn_dejarSeguir_usuario:hover {
+/* button.btn_dejarSeguir_usuario:hover {
     background-color: red;
     color: white;   
-}
+} */
 /* Publicaciones GRID */
 /* titulo publicaciones */
 h6.titulo_publicaciones {
@@ -117,7 +119,8 @@ button.likeButton svg:hover {
   }
 /* Modal opciones */
 /* Boton opciones de la publicacion */
-a.btn_opciones_publicaciones, button.btn_opciones_publicaciones {
+/* ESTOS ESTILOS PROBLABLEMENTE SERAN BORRADOS */
+a.btn_opciones_publicaciones {
     font-family: 'Open Sans', sans-serif;
     background-color: transparent;
     display: block;
@@ -130,14 +133,19 @@ a.btn_opciones_publicaciones, button.btn_opciones_publicaciones {
     border: none;
     border-bottom: 1px solid rgb(127, 127, 127, 0.2);
 }
-
-/* btn seguir */
-a.btn_seguir, button.btn_seguir {
-    color: #EBCA9A ;
-}
-/* opcion roja */
-a.btn_rojo, button.btn_rojo {
-    color: red;
+/* ESTILSO BASE DEL BOTON SEGUIR/DEJAR DE SEGUIR DEL MODAL OPCIONES DE PUBLICACION */
+/* TODO: RECORDAR QUE SON ESTILOS DIFERENTES LOS BOTONES DE SEGUIR/DEJAR DE SEGUIR DEL MODAL DE OPCIONES COMO DEL BOTON DE LA PAGINA DEL PERFIL DE USUARIO */
+button.btn_opciones_publicaciones {
+    font-family: 'Open Sans', sans-serif;
+    background-color: transparent;
+    display: block;
+    width: 100%;
+    font-size: 1rem;
+    text-decoration: none;
+    /* color: #000000; */
+    margin: 7px;
+    border: none;
+    border-bottom: 1px solid rgb(127, 127, 127, 0.2);
 }
 /*X-Small devices (portrait phones, less than 576px)
 No media query for `xs` since this is the default in Bootstrap*/
