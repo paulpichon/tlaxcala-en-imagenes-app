@@ -20,8 +20,6 @@ interface PosteoCardProps {
 
 export default function PosteoCard({
   post,
-  updateFollowState,
-  updateFavoritoState,
   isDetail = false, // por defecto es feed
 }: PosteoCardProps) {
   const { fetchWithAuth } = useAuth();
@@ -150,8 +148,6 @@ export default function PosteoCard({
         isOpen={isOptionsOpen}
         selectedImage={post}
         onClose={closeOptions}
-        updateFollowState={updateFollowState}
-        updateFavoritoState={updateFavoritoState}
       />
 
       <ModalLikesUsuarios
