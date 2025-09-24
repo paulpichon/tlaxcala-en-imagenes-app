@@ -49,7 +49,7 @@ export default function PublicacionesUsuarioGrid({ usuarioId }: { usuarioId: str
 
       const posteoDetalle: Posteo = {
         ...data.posteo,
-        isFollowing: data.isFollowing,
+        isFollowing: data.isFollowing, // solo inicial
         isFavorito: data.isFavorito,
       };
 
@@ -58,16 +58,6 @@ export default function PublicacionesUsuarioGrid({ usuarioId }: { usuarioId: str
     } catch (err) {
       console.error("Error al cargar detalle del posteo:", err);
     }
-  };
-
-  const updateFollowState = (userId: string, isFollowing: boolean) => {
-    if (!selectedImage) return;
-    setSelectedImage({ ...selectedImage, isFollowing });
-  };
-
-  const updateFavoritoState = (postId: string, isFavorito: boolean) => {
-    if (!selectedImage) return;
-    setSelectedImage({ ...selectedImage, isFavorito });
   };
 
   return (
@@ -88,14 +78,12 @@ export default function PublicacionesUsuarioGrid({ usuarioId }: { usuarioId: str
         </div>
       ))}
 
-      {/* Modal de imagen (que incluye opciones dentro) */}
+      {/* Modal de imagen */}
       {selectedImage && (
         <ImageModal
           isOpen={isFirstModalOpen}
           selectedImage={selectedImage}
           onClose={() => setIsFirstModalOpen(false)}
-          updateFollowState={updateFollowState}
-          updateFavoritoState={updateFavoritoState}
         />
       )}
     </div>
