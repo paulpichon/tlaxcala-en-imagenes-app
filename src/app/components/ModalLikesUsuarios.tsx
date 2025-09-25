@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { LikeUsuario } from "@/types/types";
+import Link from "next/link";
 
 interface ModalLikesUsuariosProps {
   isOpen: boolean;
@@ -55,7 +56,7 @@ export default function ModalLikesUsuarios({
             ) : (
                 <ul className="list-unstyled">
                   {usuarios.map((like) => (
-                    <a href={`perfil/${like._idUsuario.url}`} key={like._idUsuario._id} className="text-decoration-none text-dark">
+                    <Link className="text-decoration-none text-dark" href={`/${like._idUsuario.url}`} key={like._idUsuario._id}>
                       <li className="d-flex align-items-center mb-3">
                         <Image
                           src={like._idUsuario.imagen_perfil.url}
@@ -69,7 +70,7 @@ export default function ModalLikesUsuarios({
                           {like._idUsuario.nombre_completo.apellido}
                         </span>
                       </li>
-                     </a>
+                     </Link>
                   ))}
                 </ul>
             )}
