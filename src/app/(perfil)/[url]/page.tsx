@@ -1,6 +1,8 @@
 "use client";
 
 import "bootstrap/dist/css/bootstrap.css";
+// Estilos que debemos mantener para el diseño del boton de LIKE
+import "../../ui/inicio/inicio.css";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import perfil from "../../ui/perfil/perfil.module.css";
