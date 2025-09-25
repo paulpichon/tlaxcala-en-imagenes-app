@@ -6,6 +6,7 @@ import FavoritoButton from "./FavoritoButton";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Posteo } from "@/types/types";
+import { useAuth } from "@/context/AuthContext";
 
 interface ModalOpcionesPublicacionProps {
   isOpen: boolean;
@@ -18,7 +19,9 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   selectedImage,
   onClose,
 }) => {
+  const { user } = useAuth(); // Usuario logueado
   const pathname = usePathname();
+
   if (!isOpen || !selectedImage) return null;
 
   const isDetallePage = pathname.startsWith(`/posteo/`);
@@ -49,6 +52,9 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
     }
   };
 
+  // ✅ Determinar si el posteo pertenece al usuario logueado
+  const isOwnPost = user?.uid === selectedImage._idUsuario._id;
+
   return (
     <div
       className="modal show d-block"
@@ -59,37 +65,45 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
         <div className="modal-content">
           <div className="modal-body">
             <div className="row text-center">
-              <div className="col-md-12">
-                {/* ✅ Ahora el botón usa FollowContext directamente */}
-                <FollowButton
-                  userId={selectedImage._idUsuario._id}
-                  initialFollowing={selectedImage.isFollowing}
-                  className={perfil.btn_opciones_publicaciones} // solo estilos base
+              {/* Verificamos si es nuestro propio POSTEO */}
+              {isOwnPost ? (
+                //  Mostrar solo si no es propio post 
+                <>
+                  <button className={`${perfil.btn_opciones_publicaciones} text-danger`}>Eliminar</button>
+                  <button className={perfil.btn_opciones_publicaciones}>Editar</button>
+                </>
+              ) : (
+                // Si no es nuestro propio POSTEO, mostramos estos botones
+                <>
+                  <div className="col-md-12 mb-2">
+                    <FollowButton
+                      userId={selectedImage._idUsuario._id}
+                      initialFollowing={selectedImage.isFollowing}
+                      className={perfil.btn_opciones_publicaciones}
+                    />
+                  </div>
 
-                 />
+                  <div className="col-md-12 mb-2">
+                    <FavoritoButton
+                      posteoId={selectedImage._id}
+                      autorId={selectedImage._idUsuario._id}
+                      imagenUrl={selectedImage.img}
+                      initialFavorito={selectedImage.isFavorito}
+                    />
+                  </div>
+                </>
+             )}
 
-              </div>
-
-              <div className="col-md-12">
-                <FavoritoButton
-                  posteoId={selectedImage._id}
-                  autorId={selectedImage._idUsuario._id}
-                  imagenUrl={selectedImage.img}
-                  initialFavorito={selectedImage.isFavorito}
-                />
-              </div>
-
-              {!isDetallePage ? (
-                <div className="col-md-12">
+              {/* Ir a publicación / Copiar enlace */}
+              <div className="col-md-12 mb-2">
+                {!isDetallePage ? (
                   <Link
                     href={`/posteo/${selectedImage._id}/`}
                     className={`${perfil.btn_opciones_publicaciones}`}
                   >
                     Ir a la publicación
                   </Link>
-                </div>
-              ) : (
-                <div className="col-md-12">
+                ) : (
                   <button
                     type="button"
                     className={`${perfil.btn_opciones_publicaciones}`}
@@ -99,18 +113,20 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                       ? "Compartir publicación"
                       : "Copiar enlace de la publicación"}
                   </button>
-                </div>
-              )}
+                )}
+              </div>
 
-              <div className="col-md-12">
-                <a
+              {/* Denunciar */}
+              <div className="col-md-12 mb-2">
+                <button
                   type="button"
                   className={`${perfil.btn_opciones_publicaciones} ${perfil.btn_rojo}`}
                 >
                   Denunciar
-                </a>
+                </button>
               </div>
 
+              {/* Cerrar */}
               <div className="col-md-12">
                 <button
                   type="button"
