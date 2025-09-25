@@ -1,15 +1,16 @@
 'use client';
 
 import { useState } from "react";
-import { Posteo, LikeUsuario } from "@/types/types";
+import { Posteo, LikeUsuario, LikesUsuariosResponse } from "@/types/types";
 import perfil from "../../ui/perfil/perfil.module.css";
 import Image from "next/image";
-import { FiMoreHorizontal } from "react-icons/fi";
+import { FiMoreHorizontal, FiX } from "react-icons/fi";
 import ModalOpcionesPublicacion from "../ModalOpcionesPublicacion";
 import LikeButton from "../LikeButton";
 import ModalLikesUsuarios from "../ModalLikesUsuarios";
-// import { AuthContext } from "@/context/AuthContext"; // <-- importa tu contexto
 import { useAuth } from "@/context/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
+
 interface PropsImageModal {
   isOpen: boolean;
   selectedImage: Posteo | null;
@@ -24,19 +25,21 @@ const ImageModal: React.FC<PropsImageModal> = ({
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isLikesModalOpen, setIsLikesModalOpen] = useState(false);
   const [usuariosLikes, setUsuariosLikes] = useState<LikeUsuario[]>([]);
+  const { fetchWithAuth } = useAuth(); 
 
-  // const { fetchWithAuth } = useContext(AuthContext); // <-- obtiene fetchWithAuth
-  const { fetchWithAuth } = useAuth();
   if (!isOpen || !selectedImage) return null;
 
+  // ✅ Función para abrir modal de usuarios que dieron like
   const openLikesModal = async () => {
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/likes/${selectedImage._id}`
+        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/likes/${selectedImage._id}/likes/usuarios`
       );
       if (!res.ok) throw new Error("Error al obtener usuarios que dieron like");
-      const data = await res.json();
-      setUsuariosLikes(data.usuarios || []);
+
+      const data: LikesUsuariosResponse = await res.json();
+
+      setUsuariosLikes(data.likes_usuarios_posteo || []);
       setIsLikesModalOpen(true);
     } catch (err) {
       console.error("Error al cargar likes:", err);
@@ -44,141 +47,127 @@ const ImageModal: React.FC<PropsImageModal> = ({
   };
 
   return (
-    <>
-      <div
-        className="modal show d-block"
-        tabIndex={-1}
-        onClick={onClose}
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
         style={{
-          backgroundColor: "rgba(0, 0, 0, 0.8)",
-          zIndex: 1040,
-          overflowY: "auto",
+          backgroundColor: "rgba(0,0,0,0.8)",
+          zIndex: 1050,
         }}
       >
-        <div
-          className="modal-dialog modal-dialog-centered modal-xl"
-          onClick={(e) => e.stopPropagation()}
-          style={{ maxWidth: 1100 }}
+        {/* Botón cerrar */}
+        <button
+          onClick={onClose}
+          className="btn btn-dark position-absolute"
+          style={{ top: "15px", right: "25px", zIndex: 2000 }}
         >
-          <div
-            className="modal-content"
-            style={{
-              borderRadius: 10,
-              overflow: "hidden",
-              display: "flex",
-              minHeight: 500,
-            }}
-          >
-            <div className="row g-0" style={{ width: "100%" }}>
-              {/* Imagen izquierda */}
-              <div className="col-md-7 bg-dark d-flex align-items-center justify-content-center">
-                <Image
-                  src={selectedImage.img}
-                  alt={`${selectedImage._id}`}
-                  width={900}
-                  height={700}
-                  className="img-fluid"
-                  style={{ objectFit: "contain", maxHeight: "80vh" }}
-                />
-              </div>
+          <FiX size={28} />
+        </button>
 
-              {/* Panel derecho */}
-              <div
-                className="col-md-5 d-flex flex-column"
-                style={{ maxHeight: "80vh", overflow: "hidden" }}
-              >
-                {/* Header usuario */}
-                <div
-                  className="d-flex justify-content-between align-items-center p-3 border-bottom"
-                  style={{ flex: "0 0 auto" }}
-                >
-                  <div className="d-flex align-items-center gap-2">
-                    <Image
-                      src={
-                        selectedImage._idUsuario.imagen_perfil?.url ||
-                        "/default.png"
-                      }
-                      alt="perfil"
-                      width={40}
-                      height={40}
-                      className="rounded-circle"
-                    />
-                    <span className="fw-bold">
-                      {selectedImage._idUsuario.nombre_completo?.nombre}{" "}
-                      {selectedImage._idUsuario.nombre_completo?.apellido}
-                    </span>
-                  </div>
-
-                  <div className="d-flex gap-2 align-items-center">
-                    <button
-                      type="button"
-                      className={perfil.btn_opciones_modal_perfil}
-                      aria-label="Options"
-                      onClick={() => setIsOptionsOpen(true)}
-                    >
-                      <FiMoreHorizontal />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Contenido / caption y scroll */}
-                <div style={{ overflowY: "auto", padding: 16, flex: "1 1 auto" }}>
-                  <p style={{ whiteSpace: "pre-wrap" }}>{selectedImage.texto}</p>
-                </div>
-
-                {/* Footer con acciones */}
-                <div className="p-3 border-top" style={{ flex: "0 0 auto" }}>
-                  <div className="d-flex align-items-center justify-content-between">
-                    <div>
-                      <LikeButton
-                        postId={selectedImage._id}
-                        onOpenLikesModal={openLikesModal}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        {/* Contenido modal */}
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.95, opacity: 0 }}
+          transition={{ duration: 0.25 }}
+          className="bg-white rounded shadow-lg d-flex flex-column flex-md-row"
+          style={{
+            width: "90%",
+            maxWidth: "1000px",
+            height: "90%",
+            overflow: "hidden",
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Columna izquierda: Imagen */}
+          <div className="flex-grow-1 bg-black position-relative">
+            <Image
+              src={selectedImage.img}
+              alt={selectedImage.texto}
+              fill
+              priority
+              className="object-contain"
+            />
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            style={{
-              position: "absolute",
-              top: 12,
-              right: 12,
-              zIndex: 2000,
-              borderRadius: "50%",
-              background: "#ffffff",
-              border: "none",
-              width: 36,
-              height: 36,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-            }}
+          {/* Columna derecha: Info */}
+          <div
+            className="d-flex flex-column p-3"
+            style={{ width: "350px", borderLeft: "1px solid #ddd" }}
           >
-            <span style={{ fontSize: 18, lineHeight: 1 }}>✕</span>
-          </button>
-        </div>
-      </div>
+            {/* Header usuario */}
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <div className="d-flex align-items-center gap-2">
+                <div
+                  className="position-relative"
+                  style={{ width: 35, height: 35 }}
+                >
+                  <Image
+                    src={
+                      selectedImage._idUsuario.imagen_perfil?.url ||
+                      "/default.png"
+                    }
+                    alt="perfil"
+                    fill
+                    className="rounded-circle object-cover"
+                  />
+                </div>
+                <span className="fw-bold">
+                  {selectedImage._idUsuario.nombre_completo.nombre}{" "}
+                  {selectedImage._idUsuario.nombre_completo.apellido}
+                </span>
+              </div>
 
-      {/* Modales */}
-      <ModalOpcionesPublicacion
-        isOpen={isOptionsOpen}
-        selectedImage={selectedImage}
-        onClose={() => setIsOptionsOpen(false)}
-      />
-      <ModalLikesUsuarios
-        isOpen={isLikesModalOpen}
-        onClose={() => setIsLikesModalOpen(false)}
-        usuarios={usuariosLikes}
-      />
-    </>
+              {/* Botón opciones */}
+              <button
+                type="button"
+                className={perfil.btn_opciones_modal_perfil}
+                aria-label="Options"
+                onClick={() => setIsOptionsOpen(true)}
+              >
+                <FiMoreHorizontal />
+              </button>
+            </div>
+
+            {/* Texto publicación */}
+            {selectedImage.texto && (
+              <p className="mb-3">{selectedImage.texto}</p>
+            )}
+
+            {/* Botones interacción */}
+            <div className="d-flex gap-3 align-items-center mb-3">
+              <LikeButton
+                postId={selectedImage._id}
+                onOpenLikesModal={openLikesModal}
+              />
+            </div>
+
+            {/* Footer */}
+            <div>
+              <p className="small text-muted">
+                Publicado el{" "}
+                {new Date(selectedImage.fecha_creacion).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Modales secundarios */}
+        <ModalOpcionesPublicacion
+          isOpen={isOptionsOpen}
+          selectedImage={selectedImage}
+          onClose={() => setIsOptionsOpen(false)}
+        />
+        <ModalLikesUsuarios
+          isOpen={isLikesModalOpen}
+          onClose={() => setIsLikesModalOpen(false)}
+          usuarios={usuariosLikes}
+        />
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
