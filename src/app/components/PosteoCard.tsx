@@ -13,8 +13,6 @@ import { useAuth } from "@/context/AuthContext";
 
 interface PosteoCardProps {
   post: Posteo;
-  updateFollowState: (userId: string, isFollowing: boolean) => void;
-  updateFavoritoState: (postId: string, isFavorito: boolean) => void;
   isDetail?: boolean; // 👈 para diferenciar entre feed y vista detalle
 }
 
@@ -135,11 +133,9 @@ export default function PosteoCard({
 
           {/* Ubicación solo en detalle */}
           {isDetail && post.texto && (
-            <p className="text-muted small mb-1">{post.texto}</p>
+            // <p className="text-muted small mb-1">{post.texto}</p>
+            <p className="text-muted small mb-0">{fechaFormateada}</p>
           )}
-
-          {/* Fecha */}
-          <p className="text-muted small mb-0">{fechaFormateada}</p>
         </div>
       </div>
 

@@ -61,18 +61,6 @@ export default function PosteoDetalle() {
     if (!fetchWithAuth) return;
     fetchPost();
   }, [fetchPost, fetchWithAuth]);
-  
-  // Estos update... son pasados al ModalOpcionesPublicacion para sincronizar estado localmente
-  const updateFollowState = (userId: string, isFollowing: boolean) => {
-    if (!post) return;
-    // El flag isFollowing está en el objeto post a nivel top según tus types
-    setPost({ ...post, isFollowing });
-  };
-
-  const updateFavoritoState = (postId: string, isFavorito: boolean) => {
-    if (!post) return;
-    setPost({ ...post, isFavorito });
-  };
 
   if (loading) return <div className="d-flex justify-content-center align-items-center vh-100"><Spinner /></div>
   if (error) return <p className="text-center text-danger mt-5">{error}</p>;
@@ -81,10 +69,9 @@ export default function PosteoDetalle() {
   return (
     <>
       {/* Componente Publicación/Posteo */}
+      {/* Se usa FollowContext para saber el estado de isFollowing y tambien de isFavorito*/}
       <PosteoCard
           post={post}
-          updateFollowState={updateFollowState}
-          updateFavoritoState={updateFavoritoState}
           isDetail={true}
       />
     </>
