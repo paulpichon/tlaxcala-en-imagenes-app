@@ -9,8 +9,10 @@ import ModalOpcionesPublicacion from "../ModalOpcionesPublicacion";
 import LikeButton from "../LikeButton";
 import ModalLikesUsuarios from "../ModalLikesUsuarios";
 import { useAuth } from "@/context/AuthContext";
+// import { useFavorito } from "@/context/FavoritoContext"; // ✅ usamos el contexto global
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+// import FavoritoButton from "../FavoritoButton"; // ✅ botón favorito
 
 interface PropsImageModal {
   isOpen: boolean;
@@ -23,6 +25,7 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
   const [isLikesModalOpen, setIsLikesModalOpen] = useState(false);
   const [usuariosLikes, setUsuariosLikes] = useState<LikeUsuario[]>([]);
   const { fetchWithAuth } = useAuth();
+  // const { favoritosMap } = useFavorito(); // ✅ estado global de favoritos
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -35,6 +38,10 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
   if (!isOpen || !selectedImage) return null;
 
   const fechaFormateada = new Date(selectedImage.fecha_creacion).toLocaleDateString();
+
+  // ✅ estado global sincronizado
+  // const esFavoritoGlobal =
+  //   favoritosMap[selectedImage._id] ?? selectedImage.isFavorito;
 
   // Función para abrir modal de usuarios que dieron like
   const openLikesModal = async () => {
@@ -175,10 +182,18 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
                 </p>
               </div>
 
-              {/* Parte inferior: Like y footer */}
+              {/* Parte inferior: Like, Favorito y fecha */}
               <div className="mt-auto">
                 <div className="d-flex gap-3 align-items-center mb-2">
                   <LikeButton postId={selectedImage._id} onOpenLikesModal={openLikesModal} />
+                  {/* ✅ botón favorito sincronizado con contexto */}
+                  {/* TODO: cambiar estilos mas tarde */}
+                  {/* <FavoritoButton
+                    posteoId={selectedImage._id}
+                    autorId={selectedImage._idUsuario._id}
+                    imagenUrl={selectedImage.img}
+                    initialFavorito={esFavoritoGlobal}
+                  /> */}
                 </div>
                 <p className="text-muted small mb-0">{fechaFormateada}</p>
               </div>
@@ -190,6 +205,13 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
             <div className="p-3 border-top">
               <div className="d-flex gap-3 align-items-center mb-2">
                 <LikeButton postId={selectedImage._id} onOpenLikesModal={openLikesModal} />
+                {/* TODO: cambiar estilos del boton mas tarde */}
+                {/* <FavoritoButton
+                  posteoId={selectedImage._id}
+                  autorId={selectedImage._idUsuario._id}
+                  imagenUrl={selectedImage.img}
+                  initialFavorito={esFavoritoGlobal}
+                /> */}
               </div>
               <p className="mb-1">
                 <Link

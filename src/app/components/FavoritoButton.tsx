@@ -1,33 +1,48 @@
-'use client';
+"use client";
 
-import { useFavoritoButton } from "../hooks/useFavorito";
 import perfil from "../ui/perfil/perfil.module.css";
 import Spinner from "./spinner";
-import { FavoritoButtonProps } from "@/types/types";
+import { useFavorito } from "@/context/FavoritoContext";
+
+interface FavoritoButtonProps {
+  posteoId: string;
+  autorId: string;
+  imagenUrl: string;
+  initialFavorito: boolean;
+  className?: string;
+}
 
 const FavoritoButton: React.FC<FavoritoButtonProps> = ({
   posteoId,
   autorId,
   imagenUrl,
   initialFavorito,
-  onToggle,
+  className,
 }) => {
-  const { esFavorito, loading, toggleFavorito } = useFavoritoButton(
-    posteoId,
-    autorId,
-    imagenUrl,
-    initialFavorito,
-    onToggle
-  );
+  const { favoritosMap, loadingMap, toggleFavorito } = useFavorito();
+
+  const esFavorito = favoritosMap[posteoId] ?? initialFavorito;
+  const loading = loadingMap[posteoId] ?? false;
+
+  const handleClick = () => {
+    toggleFavorito(posteoId, autorId, imagenUrl, initialFavorito);
+  };
 
   return (
     <button
       type="button"
       disabled={loading}
-      className={`${perfil.btn_opciones_publicaciones}`}
-      onClick={toggleFavorito}
+      className={className ?? perfil.btn_opciones_publicaciones}
+      onClick={handleClick}
+      style={{ minWidth: "140px" }}
     >
-      {loading ? <Spinner size="20px" /> : esFavorito ? "Quitar de favoritos" : "Añadir a favoritos"}
+      {loading ? (
+        <Spinner size="20px" />
+      ) : esFavorito ? (
+        "Quitar de favoritos"
+      ) : (
+        "Añadir a favoritos"
+      )}
     </button>
   );
 };

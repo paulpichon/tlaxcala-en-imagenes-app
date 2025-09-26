@@ -7,6 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Posteo } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
+import { useFavorito } from "@/context/FavoritoContext";
 
 interface ModalOpcionesPublicacionProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
 }) => {
   const { user } = useAuth(); // Usuario logueado
   const pathname = usePathname();
+  const { favoritosMap } = useFavorito(); // ✅ usamos el FavoritoContext
 
   if (!isOpen || !selectedImage) return null;
 
@@ -55,6 +57,10 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   // ✅ Determinar si el posteo pertenece al usuario logueado
   const isOwnPost = user?.uid === selectedImage._idUsuario._id;
 
+  // ✅ El estado global de favorito
+  const esFavoritoGlobal =
+    favoritosMap[selectedImage._id] ?? selectedImage.isFavorito;
+
   return (
     <div
       className="modal show d-block"
@@ -65,15 +71,20 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
         <div className="modal-content">
           <div className="modal-body">
             <div className="row text-center">
-              {/* Verificamos si es nuestro propio POSTEO */}
               {isOwnPost ? (
-                //  Mostrar solo si no es propio post 
+                // 🔹 Si el post es del usuario logueado → mostrar opciones propias
                 <>
-                  <button className={`${perfil.btn_opciones_publicaciones} text-danger`}>Eliminar</button>
-                  <button className={perfil.btn_opciones_publicaciones}>Editar</button>
+                  <button
+                    className={`${perfil.btn_opciones_publicaciones} text-danger`}
+                  >
+                    Eliminar
+                  </button>
+                  <button className={perfil.btn_opciones_publicaciones}>
+                    Editar
+                  </button>
                 </>
               ) : (
-                // Si no es nuestro propio POSTEO, mostramos estos botones
+                // 🔹 Si NO es del usuario logueado → mostrar botones de interacción
                 <>
                   <div className="col-md-12 mb-2">
                     <FollowButton
@@ -88,13 +99,14 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                       posteoId={selectedImage._id}
                       autorId={selectedImage._idUsuario._id}
                       imagenUrl={selectedImage.img}
-                      initialFavorito={selectedImage.isFavorito}
+                      initialFavorito={esFavoritoGlobal} // ✅ ahora se conecta al contexto
+                      className={perfil.btn_opciones_publicaciones}
                     />
                   </div>
                 </>
-             )}
+              )}
 
-              {/* Ir a publicación / Copiar enlace */}
+              {/* Ir a publicación / Compartir */}
               <div className="col-md-12 mb-2">
                 {!isDetallePage ? (
                   <Link
