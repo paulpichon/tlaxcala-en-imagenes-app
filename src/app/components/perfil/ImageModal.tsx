@@ -10,6 +10,7 @@ import LikeButton from "../LikeButton";
 import ModalLikesUsuarios from "../ModalLikesUsuarios";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 
 interface PropsImageModal {
   isOpen: boolean;
@@ -17,28 +18,23 @@ interface PropsImageModal {
   onClose: () => void;
 }
 
-const ImageModal: React.FC<PropsImageModal> = ({
-  isOpen,
-  selectedImage,
-  onClose,
-}) => {
+const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose }) => {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isLikesModalOpen, setIsLikesModalOpen] = useState(false);
   const [usuariosLikes, setUsuariosLikes] = useState<LikeUsuario[]>([]);
+  const { fetchWithAuth } = useAuth();
   const [isMobile, setIsMobile] = useState(false);
 
-  const { fetchWithAuth } = useAuth();
-
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      setIsMobile(window.innerWidth < 768);
-      const handleResize = () => setIsMobile(window.innerWidth < 768);
-      window.addEventListener("resize", handleResize);
-      return () => window.removeEventListener("resize", handleResize);
-    }
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   if (!isOpen || !selectedImage) return null;
+
+  const fechaFormateada = new Date(selectedImage.fecha_creacion).toLocaleDateString();
 
   // Función para abrir modal de usuarios que dieron like
   const openLikesModal = async () => {
@@ -63,10 +59,7 @@ const ImageModal: React.FC<PropsImageModal> = ({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
-        style={{
-          backgroundColor: "rgba(0,0,0,0.8)",
-          zIndex: 1050,
-        }}
+        style={{ backgroundColor: "rgba(0,0,0,0.8)", zIndex: 1050 }}
       >
         {/* Botón cerrar */}
         <button
@@ -131,75 +124,86 @@ const ImageModal: React.FC<PropsImageModal> = ({
             />
           </div>
 
-          {/* Columna derecha: Info (solo en escritorio) */}
+          {/* Columna derecha: Info (solo escritorio) */}
           {!isMobile && (
             <div
               className="d-flex flex-column p-3"
-              style={{ width: "350px", borderLeft: "1px solid #ddd" }}
+              style={{ width: "350px", borderLeft: "1px solid #ddd", height: "100%" }}
             >
-              {/* Header usuario */}
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <div className="d-flex align-items-center gap-2">
-                  <div className="position-relative" style={{ width: 35, height: 35 }}>
-                    <Image
-                      src={selectedImage._idUsuario.imagen_perfil?.url || "/default.png"}
-                      alt="perfil"
-                      fill
-                      className="rounded-circle object-cover"
-                    />
+              {/* Parte superior: Header y texto */}
+              <div>
+                {/* Header usuario */}
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <div className="d-flex align-items-center gap-2">
+                    <div className="position-relative" style={{ width: 35, height: 35 }}>
+                      <Image
+                        src={selectedImage._idUsuario.imagen_perfil?.url || "/default.png"}
+                        alt="perfil"
+                        fill
+                        className="rounded-circle object-cover"
+                      />
+                    </div>
+                    <span className="fw-bold">
+                      {selectedImage._idUsuario.nombre_completo.nombre}{" "}
+                      {selectedImage._idUsuario.nombre_completo.apellido}
+                    </span>
                   </div>
-                  <span className="fw-bold">
-                    {selectedImage._idUsuario.nombre_completo.nombre}{" "}
-                    {selectedImage._idUsuario.nombre_completo.apellido}
-                  </span>
+
+                  {/* Botón opciones */}
+                  <button
+                    type="button"
+                    className={perfil.btn_opciones_modal_perfil}
+                    aria-label="Options"
+                    onClick={() => setIsOptionsOpen(true)}
+                  >
+                    <FiMoreHorizontal />
+                  </button>
                 </div>
 
-                {/* Botón opciones */}
-                <button
-                  type="button"
-                  className={perfil.btn_opciones_modal_perfil}
-                  aria-label="Options"
-                  onClick={() => setIsOptionsOpen(true)}
-                >
-                  <FiMoreHorizontal />
-                </button>
-              </div>
-
-              {/* Texto publicación */}
-              {selectedImage.texto && <p className="mb-3">{selectedImage.texto}</p>}
-
-              {/* Botones interacción */}
-              <div className="d-flex gap-3 align-items-center mb-3">
-                <LikeButton
-                  postId={selectedImage._id}
-                  onOpenLikesModal={openLikesModal}
-                />
-              </div>
-
-              {/* Footer */}
-              <div>
-                <p className="small text-muted">
-                  Publicado el{" "}
-                  {new Date(selectedImage.fecha_creacion).toLocaleDateString()}
+                {/* Texto */}
+                <p className="mb-2">
+                  <Link
+                    className="link_perfil_usuario text-dark text-decoration-none"
+                    href={`/${selectedImage._idUsuario.url}`}
+                  >
+                    <strong className="me-1">
+                      {selectedImage._idUsuario.nombre_completo.nombre}{" "}
+                      {selectedImage._idUsuario.nombre_completo.apellido}
+                    </strong>
+                  </Link>
+                  {selectedImage.texto}
                 </p>
+              </div>
+
+              {/* Parte inferior: Like y footer */}
+              <div className="mt-auto">
+                <div className="d-flex gap-3 align-items-center mb-2">
+                  <LikeButton postId={selectedImage._id} onOpenLikesModal={openLikesModal} />
+                </div>
+                <p className="text-muted small mb-0">{fechaFormateada}</p>
               </div>
             </div>
           )}
 
           {/* Footer móvil debajo de la imagen */}
           {isMobile && (
-            <div className="p-2 border-top">
-              {selectedImage.texto && <p className="mb-2">{selectedImage.texto}</p>}
+            <div className="p-3 border-top">
               <div className="d-flex gap-3 align-items-center mb-2">
-                <LikeButton
-                  postId={selectedImage._id}
-                  onOpenLikesModal={openLikesModal}
-                />
+                <LikeButton postId={selectedImage._id} onOpenLikesModal={openLikesModal} />
               </div>
-              <p className="small text-muted mb-0">
-                Publicado el{" "}
-                {new Date(selectedImage.fecha_creacion).toLocaleDateString()}
+              <p className="mb-1">
+                <Link
+                  className="link_perfil_usuario text-dark text-decoration-none"
+                  href={`/${selectedImage._idUsuario.url}`}
+                >
+                  <strong className="me-1">
+                    {selectedImage._idUsuario.nombre_completo.nombre}{" "}
+                    {selectedImage._idUsuario.nombre_completo.apellido}
+                  </strong>
+                </Link>
+                {selectedImage.texto}
               </p>
+              <p className="text-muted small mb-0">{fechaFormateada}</p>
             </div>
           )}
         </motion.div>
