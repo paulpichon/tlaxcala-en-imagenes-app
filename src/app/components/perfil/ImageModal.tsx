@@ -1,3 +1,4 @@
+// Hay algunas lineas de codigo comentado, ayq eu se le dara uso dspues pero por el momento no es NECESARIO, que e sla funcion de Guardar favoritos con el icono desde el footer del modal de posteo no del modal de opciones dle posteo
 'use client';
 
 import { useState, useEffect } from "react";
