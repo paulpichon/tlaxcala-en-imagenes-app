@@ -9,14 +9,18 @@ import Image from "next/image";
 // Importamos el modal de crear posteo
 import CrearPosteoModal from "./CrearPosteoModal";
 
-export default function MenuPrincipal() {
+interface Props {
+  onPostCreated?: () => void; // 👈 Nueva prop para actualizar el feed/perfil
+}
+
+export default function MenuPrincipal({ onPostCreated }: Props) {
     const pathname = usePathname();
     const router = useRouter();
     const { user, logout } = useAuth();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLLIElement>(null);
     const [showModal, setShowModal] = useState(false);
-    const [showCrearPost, setShowCrearPost] = useState(false); // 👈 estado para modal de posteo
+    const [showCrearPost, setShowCrearPost] = useState(false);
 
     const handleLogout = async () => {
         await logout();
@@ -26,7 +30,6 @@ export default function MenuPrincipal() {
     const links = [
         { name: 'Inicio', href: '/inicio', icon: FiHome },
         { name: 'Notificaciones', href: '/notificaciones', icon: FiBell },
-        // 👇 ahora Postear usa action en vez de href
         { name: 'Postear', action: () => setShowCrearPost(true), icon: FiPlusCircle },
         { name: 'Configuraciones', href: '/configuraciones', icon: FiSliders },
         { 
@@ -146,8 +149,12 @@ export default function MenuPrincipal() {
                 </div>
             )}
 
-            {/* Modal Crear posteo */}
-            <CrearPosteoModal show={showCrearPost} onClose={() => setShowCrearPost(false)} />
+            {/* Modal Crear posteo - 👇 Pasamos el callback */}
+            <CrearPosteoModal 
+                show={showCrearPost} 
+                onClose={() => setShowCrearPost(false)}
+                onPostCreated={onPostCreated} // 👈 Pasar el callback al modal
+            />
         </nav>            
     );
 }

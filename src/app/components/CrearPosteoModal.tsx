@@ -9,9 +9,10 @@ import { ZodError } from "zod";
 interface Props {
   show: boolean;
   onClose: () => void;
+  onPostCreated?: () => void; // 👈 Nueva prop para actualizar el feed
 }
 
-export default function CrearPosteoModal({ show, onClose }: Props) {
+export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props) {
   const { fetchWithAuth } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -20,6 +21,8 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
   const [posteoPublico, setPosteoPublico] = useState(true);
   const [showConfirmDiscard, setShowConfirmDiscard] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  const [toastMessage, setToastMessage] = useState<string>("");
+  const [toastType, setToastType] = useState<"success" | "danger" | "info">("info");
 
   const resetForm = () => {
     setFile(null);
@@ -29,7 +32,14 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
     setErrors([]);
   };
 
-  // ✅ Validación reactiva al seleccionar archivo
+  // 🔹 Auto-cierre del toast a los 5s
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => setToastMessage(""), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] || null;
 
@@ -39,7 +49,6 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
       return;
     }
 
-    // Validar archivo
     const result = posteoBaseSchema.pick({ file: true }).safeParse({ file: f });
 
     if (!result.success) {
@@ -49,7 +58,6 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
       return;
     }
 
-    // Si es válido, limpiamos errores previos de file
     setErrors((prev) =>
       prev.filter(
         (err) =>
@@ -85,12 +93,13 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
   const handleSubmit = async () => {
     try {
       const dataToValidate = { texto, file, posteo_publico: posteoPublico };
-
       posteoSchema.parse(dataToValidate);
       setErrors([]);
 
       if (!file) return;
       setLoading(true);
+      setToastMessage("Subiendo tu posteo...");
+      setToastType("info");
 
       const formData = new FormData();
       formData.append("img", file);
@@ -104,17 +113,29 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
 
       if (!res.ok) throw new Error("Error al crear posteo");
 
-      const data = await res.json();
-      console.log("Post creado:", data);
+      // 🔹 Mostramos toast de éxito
+      setToastMessage("¡Tu publicación se creó con éxito!");
+      setToastType("success");
 
-      resetForm();
-      onClose();
+      // 🔹 NUEVO: Llamar al callback para actualizar el feed
+      if (onPostCreated) {
+        onPostCreated();
+      }
+
+      // 🔹 Cerramos modal después de un pequeño delay
+      setTimeout(() => {
+        resetForm();
+        onClose();
+      }, 2500);
+
     } catch (err) {
       if (err instanceof ZodError) {
         setErrors(err.errors.map((e) => e.message));
       } else {
         console.error("Error creando posteo:", err);
         setErrors(["Ocurrió un error al crear la publicación"]);
+        setToastMessage("Ocurrió un error al crear la publicación");
+        setToastType("danger");
       }
     } finally {
       setLoading(false);
@@ -164,7 +185,7 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
                     </button>
                   </div>
 
-                  {/* Descripción con contador y validación */}
+                  {/* Descripción con contador */}
                   <div className="mb-2">
                     <textarea
                       className="form-control"
@@ -172,14 +193,12 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
                       placeholder="Escribe una descripción..."
                       value={texto}
                       onChange={(e) => setTexto(e.target.value)}
-                      maxLength={200} // límite duro
+                      maxLength={200}
                     />
-                    {/* Contador de caracteres */}
                     <div className="text-end small text-muted">
                       {texto.length}/200
                     </div>
                   </div>
-
 
                   {/* Radios de privacidad */}
                   <div className="d-flex justify-content-around mt-3">
@@ -196,7 +215,6 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
                         Público
                       </label>
                     </div>
-
                     <div className="form-check">
                       <input
                         className="form-check-input"
@@ -216,14 +234,11 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
                   <div className="mt-2 text-muted small text-start">
                     {posteoPublico ? (
                       <p>
-                        🔓 <strong>Público:</strong> tu publicación aparecerá en el
-                        inicio de todos los usuarios, además de en tu perfil.
+                        🔓 <strong>Público:</strong> tu publicación aparecerá en el inicio de todos los usuarios, además de en tu perfil.
                       </p>
                     ) : (
                       <p>
-                        🔒 <strong>Solo yo:</strong> tu publicación <u>no</u> se
-                        mostrará en el inicio de los demás. Solo estará visible en
-                        tu perfil.
+                        🔒 <strong>Solo yo:</strong> tu publicación <u>no</u> se mostrará en el inicio de los demás. Solo estará visible en tu perfil.
                       </p>
                     )}
                   </div>
@@ -257,7 +272,45 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
         </div>
       </div>
 
-      {/* Modal de confirmación */}
+      {/* Overlay con spinner */}
+      {loading && (
+        <div
+          className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+          style={{ background: "rgba(0,0,0,0.5)", zIndex: 2000 }}
+        >
+          <div
+            className="spinner-border text-light"
+            role="status"
+            style={{ width: "3rem", height: "3rem" }}
+          >
+            <span className="visually-hidden">Subiendo...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Toast (z-index más alto que el overlay) */}
+      {toastMessage && (
+        <div
+          className="toast-container position-fixed bottom-0 end-0 p-3"
+          style={{ zIndex: 3000 }}
+        >
+          <div
+            className={`toast align-items-center text-bg-${toastType} border-0 show`}
+            role="alert"
+          >
+            <div className="d-flex">
+              <div className="toast-body">{toastMessage}</div>
+              <button
+                type="button"
+                className="btn-close btn-close-white me-2 m-auto"
+                onClick={() => setToastMessage("")}
+              ></button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación de descarte */}
       {showConfirmDiscard && (
         <div
           className="modal fade show d-block"
@@ -294,6 +347,7 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
           </div>
         </div>
       )}
+
     </>
   );
 }

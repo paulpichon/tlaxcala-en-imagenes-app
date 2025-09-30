@@ -7,10 +7,16 @@ import ImageModal from "./ImageModal";
 import { Posteo, PosteoDetalleResponse } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 
-export default function PublicacionesUsuarioGrid({ usuarioId }: { usuarioId: string }) {
+interface Props {
+  usuarioId: string;
+  refreshTrigger?: number;
+}
+
+export default function PublicacionesUsuarioGrid({ usuarioId, refreshTrigger }: Props) {
   const { fetchWithAuth } = useAuth();
   const [posteos, setPosteos] = useState<Posteo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false); // 👈 Estado separado para refresh suave
 
   const [selectedImage, setSelectedImage] = useState<Posteo | null>(null);
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
@@ -19,6 +25,14 @@ export default function PublicacionesUsuarioGrid({ usuarioId }: { usuarioId: str
     if (!usuarioId) return;
 
     const fetchPosteos = async () => {
+      // 👇 Si ya hay posteos, solo mostrar refreshing (spinner pequeño)
+      if (posteos.length > 0) {
+        setRefreshing(true);
+      } else {
+        // 👇 Si es la primera carga, mostrar loading completo
+        setLoading(true);
+      }
+
       try {
         const res = await fetchWithAuth(
           `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/usuario/${usuarioId}`
@@ -30,14 +44,23 @@ export default function PublicacionesUsuarioGrid({ usuarioId }: { usuarioId: str
         console.error("Error al cargar posteos:", error);
       } finally {
         setLoading(false);
+        setRefreshing(false);
       }
     };
 
     fetchPosteos();
-  }, [usuarioId, fetchWithAuth]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usuarioId, fetchWithAuth, refreshTrigger]);
 
-  if (loading) return <p className="text-center mt-3">Cargando publicaciones...</p>;
-  if (!posteos.length) return <p className="text-center mt-3">Este usuario no tiene publicaciones</p>;
+  // 👇 Loading inicial (primera carga)
+  if (loading && posteos.length === 0) {
+    return <p className="text-center mt-3">Cargando publicaciones...</p>;
+  }
+
+  // 👇 Sin publicaciones
+  if (!loading && !posteos.length) {
+    return <p className="text-center mt-3">Este usuario no tiene publicaciones</p>;
+  }
 
   const openFirstModal = async (posteo: Posteo) => {
     try {
@@ -49,7 +72,7 @@ export default function PublicacionesUsuarioGrid({ usuarioId }: { usuarioId: str
 
       const posteoDetalle: Posteo = {
         ...data.posteo,
-        isFollowing: data.isFollowing, // solo inicial
+        isFollowing: data.isFollowing,
         isFavorito: data.isFavorito,
       };
 
@@ -61,22 +84,35 @@ export default function PublicacionesUsuarioGrid({ usuarioId }: { usuarioId: str
   };
 
   return (
-    <div className="row g-1">
-      {posteos.map((posteo) => (
-        <div key={posteo._id} className="col-4">
-          <div className="card">
-            <Image
-              src={posteo.img}
-              alt={posteo.texto}
-              width={200}
-              height={200}
-              className={`${perfil.imagen_grid_perfil_usuario} gallery-image`}
-              style={{ cursor: "pointer" }}
-              onClick={() => openFirstModal(posteo)}
-            />
+    <>
+      {/* 👇 Spinner pequeño durante refresh */}
+      {refreshing && (
+        <div className="text-center py-2">
+          <div className="spinner-border spinner-border-sm text-primary" role="status">
+            <span className="visually-hidden">Actualizando...</span>
           </div>
+          <small className="text-muted ms-2">Actualizando publicaciones...</small>
         </div>
-      ))}
+      )}
+
+      {/* 👇 Grid de publicaciones (siempre visible durante refresh) */}
+      <div className="row g-1" style={{ opacity: refreshing ? 0.6 : 1, transition: 'opacity 0.3s' }}>
+        {posteos.map((posteo) => (
+          <div key={posteo._id} className="col-4">
+            <div className="card">
+              <Image
+                src={posteo.img}
+                alt={posteo.texto}
+                width={200}
+                height={200}
+                className={`${perfil.imagen_grid_perfil_usuario} gallery-image`}
+                style={{ cursor: "pointer" }}
+                onClick={() => openFirstModal(posteo)}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
 
       {/* Modal de imagen */}
       {selectedImage && (
@@ -86,6 +122,6 @@ export default function PublicacionesUsuarioGrid({ usuarioId }: { usuarioId: str
           onClose={() => setIsFirstModalOpen(false)}
         />
       )}
-    </div>
+    </>
   );
 }

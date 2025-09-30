@@ -20,36 +20,42 @@ import { useAuth } from "@/context/AuthContext";
 import { UsuarioPerfil } from "@/types/types";
 
 export default function PerfilUsuario() {
-	const { url } = useParams<{ url: string }>();
-	const { fetchWithAuth } = useAuth(); // 👈 usamos fetchWithAuth
+  const { url } = useParams<{ url: string }>();
+  const { fetchWithAuth } = useAuth();
   // Se usa el tipo UsuarioPerfil que extiende de UsuarioLogueado ya que se agregan estadisticas adicionales  totaltPosteos, totalSeguidores, totalSeguidos
-	const [usuario, setUsuario] = useState<UsuarioPerfil | null>(null);
-	const [loading, setLoading] = useState(true);
-  
-	useEffect(() => {
-	  if (!url) return;
-  
-	  const fetchUsuario = async () => {
-		try {
-		  const res = await fetchWithAuth(
-			`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/usuarios/${url}`
-		  );
-		  if (!res.ok) throw new Error("Error al obtener usuario");
-		  const data = await res.json();
-		  setUsuario(data.usuario);
-		} catch (error) {
-		  console.error("Error al cargar usuario:", error);
-		} finally {
-		  setLoading(false);
-		}
-	  };
-  
-	  fetchUsuario();
-	}, [url, fetchWithAuth]);
-  
-	if (loading) return <p className="text-center mt-5">Cargando perfil...</p>;
-	if (!usuario) return <p className="text-center mt-5">Usuario no encontrado</p>;
-  
+  const [usuario, setUsuario] = useState<UsuarioPerfil | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshPosteos, setRefreshPosteos] = useState(0); // 👈 Solo para refrescar posteos
+
+  useEffect(() => {
+    if (!url) return;
+
+    const fetchUsuario = async () => {
+      setLoading(true);
+      try {
+        const res = await fetchWithAuth(
+          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/usuarios/${url}`
+        );
+        if (!res.ok) throw new Error("Error al obtener usuario");
+        const data = await res.json();
+        setUsuario(data.usuario);
+      } catch (error) {
+        console.error("Error al cargar usuario:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsuario();
+  }, [url, fetchWithAuth]); // 👈 Solo se ejecuta al cambiar url
+
+  // 👇 Solo actualiza los posteos, NO todo el perfil
+  const handlePostCreated = () => {
+    setRefreshPosteos(prev => prev + 1);
+  };
+
+  if (loading) return <p className="text-center mt-5">Cargando perfil...</p>;
+  if (!usuario) return <p className="text-center mt-5">Usuario no encontrado</p>;
 
   return (
     <div className="contenedor_principal">
@@ -57,7 +63,7 @@ export default function PerfilUsuario() {
         {/* Menú lateral */}
         <div className="col-md-2 col-lg-2 col-xl-2">
           <div className="contenedor_menu_lateral_inferior fixed-bottom">
-            <MenuPrincipal />
+            <MenuPrincipal onPostCreated={handlePostCreated} />
           </div>
         </div>
 
@@ -86,7 +92,11 @@ export default function PerfilUsuario() {
                           PUBLICACIONES
                         </h6>
                       </div>
-                      <PublicacionesUsuarioGrid usuarioId={usuario._id} />
+                      {/* 👇 Solo esta parte se actualiza */}
+                      <PublicacionesUsuarioGrid 
+                        usuarioId={usuario._id}
+                        refreshTrigger={refreshPosteos}
+                      />
                     </div>
                   </div>
                 </div>
