@@ -18,7 +18,7 @@ interface PosteoCardProps {
 
 export default function PosteoCard({
   post,
-  isDetail = false, // por defecto es feed
+  // isDetail = false, // por defecto es feed
 }: PosteoCardProps) {
   const { fetchWithAuth } = useAuth();
 
