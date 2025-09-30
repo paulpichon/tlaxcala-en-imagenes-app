@@ -13,9 +13,7 @@ export default function PublicacionUsuario() {
     posts,
     loading,
     observerRef,
-    finished,
-    updateFollowState,
-    updateFavoritoState,
+    finished
   } = useInfinitePosts(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos`);
 
   if (loading && posts.length === 0)
@@ -27,8 +25,6 @@ export default function PublicacionUsuario() {
         <PosteoCard
           key={post._id}
           post={post}
-          updateFollowState={updateFollowState}
-          updateFavoritoState={updateFavoritoState}
         />
       ))}
       <div ref={observerRef} />
