@@ -6,6 +6,9 @@ import { useAuth } from "@/context/AuthContext";
 import { FiHome, FiBell, FiPlusCircle, FiSliders, FiAlignJustify } from "react-icons/fi";
 import Image from "next/image";
 
+// Importamos el modal de crear posteo
+import CrearPosteoModal from "./CrearPosteoModal";
+
 export default function MenuPrincipal() {
     const pathname = usePathname();
     const router = useRouter();
@@ -13,6 +16,7 @@ export default function MenuPrincipal() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLLIElement>(null);
     const [showModal, setShowModal] = useState(false);
+    const [showCrearPost, setShowCrearPost] = useState(false); // 👈 estado para modal de posteo
 
     const handleLogout = async () => {
         await logout();
@@ -22,12 +26,12 @@ export default function MenuPrincipal() {
     const links = [
         { name: 'Inicio', href: '/inicio', icon: FiHome },
         { name: 'Notificaciones', href: '/notificaciones', icon: FiBell },
-        { name: 'Postear', href: '/postear', icon: FiPlusCircle },
+        // 👇 ahora Postear usa action en vez de href
+        { name: 'Postear', action: () => setShowCrearPost(true), icon: FiPlusCircle },
         { name: 'Configuraciones', href: '/configuraciones', icon: FiSliders },
         { 
             name: `${user?.nombre_completo?.nombre} ${user?.nombre_completo?.apellido}`, 
             href: `/${user?.url}`, 
-            // guardamos la URL de la imagen en lugar del icono
             image: user?.imagen_perfil?.url 
         },
     ];
@@ -45,33 +49,53 @@ export default function MenuPrincipal() {
     }, []);
 
     useEffect(() => {
-        document.body.style.overflow = showModal ? 'hidden' : 'auto';
-    }, [showModal]);
+        document.body.style.overflow = (showModal || showCrearPost) ? 'hidden' : 'auto';
+    }, [showModal, showCrearPost]);
 
     return (
         <nav>
             <ul className="nav justify-content-center menu_inferior_lateral">
-                {links.map(({ name, href, icon: LinkIcon, image }) => (
+                {links.map(({ name, href, icon: LinkIcon, image, action }) => (
                     <li className="nav-item" key={name} title={name}>
-                        <Link
-                            href={href!}
-                            className={`nav-link opciones_menu ${pathname === href ? 'link-activo' : ''}`}
-                        >
-                            {/* Si existe imagen, mostramos la foto de perfil, sino el icono */}
-                            {image ? (
-                                <Image 
-                                    src={image} 
-                                    alt={name} 
-                                    width={100}
-                                    height={100}
-                                    className="rounded-circle icono_menu" 
-                                    style={{ width: "30px", height: "30px", objectFit: "cover" }}
-                                />
-                            ) : (
-                                LinkIcon && <LinkIcon className="icono_menu" />
-                            )}
-                            <span className="nombre_opciones_menu">{name}</span>
-                        </Link>
+                        {action ? (
+                            <button
+                                onClick={action}
+                                className={`nav-link opciones_menu bg-transparent border-0`}
+                            >
+                                {image ? (
+                                    <Image 
+                                        src={image} 
+                                        alt={name} 
+                                        width={100}
+                                        height={100}
+                                        className="rounded-circle icono_menu" 
+                                        style={{ width: "30px", height: "30px", objectFit: "cover" }}
+                                    />
+                                ) : (
+                                    LinkIcon && <LinkIcon className="icono_menu" />
+                                )}
+                                <span className="nombre_opciones_menu">{name}</span>
+                            </button>
+                        ) : (
+                            <Link
+                                href={href!}
+                                className={`nav-link opciones_menu ${pathname === href ? 'link-activo' : ''}`}
+                            >
+                                {image ? (
+                                    <Image 
+                                        src={image} 
+                                        alt={name} 
+                                        width={100}
+                                        height={100}
+                                        className="rounded-circle icono_menu" 
+                                        style={{ width: "30px", height: "30px", objectFit: "cover" }}
+                                    />
+                                ) : (
+                                    LinkIcon && <LinkIcon className="icono_menu" />
+                                )}
+                                <span className="nombre_opciones_menu">{name}</span>
+                            </Link>
+                        )}
                     </li>
                 ))}
 
@@ -98,7 +122,7 @@ export default function MenuPrincipal() {
                 </li>
             </ul>
 
-            {/* Modal */}
+            {/* Modal Cerrar sesión */}
             {showModal && (
                 <div className="modal fade show d-block" tabIndex={-1} role="dialog" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
                     <div className="modal-dialog modal-dialog-centered" role="document">
@@ -121,6 +145,9 @@ export default function MenuPrincipal() {
                     </div>
                 </div>
             )}
+
+            {/* Modal Crear posteo */}
+            <CrearPosteoModal show={showCrearPost} onClose={() => setShowCrearPost(false)} />
         </nav>            
     );
 }
