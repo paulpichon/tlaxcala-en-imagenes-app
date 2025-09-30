@@ -132,9 +132,9 @@ export default function PosteoCard({
           </p>
 
           {/* Ubicación solo en detalle */}
-          {isDetail && post.texto && (
-            <p className="text-muted small mb-1">{post.texto}</p>
-          )}
+          {/* {isDetail && post.texto && (
+            <p className="text-muted small mb-1">{post.ubicacion}</p>
+          )} */}
           <p className="text-muted small mb-0">{fechaFormateada}</p>
         </div>
       </div>
