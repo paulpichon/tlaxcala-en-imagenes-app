@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
-import { posteoBaseSchema, posteoSchema } from "@/lib/validaciones";
+import { posteoSchema, posteoBaseSchema } from "@/lib/validaciones";
 import { ZodError } from "zod";
 
 interface Props {
@@ -19,7 +19,7 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [posteoPublico, setPosteoPublico] = useState(true);
   const [showConfirmDiscard, setShowConfirmDiscard] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]); // errores Zod
+  const [errors, setErrors] = useState<string[]>([]);
 
   const resetForm = () => {
     setFile(null);
@@ -39,9 +39,8 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
       return;
     }
 
-    // Validar solo el archivo con Zod
+    // Validar archivo
     const result = posteoBaseSchema.pick({ file: true }).safeParse({ file: f });
-
 
     if (!result.success) {
       setErrors(result.error.errors.map((e) => e.message));
@@ -50,13 +49,11 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
       return;
     }
 
-    // Si es válido, limpiar errores previos de file
+    // Si es válido, limpiamos errores previos de file
     setErrors((prev) =>
       prev.filter(
         (err) =>
-          //? Este mensaje de error debe ser igual al que se ponga en el archivo CrearPosteoModal.tsx, de lo contrario prodria crearse un error
           err !== "La imagen no debe superar los 5 MB" &&
-          //? Este mensaje de error debe ser igual al que se ponga en el archivo CrearPosteoModal.tsx, de lo contrario prodria crearse un error
           err !== "No se admite este archivo. Solo se permiten .jpg, .jpeg y .webp"
       )
     );
@@ -89,11 +86,10 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
     try {
       const dataToValidate = { texto, file, posteo_publico: posteoPublico };
 
-      // ✅ Validar con Zod todo el formulario
       posteoSchema.parse(dataToValidate);
       setErrors([]);
 
-      if (!file) return; // seguridad extra
+      if (!file) return;
       setLoading(true);
 
       const formData = new FormData();
@@ -168,20 +164,22 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
                     </button>
                   </div>
 
-                  {/* Descripción */}
-                  <textarea
-                    className={`form-control mb-1 ${texto.length > 200 ? "is-invalid" : ""}`}
-                    rows={3}
-                    placeholder="Escribe una descripción..."
-                    value={texto}
-                    onChange={(e) => setTexto(e.target.value)}
-                    maxLength={200}
-                  />
-
-                  {/* Contador de caracteres */}
-                  <div className="text-end small text-muted">
-                    {texto.length}/200
+                  {/* Descripción con contador y validación */}
+                  <div className="mb-2">
+                    <textarea
+                      className="form-control"
+                      rows={3}
+                      placeholder="Escribe una descripción..."
+                      value={texto}
+                      onChange={(e) => setTexto(e.target.value)}
+                      maxLength={200} // límite duro
+                    />
+                    {/* Contador de caracteres */}
+                    <div className="text-end small text-muted">
+                      {texto.length}/200
+                    </div>
                   </div>
+
 
                   {/* Radios de privacidad */}
                   <div className="d-flex justify-content-around mt-3">
@@ -232,7 +230,7 @@ export default function CrearPosteoModal({ show, onClose }: Props) {
                 </>
               )}
 
-              {/* 👇 Errores visibles en el modal */}
+              {/* Errores */}
               {errors.length > 0 && (
                 <div className="alert alert-danger mt-3 text-start">
                   <ul className="mb-0">
