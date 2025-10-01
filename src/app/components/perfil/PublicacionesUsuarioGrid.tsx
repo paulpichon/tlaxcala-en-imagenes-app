@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import perfil from "../../ui/perfil/perfil.module.css";
 import Image from "next/image";
 import ImageModal from "./ImageModal";
+import ImagePreloader from "../ImagePreloader"; // 👈 Importar preloader
 import { Posteo, PosteoDetalleResponse } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 
@@ -16,7 +17,8 @@ export default function PublicacionesUsuarioGrid({ usuarioId, refreshTrigger }: 
   const { fetchWithAuth } = useAuth();
   const [posteos, setPosteos] = useState<Posteo[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false); // 👈 Estado separado para refresh suave
+  const [refreshing, setRefreshing] = useState(false);
+  const isFirstLoad = useRef(true); // 👈 Para evitar warning de ESLint
 
   const [selectedImage, setSelectedImage] = useState<Posteo | null>(null);
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
@@ -25,12 +27,12 @@ export default function PublicacionesUsuarioGrid({ usuarioId, refreshTrigger }: 
     if (!usuarioId) return;
 
     const fetchPosteos = async () => {
-      // 👇 Si ya hay posteos, solo mostrar refreshing (spinner pequeño)
-      if (posteos.length > 0) {
-        setRefreshing(true);
-      } else {
-        // 👇 Si es la primera carga, mostrar loading completo
+      // 👇 Primera carga: loading completo
+      if (isFirstLoad.current) {
         setLoading(true);
+      } else {
+        // 👇 Refresh: solo spinner pequeño
+        setRefreshing(true);
       }
 
       try {
@@ -40,6 +42,11 @@ export default function PublicacionesUsuarioGrid({ usuarioId, refreshTrigger }: 
         if (!res.ok) throw new Error("Error al obtener posteos");
         const data = await res.json();
         setPosteos(data.posteos || []);
+        
+        // 👇 Marcar que ya no es primera carga
+        if (isFirstLoad.current) {
+          isFirstLoad.current = false;
+        }
       } catch (error) {
         console.error("Error al cargar posteos:", error);
       } finally {
@@ -49,7 +56,6 @@ export default function PublicacionesUsuarioGrid({ usuarioId, refreshTrigger }: 
     };
 
     fetchPosteos();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuarioId, fetchWithAuth, refreshTrigger]);
 
   // 👇 Loading inicial (primera carga)
@@ -85,6 +91,9 @@ export default function PublicacionesUsuarioGrid({ usuarioId, refreshTrigger }: 
 
   return (
     <>
+      {/* 👇 Precargar todas las imágenes en segundo plano */}
+      <ImagePreloader images={posteos.map(p => p.img)} />
+
       {/* 👇 Spinner pequeño durante refresh */}
       {refreshing && (
         <div className="text-center py-2">
