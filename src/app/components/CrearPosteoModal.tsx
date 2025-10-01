@@ -5,12 +5,12 @@ import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { posteoSchema, posteoBaseSchema } from "@/lib/validaciones";
 import { ZodError } from "zod";
-import { Posteo } from "@/types/types"; // 👈 Importar el tipo
+import { Posteo } from "@/types/types";
 
 interface Props {
   show: boolean;
   onClose: () => void;
-  onPostCreated?: (newPost?: Posteo) => void; // 👈 Usar Posteo en lugar de any
+  onPostCreated?: (newPost?: Posteo) => void;
 }
 
 export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props) {
@@ -24,6 +24,22 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
   const [errors, setErrors] = useState<string[]>([]);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [toastType, setToastType] = useState<"success" | "danger" | "info">("info");
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar si es móvil
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const mobileKeywords = ['android', 'webos', 'iphone', 'ipad', 'ipod', 'blackberry', 'windows phone'];
+      return mobileKeywords.some(keyword => userAgent.includes(keyword)) || window.innerWidth <= 768;
+    };
+
+    setIsMobile(checkMobile());
+
+    const handleResize = () => setIsMobile(checkMobile());
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const resetForm = () => {
     setFile(null);
@@ -33,7 +49,6 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
     setErrors([]);
   };
 
-  // 🔹 Auto-cierre del toast a los 5s
   useEffect(() => {
     if (toastMessage) {
       const timer = setTimeout(() => setToastMessage(""), 5000);
@@ -41,7 +56,6 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
     }
   }, [toastMessage]);
 
-  // 👇 Función común para procesar archivos (desde input o drag&drop)
   const processFile = (f: File | null) => {
     if (!f) {
       setFile(null);
@@ -70,13 +84,11 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
     setPreview(URL.createObjectURL(f));
   };
 
-  // 👇 Handler para el input de archivo
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] || null;
     processFile(f);
   };
 
-  // 👇 Handlers para Drag & Drop
   const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -85,9 +97,8 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
   const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    
     const f = e.dataTransfer.files?.[0] || null;
-    processFile(f); // Usa la misma lógica
+    processFile(f);
   };
 
   const handleRemoveImage = () => {
@@ -133,18 +144,15 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
 
       if (!res.ok) throw new Error("Error al crear posteo");
 
-      const newPost = await res.json(); // 👈 Obtener el post creado (tipo Posteo)
+      const newPost = await res.json();
 
-      // 🔹 Mostramos toast de éxito
       setToastMessage("¡Tu publicación se creó con éxito!");
       setToastType("success");
 
-      // 🔹 Pasar el post creado al callback
       if (onPostCreated) {
         onPostCreated(newPost);
       }
 
-      // 🔹 Cerramos modal después de un pequeño delay
       setTimeout(() => {
         resetForm();
         onClose();
@@ -230,7 +238,39 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
                       font-weight: 600;
                       margin: 4px;
                     }
+                    .camera-buttons {
+                      display: flex;
+                      gap: 10px;
+                      justify-content: center;
+                      margin-top: 20px;
+                    }
+                    .camera-btn {
+                      padding: 12px 24px;
+                      border: 2px solid #0d6efd;
+                      border-radius: 12px;
+                      background: white;
+                      color: #0d6efd;
+                      font-weight: 600;
+                      cursor: pointer;
+                      transition: all 0.3s ease;
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                    }
+                    .camera-btn:hover {
+                      background: #0d6efd;
+                      color: white;
+                      transform: translateY(-2px);
+                    }
+                    .camera-btn.primary {
+                      background: #0d6efd;
+                      color: white;
+                    }
+                    .camera-btn.primary:hover {
+                      background: #0a58ca;
+                    }
                   `}</style>
+                  
                   <label 
                     htmlFor="imageInput" 
                     className="upload-area w-100"
@@ -238,21 +278,58 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
                     onDrop={handleDrop}
                   >
                     <div className="upload-icon">📸</div>
-                    <div className="upload-text">Arrastra tu imagen aquí</div>
-                    <div className="upload-hint">o haz clic para seleccionar</div>
+                    <div className="upload-text">
+                      {isMobile ? 'Toca para seleccionar o tomar foto' : 'Arrastra tu imagen aquí'}
+                    </div>
+                    <div className="upload-hint">
+                      {isMobile ? 'Puedes usar tu cámara o galería' : 'o haz clic para seleccionar'}
+                    </div>
                     <div className="mt-3">
                       <span className="format-badge">JPG</span>
                       <span className="format-badge">PNG</span>
                       <span className="format-badge">WEBP</span>
                     </div>
                   </label>
+                  
+                  {/* Input principal - Galería */}
                   <input 
                     type="file" 
                     id="imageInput"
-                    accept="image/*" 
+                    accept="image/*"
                     onChange={handleFileChange}
                     style={{ display: 'none' }}
                   />
+
+                  {/* Botones adicionales en móvil */}
+                  {isMobile && (
+                    <div className="camera-buttons">
+                      <label htmlFor="cameraInput" className="camera-btn primary">
+                        📷 Tomar foto
+                      </label>
+                      <label htmlFor="galleryInput" className="camera-btn">
+                        🖼️ Galería
+                      </label>
+
+                      {/* Input para cámara */}
+                      <input 
+                        type="file" 
+                        id="cameraInput"
+                        accept="image/*"
+                        capture="environment"
+                        onChange={handleFileChange}
+                        style={{ display: 'none' }}
+                      />
+
+                      {/* Input para galería */}
+                      <input 
+                        type="file" 
+                        id="galleryInput"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        style={{ display: 'none' }}
+                      />
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
@@ -378,7 +455,7 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
         </div>
       )}
 
-      {/* Toast (z-index más alto que el overlay) */}
+      {/* Toast */}
       {toastMessage && (
         <div
           className="toast-container position-fixed bottom-0 end-0 p-3"
@@ -437,7 +514,6 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
           </div>
         </div>
       )}
-
     </>
   );
 }
