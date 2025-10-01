@@ -5,11 +5,12 @@ import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { posteoSchema, posteoBaseSchema } from "@/lib/validaciones";
 import { ZodError } from "zod";
+import { Posteo } from "@/types/types"; // 👈 Importar el tipo
 
 interface Props {
   show: boolean;
   onClose: () => void;
-  onPostCreated?: () => void; // 👈 Nueva prop para actualizar el feed
+  onPostCreated?: (newPost?: Posteo) => void; // 👈 Usar Posteo en lugar de any
 }
 
 export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props) {
@@ -40,9 +41,8 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
     }
   }, [toastMessage]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0] || null;
-
+  // 👇 Función común para procesar archivos (desde input o drag&drop)
+  const processFile = (f: File | null) => {
     if (!f) {
       setFile(null);
       setPreview(null);
@@ -68,6 +68,26 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
 
     setFile(f);
     setPreview(URL.createObjectURL(f));
+  };
+
+  // 👇 Handler para el input de archivo
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0] || null;
+    processFile(f);
+  };
+
+  // 👇 Handlers para Drag & Drop
+  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const f = e.dataTransfer.files?.[0] || null;
+    processFile(f); // Usa la misma lógica
   };
 
   const handleRemoveImage = () => {
@@ -113,13 +133,15 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
 
       if (!res.ok) throw new Error("Error al crear posteo");
 
+      const newPost = await res.json(); // 👈 Obtener el post creado (tipo Posteo)
+
       // 🔹 Mostramos toast de éxito
       setToastMessage("¡Tu publicación se creó con éxito!");
       setToastType("success");
 
-      // 🔹 NUEVO: Llamar al callback para actualizar el feed
+      // 🔹 Pasar el post creado al callback
       if (onPostCreated) {
-        onPostCreated();
+        onPostCreated(newPost);
       }
 
       // 🔹 Cerramos modal después de un pequeño delay
@@ -163,7 +185,75 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
             </div>
             <div className="modal-body text-center">
               {!preview ? (
-                <input type="file" accept="image/*" onChange={handleFileChange} />
+                <>
+                  <style jsx>{`
+                    .upload-area {
+                      border: 2px dashed #0d6efd;
+                      border-radius: 16px;
+                      padding: 60px 20px;
+                      background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+                      cursor: pointer;
+                      transition: all 0.3s ease;
+                    }
+                    .upload-area:hover {
+                      border-color: #0a58ca;
+                      background: linear-gradient(135deg, #e7f1ff 0%, #f8f9ff 100%);
+                      transform: translateY(-2px);
+                      box-shadow: 0 8px 16px rgba(13, 110, 253, 0.1);
+                    }
+                    .upload-icon {
+                      font-size: 48px;
+                      margin-bottom: 16px;
+                      animation: bounce 2s infinite;
+                    }
+                    @keyframes bounce {
+                      0%, 100% { transform: translateY(0); }
+                      50% { transform: translateY(-10px); }
+                    }
+                    .upload-text {
+                      font-size: 18px;
+                      font-weight: 600;
+                      color: #212529;
+                      margin-bottom: 8px;
+                    }
+                    .upload-hint {
+                      font-size: 14px;
+                      color: #6c757d;
+                    }
+                    .format-badge {
+                      display: inline-block;
+                      padding: 6px 12px;
+                      background: #e7f1ff;
+                      color: #0d6efd;
+                      border-radius: 20px;
+                      font-size: 12px;
+                      font-weight: 600;
+                      margin: 4px;
+                    }
+                  `}</style>
+                  <label 
+                    htmlFor="imageInput" 
+                    className="upload-area w-100"
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                  >
+                    <div className="upload-icon">📸</div>
+                    <div className="upload-text">Arrastra tu imagen aquí</div>
+                    <div className="upload-hint">o haz clic para seleccionar</div>
+                    <div className="mt-3">
+                      <span className="format-badge">JPG</span>
+                      <span className="format-badge">PNG</span>
+                      <span className="format-badge">WEBP</span>
+                    </div>
+                  </label>
+                  <input 
+                    type="file" 
+                    id="imageInput"
+                    accept="image/*" 
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                  />
+                </>
               ) : (
                 <>
                   {/* Imagen con botón overlay */}
