@@ -34,7 +34,7 @@ export default function PerfilUsuario() {
       setLoading(true);
       try {
         const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/usuarios/${url}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/${url}`
         );
         if (!res.ok) throw new Error("Error al obtener usuario");
         const data = await res.json();

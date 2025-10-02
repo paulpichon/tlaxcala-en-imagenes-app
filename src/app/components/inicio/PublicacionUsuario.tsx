@@ -14,7 +14,7 @@ export default function PublicacionUsuario() {
     loading,
     observerRef,
     finished
-  } = useInfinitePosts(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos`);
+  } = useInfinitePosts(`${process.env.NEXT_PUBLIC_API_URL}/api/posteos`);
 
   if (loading && posts.length === 0)
     return <div className="d-flex justify-content-center align-items-center vh-100"><Spinner /></div>;
