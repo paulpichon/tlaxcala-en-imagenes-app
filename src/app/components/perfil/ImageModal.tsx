@@ -73,7 +73,7 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
         <button
           onClick={onClose}
           className="btn btn-dark position-absolute"
-          style={{ top: "15px", right: "25px", zIndex: 2000 }}
+          style={{ top: "15px", right: "25px", zIndex: 1050 }}
         >
           <FiX size={28} />
         </button>
