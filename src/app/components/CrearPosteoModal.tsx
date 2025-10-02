@@ -138,7 +138,7 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
       formData.append("posteo_publico", String(posteoPublico));
 
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/posteos`,
+        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos`,
         { method: "POST", body: formData }
       );
 

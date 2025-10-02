@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const refreshToken = async (): Promise<boolean> => {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`,
+        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/refresh`,
         { method: 'POST', credentials: 'include' }
       );
       return res.ok;
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = async () => {
     try {
       // Petición normal al endpoint de logout
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });
@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/me`, {
           credentials: 'include',
         });
 
@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (res.status === 401) {
           const refreshed = await refreshToken();
           if (refreshed) {
-            const retry = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
+            const retry = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/me`, {
               credentials: 'include',
             });
             if (retry.ok) {

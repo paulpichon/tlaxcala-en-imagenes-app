@@ -37,7 +37,7 @@ export default function PublicacionesUsuarioGrid({ usuarioId, refreshTrigger }: 
 
       try {
         const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/posteos/usuario/${usuarioId}`
+          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/usuario/${usuarioId}`
         );
         if (!res.ok) throw new Error("Error al obtener posteos");
         const data = await res.json();
@@ -71,7 +71,7 @@ export default function PublicacionesUsuarioGrid({ usuarioId, refreshTrigger }: 
   const openFirstModal = async (posteo: Posteo) => {
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/posteos/post/${posteo._id}`
+        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/post/${posteo._id}`
       );
       if (!res.ok) throw new Error("Error al obtener detalle del posteo");
       const data: PosteoDetalleResponse = await res.json();
