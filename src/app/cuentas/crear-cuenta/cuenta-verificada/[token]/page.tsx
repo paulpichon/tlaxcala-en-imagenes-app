@@ -7,6 +7,7 @@ import cuentaVerificada from "../../../../ui/cuentas/crear-cuenta/cuenta-verific
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer principal
 import FooterPrincipal from "@/app/components/FooterMain";
+import Link from "next/link";
 
 export default async function CuentaVerificada ({ 
     params
@@ -32,13 +33,13 @@ export default async function CuentaVerificada ({
                                 <div className={cuentaVerificada.contenedor_titulos}>   
                                     <h3 className={cuentaVerificada.subtitulo_h3}>Cuenta verificada</h3>
                                     <p className={cuentaVerificada.texto}>Ahora puedes  
-                                        <a className={cuentaVerificada.link_inciar_sesion} href="/cuentas/login"> iniciar sesión.</a>
+                                        <Link className={cuentaVerificada.link_inciar_sesion} href="/cuentas/login"> iniciar sesión.</Link>
                                     </p>
                                 </div>    
                             ) : (
                                 <div className={cuentaVerificada.contenedor_titulos}>   
                                     <h3 className={cuentaVerificada.subtitulo_h3}>Token inválido o ha expirado.</h3>
-                                    <p className={cuentaVerificada.texto}><a className={cuentaVerificada.link_inciar_sesion} href="/cuentas/login"> iniciar sesión</a>
+                                    <p className={cuentaVerificada.texto}><Link className={cuentaVerificada.link_inciar_sesion} href="/cuentas/login"> iniciar sesión</Link>
                                     </p>
                                 </div> 
                             )}
