@@ -10,6 +10,7 @@ import styPassRes from "../../../ui/cuentas/confirmacion/password-restablecido/P
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer principal
 import FooterPrincipal from "@/app/components/FooterMain";
+import Link from "next/link";
 
 export default function ConfirmacionPasswordRestablecido() {
     // Hook para redireccionar
@@ -59,7 +60,7 @@ export default function ConfirmacionPasswordRestablecido() {
                         </div>
                         <div className="cool-md-12 text-center mt-2">
                             <p className={`${ styPassRes.pregunta}`}>
-                                <a href="/cuentas/login" className={`${ styPassRes.boton_registrarse}`}>Iniciar sesión</a>
+                                <Link href="/cuentas/login" className={`${ styPassRes.boton_registrarse}`}>Iniciar sesión</ Link>
                             </p>
                         </div>
                     </div>
