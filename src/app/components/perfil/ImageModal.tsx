@@ -91,7 +91,8 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
             height: isMobile ? "70%" : "90%",
             overflow: "hidden",
           }}
-          onClick={(e) => e.stopPropagation()}
+          // 
+          onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
         >
           {/* Header móvil arriba de la imagen */}
           {isMobile && (
