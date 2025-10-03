@@ -27,8 +27,11 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   if (!isOpen || !selectedImage) return null;
 
   const isDetallePage = pathname.startsWith(`/posteo/`);
-  const link = `${process.env.NEXT_PUBLIC_BASE_URL}/posteo/${selectedImage._id}`;
-
+  // Link para comparti, pero debemos checar en produccion si el link esta funcional
+  const link = `${process.env.NEXT_PUBLIC_BASE_URL}/posteo/${selectedImage._id}/?fuente=tlx_web_link_copiado`;
+  // const link = `http://192.168.1.141:3000/posteo/${selectedImage._id}?fuente=tlx_web_link_copiado`;
+  
+  
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(link);
