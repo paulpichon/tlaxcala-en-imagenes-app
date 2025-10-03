@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { posteoSchema, posteoBaseSchema } from "@/lib/validaciones";
 import { ZodError } from "zod";
 import { Posteo } from "@/types/types";
+import { FiCamera, FiImage } from "react-icons/fi";
 
 interface Props {
   show: boolean;
@@ -196,7 +197,7 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
                 <>
                   <style jsx>{`
                     .upload-area {
-                      border: 2px dashed #0d6efd;
+                      border: 2px dashed #EBCA9A;
                       border-radius: 16px;
                       padding: 60px 20px;
                       background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
@@ -204,10 +205,10 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
                       transition: all 0.3s ease;
                     }
                     .upload-area:hover {
-                      border-color: #0a58ca;
+                      border-color: #EBCA9A;
                       background: linear-gradient(135deg, #e7f1ff 0%, #f8f9ff 100%);
                       transform: translateY(-2px);
-                      box-shadow: 0 8px 16px rgba(13, 110, 253, 0.1);
+                      box-shadow: 0 8px 16px rgba(235, 202, 154, 0.1);
                     }
                     .upload-icon {
                       font-size: 48px;
@@ -232,7 +233,7 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
                       display: inline-block;
                       padding: 6px 12px;
                       background: #e7f1ff;
-                      color: #0d6efd;
+                      color: #EBCA9A;
                       border-radius: 20px;
                       font-size: 12px;
                       font-weight: 600;
@@ -246,10 +247,10 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
                     }
                     .camera-btn {
                       padding: 12px 24px;
-                      border: 2px solid #0d6efd;
+                      border: 2px solid #EBCA9A;
                       border-radius: 12px;
                       background: white;
-                      color: #0d6efd;
+                      color: #EBCA9A;
                       font-weight: 600;
                       cursor: pointer;
                       transition: all 0.3s ease;
@@ -258,16 +259,16 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
                       gap: 8px;
                     }
                     .camera-btn:hover {
-                      background: #0d6efd;
+                      background: #EBCA9A;
                       color: white;
                       transform: translateY(-2px);
                     }
                     .camera-btn.primary {
-                      background: #0d6efd;
+                      background: #EBCA9A;
                       color: white;
                     }
                     .camera-btn.primary:hover {
-                      background: #0a58ca;
+                      background: #EBCA9A;
                     }
                   `}</style>
                   
@@ -304,10 +305,12 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
                   {isMobile && (
                     <div className="camera-buttons">
                       <label htmlFor="cameraInput" className="camera-btn primary">
-                        📷 Tomar foto
+                        {/* 📷 Tomar foto */}
+                        <FiCamera /> Tomar foto
                       </label>
                       <label htmlFor="galleryInput" className="camera-btn">
-                        🖼️ Galería
+                        <FiImage /> Galería
+                        {/* 🖼️ Galería */}
                       </label>
 
                       {/* Input para cámara */}
@@ -428,7 +431,7 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
                 Cancelar
               </button>
               <button
-                className="btn btn-primary"
+                className="btn btnCancelar"
                 disabled={loading || !file}
                 onClick={handleSubmit}
               >
@@ -497,7 +500,7 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
               <div className="modal-footer">
                 <button
                   type="button"
-                  className="btn btnCancelar"
+                  className="btn btn-secondary"
                   onClick={() => setShowConfirmDiscard(false)}
                 >
                   Cancelar
