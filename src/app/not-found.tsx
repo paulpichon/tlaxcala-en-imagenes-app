@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   description: "El lugar donde encuentras gente de Tlaxcala",
 };
 
-export default function CorreoEnviado() {
+export default function NotFound() {
   
   // Retornar el componente
   return (
