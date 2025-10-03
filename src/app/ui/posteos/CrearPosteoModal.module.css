@@ -1,0 +1,77 @@
+/* Estilos para el componente CrearPosteoModal.tsx */
+/* Componente para la creacion de posteos */
+.uploadArea {
+    border: 2px dashed #EBCA9A;
+    border-radius: 16px;
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .uploadArea:hover {
+    border-color: #EBCA9A;
+    background: linear-gradient(135deg, #e7f1ff 0%, #f8f9ff 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(235, 202, 154, 0.1);
+  }
+  .uploadIcon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    animation: bounce 2s infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .uploadText {
+    font-size: 18px;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 8px;
+  }
+  .uploadHint {
+    font-size: 14px;
+    color: #6c757d;
+  }
+  .formatBadge {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #e7f1ff;
+    color: #EBCA9A;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 4px;
+  }
+  .cameraButtons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  .cameraBtn {
+    padding: 12px 24px;
+    border: 2px solid #EBCA9A;
+    border-radius: 12px;
+    background: white;
+    color: #EBCA9A;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cameraBtn:hover {
+    background: #EBCA9A;
+    color: white;
+    transform: translateY(-2px);
+  }
+  .primary {
+    background: #EBCA9A;
+    color: white;
+  }
+  .primary:hover {
+    background: #EBCA9A;
+  }
+  
