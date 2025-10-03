@@ -32,7 +32,7 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
     processFile,
     handleSubmit,
     resetForm,
-  } = useCrearPosteo(onPostCreated);
+  } = useCrearPosteo(onPostCreated, onClose);
 
   const handleClose = () => {
     if (file || texto.trim() !== "") {

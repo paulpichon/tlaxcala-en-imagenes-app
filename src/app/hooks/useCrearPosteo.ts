@@ -1,4 +1,3 @@
-// Hook para ña creacion de POSTEOS
 // hooks/useCrearPosteo.ts
 import { useState, useEffect } from "react";
 import { posteoSchema, posteoBaseSchema } from "@/lib/validaciones";
@@ -6,7 +5,10 @@ import { ZodError } from "zod";
 import { useAuth } from "@/context/AuthContext";
 import { Posteo } from "@/types/types";
 
-export function useCrearPosteo(onPostCreated?: (newPost?: Posteo) => void) {
+export function useCrearPosteo(
+  onPostCreated?: (newPost?: Posteo) => void,
+  onClose?: () => void
+) {
   const { fetchWithAuth } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -96,7 +98,11 @@ export function useCrearPosteo(onPostCreated?: (newPost?: Posteo) => void) {
       setToastType("success");
       onPostCreated?.(newPost);
 
-      setTimeout(() => resetForm(), 2500);
+      // 👇 Cerrar modal y limpiar formulario después de unos segundos
+      setTimeout(() => {
+        resetForm();
+        onClose?.(); // 👈 aquí cerramos el modal
+      }, 1500);
     } catch (err) {
       if (err instanceof ZodError) {
         setErrors(err.errors.map((e) => e.message));
@@ -112,9 +118,21 @@ export function useCrearPosteo(onPostCreated?: (newPost?: Posteo) => void) {
   };
 
   return {
-    file, preview, texto, posteoPublico, loading, showConfirmDiscard,
-    errors, toastMessage, toastType, isMobile,
-    setTexto, setPosteoPublico, setShowConfirmDiscard,
-    processFile, handleSubmit, resetForm,
+    file,
+    preview,
+    texto,
+    posteoPublico,
+    loading,
+    showConfirmDiscard,
+    errors,
+    toastMessage,
+    toastType,
+    isMobile,
+    setTexto,
+    setPosteoPublico,
+    setShowConfirmDiscard,
+    processFile,
+    handleSubmit,
+    resetForm,
   };
 }
