@@ -45,6 +45,12 @@ export interface Posteo {
   isFollowing: boolean;   // 👈 añadido
   isFavorito: boolean;    // 👈 añadido
 }
+// Interface para crear Posteo Modal
+export interface CrearPosteoModalProps {
+  show: boolean;
+  onClose: () => void;
+  onPostCreated?: (newPost?: Posteo) => void;
+} 
 
 // Response de la API para los posteos
 // Esta interface es la que se espera recibir de la API al hacer una petición para obtener los posteos
@@ -146,6 +152,11 @@ export interface LikeUsuario {
   updatedAt: string;
   __v: number;
 }
+// Interface Props LikeButton.tsx
+export interface LikeButtonProps {
+  postId: string;
+  onOpenLikesModal?: () => void;
+}
 // Respuesta de la API para likes de un posteo
 // Esta interface representa la respuesta de la API al solicitar los likes de un posteo
 // Contiene un array de usuarios que han dado like al posteo
@@ -157,12 +168,23 @@ export interface FavoritoButtonProps {
   posteoId: string;
   autorId: string;
   imagenUrl: string;
-  initialFavorito: boolean; // 👈 estado inicial desde el post
-  onToggle?: (newState: boolean) => void; // ✅ nueva prop opcional
+  initialFavorito: boolean;
+  className?: string;
 }
 // Interface para las props del componente FollowButton
 export interface FollowButtonProps {
   userId: string;
   initialFollowing: boolean;
-  onToggle?: (newState: boolean) => void; // 👈 notificación
+  className?: string; // solo estilos base, no color
+}
+// Interface para todo lo que tenga que ver con publicaciones de usuario props 
+export interface PublicacionesUsuarioProps {
+  usuarioId?: string;
+  refreshTrigger?: number;
+}
+// Interface props de TOAST
+export interface ToastGlobalProps {
+  message: string;
+  type?: "success" | "danger" | "creacion";
+  onClose?: () => void;
 }

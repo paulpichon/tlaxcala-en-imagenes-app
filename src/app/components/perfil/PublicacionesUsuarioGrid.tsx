@@ -5,15 +5,12 @@ import perfil from "../../ui/perfil/perfil.module.css";
 import Image from "next/image";
 import ImageModal from "./ImageModal";
 import ImagePreloader from "../ImagePreloader"; // 👈 Importar preloader
-import { Posteo, PosteoDetalleResponse } from "@/types/types";
+import { Posteo, PosteoDetalleResponse, PublicacionesUsuarioProps } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 
-interface Props {
-  usuarioId: string;
-  refreshTrigger?: number;
-}
 
-export default function PublicacionesUsuarioGrid({ usuarioId, refreshTrigger }: Props) {
+
+export default function PublicacionesUsuarioGrid({ usuarioId, refreshTrigger }: PublicacionesUsuarioProps) {
   const { fetchWithAuth } = useAuth();
   const [posteos, setPosteos] = useState<Posteo[]>([]);
   const [loading, setLoading] = useState(true);

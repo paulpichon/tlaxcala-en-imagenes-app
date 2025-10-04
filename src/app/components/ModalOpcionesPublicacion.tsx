@@ -5,17 +5,11 @@ import FollowButton from "./FollowButton";
 import FavoritoButton from "./FavoritoButton";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Posteo } from "@/types/types";
+import { PropsModalOpcionesPublicacion } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 import { useFavorito } from "@/context/FavoritoContext";
 
-interface ModalOpcionesPublicacionProps {
-  isOpen: boolean;
-  selectedImage: Posteo | null;
-  onClose: () => void;
-}
-
-const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
+const ModalOpcionesPublicacion: React.FC<PropsModalOpcionesPublicacion> = ({
   isOpen,
   selectedImage,
   onClose,

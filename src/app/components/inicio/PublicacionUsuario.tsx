@@ -3,12 +3,9 @@
 import { useInfinitePosts } from "@/app/hooks/useInfinitePosts";
 import Spinner from "../spinner";
 import PosteoCard from "../PosteoCard";
+import { PublicacionesUsuarioProps } from "@/types/types";
 
-interface Props {
-  refreshTrigger?: number;
-}
-
-export default function PublicacionUsuario({ refreshTrigger }: Props) {
+export default function PublicacionUsuario({ refreshTrigger }: PublicacionesUsuarioProps) {
   const {
     posts,
     loading,

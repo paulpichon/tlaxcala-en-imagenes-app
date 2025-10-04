@@ -1,13 +1,8 @@
 // components/ui/ToastGlobal.tsx
 'use client';
 
+import { ToastGlobalProps } from "@/types/types";
 import { motion, AnimatePresence } from "framer-motion";
-
-interface ToastGlobalProps {
-  message: string;
-  type?: "success" | "danger" | "creacion";
-  onClose?: () => void;
-}
 
 export default function ToastGlobal({ message, type = "creacion", onClose }: ToastGlobalProps) {
   return (

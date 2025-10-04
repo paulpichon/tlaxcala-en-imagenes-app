@@ -2,19 +2,13 @@
 
 import Image from "next/image";
 import { FiCamera, FiImage } from "react-icons/fi";
-import { Posteo } from "@/types/types";
 import { useCrearPosteo } from "../hooks/useCrearPosteo";
 import posteo from "../ui/posteos/CrearPosteoModal.module.css";
 import ToastGlobal from "./ToastGlobal";
 import { useEffect, useState } from "react";
+import { CrearPosteoModalProps } from "@/types/types";
 
-interface Props {
-  show: boolean;
-  onClose: () => void;
-  onPostCreated?: (newPost?: Posteo) => void;
-}
-
-export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props) {
+export default function CrearPosteoModal({ show, onClose, onPostCreated }: CrearPosteoModalProps) {
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "danger" | "creacion">("creacion");
 

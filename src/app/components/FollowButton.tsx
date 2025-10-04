@@ -4,12 +4,7 @@ import React from "react";
 import perfil from "../ui/perfil/perfil.module.css";
 import Spinner from "./spinner";
 import { useFollow } from "@/context/FollowContext";
-
-interface FollowButtonProps {
-  userId: string;
-  initialFollowing: boolean;
-  className?: string; // solo estilos base, no color
-}
+import { FollowButtonProps } from "@/types/types";
 
 const FollowButton: React.FC<FollowButtonProps> = ({
   userId,

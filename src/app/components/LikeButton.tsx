@@ -3,12 +3,8 @@
 'use client';
 // Hook personalizado para manejar likes
 import { useLikes } from "@/app/hooks/useLikes";
+import { LikeButtonProps } from "@/types/types";
 import { FiHeart } from "react-icons/fi";
-
-interface LikeButtonProps {
-  postId: string;
-  onOpenLikesModal?: () => void;
-}
 
 export default function LikeButton({ postId, onOpenLikesModal }: LikeButtonProps) {
   const { likeState, toggleLike, loading } = useLikes(postId);

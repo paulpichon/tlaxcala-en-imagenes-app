@@ -1,16 +1,9 @@
 "use client";
 
+import { FavoritoButtonProps } from "@/types/types";
 import perfil from "../ui/perfil/perfil.module.css";
 import Spinner from "./spinner";
 import { useFavorito } from "@/context/FavoritoContext";
-
-interface FavoritoButtonProps {
-  posteoId: string;
-  autorId: string;
-  imagenUrl: string;
-  initialFavorito: boolean;
-  className?: string;
-}
 
 const FavoritoButton: React.FC<FavoritoButtonProps> = ({
   posteoId,

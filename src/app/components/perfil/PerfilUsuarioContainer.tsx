@@ -12,12 +12,9 @@ import ImagenesMasVotadas from "../../components/ImagenesMasVotadas";
 import Publicidad from "../../components/Publicidad";
 import FooterSugerencias from "../../components/FooterSugerencias";
 import { useUsuarioPerfil } from "@/app/hooks/useUsuarioPerfil";
+import { UsuarioLogueado } from "@/types/types";
 
-interface Props {
-  url: string;
-}
-
-export default function PerfilUsuarioContainer({ url }: Props) {
+export default function PerfilUsuarioContainer({ url }: UsuarioLogueado) {
   const { usuario, loading, error } = useUsuarioPerfil(url);
   const [refreshPosteos, setRefreshPosteos] = useState(0);
 
