@@ -122,6 +122,7 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Props
                       </div>
                       <div className="mt-3">
                         <span className={posteo.formatBadge}>JPG</span>
+                        <span className={posteo.formatBadge}>JPEG</span>
                         <span className={posteo.formatBadge}>PNG</span>
                         <span className={posteo.formatBadge}>WEBP</span>
                       </div>

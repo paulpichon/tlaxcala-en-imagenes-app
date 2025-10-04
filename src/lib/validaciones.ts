@@ -46,10 +46,10 @@ export const posteoBaseSchema = z.object({
         message: "La imagen no debe superar los 5 MB",
         })
         .refine(
-        (file) => ["image/jpeg", "image/jpg", "image/webp"].includes(file.type),
+        (file) => ["image/jpeg", "image/jpg", "image/png","image/webp"].includes(file.type),
         {
-            //? Este mensaje de error debe ser igual al que se ponga en el archivo CrearPosteoModal.tsx, de lo contrario prodria crearse un error
-            message: "No se admite este archivo. Solo se permiten .jpg, .jpeg y .webp",
+            //? Mnesaje que se muestra de error en el formulario
+            message: "No se admite este tipo de archivo.",
         }
         )
         .optional(),
