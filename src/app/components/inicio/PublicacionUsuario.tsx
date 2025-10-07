@@ -3,9 +3,8 @@
 import { useInfinitePosts } from "@/app/hooks/useInfinitePosts";
 import Spinner from "../spinner";
 import PosteoCard from "../PosteoCard";
-import { PublicacionesUsuarioProps } from "@/types/types";
 
-export default function PublicacionUsuario({ refreshTrigger }: PublicacionesUsuarioProps) {
+export default function PublicacionUsuario() {
   const {
     posts,
     loading,
@@ -13,7 +12,6 @@ export default function PublicacionUsuario({ refreshTrigger }: PublicacionesUsua
     finished
   } = useInfinitePosts(
     `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos`,
-    refreshTrigger
   );
 
   // Loading inicial
