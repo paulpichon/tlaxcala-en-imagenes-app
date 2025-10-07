@@ -89,7 +89,7 @@ export default function PublicacionesUsuarioGrid({ usuarioId, refreshTrigger }: 
   return (
     <>
       {/* 👇 Precargar todas las imágenes en segundo plano */}
-      <ImagePreloader images={posteos.map(p => p.img)} />
+      <ImagePreloader images={posteos.map(p => p.secure_url)} />
 
       {/* 👇 Spinner pequeño durante refresh */}
       {refreshing && (
@@ -107,7 +107,7 @@ export default function PublicacionesUsuarioGrid({ usuarioId, refreshTrigger }: 
           <div key={posteo._id} className="col-4">
             <div className="card">
               <Image
-                src={posteo.img}
+                src={posteo.secure_url}
                 alt={posteo.texto}
                 width={200}
                 height={200}

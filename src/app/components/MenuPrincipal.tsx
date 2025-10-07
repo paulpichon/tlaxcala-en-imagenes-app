@@ -35,7 +35,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
         { 
             name: `${user?.nombre_completo?.nombre} ${user?.nombre_completo?.apellido}`, 
             href: `/${user?.url}`, 
-            image: user?.imagen_perfil?.url 
+            image: user?.imagen_perfil?.secure_url 
         },
     ];
 

@@ -34,9 +34,9 @@ export interface APIResponse {
   }
 export interface Posteo {
   _idUsuario: UsuarioLogueado;
-  public_id_img: string;
+  public_id: string;
   texto: string;
-  img: string;
+  secure_url: string;
   posteo_publico: boolean;
   fecha_creacion: string;
   fecha_actualizacion?: string;
@@ -108,9 +108,9 @@ export interface UsuarioLogueado {
   };
   correo: string;
   imagen_perfil?: {
-    url: string;
+    secure_url: string;
   };
-  url?: string; // slug del perfil
+  url: string; // slug del perfil
   uid: string;
   _id: string;
 }
@@ -141,7 +141,7 @@ export interface LikeUsuario {
       apellido: string;
     };
     imagen_perfil: {
-      url: string;
+      secure_url: string;
     };
     url: string; // URL del perfil del usuario
     uid: string;

@@ -20,7 +20,7 @@ export default function InformacionUsuarioPerfil({ usuario }: Props) {
           {/* Imagen de perfil */}
           <div className="col-4 col-md-3 text-center">
             <Image
-              src={usuario.imagen_perfil?.url || "/default-profile.png"}
+              src={usuario.imagen_perfil?.secure_url || "/default-profile.png"}
               width={150}
               height={150}
               className={`${perfil.img_perfil_usuario} rounded-circle`}
@@ -64,45 +64,5 @@ export default function InformacionUsuarioPerfil({ usuario }: Props) {
         </div>
       </div>
     </div>
-
-
-
-
-
-
-
-
-    // <div className={perfil.contenedor_info_usuario}>
-    //   <div className="row align-items-center">
-    //     {/* Imagen */}
-    //     <div className="col-3 text-center">
-    //     <Image
-    //         src={usuario.imagen_perfil?.url || "/default-profile.png"}
-    //         width={150}
-    //         height={150}
-    //         className={`${perfil.img_perfil_usuario} rounded-circle`}
-    //         alt={usuario.nombre_completo.nombre}
-    //       />
-    //     </div>
-
-    //     {/* Info */}
-    //     <div className="col-9">
-    //       <h5>
-    //         {usuario.nombre_completo.nombre} {usuario.nombre_completo.apellido}
-    //       </h5>
-    //       <p className="text-muted mb-1">{usuario.lugar_radicacion?.nombre_estado}</p>
-    //       <p className="mb-1">
-    //         Posteos: {usuario.totaltPosteos} | Seguidores: {usuario.totalSeguidores} | Seguidos:{" "}
-    //         {usuario.totalSeguidos}
-    //       </p>
-
-    //       {/* ✅ FollowButton usando FollowContext */}
-    //       <FollowButton
-    //         userId={usuario._id}
-    //         initialFollowing={usuario.isFollowing}
-    //       />
-    //     </div>
-    //   </div>
-    // </div>
   );
 }

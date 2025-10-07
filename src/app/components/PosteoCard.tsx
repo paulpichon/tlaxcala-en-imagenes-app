@@ -63,7 +63,7 @@ export default function PosteoCard({
         <div className="card-header bg-white d-flex align-items-center border-0">
           <Link className="link_perfil_img" href={`/${post._idUsuario.url}`}>
             <Image
-              src={post._idUsuario.imagen_perfil!.url}
+              src={post._idUsuario.imagen_perfil!.secure_url}
               alt={post.texto}
               title={post.texto}
               width={40}
@@ -95,7 +95,7 @@ export default function PosteoCard({
         {/* Imagen */}
         <div className="ratio ratio-1x1">
           <Image
-            src={post.img}
+            src={post.secure_url}
             alt={post.texto}
             fill
             className="object-fit-cover"

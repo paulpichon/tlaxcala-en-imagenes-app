@@ -59,7 +59,7 @@ export default function ModalLikesUsuarios({
                     <Link className="text-decoration-none text-dark" href={`/${like._idUsuario.url}`} key={like._idUsuario._id}>
                       <li className="d-flex align-items-center mb-3">
                         <Image
-                          src={like._idUsuario.imagen_perfil.url}
+                          src={like._idUsuario.imagen_perfil.secure_url}
                           alt={`${like._idUsuario.nombre_completo.nombre}`}
                           width={40}
                           height={40}

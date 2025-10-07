@@ -100,7 +100,7 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
               <div className="d-flex align-items-center gap-2">
                 <div className="position-relative" style={{ width: 35, height: 35 }}>
                   <Image
-                    src={selectedImage._idUsuario.imagen_perfil?.url || "/default.png"}
+                    src={selectedImage._idUsuario.imagen_perfil?.secure_url || "/default.png"}
                     alt="perfil"
                     fill
                     className="rounded-circle object-cover"
@@ -125,7 +125,7 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
           {/* Columna izquierda: Imagen */}
           <div className="flex-grow-1 bg-black position-relative">
             <Image
-              src={selectedImage.img}
+              src={selectedImage.secure_url}
               alt={selectedImage.texto}
               fill
               priority
@@ -146,7 +146,7 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
                   <div className="d-flex align-items-center gap-2">
                     <div className="position-relative" style={{ width: 35, height: 35 }}>
                       <Image
-                        src={selectedImage._idUsuario.imagen_perfil?.url || "/default.png"}
+                        src={selectedImage._idUsuario.imagen_perfil?.secure_url || "/default.png"}
                         alt="perfil"
                         fill
                         className="rounded-circle object-cover"
