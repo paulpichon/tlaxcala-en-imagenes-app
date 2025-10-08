@@ -1,0 +1,29 @@
+/* Imagen de detalle centrada con fondo negro */
+.detalleCard {
+  background-color: black !important;
+}
+
+/* Ajuste tipo Instagram en detalle */
+.detalleImagen {
+  width: 100%;
+  height: auto;
+  max-height: 90vh;
+  object-fit: contain;
+  background-color: black;
+  transition: opacity 0.6s ease-in-out;
+}
+
+/* Animación de fade-in */
+.fadeIn {
+  opacity: 1;
+}
+
+.hidden {
+  opacity: 0;
+}
+
+/* Hover en feed */
+.card .ratio img:hover {
+  transform: scale(1.02);
+  transition: transform 0.3s ease;
+}
