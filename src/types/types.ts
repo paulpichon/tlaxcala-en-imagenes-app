@@ -189,3 +189,14 @@ export interface ToastGlobalProps {
   type?: "success" | "danger" | "creacion";
   onClose?: () => void;
 }
+// Interface para las opciones custom de Cloudinary
+export interface CloudinaryCustomOptions {
+  width?: number;
+  height?: number;
+  crop?: "fill" | "limit" | "fit" | "scale" | "thumb" | "pad";
+  gravity?: "auto" | "face" | "center" | string;
+  background?: string;
+  quality?: "auto" | number | null;
+  format?: "auto" | "jpg" | "webp" | "avif" | "png" | null;
+  useAutoTransforms?: boolean;
+}
