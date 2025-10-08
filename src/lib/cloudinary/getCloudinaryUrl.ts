@@ -1,21 +1,19 @@
-// lib/cloudinary/getCloudinaryUrl.ts
-
-export type CloudinaryPreset = "feed" | "detalle" | "perfil" | "grid" | "mini" | "custom";
-
-export interface CloudinaryCustomOptions {
-  width?: number;
-  height?: number;
-  crop?: "fill" | "limit" | "fit" | "scale" | "thumb";
-  gravity?: "auto" | "face" | "center";
-  quality?: "auto" | number;
-  format?: "auto" | "jpg" | "webp" | "avif" | "png";
-}
-
+// src/lib/cloudinary/getCloudinaryUrl.ts
+// Función para generar URLs de Cloudinary con presets y opciones seguras
+import { CloudinaryCustomOptions } from "@/types/types";
+// Tipos de presets disponibles
+export type CloudinaryPreset =
+  | "feed"
+  | "detalle"
+  | "perfil"
+  | "grid"
+  | "mini"
+  | "custom";
+  
 /**
- * Genera una URL de Cloudinary con transformaciones predefinidas o personalizadas.
- * @param publicId public_id de Cloudinary (ej: tlaxcala-en-imagenes/usuarios/1234/abcd-efgh)
- * @param preset Nombre del preset o "custom" para opciones manuales
- * @param options Opciones personalizadas (si preset = "custom")
+ * ✅ Genera una URL transformada de Cloudinary según un preset o configuración custom.
+ * - Evita el bug de imágenes rotas por combinación g_auto,q_auto,f_auto.
+ * - Usa configuraciones seguras por preset.
  */
 export function getCloudinaryUrl(
   publicId: string,
@@ -30,46 +28,64 @@ export function getCloudinaryUrl(
     return "";
   }
 
-  // 🎨 Presets predefinidos (ajustables)
+  // 1️⃣ Limpiar extensión (por si viene con .jpg, .png, etc.)
+  const withoutExt = publicId.replace(/\.(jpe?g|png|gif|webp|avif|bmp|tiff)$/i, "");
+
+  // 2️⃣ Codificar segmentos del path manteniendo '/'
+  const safePublicId = withoutExt.split("/").map(encodeURIComponent).join("/");
+
+  // 3️⃣ Presets definidos
   const presets: Record<Exclude<CloudinaryPreset, "custom">, CloudinaryCustomOptions> = {
+    // Feed (cuadrado tipo Instagram)
     feed: {
       width: 600,
       height: 600,
       crop: "fill",
       gravity: "auto",
       quality: "auto",
-      format: "auto",
+      format: null, // ❌ sin f_auto (evita bug)
+      useAutoTransforms: false,
     },
+    // Detalle (grande, sin recorte y con fondo gris oscuro)
     detalle: {
       width: 1080,
-      crop: "limit",
+      height: 1080,
+      crop: "pad",
       gravity: "auto",
+      background: "auto",
       quality: "auto",
-      format: "auto",
+      format: null, // ❌ sin f_auto
+      useAutoTransforms: false,
     },
+    // Foto de perfil
     perfil: {
       width: 80,
       height: 80,
       crop: "fill",
       gravity: "face",
       quality: "auto",
-      format: "auto",
+      format: null,
+      useAutoTransforms: false,
     },
+    // Cuadrícula de publicaciones
     grid: {
       width: 300,
       height: 300,
       crop: "fill",
       gravity: "auto",
       quality: "auto",
-      format: "auto",
+      format: null,
+      useAutoTransforms: false,
     },
+    // Íconos o miniaturas
     mini: {
       width: 40,
       height: 40,
       crop: "fill",
       gravity: "face",
       quality: "auto",
-      format: "auto",
+      format: null,
+      useAutoTransforms: false,
     },
   };
 
@@ -78,22 +94,38 @@ export function getCloudinaryUrl(
   const {
     width,
     height,
-    crop = "fill",
-    gravity = "auto",
-    quality = "auto",
-    format = "auto",
+    crop,
+    gravity,
+    background,
+    quality,
+    format,
+    useAutoTransforms = false,
   } = config;
 
-  const transformations = [
-    width ? `w_${width}` : null,
-    height ? `h_${height}` : null,
-    crop ? `c_${crop}` : null,
-    gravity ? `g_${gravity}` : null,
-    quality ? `q_${quality}` : null,
-    format ? `f_${format}` : null,
-  ]
-    .filter(Boolean)
-    .join(",");
+  // 4️⃣ Construcción de transformaciones seguras
+  const parts: string[] = [];
+  if (width) parts.push(`w_${width}`);
+  if (height) parts.push(`h_${height}`);
+  if (crop) parts.push(`c_${crop}`);
+  if (gravity && gravity !== "auto") parts.push(`g_${gravity}`);
+  if (background) parts.push(`b_${background}`);
 
-  return `https://res.cloudinary.com/${cloudName}/image/upload/${transformations}/${publicId}.jpg`;
+  // Solo añadimos los flags automáticos seguros
+  if (useAutoTransforms) {
+    if (gravity === "auto") parts.push("g_auto");
+    if (quality === "auto") parts.push("q_auto");
+    if (format === "auto") parts.push("f_auto");
+  } else {
+    if (typeof quality === "number" || quality === "auto") parts.push(`q_${quality}`);
+    if (format && format !== "auto") parts.push(`f_${format}`);
+  }
+
+  const transformation = parts.filter(Boolean).join(",");
+
+  // 5️⃣ URL final
+  const url = transformation
+    ? `https://res.cloudinary.com/${cloudName}/image/upload/${transformation}/${safePublicId}`
+    : `https://res.cloudinary.com/${cloudName}/image/upload/${safePublicId}`;
+
+  return url;
 }
