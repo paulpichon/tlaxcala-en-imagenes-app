@@ -109,6 +109,7 @@ export interface UsuarioLogueado {
   correo: string;
   imagen_perfil?: {
     secure_url: string;
+    public_id: string;
   };
   url: string; // slug del perfil
   uid: string;
