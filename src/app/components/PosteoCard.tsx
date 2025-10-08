@@ -11,6 +11,7 @@ import ModalLikesUsuarios from "./ModalLikesUsuarios";
 import { Posteo, LikeUsuario } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
+import posteoCard from "../ui/posteos/PosteoCard.module.css";
 
 interface PosteoCardProps {
   post: Posteo;
@@ -22,6 +23,7 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isLikesOpen, setIsLikesOpen] = useState(false);
   const [likesUsuarios, setLikesUsuarios] = useState<LikeUsuario[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
   const openLikesModal = async () => {
     try {
@@ -59,7 +61,11 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
 
   return (
     <>
-      <div className="card shadow-sm mb-4 border-0 rounded-3 overflow-hidden">
+      <div
+        className={`card shadow-sm mb-4 border-0 rounded-3 overflow-hidden ${
+          isDetail ? posteoCard.detalleCard : ""
+        }`}
+      >
         {/* Header */}
         <div className="card-header bg-white d-flex align-items-center border-0">
           <Link className="link_perfil_img" href={`/${post._idUsuario.url}`}>
@@ -94,10 +100,18 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
         <div
           className={`${
             isDetail
-              ? "d-flex justify-content-center align-items-center"
+              ? "d-flex justify-content-center align-items-center bg-black"
               : "ratio ratio-1x1"
           }`}
-          style={isDetail ? { aspectRatio: "1 / 1", backgroundColor: "#ffffff" } : {}}
+          style={
+            isDetail
+              ? {
+                  backgroundColor: "black",
+                  maxHeight: "90vh",
+                  overflow: "hidden",
+                }
+              : {}
+          }
         >
           <Image
             src={postImageUrl}
@@ -106,14 +120,15 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
             width={isDetail ? 1080 : undefined}
             height={isDetail ? 1080 : undefined}
             className={`${
-              isDetail ? "object-contain w-100 h-auto" : "object-fit-cover"
-            }`}
+              isDetail ? posteoCard.detalleImagen : "object-fit-cover"
+            } ${loaded ? posteoCard.fadeIn : posteoCard.hidden}`}
             priority={isDetail}
+            onLoad={() => setLoaded(true)}
           />
         </div>
 
         {/* Body */}
-        <div className="card-body">
+        <div className="card-body bg-white">
           <div className="d-flex align-items-center mb-2">
             <LikeButton postId={post._id} onOpenLikesModal={openLikesModal} />
           </div>
