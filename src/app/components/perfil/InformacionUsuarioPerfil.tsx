@@ -5,6 +5,7 @@ import perfil from "../../ui/perfil/perfil.module.css";
 import FollowButton from "../FollowButton";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
+import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 
 interface Props {
   usuario: UsuarioPerfil;
@@ -13,6 +14,13 @@ interface Props {
 export default function InformacionUsuarioPerfil({ usuario }: Props) {
   const { user } = useAuth();
   const isOwnProfile = user?.uid === usuario._id;
+
+  // ✅ URLs optimizadas de perfil con Cloudinary
+    const perfilImageUrl = getCloudinaryUrl(
+      usuario.imagen_perfil!.public_id,
+      "perfil"
+    );
+
   return (
     <div className={perfil.contenedor_info_usuario}>
       <div className="container mt-4">
@@ -20,7 +28,7 @@ export default function InformacionUsuarioPerfil({ usuario }: Props) {
           {/* Imagen de perfil */}
           <div className="col-4 col-md-3 text-center">
             <Image
-              src={usuario.imagen_perfil?.secure_url || "/default-profile.png"}
+              src={perfilImageUrl}
               width={150}
               height={150}
               className={`${perfil.img_perfil_usuario} rounded-circle`}
@@ -40,7 +48,6 @@ export default function InformacionUsuarioPerfil({ usuario }: Props) {
                 <FollowButton
                   userId={usuario._id}
                   initialFollowing={usuario.isFollowing} 
-                  // className={`${usuario.isFollowing ? `${perfil.btn_dejarSeguir_usuario}` : `${perfil.btn_seguir_usuario}`}`}
                   className={`${ perfil.btn_base_usuario }`}
                 />
               )}
