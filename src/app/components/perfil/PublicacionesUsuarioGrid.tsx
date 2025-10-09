@@ -7,6 +7,7 @@ import ImageModal from "./ImageModal";
 import ImagePreloader from "../ImagePreloader"; // 👈 Importar preloader
 import { Posteo, PosteoDetalleResponse, PublicacionesUsuarioProps } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
+import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 
 
 
@@ -107,7 +108,9 @@ export default function PublicacionesUsuarioGrid({ usuarioId, refreshTrigger }: 
           <div key={posteo._id} className="col-4">
             <div className="card">
               <Image
-                src={posteo.secure_url}
+                src={
+                  getCloudinaryUrl(posteo.public_id, "grid")
+                }
                 alt={posteo.texto}
                 width={200}
                 height={200}
