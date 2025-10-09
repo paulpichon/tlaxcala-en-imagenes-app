@@ -41,7 +41,7 @@ export function getCloudinaryUrl(
       width: 600,
       height: 600,
       crop: "fill",
-      gravity: "auto",
+      gravity: "face", // centrado en rostro si es posible
       quality: "auto",
       format: null, // ❌ sin f_auto (evita bug)
       useAutoTransforms: false,
@@ -62,7 +62,7 @@ export function getCloudinaryUrl(
       width: 80,
       height: 80,
       crop: "fill",
-      gravity: "face",
+      gravity: "face", // centrado en rostro
       quality: "auto",
       format: null,
       useAutoTransforms: false,
@@ -72,7 +72,7 @@ export function getCloudinaryUrl(
       width: 300,
       height: 300,
       crop: "fill",
-      gravity: "auto",
+      gravity: "face", // centrado en rostro
       quality: "auto",
       format: null,
       useAutoTransforms: false,
@@ -82,7 +82,7 @@ export function getCloudinaryUrl(
       width: 40,
       height: 40,
       crop: "fill",
-      gravity: "face",
+      gravity: "face", // centrado en rostro
       quality: "auto",
       format: null,
       useAutoTransforms: false,
