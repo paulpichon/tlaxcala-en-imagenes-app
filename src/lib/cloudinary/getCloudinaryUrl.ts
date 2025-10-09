@@ -62,10 +62,10 @@ export function getCloudinaryUrl(
     },
     // Foto de perfil
     perfil: {
-      width: 200,
-      height: 200,
+      width: 300,
+      height: 300,
       crop: "thumb",
-      gravity: "face", // centrado en rostro
+      gravity: "center", // centrado en rostro
       quality:85,
       format: null,
       useAutoTransforms: false,
@@ -82,8 +82,8 @@ export function getCloudinaryUrl(
     },
     // Íconos o miniaturas
     mini: {
-      width: 40,
-      height: 40,
+      width: 60,
+      height: 60,
       crop: "fill",
       gravity: "face", // centrado en rostro
       quality: 85,
