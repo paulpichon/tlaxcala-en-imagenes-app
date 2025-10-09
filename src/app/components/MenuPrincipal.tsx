@@ -8,6 +8,7 @@ import Image from "next/image";
 
 // Importamos el modal de crear posteo
 import CrearPosteoModal from "./CrearPosteoModal";
+import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 
 interface Props {
   onPostCreated?: () => void; // 👈 Nueva prop para actualizar el feed/perfil
@@ -35,7 +36,12 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
         { 
             name: `${user?.nombre_completo?.nombre} ${user?.nombre_completo?.apellido}`, 
             href: `/${user?.url}`, 
-            image: user?.imagen_perfil?.secure_url 
+            image: `${
+                getCloudinaryUrl(
+                    user!.imagen_perfil!.public_id,
+                    "mini"
+                  )
+            }` 
         },
     ];
 
