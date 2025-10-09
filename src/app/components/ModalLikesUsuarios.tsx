@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Image from "next/image";
 import { LikeUsuario } from "@/types/types";
 import Link from "next/link";
+import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 
 interface ModalLikesUsuariosProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ export default function ModalLikesUsuarios({
       document.body.style.overflow = "";
     };
   }, [isOpen]);
+console.log(usuarios);
 
   if (!isOpen) return null;
   return (
@@ -59,7 +61,13 @@ export default function ModalLikesUsuarios({
                     <Link className="text-decoration-none text-dark" href={`/${like._idUsuario.url}`} key={like._idUsuario._id}>
                       <li className="d-flex align-items-center mb-3">
                         <Image
-                          src={like._idUsuario.imagen_perfil.secure_url}
+                          src={
+                            // Mostar la imagen de perfil del usuario que dio like con tamaño "mini" Cloudinary URL´S
+                            getCloudinaryUrl(
+                              like._idUsuario.imagen_perfil!.public_id,
+                              "mini"
+                            )
+                          }
                           alt={`${like._idUsuario.nombre_completo.nombre}`}
                           width={40}
                           height={40}
