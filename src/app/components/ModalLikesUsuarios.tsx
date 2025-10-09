@@ -29,7 +29,6 @@ export default function ModalLikesUsuarios({
       document.body.style.overflow = "";
     };
   }, [isOpen]);
-console.log(usuarios);
 
   if (!isOpen) return null;
   return (
