@@ -1,4 +1,3 @@
-// Hay algunas lineas de codigo comentado, ayq eu se le dara uso dspues pero por el momento no es NECESARIO, que e sla funcion de Guardar favoritos con el icono desde el footer del modal de posteo no del modal de opciones dle posteo
 'use client';
 
 import { useState, useEffect } from "react";
@@ -10,10 +9,9 @@ import ModalOpcionesPublicacion from "../ModalOpcionesPublicacion";
 import LikeButton from "../LikeButton";
 import ModalLikesUsuarios from "../ModalLikesUsuarios";
 import { useAuth } from "@/context/AuthContext";
-// import { useFavorito } from "@/context/FavoritoContext"; // ✅ usamos el contexto global
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-// import FavoritoButton from "../FavoritoButton"; // ✅ botón favorito
+import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 
 interface PropsImageModal {
   isOpen: boolean;
@@ -26,7 +24,6 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
   const [isLikesModalOpen, setIsLikesModalOpen] = useState(false);
   const [usuariosLikes, setUsuariosLikes] = useState<LikeUsuario[]>([]);
   const { fetchWithAuth } = useAuth();
-  // const { favoritosMap } = useFavorito(); // ✅ estado global de favoritos
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -40,11 +37,25 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
 
   const fechaFormateada = new Date(selectedImage.fecha_creacion).toLocaleDateString();
 
-  // ✅ estado global sincronizado
-  // const esFavoritoGlobal =
-  //   favoritosMap[selectedImage._id] ?? selectedImage.isFavorito;
+  // ✅ Imagen de perfil optimizada con Cloudinary
+  const urlImg = getCloudinaryUrl(
+    selectedImage._idUsuario.imagen_perfil!.public_id,
+    "mini"
+  );
 
-  // Función para abrir modal de usuarios que dieron like
+  // ✅ Imagen principal del post (versión responsiva, sin recortes)
+  const postImageUrl = getCloudinaryUrl(selectedImage.public_id, "custom", {
+    width: 1400,
+    height: 1400,
+    crop: "limit",
+    background: "black",
+    quality: 90,
+    useAutoTransforms: false,
+  });
+  console.log(postImageUrl);
+  
+
+  // 🔹 Abrir modal de usuarios que dieron like
   const openLikesModal = async () => {
     try {
       const res = await fetchWithAuth(
@@ -78,7 +89,7 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
           <FiX size={28} />
         </button>
 
-        {/* Contenido modal */}
+        {/* Contenedor modal principal */}
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -91,22 +102,20 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
             height: isMobile ? "70%" : "90%",
             overflow: "hidden",
           }}
-          // 
           onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
         >
           {/* Header móvil arriba de la imagen */}
           {isMobile && (
-            <div className="d-flex justify-content-between align-items-center p-2 border-bottom">
+            <div className="d-flex justify-content-between align-items-center p-2 border-bottom bg-white">
               <div className="d-flex align-items-center gap-2">
-                <div className="position-relative" style={{ width: 35, height: 35 }}>
-                  <Image
-                    src={selectedImage._idUsuario.imagen_perfil?.secure_url || "/default.png"}
-                    alt="perfil"
-                    fill
-                    className="rounded-circle object-cover"
-                  />
-                </div>
-                <span className="fw-bold">
+                <Image
+                  src={urlImg}
+                  alt={selectedImage.texto}
+                  width={40}
+                  height={40}
+                  className="rounded-circle me-2 border"
+                />
+                <span className="fw-bold text-dark">
                   {selectedImage._idUsuario.nombre_completo.nombre}{" "}
                   {selectedImage._idUsuario.nombre_completo.apellido}
                 </span>
@@ -123,30 +132,51 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
           )}
 
           {/* Columna izquierda: Imagen */}
-          <div className="flex-grow-1 bg-black position-relative">
-            <Image
-              src={selectedImage.secure_url}
-              alt={selectedImage.texto}
-              fill
-              priority
-              className="object-contain"
-            />
+          <div
+            className="flex-grow-1 bg-black position-relative d-flex justify-content-center align-items-center"
+            style={{
+              width: isMobile ? "100%" : "auto",
+              height: isMobile ? "100%" : "100%",
+              minHeight: isMobile ? "250px" : "400px",
+              maxHeight: "90vh",
+              overflow: "hidden",
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="w-100 h-100 position-relative"
+            >
+              <Image
+                src={selectedImage.secure_url}
+                alt={selectedImage.texto}
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 60vw"
+                className="object-contain"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                }}
+              />
+            </motion.div>
           </div>
 
           {/* Columna derecha: Info (solo escritorio) */}
           {!isMobile && (
             <div
-              className="d-flex flex-column p-3"
+              className="d-flex flex-column p-3 bg-white"
               style={{ width: "350px", borderLeft: "1px solid #ddd", height: "100%" }}
             >
               {/* Parte superior: Header y texto */}
               <div>
-                {/* Header usuario */}
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div className="d-flex align-items-center gap-2">
                     <div className="position-relative" style={{ width: 35, height: 35 }}>
                       <Image
-                        src={selectedImage._idUsuario.imagen_perfil?.secure_url || "/default.png"}
+                        src={urlImg}
                         alt="perfil"
                         fill
                         className="rounded-circle object-cover"
@@ -158,7 +188,6 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
                     </span>
                   </div>
 
-                  {/* Botón opciones */}
                   <button
                     type="button"
                     className={perfil.btn_opciones_modal_perfil}
@@ -169,7 +198,6 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
                   </button>
                 </div>
 
-                {/* Texto */}
                 <p className="mb-2">
                   <Link
                     className="link_perfil_usuario text-dark text-decoration-none"
@@ -184,18 +212,10 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
                 </p>
               </div>
 
-              {/* Parte inferior: Like, Favorito y fecha */}
+              {/* Parte inferior: Like y fecha */}
               <div className="mt-auto">
                 <div className="d-flex gap-3 align-items-center mb-2">
                   <LikeButton postId={selectedImage._id} onOpenLikesModal={openLikesModal} />
-                  {/* ✅ botón favorito sincronizado con contexto */}
-                  {/* TODO: cambiar estilos mas tarde */}
-                  {/* <FavoritoButton
-                    posteoId={selectedImage._id}
-                    autorId={selectedImage._idUsuario._id}
-                    imagenUrl={selectedImage.img}
-                    initialFavorito={esFavoritoGlobal}
-                  /> */}
                 </div>
                 <p className="text-muted small mb-0">{fechaFormateada}</p>
               </div>
@@ -204,16 +224,9 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
 
           {/* Footer móvil debajo de la imagen */}
           {isMobile && (
-            <div className="p-3 border-top">
+            <div className="p-3 border-top bg-white">
               <div className="d-flex gap-3 align-items-center mb-2">
                 <LikeButton postId={selectedImage._id} onOpenLikesModal={openLikesModal} />
-                {/* TODO: cambiar estilos del boton mas tarde */}
-                {/* <FavoritoButton
-                  posteoId={selectedImage._id}
-                  autorId={selectedImage._idUsuario._id}
-                  imagenUrl={selectedImage.img}
-                  initialFavorito={esFavoritoGlobal}
-                /> */}
               </div>
               <p className="mb-1">
                 <Link
