@@ -1,5 +1,8 @@
 // src/lib/cloudinary/getCloudinaryUrl.ts
 // Función para generar URLs de Cloudinary con presets y opciones seguras
+// ?: Documentacion de cloudinary para mas informacion
+//* https://cloudinary.com/documentation/face_detection_based_transformations
+
 import { CloudinaryCustomOptions } from "@/types/types";
 // Tipos de presets disponibles
 export type CloudinaryPreset =
@@ -42,7 +45,7 @@ export function getCloudinaryUrl(
       height: 600,
       crop: "fill",
       gravity: "face", // centrado en rostro si es posible
-      quality: "auto",
+      quality: 85,
       format: null, // ❌ sin f_auto (evita bug)
       useAutoTransforms: false,
     },
@@ -53,17 +56,17 @@ export function getCloudinaryUrl(
       crop: "pad",
       gravity: "auto",
       background: "auto",
-      quality: "auto",
+      quality: 85,
       format: null, // ❌ sin f_auto
       useAutoTransforms: false,
     },
     // Foto de perfil
     perfil: {
-      width: 80,
-      height: 80,
-      crop: "fill",
+      width: 200,
+      height: 200,
+      crop: "thumb",
       gravity: "face", // centrado en rostro
-      quality: "auto",
+      quality:85,
       format: null,
       useAutoTransforms: false,
     },
@@ -73,7 +76,7 @@ export function getCloudinaryUrl(
       height: 300,
       crop: "fill",
       gravity: "face", // centrado en rostro
-      quality: "auto",
+      quality: 85,
       format: null,
       useAutoTransforms: false,
     },
@@ -83,7 +86,7 @@ export function getCloudinaryUrl(
       height: 40,
       crop: "fill",
       gravity: "face", // centrado en rostro
-      quality: "auto",
+      quality: 85,
       format: null,
       useAutoTransforms: false,
     },
