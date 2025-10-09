@@ -103,9 +103,9 @@ export default function PublicacionesUsuarioGrid({ usuarioId, refreshTrigger }: 
       )}
 
       {/* 👇 Grid de publicaciones (siempre visible durante refresh) */}
-      <div className="row g-1" style={{ opacity: refreshing ? 0.6 : 1, transition: 'opacity 0.3s' }}>
+      <div className="row g-0" style={{ opacity: refreshing ? 0.6 : 1, transition: 'opacity 0.3s' }}>
         {posteos.map((posteo) => (
-          <div key={posteo._id} className="col-4">
+          <div key={posteo._id} className="col-6 col-sm-6 col-md-4 col-lg-4">
             <div className="card">
               <Image
                 src={

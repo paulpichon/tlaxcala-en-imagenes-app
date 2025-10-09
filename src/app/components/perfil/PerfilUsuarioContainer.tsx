@@ -62,11 +62,6 @@ export default function PerfilUsuarioContainer({ url }: UrlProps) {
                   <div className="contenedor_publicacion_usuario mb-5">
                     <div className="mt-3">
                       <div className="titulo_contenedor text-center">
-                        <h6
-                          className={`${perfil.titulo_publicaciones} pt-3 pb-3`}
-                        >
-                          PUBLICACIONES
-                        </h6>
                       </div>
                       <PublicacionesUsuarioGrid
                         usuarioId={usuario._id}
