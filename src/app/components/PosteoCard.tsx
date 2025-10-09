@@ -68,7 +68,7 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
       >
         {/* Header */}
         <div className="card-header bg-white d-flex align-items-center border-0">
-          <Link className="link_perfil_img" href={`/${post._idUsuario.url}`}>
+          <Link href={`/${post._idUsuario.url}`}>
             <Image
               src={perfilImageUrl}
               alt={post.texto}
