@@ -142,7 +142,7 @@ export interface LikeUsuario {
       apellido: string;
     };
     imagen_perfil: {
-      secure_url: string;
+      public_id: string;
     };
     url: string; // URL del perfil del usuario
     uid: string;
