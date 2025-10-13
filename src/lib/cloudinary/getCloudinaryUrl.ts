@@ -3,15 +3,7 @@
 // ?: Documentacion de cloudinary para mas informacion
 //* https://cloudinary.com/documentation/face_detection_based_transformations
 
-import { CloudinaryCustomOptions } from "@/types/types";
-// Tipos de presets disponibles
-export type CloudinaryPreset =
-  | "feed"
-  | "detalle"
-  | "perfil"
-  | "grid"
-  | "mini"
-  | "custom";
+import { CloudinaryCustomOptions, CloudinaryPreset } from "@/types/types";
   
 /**
  * ✅ Genera una URL transformada de Cloudinary según un preset o configuración custom.
