@@ -136,18 +136,7 @@ export interface IAuthContext {
 // Contiene el ID del usuario, el nombre completo, la imagen de perfil y el ID del posteo al que le dio like
 export interface LikeUsuario {
   _id: string;
-  _idUsuario: {
-    nombre_completo: {
-      nombre: string;
-      apellido: string;
-    };
-    imagen_perfil: {
-      public_id: string;
-    };
-    url: string; // URL del perfil del usuario
-    uid: string;
-    _id: string;
-  };
+  _idUsuario: UsuarioLogueado;
   _idPosteo: string;
   createdAt: string;
   updatedAt: string;
