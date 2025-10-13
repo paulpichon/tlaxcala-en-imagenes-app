@@ -12,6 +12,7 @@ import { Posteo, LikeUsuario } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import posteoCard from "../ui/posteos/PosteoCard.module.css";
+import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 
 interface PosteoCardProps {
   post: Posteo;
@@ -54,10 +55,10 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
     post.public_id,
     isDetail ? "detalle" : "feed"
   );
-  const perfilImageUrl = getCloudinaryUrl(
-    post._idUsuario.imagen_perfil!.public_id,
-    "perfil"
-  );
+  // const perfilImageUrl = getCloudinaryUrl(
+  //   post._idUsuario.imagen_perfil!.public_id,
+  //   "perfil"
+  // );
 
   return (
     <>
@@ -70,7 +71,9 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
         <div className="card-header bg-white d-flex align-items-center border-0">
           <Link href={`/${post._idUsuario.url}`}>
             <Image
-              src={perfilImageUrl}
+              // Se verifica si la imagen viene por default o si el usuario ya ha subido alguna imagen de perfil, despues llama a getCloudinaryUrl para obtener la URL optimizada
+              // obtenerImagenPerfilUsuario(usuarioLogueado, preset)
+              src={obtenerImagenPerfilUsuario(post._idUsuario, "perfil")}
               alt={post.texto}
               width={40}
               height={40}

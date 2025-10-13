@@ -4,7 +4,8 @@ import { useEffect } from "react";
 import Image from "next/image";
 import { LikeUsuario } from "@/types/types";
 import Link from "next/link";
-import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
+// Verificar la imagen de perfil del usuario
+import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 
 interface ModalLikesUsuariosProps {
   isOpen: boolean;
@@ -61,11 +62,9 @@ export default function ModalLikesUsuarios({
                       <li className="d-flex align-items-center mb-3">
                         <Image
                           src={
-                            // Mostar la imagen de perfil del usuario que dio like con tamaño "mini" Cloudinary URL´S
-                            getCloudinaryUrl(
-                              like._idUsuario.imagen_perfil!.public_id,
-                              "mini"
-                            )
+                            // Se verifica si la imagen viene por default o si el usuario ya ha subido alguna imagen de perfil, despues llama a getCloudinaryUrl para obtener la URL optimizada
+                            // obtenerImagenPerfilUsuario(usuarioLogueado, preset)
+                            obtenerImagenPerfilUsuario(like._idUsuario, "mini")
                           }
                           alt={`${like._idUsuario.nombre_completo.nombre}`}
                           width={40}

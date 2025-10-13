@@ -5,21 +5,18 @@ import perfil from "../../ui/perfil/perfil.module.css";
 import FollowButton from "../FollowButton";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
-import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
+import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
+// import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 
 interface Props {
   usuario: UsuarioPerfil;
 }
 
 export default function InformacionUsuarioPerfil({ usuario }: Props) {
+  // Obtenemos el usuario autenticado
   const { user } = useAuth();
+  // Verificamos si es su propio perfil
   const isOwnProfile = user?.uid === usuario._id;
-
-  // ✅ URLs optimizadas de perfil con Cloudinary
-    const perfilImageUrl = getCloudinaryUrl(
-      usuario.imagen_perfil!.public_id,
-      "perfil"
-    );
 
   return (
     <div className={perfil.contenedor_info_usuario}>
@@ -28,7 +25,9 @@ export default function InformacionUsuarioPerfil({ usuario }: Props) {
           {/* Imagen de perfil */}
           <div className="col-4 col-md-3 text-center">
             <Image
-              src={perfilImageUrl}
+              // Se verifica si la imagen viene por default o si el usuario ya ha subido alguna imagen de perfil, despues llama a getCloudinaryUrl para obtener la URL optimizada
+              // obtenerImagenPerfilUsuario(usuarioLogueado, preset)
+              src={obtenerImagenPerfilUsuario(usuario, "perfil")}
               width={150}
               height={150}
               className={`${perfil.img_perfil_usuario} rounded-circle`}

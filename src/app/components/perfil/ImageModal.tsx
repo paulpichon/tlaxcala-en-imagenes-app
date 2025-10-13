@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
+import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 
 interface PropsImageModal {
   isOpen: boolean;
@@ -37,12 +38,6 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
 
   const fechaFormateada = new Date(selectedImage.fecha_creacion).toLocaleDateString();
 
-  // ✅ Imagen de perfil optimizada con Cloudinary
-  const urlImg = getCloudinaryUrl(
-    selectedImage._idUsuario.imagen_perfil!.public_id,
-    "mini"
-  );
-
   // ✅ Imagen principal del post (versión responsiva, sin recortes)
   const postImageUrl = getCloudinaryUrl(selectedImage.public_id, "custom", {
     width: 1400,
@@ -52,9 +47,6 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
     quality: 90,
     useAutoTransforms: false,
   });
-  console.log(postImageUrl);
-  
-
   // 🔹 Abrir modal de usuarios que dieron like
   const openLikesModal = async () => {
     try {
@@ -109,7 +101,9 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
             <div className="d-flex justify-content-between align-items-center p-2 border-bottom bg-white">
               <div className="d-flex align-items-center gap-2">
                 <Image
-                  src={urlImg}
+                  // Se verifica si la imagen viene por default o si el usuario ya ha subido alguna imagen de perfil, despues llama a getCloudinaryUrl para obtener la URL optimizada
+                  // obtenerImagenPerfilUsuario(usuarioLogueado, preset)
+                  src={obtenerImagenPerfilUsuario(selectedImage._idUsuario, "mini")}
                   alt={selectedImage.texto}
                   width={40}
                   height={40}
@@ -149,7 +143,7 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
               className="w-100 h-100 position-relative"
             >
               <Image
-                src={selectedImage.secure_url}
+                src={postImageUrl}
                 alt={selectedImage.texto}
                 fill
                 priority
@@ -176,7 +170,7 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
                   <div className="d-flex align-items-center gap-2">
                     <div className="position-relative" style={{ width: 35, height: 35 }}>
                       <Image
-                        src={urlImg}
+                        src={obtenerImagenPerfilUsuario(selectedImage._idUsuario, "mini")}
                         alt="perfil"
                         fill
                         className="rounded-circle object-cover"
