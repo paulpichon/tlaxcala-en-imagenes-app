@@ -189,6 +189,14 @@ export interface ToastGlobalProps {
   type?: "success" | "danger" | "creacion";
   onClose?: () => void;
 }
+// Predefinidos de Cloudinary
+export type CloudinaryPreset =
+  | "feed"
+  | "detalle"
+  | "perfil"
+  | "grid"
+  | "mini"
+  | "custom";
 // Interface para las opciones custom de Cloudinary
 export interface CloudinaryCustomOptions {
   width?: number;
