@@ -48,6 +48,12 @@ a.a_links {
 a.a_links:hover {
     transform: translateY(-4px);
 }
+/* Estilos de menu activo */
+.perfil-activo {
+    box-shadow: 0 0 0 2px #000000; /* resalta como un anillo */
+    transition: box-shadow 0.3s ease;
+}
+  
 /*FIN HOVER A_LINKS*/
 /*Icono Google*/
 .google_icon {

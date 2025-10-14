@@ -26,19 +26,19 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
     router.push("/cuentas/login");
   };
 
+  const perfilHref = `/${user?.url ?? "#"}`; // ⭐ Ruta de perfil del usuario logueado
+  const isPerfilActivo = pathname === perfilHref; // ⭐ Saber si estamos en el perfil del usuario
+
   const links = [
     { name: "Inicio", href: "/inicio", icon: FiHome },
     { name: "Notificaciones", href: "/notificaciones", icon: FiBell },
     { name: "Postear", action: () => setShowCrearPost(true), icon: FiPlusCircle },
     { name: "Configuraciones", href: "/configuraciones", icon: FiSliders },
     {
-        name: `${user?.nombre_completo?.nombre ?? "Usuario"} ${
-        user?.nombre_completo?.apellido ?? ""
-        }`,
-        href: `/${user?.url ?? "#"}`,
-        // Se verifica si la imagen viene por default o si el usuario ya ha subido alguna imagen de perfil, despues llama a getCloudinaryUrl para obtener la URL optimizada
-        // obtenerImagenPerfilUsuario(usuarioLogueado, preset)
-        image: obtenerImagenPerfilUsuario(user!, "mini"), // ✅ ahora siempre tiene imagen segura
+      name: `${user?.nombre_completo?.nombre ?? "Usuario"} ${user?.nombre_completo?.apellido ?? ""}`,
+      href: perfilHref,
+      image: obtenerImagenPerfilUsuario(user!, "mini"),
+      isPerfil: true, // ⭐ identificamos que este link es el perfil
     },
   ];
 
@@ -61,29 +61,14 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
   return (
     <nav>
       <ul className="nav justify-content-center menu_inferior_lateral">
-        {links.map(({ name, href, icon: LinkIcon, image, action }) => (
+        {links.map(({ name, href, icon: LinkIcon, image, action, isPerfil }) => (
           <li className="nav-item" key={name} title={name}>
             {action ? (
               <button
                 onClick={action}
                 className="nav-link opciones_menu bg-transparent border-0"
               >
-                {image ? (
-                  <Image
-                    src={image}
-                    alt={name}
-                    width={100}
-                    height={100}
-                    className="rounded-circle icono_menu"
-                    style={{
-                      width: "30px",
-                      height: "30px",
-                      objectFit: "cover",
-                    }}
-                  />
-                ) : (
-                  LinkIcon && <LinkIcon className="icono_menu" />
-                )}
+                {LinkIcon && <LinkIcon className="icono_menu" />}
                 <span className="nombre_opciones_menu">{name}</span>
               </button>
             ) : (
@@ -99,11 +84,15 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
                     alt={name}
                     width={100}
                     height={100}
-                    className="rounded-circle icono_menu"
+                    className={`rounded-circle icono_menu ${
+                      isPerfil && isPerfilActivo ? "perfil-activo" : ""
+                    }`} // ⭐ clase condicional
                     style={{
                       width: "30px",
                       height: "30px",
                       objectFit: "cover",
+                      border: isPerfil && isPerfilActivo ? "2px solid #000000" : "none", // ⭐ Borde azul (puedes cambiar color)
+                      padding: isPerfil && isPerfilActivo ? "2px" : "0",
                     }}
                   />
                 ) : (
@@ -131,7 +120,12 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
               style={{ minWidth: "10rem" }}
             >
               <li>
-                <Link className="dropdown-item" href={`/${user?.url}`}>
+                <Link
+                  className={`dropdown-item ${
+                    isPerfilActivo ? "fw-bold opciones_menu" : ""
+                  }`} // ⭐ texto resaltado
+                  href={perfilHref}
+                >
                   Mi perfil
                 </Link>
               </li>
