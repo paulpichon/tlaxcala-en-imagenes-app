@@ -129,7 +129,9 @@ export interface IAuthContext {
   loading: boolean;
   login: (user: UsuarioLogueado) => void;
   logout: () => void;
-  fetchWithAuth: (input: RequestInfo, init?: RequestInit) => Promise<Response>; // <-- agregamos esto
+  fetchWithAuth: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
+  /** 🔄 Actualiza parcialmente los datos del usuario en memoria */
+  updateUser: (newData: Partial<UsuarioLogueado>) => void;
 }
 // Interface para el usuario que da like a un posteo
 // Esta interface representa a un usuario que ha dado like a un posteo
