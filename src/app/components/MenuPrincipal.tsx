@@ -16,6 +16,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLLIElement>(null);
   const [showModal, setShowModal] = useState(false);
@@ -26,20 +27,15 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
     router.push("/cuentas/login");
   };
 
-  const perfilHref = `/${user?.url ?? "#"}`; // ⭐ Ruta de perfil del usuario logueado
-  const isPerfilActivo = pathname === perfilHref; // ⭐ Saber si estamos en el perfil del usuario
+  const perfilHref = `/${user?.url ?? "#"}`; // Ruta del perfil del usuario logueado
+  const isPerfilActivo = pathname === perfilHref;
 
-  const links = [
+  // Enlaces base del menú
+  const baseLinks = [
     { name: "Inicio", href: "/inicio", icon: FiHome },
     { name: "Notificaciones", href: "/notificaciones", icon: FiBell },
     { name: "Postear", action: () => setShowCrearPost(true), icon: FiPlusCircle },
     { name: "Configuraciones", href: "/configuraciones", icon: FiSliders },
-    {
-      name: `${user?.nombre_completo?.nombre ?? "Usuario"} ${user?.nombre_completo?.apellido ?? ""}`,
-      href: perfilHref,
-      image: obtenerImagenPerfilUsuario(user!, "mini"),
-      isPerfil: true, // ⭐ identificamos que este link es el perfil
-    },
   ];
 
   // Cerrar dropdown al hacer clic fuera
@@ -61,7 +57,8 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
   return (
     <nav>
       <ul className="nav justify-content-center menu_inferior_lateral">
-        {links.map(({ name, href, icon: LinkIcon, image, action, isPerfil }) => (
+        {/* Enlaces principales */}
+        {baseLinks.map(({ name, href, icon: LinkIcon, action }) => (
           <li className="nav-item" key={name} title={name}>
             {action ? (
               <button
@@ -74,37 +71,47 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
             ) : (
               <Link
                 href={href!}
-                className={`nav-link opciones_menu ${
-                  pathname === href ? "link-activo" : ""
-                }`}
+                className={`nav-link opciones_menu ${pathname === href ? "link-activo" : ""}`}
               >
-                {image ? (
-                  <Image
-                    src={image}
-                    alt={name}
-                    width={100}
-                    height={100}
-                    className={`rounded-circle icono_menu ${
-                      isPerfil && isPerfilActivo ? "perfil-activo" : ""
-                    }`} // ⭐ clase condicional
-                    style={{
-                      width: "30px",
-                      height: "30px",
-                      objectFit: "cover",
-                      border: isPerfil && isPerfilActivo ? "2px solid #000000" : "none", // ⭐ Borde azul (puedes cambiar color)
-                      padding: isPerfil && isPerfilActivo ? "2px" : "0",
-                    }}
-                  />
-                ) : (
-                  LinkIcon && <LinkIcon className="icono_menu" />
-                )}
+                {LinkIcon && <LinkIcon className="icono_menu" />}
                 <span className="nombre_opciones_menu">{name}</span>
               </Link>
             )}
           </li>
         ))}
 
-        {/* Dropdown menú cuenta */}
+        {/* Perfil del usuario (render independiente para detectar cambios) */}
+        {user && (
+          <li className="nav-item" title="Perfil">
+            <Link
+              href={perfilHref}
+              className={`nav-link opciones_menu ${isPerfilActivo ? "link-activo" : ""}`}
+            >
+              <Image
+                key={user?.imagen_perfil?.secure_url || "default"}
+                src={obtenerImagenPerfilUsuario(user, "mini")}
+                alt={user?.nombre_completo?.nombre || "Usuario"}
+                width={100}
+                height={100}
+                className={`rounded-circle icono_menu ${
+                  isPerfilActivo ? "perfil-activo" : ""
+                }`}
+                style={{
+                  width: "30px",
+                  height: "30px",
+                  objectFit: "cover",
+                  border: isPerfilActivo ? "2px solid #000000" : "none",
+                  padding: isPerfilActivo ? "2px" : "0",
+                }}
+              />
+              <span className="nombre_opciones_menu">
+                {`${user?.nombre_completo?.nombre ?? "Usuario"} ${user?.nombre_completo?.apellido ?? ""}`}
+              </span>
+            </Link>
+          </li>
+        )}
+
+        {/* Dropdown menú de cuenta */}
         <li className="nav-item dropdown" ref={dropdownRef}>
           <button
             className="nav-link opciones_menu bg-transparent border-0"
@@ -123,7 +130,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
                 <Link
                   className={`dropdown-item ${
                     isPerfilActivo ? "fw-bold opciones_menu" : ""
-                  }`} // ⭐ texto resaltado
+                  }`}
                   href={perfilHref}
                 >
                   Mi perfil

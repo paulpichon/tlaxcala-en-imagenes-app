@@ -22,7 +22,7 @@ export default function CambiarImagenModal({
   onClose,
   onSuccess,
 }: CambiarImagenModalProps) {
-  const { fetchWithAuth } = useAuth();
+  const { fetchWithAuth, updateUser  } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(false);
@@ -74,6 +74,11 @@ export default function CambiarImagenModal({
       // 🔥 Usar la versión optimizada desde Cloudinary
       const optimizedUrl = obtenerImagenPerfilUsuario(data.usuario, 'perfil');
       onSuccess(optimizedUrl);
+
+        // 🔥 ACTUALIZA TAMBIÉN EL USUARIO EN EL CONTEXTO GLOBAL
+        updateUser({
+            imagen_perfil: data.usuario.imagen_perfil, // o solo secure_url si lo prefieres
+        });
 
       setToast({ message: 'Imagen actualizada correctamente', type: 'success' });
       setTimeout(() => onClose(), 1200);
