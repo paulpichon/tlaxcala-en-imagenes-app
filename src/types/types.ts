@@ -197,3 +197,10 @@ export interface CloudinaryCustomOptions {
   format?: "auto" | "jpg" | "webp" | "avif" | "png" | null;
   useAutoTransforms?: boolean;
 }
+// Props para cambio de imagen de perfil modal
+export interface CambiarImagenModalProps {
+  usuario: UsuarioLogueado;
+  show: boolean;
+  onClose: () => void;
+  onSuccess: (newUrl: string) => void;
+}
