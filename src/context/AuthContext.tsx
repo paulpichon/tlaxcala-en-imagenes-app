@@ -55,6 +55,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   /**
+   * 🔄 Nueva función: actualizar parcialmente el usuario global
+   * Permite cambiar solo ciertos campos sin afectar todo el estado
+   */
+  const updateUser = (newData: Partial<UsuarioLogueado>) => {
+    setUser((prev) => (prev ? { ...prev, ...newData } : prev));
+  };
+
+  /**
    * Función de logout
    */
   const logout = async () => {
@@ -113,10 +121,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     fetchUser();
-  }, []); // sin dependencias, no hay warning
+  }, []); // sin dependencias
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, fetchWithAuth }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        logout,
+        fetchWithAuth,
+        updateUser, // ✅ agregamos aquí
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
