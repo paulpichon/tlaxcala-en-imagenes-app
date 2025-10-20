@@ -1,70 +1,120 @@
 "use client";
 
-import { UsuarioPerfil } from "@/types/types";
-import perfil from "../../ui/perfil/perfil.module.css";
-import FollowButton from "../FollowButton";
+import { useState } from "react";
 import Image from "next/image";
+import perfil from "../../ui/perfil/perfil.module.css";
+import { UsuarioPerfil } from "@/types/types";
+import FollowButton from "../FollowButton";
 import { useAuth } from "@/context/AuthContext";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
-// import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
+import CambiarImagenModal from "../CambiarImagenModal";
+import { FiCamera } from "react-icons/fi";
 
 interface Props {
   usuario: UsuarioPerfil;
 }
 
 export default function InformacionUsuarioPerfil({ usuario }: Props) {
-  // Obtenemos el usuario autenticado
   const { user } = useAuth();
-  // Verificamos si es su propio perfil
   const isOwnProfile = user?.uid === usuario._id;
+
+  const [imagenPerfil, setImagenPerfil] = useState(
+    obtenerImagenPerfilUsuario(usuario, "perfil")
+  );
+  const [showModal, setShowModal] = useState(false);
+  const [hover, setHover] = useState(false);
 
   return (
     <div className={perfil.contenedor_info_usuario}>
+      {/* Modal reutilizable */}
+      <CambiarImagenModal
+        usuario={usuario}
+        show={showModal}
+        onClose={() => setShowModal(false)}
+        onSuccess={(newUrl) => setImagenPerfil(newUrl)}
+      />
+
       <div className="container mt-4">
         <div className="row align-items-center">
-          {/* Imagen de perfil */}
-          <div className="col-4 col-md-3 text-center">
-            <Image
-              // Se verifica si la imagen viene por default o si el usuario ya ha subido alguna imagen de perfil, despues llama a getCloudinaryUrl para obtener la URL optimizada
-              // obtenerImagenPerfilUsuario(usuarioLogueado, preset)
-              src={obtenerImagenPerfilUsuario(usuario, "perfil")}
-              width={150}
-              height={150}
-              className={`${perfil.img_perfil_usuario} rounded-circle`}
-              alt={usuario.nombre_completo.nombre}
-            />
+          {/* Imagen de perfil con hover */}
+          <div className="col-sm-12 col-md-4  text-center">
+            <div
+              className="position-relative d-inline-block"
+              style={{
+                width: "150px",
+                height: "150px",
+                cursor: isOwnProfile ? "pointer" : "default",
+              }}
+              onClick={() => isOwnProfile && setShowModal(true)}
+              onMouseEnter={() => setHover(true)}
+              onMouseLeave={() => setHover(false)}
+            >
+              <Image
+                src={imagenPerfil}
+                width={150}
+                height={150}
+                className={`rounded-circle object-cover`}
+                alt={usuario.nombre_completo.nombre}
+              />
+
+              {/* Overlay con icono al hacer hover */}
+              {isOwnProfile && hover && (
+                <div
+                  className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center rounded-circle"
+                  style={{
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    transition: "opacity 0.3s ease",
+                  }}
+                >
+                  <FiCamera color="white" size={28} />
+                  <span
+                    style={{
+                      color: "white",
+                      fontSize: "13px",
+                      marginTop: "4px",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Cambiar foto
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Info del usuario */}
-          <div className="col-8 col-md-9">
-            {/* Primera fila: nombre + botón */}
+          {/* Información del usuario */}
+          <div className="col-sm-12 col-md-8">
             <div className="d-flex align-items-center flex-wrap gap-2 mb-3">
               <h2 className="mb-0 fw-normal">{usuario.url || usuario.correo}</h2>
 
-              {/* 👇 Solo mostrar si NO es su propio perfil */}
               {!isOwnProfile && (
-                // Se puede pasar className como parametro para cambiar el estilo del boton de cuando esta en Perfil de usuario o en opciones del modal
                 <FollowButton
                   userId={usuario._id}
-                  initialFollowing={usuario.isFollowing} 
-                  className={`${ perfil.btn_base_usuario }`}
+                  initialFollowing={usuario.isFollowing}
+                  className={`${perfil.btn_base_usuario}`}
                 />
               )}
             </div>
 
-            {/* Segunda fila: estadísticas */}
             <div className="d-flex flex-wrap gap-4 mb-2">
-              <span><strong>{usuario.totaltPosteos}</strong> publicaciones</span>
-              <span><strong>{usuario.totalSeguidores}</strong> seguidores</span>
-              <span><strong>{usuario.totalSeguidos}</strong> seguidos</span>
+              <span>
+                <strong>{usuario.totaltPosteos}</strong> publicaciones
+              </span>
+              <span>
+                <strong>{usuario.totalSeguidores}</strong> seguidores
+              </span>
+              <span>
+                <strong>{usuario.totalSeguidos}</strong> seguidos
+              </span>
             </div>
 
-            {/* Tercera fila: nombre completo y ubicación */}
             <div>
               <p className="mb-0 fw-bold">
                 {usuario.nombre_completo.nombre} {usuario.nombre_completo.apellido}
               </p>
-              <p className="text-muted">{usuario.lugar_radicacion?.nombre_estado || "Sin ubicación"}</p>
+              <p className="text-muted">
+                {usuario.lugar_radicacion?.nombre_estado || "Sin ubicación"}
+              </p>
             </div>
           </div>
         </div>
