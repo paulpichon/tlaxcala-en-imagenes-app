@@ -22,12 +22,20 @@ export default function PerfilUsuarioContainer({ url }: UrlProps) {
   const { usuario, loading, error } = useUsuarioPerfil(url);
   const [refreshPosteos, setRefreshPosteos] = useState(0);
 
+  // 🔹 Nuevo: estado local sincronizado con el total del usuario
+  const [totalPosteos, setTotalPosteos] = useState<number | undefined>(undefined);
+
+
   const handlePostCreated = () => {
     setRefreshPosteos((prev) => prev + 1);
   };
 
-  if (loading) return <p className="text-center mt-5">Cargando perfil...</p>;
+  // 🔹 Al cargar el usuario, sincroniza el total inicial
+  if (usuario && totalPosteos === undefined) {
+    setTotalPosteos(usuario.totaltPosteos);
+  }
 
+  if (loading) return <p className="text-center mt-5">Cargando perfil...</p>;
   // 👇 Si hubo error de fetch o no existe usuario, mostramos la página not-found
   if (error || !usuario) return notFound();
 
@@ -49,7 +57,8 @@ export default function PerfilUsuarioContainer({ url }: UrlProps) {
           <div className="contenedor_contenido_principal">
             <div className="container-fluid">
               <div className={`${perfil.contenedor_info_usuario}`}>
-                <InformacionUsuarioPerfil usuario={usuario} />
+              {/* ✅ Pasamos el total sincronizado */}
+                <InformacionUsuarioPerfil usuario={usuario} totalPosteos={totalPosteos} />
               </div>
             </div>
           </div>
@@ -63,10 +72,12 @@ export default function PerfilUsuarioContainer({ url }: UrlProps) {
                     <div className="mt-3">
                       <div className="titulo_contenedor text-center">
                       </div>
-                      <PublicacionesUsuarioGrid
-                        usuarioId={usuario._id}
-                        refreshTrigger={refreshPosteos}
-                      />
+                        {/* ✅ Sincronizamos el total al eliminar/cargar posteos */}
+                        <PublicacionesUsuarioGrid
+                          usuarioId={usuario._id}
+                          refreshTrigger={refreshPosteos}
+                          onPostCountChange={setTotalPosteos}
+                        />
                     </div>
                   </div>
                 </div>

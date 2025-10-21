@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import perfil from "../../ui/perfil/perfil.module.css";
 import { UsuarioPerfil } from "@/types/types";
@@ -12,9 +12,10 @@ import { FiCamera } from "react-icons/fi";
 
 interface Props {
   usuario: UsuarioPerfil;
+  totalPosteos?: number; // 🔹 nuevo prop opcional
 }
 
-export default function InformacionUsuarioPerfil({ usuario }: Props) {
+export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Props) {
   const { user } = useAuth();
   const isOwnProfile = user?.uid === usuario._id;
 
@@ -23,10 +24,18 @@ export default function InformacionUsuarioPerfil({ usuario }: Props) {
   );
   const [showModal, setShowModal] = useState(false);
   const [hover, setHover] = useState(false);
+  const [totalPublicaciones, setTotalPublicaciones] = useState(usuario.totaltPosteos);
+
+  // 🔹 Si cambia el prop totalPosteos (por ejemplo, desde PublicacionesUsuarioGrid), actualizamos
+  useEffect(() => {
+    if (typeof totalPosteos === "number") {
+      setTotalPublicaciones(totalPosteos);
+    }
+  }, [totalPosteos]);
 
   return (
     <div className={perfil.contenedor_info_usuario}>
-      {/* Modal reutilizable */}
+      {/* Modal para cambiar imagen */}
       <CambiarImagenModal
         usuario={usuario}
         show={showModal}
@@ -37,7 +46,7 @@ export default function InformacionUsuarioPerfil({ usuario }: Props) {
       <div className="container mt-4">
         <div className="row align-items-center">
           {/* Imagen de perfil con hover */}
-          <div className="col-sm-12 col-md-4  text-center">
+          <div className="col-sm-12 col-md-4 text-center">
             <div
               className="position-relative d-inline-block"
               style={{
@@ -57,7 +66,6 @@ export default function InformacionUsuarioPerfil({ usuario }: Props) {
                 alt={usuario.nombre_completo.nombre}
               />
 
-              {/* Overlay con icono al hacer hover */}
               {isOwnProfile && hover && (
                 <div
                   className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center rounded-circle"
@@ -98,7 +106,7 @@ export default function InformacionUsuarioPerfil({ usuario }: Props) {
 
             <div className="d-flex flex-wrap gap-4 mb-2">
               <span>
-                <strong>{usuario.totaltPosteos}</strong> publicaciones
+                <strong>{totalPublicaciones}</strong> publicaciones
               </span>
               <span>
                 <strong>{usuario.totalSeguidores}</strong> seguidores

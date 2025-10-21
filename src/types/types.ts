@@ -173,6 +173,7 @@ export interface FollowButtonProps {
 export interface PublicacionesUsuarioProps {
   usuarioId?: string;
   refreshTrigger?: number;
+  onPostCountChange?: (count: number) => void; // ✅ nuevo
 }
 // Interface props de TOAST
 export interface ToastGlobalProps {

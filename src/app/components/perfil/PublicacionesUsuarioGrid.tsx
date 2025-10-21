@@ -20,6 +20,7 @@ type NextResponse = string | { url?: string } | null | undefined;
 export default function PublicacionesUsuarioGrid({
   usuarioId,
   refreshTrigger,
+  onPostCountChange
 }: PublicacionesUsuarioProps) {
   const { fetchWithAuth } = useAuth();
   const [posteos, setPosteos] = useState<Posteo[]>([]);
@@ -82,12 +83,25 @@ export default function PublicacionesUsuarioGrid({
         }
 
         // 🔹 Evitar duplicados
+        // setPosteos((prev) => {
+        //   const combinados = url ? [...prev, ...nuevosPosteos] : nuevosPosteos;
+        //   const unicos = combinados.filter(
+        //     (post: Posteo, index: number, self: Posteo[]) =>
+        //       index === self.findIndex((p: Posteo) => p._id === post._id)
+        //   );
+        //   return unicos;
+        // });
+
         setPosteos((prev) => {
           const combinados = url ? [...prev, ...nuevosPosteos] : nuevosPosteos;
           const unicos = combinados.filter(
             (post: Posteo, index: number, self: Posteo[]) =>
               index === self.findIndex((p: Posteo) => p._id === post._id)
           );
+        
+          // 🔹 Notificar nuevo total
+          onPostCountChange?.(unicos.length);
+        
           return unicos;
         });
 
@@ -115,7 +129,7 @@ export default function PublicacionesUsuarioGrid({
         setLoadingMore(false);
       }
     },
-    [usuarioId, fetchWithAuth]
+    [usuarioId, fetchWithAuth, onPostCountChange]
   );
 
   // 🧩 Carga inicial
@@ -178,8 +192,19 @@ export default function PublicacionesUsuarioGrid({
   };
 
   // 🗑️ Eliminar post del estado local tras confirmación
+  // const handlePostDeleted = (postId: string) => {
+  //   setPosteos((prev) => prev.filter((p) => p._id !== postId));
+  //   setIsFirstModalOpen(false);
+  //   setSelectedImage(null);
+  //   setToast({ message: "Publicación eliminada correctamente", type: "success" });
+  // };
+
   const handlePostDeleted = (postId: string) => {
-    setPosteos((prev) => prev.filter((p) => p._id !== postId));
+    setPosteos((prev) => {
+      const actualizados = prev.filter((p) => p._id !== postId);
+      onPostCountChange?.(actualizados.length); // 🔹 actualizar contador
+      return actualizados;
+    });
     setIsFirstModalOpen(false);
     setSelectedImage(null);
     setToast({ message: "Publicación eliminada correctamente", type: "success" });
