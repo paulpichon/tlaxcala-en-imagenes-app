@@ -18,9 +18,10 @@ interface PropsImageModal {
   isOpen: boolean;
   selectedImage: Posteo | null;
   onClose: () => void;
+  onPostDeleted?: (id: string) => void; // ✅ nueva prop
 }
 
-const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose }) => {
+const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose, onPostDeleted }) => {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isLikesModalOpen, setIsLikesModalOpen] = useState(false);
   const [usuariosLikes, setUsuariosLikes] = useState<LikeUsuario[]>([]);
@@ -239,12 +240,19 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose 
           )}
         </motion.div>
 
-        {/* Modales secundarios */}
         <ModalOpcionesPublicacion
           isOpen={isOptionsOpen}
           selectedImage={selectedImage}
           onClose={() => setIsOptionsOpen(false)}
+          onPostDeleted={() => {
+            setIsOptionsOpen(false);
+            onClose(); // ✅ cerrar modal principal
+            if (onPostDeleted && selectedImage?._id) {
+              onPostDeleted(selectedImage._id); // ✅ notificar al padre para quitarlo del grid
+            }
+          }}
         />
+
         <ModalLikesUsuarios
           isOpen={isLikesModalOpen}
           onClose={() => setIsLikesModalOpen(false)}

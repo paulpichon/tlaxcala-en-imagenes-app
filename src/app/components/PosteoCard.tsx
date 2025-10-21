@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FiMoreHorizontal } from "react-icons/fi";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import LikeButton from "./LikeButton";
 import ModalOpcionesPublicacion from "./ModalOpcionesPublicacion";
 import ModalLikesUsuarios from "./ModalLikesUsuarios";
@@ -20,7 +21,8 @@ interface PosteoCardProps {
 }
 
 export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) {
-  const { fetchWithAuth } = useAuth();
+  const { fetchWithAuth, user } = useAuth();
+  const router = useRouter();
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isLikesOpen, setIsLikesOpen] = useState(false);
   const [likesUsuarios, setLikesUsuarios] = useState<LikeUsuario[]>([]);
@@ -44,21 +46,24 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
   const openOptions = () => setIsOptionsOpen(true);
   const closeOptions = () => setIsOptionsOpen(false);
 
+  // 🚀 Callback cuando el post fue eliminado
+  const handlePostDeleted = () => {
+    closeOptions();
+    if (isDetail && user) {
+      router.push(`/${user.url}`); // 🔄 redirige al perfil del usuario logueado
+    }
+  };
+
   const fechaFormateada = new Intl.DateTimeFormat("es-MX", {
     day: "numeric",
     month: "short",
     year: "numeric",
   }).format(new Date(post.fecha_creacion));
 
-  // ✅ URLs optimizadas de Cloudinary
   const postImageUrl = getCloudinaryUrl(
     post.public_id,
     isDetail ? "detalle" : "feed"
   );
-  // const perfilImageUrl = getCloudinaryUrl(
-  //   post._idUsuario.imagen_perfil!.public_id,
-  //   "perfil"
-  // );
 
   return (
     <>
@@ -71,8 +76,6 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
         <div className="card-header bg-white d-flex align-items-center border-0">
           <Link href={`/${post._idUsuario.url}`}>
             <Image
-              // Se verifica si la imagen viene por default o si el usuario ya ha subido alguna imagen de perfil, despues llama a getCloudinaryUrl para obtener la URL optimizada
-              // obtenerImagenPerfilUsuario(usuarioLogueado, preset)
               src={obtenerImagenPerfilUsuario(post._idUsuario, "perfil")}
               alt={post.texto}
               width={40}
@@ -157,7 +160,9 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
         isOpen={isOptionsOpen}
         selectedImage={post}
         onClose={closeOptions}
+        onPostDeleted={handlePostDeleted} // ✅ importante
       />
+
       <ModalLikesUsuarios
         isOpen={isLikesOpen}
         onClose={closeLikesModal}

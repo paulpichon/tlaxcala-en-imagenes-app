@@ -5,6 +5,7 @@ import perfil from "../../ui/perfil/perfil.module.css";
 import Image from "next/image";
 import ImageModal from "./ImageModal";
 import ImagePreloader from "../ImagePreloader";
+// import ToastGlobal from "../ui/ToastGlobal";
 import {
   Posteo,
   PosteoDetalleResponse,
@@ -12,6 +13,7 @@ import {
 } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
+import ToastGlobal from "../ToastGlobal";
 
 type NextResponse = string | { url?: string } | null | undefined;
 
@@ -32,6 +34,9 @@ export default function PublicacionesUsuarioGrid({
   const [selectedImage, setSelectedImage] = useState<Posteo | null>(null);
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
 
+  // 🧁 Toast Global
+  const [toast, setToast] = useState<{ message: string; type?: "success" | "danger" | "creacion" } | null>(null);
+
   // 🧠 Normaliza el next devuelto por el backend
   const normalizarNext = (next: NextResponse): string | null => {
     if (!next) return null;
@@ -50,7 +55,6 @@ export default function PublicacionesUsuarioGrid({
         setNextUrl(null);
         return;
       }
-
 
       const isInitialLoad = isFirstLoad.current && !url;
 
@@ -72,23 +76,20 @@ export default function PublicacionesUsuarioGrid({
         const data = await res.json();
         const nuevosPosteos = data.posteos || [];
 
-        // 🧱 Si no hay nuevos posteos, marcamos fin
         if (nuevosPosteos.length === 0) {
           setNextUrl(null);
           return;
         }
 
-        // setPosteos((prev) => (url ? [...prev, ...nuevosPosteos] : nuevosPosteos));
+        // 🔹 Evitar duplicados
         setPosteos((prev) => {
           const combinados = url ? [...prev, ...nuevosPosteos] : nuevosPosteos;
           const unicos = combinados.filter(
             (post: Posteo, index: number, self: Posteo[]) =>
               index === self.findIndex((p: Posteo) => p._id === post._id)
           );
-          
           return unicos;
         });
-        
 
         // 🧭 Normalizamos el next
         const siguiente = normalizarNext(data.next);
@@ -107,6 +108,7 @@ export default function PublicacionesUsuarioGrid({
         if (isFirstLoad.current) isFirstLoad.current = false;
       } catch (error) {
         console.error("Error al cargar posteos:", error);
+        setToast({ message: "Error al cargar publicaciones", type: "danger" });
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -138,7 +140,7 @@ export default function PublicacionesUsuarioGrid({
           }
         }
       },
-      { rootMargin: "200px", threshold: 0.1, }
+      { rootMargin: "200px", threshold: 0.1 }
     );
 
     const currentRef = observerRef.current;
@@ -150,7 +152,7 @@ export default function PublicacionesUsuarioGrid({
     };
   }, [nextUrl, loadingMore, fetchPosteos]);
 
-  // 🖼 Modal
+  // 🖼 Modal abrir detalle
   const openFirstModal = async (posteo: Posteo) => {
     try {
       const res = await fetchWithAuth(
@@ -158,6 +160,7 @@ export default function PublicacionesUsuarioGrid({
       );
       if (!res.ok) {
         console.error("Error HTTP al obtener detalle:", res.status);
+        setToast({ message: "Error al abrir la publicación", type: "danger" });
         return;
       }
 
@@ -170,9 +173,19 @@ export default function PublicacionesUsuarioGrid({
       setIsFirstModalOpen(true);
     } catch (err) {
       console.error("Error al cargar detalle del posteo:", err);
+      setToast({ message: "Error al abrir la publicación", type: "danger" });
     }
   };
 
+  // 🗑️ Eliminar post del estado local tras confirmación
+  const handlePostDeleted = (postId: string) => {
+    setPosteos((prev) => prev.filter((p) => p._id !== postId));
+    setIsFirstModalOpen(false);
+    setSelectedImage(null);
+    setToast({ message: "Publicación eliminada correctamente", type: "success" });
+  };
+
+  // 🌀 Estado inicial
   if (loading && posteos.length === 0) {
     return <p className="text-center mt-3">Cargando publicaciones...</p>;
   }
@@ -192,6 +205,7 @@ export default function PublicacionesUsuarioGrid({
         </div>
       )}
 
+      {/* 🧩 Grid de publicaciones */}
       <div
         className="row g-0"
         style={{ opacity: refreshing ? 0.6 : 1, transition: "opacity 0.3s" }}
@@ -213,6 +227,7 @@ export default function PublicacionesUsuarioGrid({
         ))}
       </div>
 
+      {/* Scroll infinito */}
       {nextUrl ? (
         <div ref={observerRef} className="text-center my-3">
           {loadingMore && (
@@ -230,11 +245,22 @@ export default function PublicacionesUsuarioGrid({
         )
       )}
 
+      {/* Modal de imagen */}
       {selectedImage && (
         <ImageModal
           isOpen={isFirstModalOpen}
           selectedImage={selectedImage}
           onClose={() => setIsFirstModalOpen(false)}
+          onPostDeleted={handlePostDeleted} // ✅ callback conectado
+        />
+      )}
+
+      {/* ✅ Toast visual global */}
+      {toast && (
+        <ToastGlobal
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
         />
       )}
     </>
