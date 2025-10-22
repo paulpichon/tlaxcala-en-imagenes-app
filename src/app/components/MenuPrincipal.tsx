@@ -35,7 +35,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
     { name: "Inicio", href: "/inicio", icon: FiHome },
     { name: "Notificaciones", href: "/notificaciones", icon: FiBell },
     { name: "Postear", action: () => setShowCrearPost(true), icon: FiPlusCircle },
-    { name: "Configuraciones", href: "/configuraciones", icon: FiSliders },
+    { name: "Configuraciones", href: "/configuracion", icon: FiSliders },
   ];
 
   // Cerrar dropdown al hacer clic fuera

@@ -73,7 +73,7 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
         }`}
       >
         {/* Header */}
-        <div className="card-header bg-white d-flex align-items-center border-0">
+        <div className="card-header bg-light d-flex align-items-center border-0">
           <Link href={`/${post._idUsuario.url}`}>
             <Image
               src={obtenerImagenPerfilUsuario(post._idUsuario, "perfil")}
@@ -134,7 +134,7 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
         </div>
 
         {/* Body */}
-        <div className="card-body bg-white">
+        <div className="card-body bg-light">
           <div className="d-flex align-items-center mb-2">
             <LikeButton postId={post._id} onOpenLikesModal={openLikesModal} />
           </div>
