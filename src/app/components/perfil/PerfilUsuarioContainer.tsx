@@ -64,7 +64,7 @@ export default function PerfilUsuarioContainer({ url }: UrlProps) {
           </div>
 
           {/* Publicaciones */}
-          <div className="publicaciones_usuario">
+          <div className="publicaciones_usuario bg-light">
             <div className="container-fluid">
               <div className="row">
                 <div className="col-12">
