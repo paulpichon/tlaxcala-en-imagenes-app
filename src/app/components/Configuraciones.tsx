@@ -1,3 +1,6 @@
+// Componente para configuraciones de usuario
+
+import Link from "next/link";
 import { FiChevronRight } from "react-icons/fi";
 
 export default function Configuraciones() {
@@ -22,22 +25,22 @@ export default function Configuraciones() {
                 </div>
                 <ul className="list-group list-group-flush">
                   <li className="list-group-item p-0">
-                    <a 
+                    <Link 
                       className="d-flex align-items-center justify-content-between p-3 text-decoration-none text-dark"
-                      href="#"
+                      href="/configuracion/editar-perfil"
                     >
                       <span>Editar perfil</span>
                       <span className="material-symbols-outlined text-secondary"><FiChevronRight size={18} /></span>
-                    </a>
+                    </Link>
                   </li>
                   <li className="list-group-item p-0">
-                    <a 
+                    <Link 
                       className="d-flex align-items-center justify-content-between p-3 text-decoration-none text-dark"
                       href="#"
                     >
                       <span>Privacidad y seguridad</span>
                       <span className="material-symbols-outlined text-secondary"><FiChevronRight size={18} /></span>
-                    </a>
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -49,22 +52,22 @@ export default function Configuraciones() {
                 </div>
                 <ul className="list-group list-group-flush">
                   <li className="list-group-item p-0">
-                    <a 
+                    <Link 
                       className="d-flex align-items-center justify-content-between p-3 text-decoration-none text-dark"
                       href="#"
                     >
                       <span>Notificaciones</span>
                       <span className="material-symbols-outlined text-secondary"><FiChevronRight size={18} /></span>
-                    </a>
+                    </Link>
                   </li>
                   <li className="list-group-item p-0">
-                    <a 
+                    <Link 
                       className="d-flex align-items-center justify-content-between p-3 text-decoration-none text-dark"
                       href="#"
                     >
                       <span>Ayuda y soporte</span>
                       <span className="material-symbols-outlined text-secondary"><FiChevronRight size={18} /></span>
-                    </a>
+                    </Link>
                   </li>
                 </ul>
               </div>
