@@ -121,7 +121,7 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
                 {usuario.nombre_completo.nombre} {usuario.nombre_completo.apellido}
               </p>
               <p className="text-muted">
-                {usuario.lugar_radicacion?.nombre_estado || "Sin ubicación"}
+                {usuario.lugar_radicacion?.nombreEntidad || "Sin ubicación"}
               </p>
             </div>
           </div>
