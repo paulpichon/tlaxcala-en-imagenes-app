@@ -115,6 +115,7 @@ export interface UsuarioLogueado {
     secure_url: string;
     public_id: string;
   };
+  genero?: string;
   url: string; // slug del perfil
   uid: string;
   _id: string;
