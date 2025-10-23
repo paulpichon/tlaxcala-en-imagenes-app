@@ -104,7 +104,11 @@ export interface UsuarioLogueado {
     apellido: string;
   };
   lugar_radicacion?: {
-    nombre_estado: string;
+    claveEntidad: number;
+    nombreEntidad: string;
+    claveMunicipio: number;
+    nombreMunicipio: string;
+    codigoPostal: string;
   };
   correo: string;
   imagen_perfil?: {
