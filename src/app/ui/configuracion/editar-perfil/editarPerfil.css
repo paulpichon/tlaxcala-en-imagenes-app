@@ -1,0 +1,26 @@
+/* CSS para la pagina editar perrfil */
+/* icono para cambiar la imagen de perfil */
+.iconoCambiarImgPerfil {
+    background-color: #EBCA9A;
+    border: 2px solid white;
+    color: white;
+}
+/* Boton para guardar cambios en el formulario de perfil */
+/* Boton para cambiar fotos */
+.btnGuardarCambiar {
+    background-color: transparent;
+    border: 1px solid #EBCA9A!important;
+    color: #EBCA9A;
+    font-weight: bold;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+/* :hover- */
+.btnGuardarCambiar:hover {
+    background-color: #EBCA9A;
+    color: white;
+}
