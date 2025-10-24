@@ -69,12 +69,14 @@ p.votaciones {
     font-size: 15px!important;
 }
 /* Boton para cerrar el modal Persona a las que les gusto */
+/* Boton para guardar informacion de la pagina editar perfil */
 .btnCerrarModal {
     background-color: #EBCA9A;
     color: white;
 }
 .btnCerrarModal:hover {
     border: 1px solid #EBCA9A;
+    color: #EBCA9A;
 }
 /* Etiqueta strong me gusta y votaciones tamaño de fuente */
 strong.etiqueta_strong, p.votaciones {
