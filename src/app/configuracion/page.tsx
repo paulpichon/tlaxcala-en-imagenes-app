@@ -2,7 +2,6 @@
 // bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
-import "../ui/inicio/inicio.css";
 // viewport
 import type { Viewport } from 'next';
 // Componentes
