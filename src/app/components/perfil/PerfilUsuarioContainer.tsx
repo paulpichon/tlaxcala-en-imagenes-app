@@ -12,6 +12,7 @@ import ImagenesMasVotadas from "../../components/ImagenesMasVotadas";
 import Publicidad from "../../components/Publicidad";
 import FooterSugerencias from "../../components/FooterSugerencias";
 import { useUsuarioPerfil } from "@/app/hooks/useUsuarioPerfil";
+import Spinner from "../spinner";
 
 // Props de url de perfil
 interface UrlProps {
@@ -35,7 +36,8 @@ export default function PerfilUsuarioContainer({ url }: UrlProps) {
     setTotalPosteos(usuario.totaltPosteos);
   }
 
-  if (loading) return <p className="text-center mt-5">Cargando perfil...</p>;
+  if (loading) return <div className="d-flex justify-content-center align-items-center vh-100"><Spinner /></div>;
+
   // 👇 Si hubo error de fetch o no existe usuario, mostramos la página not-found
   if (error || !usuario) return notFound();
 
