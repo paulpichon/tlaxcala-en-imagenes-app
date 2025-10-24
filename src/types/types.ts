@@ -116,6 +116,7 @@ export interface UsuarioLogueado {
     public_id: string;
   };
   genero?: string;
+  fecha_nacimiento?: string;
   url: string; // slug del perfil
   uid: string;
   _id: string;
