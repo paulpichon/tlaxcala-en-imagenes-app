@@ -161,7 +161,7 @@ export default function CambiarImagenModal({
                 Cancelar
               </button>
               <button
-                className="btn btn-primary"
+                className="btnGuardarCambiarMedium"
                 onClick={handleUpload}
                 disabled={loading || !fileInputRef.current?.files?.length}
               >
