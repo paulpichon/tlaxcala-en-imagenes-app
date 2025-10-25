@@ -25,7 +25,7 @@ const perfilSchema = z
       .min(1, 'La fecha de nacimiento es obligatoria')
       .refine((date) => !isNaN(Date.parse(date)), 'Debe ingresar una fecha válida'),
     claveMunicipio: z.string().min(1, 'Debe seleccionar un municipio'),
-    genero: z.enum(['MASCULINO', 'FEMENINO', 'OTRO'], {
+    genero: z.enum(['MASCULINO', 'FEMENINO', 'PREFIERO NO DECIR'], {
       errorMap: () => ({ message: 'Debe seleccionar un género' }),
     }),
     password: z
@@ -234,7 +234,7 @@ export default function EditarPerfil() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-grow-1 overflow-auto p-4">
+      <div className="flex-grow-1 overflow-auto p-4 hola">
         <div className="container" style={{ maxWidth: '448px' }}>
           {/* Profile Header */}
           <div className="d-flex justify-content-center p-4">
@@ -248,13 +248,13 @@ export default function EditarPerfil() {
                 </div>
                 <button
                   onClick={handleImageChange}
-                  className="btn btn-primary rounded-circle position-absolute bottom-0 end-0"
+                  className="iconoCambiarImgPerfil rounded-circle position-absolute bottom-0 end-0"
                   style={{ width: '40px', height: '40px', padding: 0, border: '2px solid white' }}
                 >
                   <FiCamera size={20} />
                 </button>
               </div>
-              <button onClick={handleImageChange} className="btn btn-outline-primary">
+              <button onClick={handleImageChange} className="btnGuardarCambiar">
                 Cambiar foto
               </button>
             </div>
@@ -348,7 +348,7 @@ export default function EditarPerfil() {
                   <option value="">Seleccionar...</option>
                   <option value="MASCULINO">Masculino</option>
                   <option value="FEMENINO">Femenino</option>
-                  <option value="OTRO">Otro</option>
+                  <option value="PREFIERO NO DECIR">Prefieron no decir</option>
                 </select>
                 {errors.genero && <div className="invalid-feedback">{errors.genero}</div>}
               </div>
@@ -385,17 +385,15 @@ export default function EditarPerfil() {
                 </div>
               )}
             </div>
+            {/* Save Button */}
+            <div className="border-top p-4">
+              <button onClick={handleSubmit} className="btnGuardarCambiar w-100" disabled={loading}>
+                {loading ? 'Guardando...' : 'Guardar cambios'}
+              </button>
+            </div>
           </form>
         </div>
       </div>
-
-      {/* Save Button */}
-      <div className="bg-white border-top p-4">
-        <button onClick={handleSubmit} className="btn btn-primary w-100 py-3 fw-bold" disabled={loading}>
-          {loading ? 'Guardando...' : 'Guardar cambios'}
-        </button>
-      </div>
-
       {/* Modal para cambiar imagen */}
       {user && <CambiarImagenModal usuario={user} show={showModal} onClose={handleCloseModal} onSuccess={handleSuccessImageChange} />}
     </div>
