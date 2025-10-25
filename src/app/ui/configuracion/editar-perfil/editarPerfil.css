@@ -8,7 +8,7 @@
 /* Boton para guardar cambios en el formulario de perfil */
 /* Boton para cambiar fotos */
 .btnGuardarCambiar {
-    background-color: transparent;
+    background-color: transparent!important;
     border: 1px solid #EBCA9A!important;
     color: #EBCA9A;
     font-weight: bold;
@@ -21,6 +21,21 @@
 }
 /* :hover- */
 .btnGuardarCambiar:hover {
-    background-color: #EBCA9A;
+    background-color: #EBCA9A!important;
     color: white;
+}
+/* Boton para guardar la imagen en el Modal */
+.btnGuardarCambiarMedium {
+    background-color: #EBCA9A;
+    border: none;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+/* :hover- */
+.btnGuardarCambiarMedium:hover {
+    background-color: #d4a76a;
 }
