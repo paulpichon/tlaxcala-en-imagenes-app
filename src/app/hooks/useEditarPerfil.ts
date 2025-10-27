@@ -5,11 +5,7 @@ import { useEffect, useState } from 'react';
 import { z } from 'zod';
 import { useAuth } from '@/context/AuthContext';
 import { obtenerImagenPerfilUsuario } from '@/lib/cloudinary/obtenerImagenPerfilUsuario';
-
-interface Municipio {
-  claveMunicipio: string;
-  nombreMunicipio: string;
-}
+import { Municipio } from '@/types/types';
 
 export const perfilSchema = z
   .object({

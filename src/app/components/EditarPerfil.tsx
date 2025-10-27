@@ -8,11 +8,6 @@ import ToastGlobal from './ToastGlobal';
 import PerfilHeader from './configuracion/editar-perfil/PerfilHeader';
 import PerfilForm from './configuracion/editar-perfil/PerfilForm';
 import CambiarImagenModal from './CambiarImagenModal';
-// import { useEditarPerfil } from './useEditarPerfil';
-// import ToastGlobal from '@/components/ToastGlobal';
-// import CambiarImagenModal from '@/components/perfil/CambiarImagenModal';
-// import PerfilHeader from './PerfilHeader';
-// import PerfilForm from './PerfilForm';
 
 export default function EditarPerfil() {
   const router = useRouter();

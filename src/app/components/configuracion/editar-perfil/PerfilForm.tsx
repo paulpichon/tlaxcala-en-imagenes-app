@@ -1,30 +1,13 @@
 // components/perfil/EditarPerfil/PerfilForm.tsx
 'use client';
 
+import { FormDataEditarPerfil, Municipio } from '@/types/types';
 import { ChangeEvent, FormEvent } from 'react';
 
-interface Municipio {
-  claveMunicipio: string;
-  nombreMunicipio: string;
-}
-
-interface FormData {
-  nombre: string;
-  apellido: string;
-  claveMunicipio: string;
-  nombreMunicipio: string;
-  genero: string;
-  password: string;
-  confirmPassword: string;
-  url: string;
-  fecha_nacimiento: string;
-  nombreEntidad: string;
-  claveEntidad: number;
-}
 
 interface PerfilFormProps {
-  formData: FormData;
-  errors: Record<keyof FormData | string, string>;
+  formData: FormDataEditarPerfil;
+  errors: Record<keyof FormDataEditarPerfil | string, string>;
   municipios: Municipio[];
   loading: boolean;
   handleChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
@@ -41,7 +24,7 @@ export default function PerfilForm({
 }: PerfilFormProps) {
   const renderInput = (
     label: string,
-    name: keyof FormData,
+    name: keyof FormDataEditarPerfil,
     type: string = 'text',
     extraProps: Record<string, unknown> = {}
   ) => (
