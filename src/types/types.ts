@@ -129,6 +129,10 @@ export interface UsuarioPerfil extends UsuarioLogueado {
   totalSeguidos: number;
   isFollowing: boolean; // Si el usuario actual sigue a este usuario
 }
+// Password
+export interface PasswordConfirm extends UsuarioLogueado {
+  confirmPassword: string;
+}
 // Tipo de datos para el contexto de autenticación
 export interface IAuthContext {
   user: UsuarioLogueado | null;
@@ -212,4 +216,23 @@ export interface CambiarImagenModalProps {
   show: boolean;
   onClose: () => void;
   onSuccess: (newUrl: string) => void;
+}
+// Municipios
+export interface Municipio {
+  claveMunicipio: string;
+  nombreMunicipio: string;
+}
+// FormData para Editar Perfil
+export interface FormDataEditarPerfil {
+  nombre: string;
+  apellido: string;
+  claveMunicipio: string;
+  nombreMunicipio: string;
+  genero: string;
+  password: string;
+  confirmPassword: string;
+  url: string;
+  fecha_nacimiento: string;
+  nombreEntidad: string;
+  claveEntidad: number;
 }
