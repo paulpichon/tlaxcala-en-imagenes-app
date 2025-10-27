@@ -1,12 +1,13 @@
 'use client';
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { FiHome, FiBell, FiPlusCircle, FiSliders, FiAlignJustify } from "react-icons/fi";
 import Image from "next/image";
 import CrearPosteoModal from "./CrearPosteoModal";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
+import { useLogout } from "../hooks/auth/logout";
 
 interface Props {
   onPostCreated?: () => void;
@@ -14,18 +15,13 @@ interface Props {
 
 export default function MenuPrincipal({ onPostCreated }: Props) {
   const pathname = usePathname();
-  const router = useRouter();
-  const { user, logout } = useAuth();
+  const { handleLogout } = useLogout();
+  const { user } = useAuth();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLLIElement>(null);
   const [showModal, setShowModal] = useState(false);
   const [showCrearPost, setShowCrearPost] = useState(false);
-
-  const handleLogout = async () => {
-    await logout();
-    router.push("/cuentas/login");
-  };
 
   const perfilHref = `/${user?.url ?? "#"}`; // Ruta del perfil del usuario logueado
   const isPerfilActivo = pathname === perfilHref;
