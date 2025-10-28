@@ -22,36 +22,64 @@ export default function CambiarImagenModal({
   onClose,
   onSuccess,
 }: CambiarImagenModalProps) {
-  const { fetchWithAuth, updateUser  } = useAuth();
+  const { fetchWithAuth, updateUser } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'danger' | 'creacion' }>({
     message: '',
   });
+  const [preview, setPreview] = useState<string | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
-  const [preview, setPreview] = useState<string | null>(
-    obtenerImagenPerfilUsuario(usuario, 'perfil')
-  );
-
+  // 🔹 Al abrir/cerrar modal
   useEffect(() => {
     if (!show) {
-      // 🔹 Limpiar el toast cuando se cierra el modal
+      // 🔸 Resetear completamente cuando se cierra
+      setPreview(null);
+      setImageLoaded(false);
       setToast({ message: '', type: undefined });
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    } else {
+      // 🔸 Cuando se abre, aseguramos el preview base (imagen actual)
+      setPreview(obtenerImagenPerfilUsuario(usuario, 'perfil'));
+      setImageLoaded(true);
     }
-  }, [show]);
+  }, [show, usuario]);
 
   const handleSelectImage = () => fileInputRef.current?.click();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // ✅ Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      setToast({ message: 'Solo se permiten archivos de imagen (JPG, JPEG, PNG, WebP...)', type: 'danger' });
+      e.target.value = '';
+      return;
+    }
+
+    // ✅ Validar tamaño (máx. 5 MB)
+    const maxSizeMB = 5;
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      setToast({ message: `La imagen no debe superar los ${maxSizeMB} MB`, type: 'danger' });
+      e.target.value = '';
+      return;
+    }
+
+    // ✅ Si todo es válido, mostrar preview
     setPreview(URL.createObjectURL(file));
+    setImageLoaded(false);
+    setToast({ message: 'Imagen lista para subir', type: 'creacion' });
   };
 
   const handleUpload = async () => {
     const file = fileInputRef.current?.files?.[0];
-    if (!file) return;
+    if (!file) {
+      setToast({ message: 'Selecciona una imagen antes de continuar', type: 'danger' });
+      return;
+    }
 
     try {
       setLoading(true);
@@ -71,17 +99,19 @@ export default function CambiarImagenModal({
       const data = await res.json();
       if (!res.ok) throw new Error(data.msg || 'Error al subir la imagen');
 
-      // 🔥 Usar la versión optimizada desde Cloudinary
+      // ✅ Obtener versión optimizada
       const optimizedUrl = obtenerImagenPerfilUsuario(data.usuario, 'perfil');
       onSuccess(optimizedUrl);
 
-        // 🔥 ACTUALIZA TAMBIÉN EL USUARIO EN EL CONTEXTO GLOBAL
-        updateUser({
-            imagen_perfil: data.usuario.imagen_perfil, // o solo secure_url si lo prefieres
-        });
+      // ✅ Actualizar usuario global
+      updateUser({ imagen_perfil: data.usuario.imagen_perfil });
 
       setToast({ message: 'Imagen actualizada correctamente', type: 'success' });
-      setTimeout(() => onClose(), 1200);
+
+      // 🔹 Cerrar modal después de un corto delay
+      setTimeout(() => {
+        onClose();
+      }, 1300);
     } catch (error) {
       console.error(error);
       setToast({ message: 'No se pudo subir la imagen', type: 'danger' });
@@ -100,7 +130,7 @@ export default function CambiarImagenModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          {/* TOAST */}
+          {/* ✅ Toast visual */}
           {toast.message && (
             <ToastGlobal
               message={toast.message}
@@ -118,21 +148,27 @@ export default function CambiarImagenModal({
           >
             <h5 className="mb-3">Cambiar imagen de perfil</h5>
 
-            {/* 🔵 Contenedor circular con preview */}
+            {/* 🌀 Contenedor con efecto de blur en el preview */}
             <div className="d-flex flex-column align-items-center mb-3">
               <div
                 className="position-relative rounded-circle overflow-hidden mb-3"
                 style={{
                   width: '150px',
                   height: '150px',
+                  backgroundColor: '#f5f5f5',
+                  filter: imageLoaded ? 'none' : 'blur(10px)',
+                  transition: 'filter 0.5s ease',
                 }}
               >
-                <Image
-                  src={preview || obtenerImagenPerfilUsuario(usuario, 'perfil')}
-                  alt="Vista previa"
-                  fill
-                  className="object-cover rounded-circle"
-                />
+                {preview && (
+                  <Image
+                    src={preview}
+                    alt="Vista previa"
+                    fill
+                    className="object-cover rounded-circle"
+                    onLoadingComplete={() => setImageLoaded(true)}
+                  />
+                )}
               </div>
 
               <button
