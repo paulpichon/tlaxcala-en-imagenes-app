@@ -52,7 +52,7 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
   const openLikesModal = async () => {
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}/api/likes/${selectedImage._id}/likes/usuarios`
+        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/likes/${selectedImage._id}/likes/usuarios`
       );
       if (!res.ok) throw new Error("Error al obtener usuarios que dieron like");
 

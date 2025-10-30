@@ -66,7 +66,7 @@ export default function PublicacionesUsuarioGrid({
       try {
         const endpoint =
           url ||
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}/api/posteos/usuario/${usuarioId}`;
+          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/usuario/${usuarioId}`;
 
         const res = await fetchWithAuth(endpoint);
         if (!res.ok) {
@@ -114,7 +114,7 @@ export default function PublicacionesUsuarioGrid({
           setNextUrl(
             siguiente.startsWith("http")
               ? siguiente
-              : `${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}${siguiente}`
+              : `${process.env.NEXT_PUBLIC_API_URL_LOCAL}${siguiente}`
           );
           fetchedPages.current.add(siguiente);
         }
@@ -170,7 +170,7 @@ export default function PublicacionesUsuarioGrid({
   const openFirstModal = async (posteo: Posteo) => {
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}/api/posteos/post/${posteo._id}`
+        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/post/${posteo._id}`
       );
       if (!res.ok) {
         console.error("Error HTTP al obtener detalle:", res.status);

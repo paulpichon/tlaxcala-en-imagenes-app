@@ -40,12 +40,12 @@ export function FavoritoProvider({ children }: { children: ReactNode }) {
       let res;
       if (current) {
         res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}/api/favoritos/${posteoId}`,
+          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/favoritos/${posteoId}`,
           { method: "DELETE" }
         );
       } else {
         res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}/api/favoritos/${posteoId}`,
+          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/favoritos/${posteoId}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
