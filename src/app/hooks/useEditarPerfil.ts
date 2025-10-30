@@ -59,7 +59,7 @@ export function useEditarPerfil() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/municipios/`);
+        const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}/api/municipios/`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.msg || 'Error al obtener municipios');
         setMunicipios(data.municipios || []);
@@ -130,7 +130,7 @@ export function useEditarPerfil() {
         fecha_nacimiento: formData.fecha_nacimiento || null,
       };
 
-      const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/usuarios/update`, {
+      const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}/api/usuarios/update`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

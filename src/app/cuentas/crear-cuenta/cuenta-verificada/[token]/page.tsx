@@ -18,7 +18,7 @@ export default async function CuentaVerificada ({
         // Obtenemos el token de la URL
     const { token } = await params;
     // Verificamos el token con una API
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/verificar-correo/${token}`, 
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}/api/auth/verificar-correo/${token}`, 
         { cache: "no-store"}
     );
     const data = await response.json();

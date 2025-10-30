@@ -11,7 +11,7 @@ export default function PublicacionUsuario() {
     observerRef,
     finished
   } = useInfinitePosts(
-    `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos`,
+    `${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}/api/posteos`,
   );
 
   // Loading inicial

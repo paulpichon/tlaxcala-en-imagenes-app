@@ -69,7 +69,7 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
     setIsDeleting(true);
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${selectedImage._id}`,
+        `${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}/api/posteos/${selectedImage._id}`,
         { method: "DELETE" }
       );
 

@@ -80,7 +80,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
         }
 
         // 4️⃣ Obtener clave pública VAPID desde el backend
-        const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/vapidPublicKey`);
+        const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}/api/notificaciones/vapidPublicKey`);
         if (!res.ok) throw new Error("No se pudo obtener la clave pública VAPID");
         const { key } = await res.json();
 
@@ -91,7 +91,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
         });
 
         // 6️⃣ Enviar suscripción al backend
-        const resp = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/subscribe`, {
+        const resp = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}/api/notificaciones/subscribe`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ subscription }),

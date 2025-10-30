@@ -39,7 +39,7 @@ export async function createUsuario( formData: IUsuarioData) {
     // Request options
     funcionRequestOptions( raw );
     // Fetch a la API
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/usuarios`, requestOptions);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}/api/usuarios`, requestOptions);
     // convertimos la respuesta en json
     const respuesta = await response.json();
     // retornamos la respuesta para obtener el JSON que viene desde la API
@@ -55,8 +55,8 @@ export async function reenviarCorreo(token: string): Promise<ReenviarCorreoRespo
         // Request options
         funcionRequestOptions( raw );
         // Cambiar la URL a la de producción
-        // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/reenviar-correo`)
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/reenviar-correo`, requestOptions);
+        // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/reenviar-correo`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}/api/auth/reenviar-correo`, requestOptions);
         
         // Resultado de la respuesta
         const data = await response.json();
@@ -121,8 +121,8 @@ export async function reenviarCorreoRestablecerPassword(token: string): Promise<
         // Request options
         funcionRequestOptions( raw );
         // Cambiar la URL a la de producción
-        // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/reenviar-correo`)
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/reenviar-correo-restablecer-password`, requestOptions);
+        // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/reenviar-correo`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}/api/auth/reenviar-correo-restablecer-password`, requestOptions);
         // Resultado de la respuesta   
         const data = await response.json();
         // Si la respuesta no es ok, retornamos el mensaje de error
@@ -191,8 +191,8 @@ export const envioCorreoRestablecerPassword = async (correo: string) => {
     });
     // Request options
     funcionRequestOptions( raw );
-    // debemos cambiar el url por el de la api: NEXT_PUBLIC_API_URL
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/cuentas/password-olvidado`, requestOptions);
+    // debemos cambiar el url por el de la api: NEXT_PUBLIC_API_URL_LOCAL
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}/api/auth/cuentas/password-olvidado`, requestOptions);
     // Respuesta desde la API
     const data = await res.json();
     // retornamos la respuesta
@@ -202,7 +202,7 @@ export const envioCorreoRestablecerPassword = async (correo: string) => {
 export const validarTokenRestablecerPassword = async (token: string) => {
     try {
         // hacer la peticion a la API
-        const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/cuentas/restablecer-password/validar-token-reset-password/${token}`, {
+        const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL_LOCAL}/api/auth/cuentas/restablecer-password/validar-token-reset-password/${token}`, {
             method: "GET",
             cache: "no-store",
         });
