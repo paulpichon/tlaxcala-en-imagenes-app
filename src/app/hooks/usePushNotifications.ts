@@ -43,7 +43,7 @@ export function usePushNotifications() {
 
         // 4️⃣ Obtener clave VAPID
         const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/notificaciones/vapidPublicKey`
+          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/vapidPublicKey`
         );
         
         if (!res.ok) {
@@ -60,7 +60,7 @@ export function usePushNotifications() {
 
         // 6️⃣ Enviar al backend
         const response = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/notificaciones/subscribe`,
+          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/subscribe`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
