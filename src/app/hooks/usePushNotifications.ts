@@ -1,99 +1,161 @@
-import { useEffect, useRef } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+
+type EstadoNotificacion = "idle" | "pending" | "enabled" | "disabled" | "error";
 
 export function usePushNotifications() {
   const { user, fetchWithAuth } = useAuth();
-  const isRegistering = useRef(false); // ✅ Evita ejecuciones concurrentes
-  const hasRegistered = useRef(false); // ✅ Evita re-registros
+  const [estado, setEstado] = useState<EstadoNotificacion>("idle");
+  const isRegistering = useRef(false);
 
+  /**
+   * 🧩 Detectar si ya hay una suscripción activa al cargar la app
+   */
   useEffect(() => {
-    // ✅ Salir si no hay usuario, ya se registró o está en proceso
-    if (!user || hasRegistered.current || isRegistering.current) return;
+    if (!user) return;
 
-    async function registerPush() {
+    async function checkExistingSubscription() {
       if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-        console.warn("🚫 Este navegador no soporta notificaciones push");
+        setEstado("disabled");
         return;
       }
 
-      isRegistering.current = true; // ✅ Marcar como "en proceso"
-
       try {
-        // 1️⃣ Registrar Service Worker
-        const registration = await navigator.serviceWorker.register("/sw.js");
-        await navigator.serviceWorker.ready;
-        // console.log("✅ Service Worker registrado");
-
-        // 2️⃣ Solicitar permiso
-        const permission = await Notification.requestPermission();
-        if (permission !== "granted") {
-        //   console.warn("⚠️ Permiso de notificaciones denegado");
-          isRegistering.current = false;
-          return;
-        }
-
-        // 3️⃣ Verificar si ya existe una suscripción
+        const registration = await navigator.serviceWorker.ready;
         const existingSub = await registration.pushManager.getSubscription();
+
         if (existingSub) {
-        //   console.log("ℹ️ Ya existe una suscripción activa");
-          hasRegistered.current = true; // ✅ Marcar como registrado
-          isRegistering.current = false;
-          return;
-        }
-
-        // 4️⃣ Obtener clave VAPID
-        const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/vapidPublicKey`
-        );
-        
-        if (!res.ok) {
-          throw new Error("Error obteniendo clave VAPID");
-        }
-        
-        const { key } = await res.json();
-
-        // 5️⃣ Crear suscripción
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(key),
-        });
-
-        // 6️⃣ Enviar al backend
-        const response = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/subscribe`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ subscription }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Error registrando suscripción en el servidor");
-        }
-
-        hasRegistered.current = true; // ✅ Marcar como completado exitosamente
-        // console.log("✅ Notificaciones push registradas correctamente");
-        // 7️⃣ Mostrar mensaje informativo una sola vez
-        if (Notification.permission === "granted") {
-          new Notification("🔔 Notificaciones activadas", {
-            body: "Recibirás avisos cuando tengas nuevos seguidores o actividad.",
-            icon: "/icon-192x192.png",
-          });
+          setEstado("enabled");
+          // console.log("🔔 Ya existe una suscripción activa");
+        } else {
+          setEstado("disabled");
+          // console.log("🔕 No hay suscripción activa");
         }
       } catch (err) {
-        console.error("❌ Error registrando notificaciones push:", err);
-      } finally {
-        isRegistering.current = false; // ✅ Liberar flag
+        console.error("Error verificando suscripción existente:", err);
+        setEstado("error");
       }
     }
 
-    registerPush();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]); // ✅ Solo depende de user
+    checkExistingSubscription();
+  }, [user]);
+
+  /**
+   * 🔔 Activar notificaciones manualmente
+   */
+  const activarNotificaciones = useCallback(async () => {
+    if (!user) {
+      console.warn("⚠️ Debes iniciar sesión para activar notificaciones");
+      return;
+    }
+    if (isRegistering.current) return;
+
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+      alert("Tu navegador no soporta notificaciones push.");
+      return;
+    }
+
+    isRegistering.current = true;
+    setEstado("pending");
+
+    try {
+      // 1️⃣ Registrar Service Worker
+      const registration = await navigator.serviceWorker.register("/sw.js");
+      await navigator.serviceWorker.ready;
+
+      // 2️⃣ Solicitar permiso explícitamente
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        setEstado("disabled");
+        alert("Permiso de notificaciones denegado.");
+        return;
+      }
+
+      // 3️⃣ Obtener clave pública VAPID
+      const res = await fetchWithAuth(
+        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/vapidPublicKey`
+      );
+      if (!res.ok) throw new Error("No se pudo obtener clave pública VAPID");
+
+      const { key } = await res.json();
+
+      // 4️⃣ Crear suscripción
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(key) as BufferSource,
+      });
+
+      // 5️⃣ Enviar suscripción al backend
+      const response = await fetchWithAuth(
+        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/subscribe`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subscription }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Error registrando suscripción en el servidor");
+
+      // ✅ Mostrar notificación de confirmación
+      new Notification("🔔 Notificaciones activadas", {
+        body: "Recibirás avisos cuando tengas nuevos seguidores o actividad.",
+        icon: "/icon-192x192.png",
+      });
+
+      setEstado("enabled");
+    } catch (err) {
+      console.error("❌ Error activando notificaciones:", err);
+      setEstado("error");
+    } finally {
+      isRegistering.current = false;
+    }
+  }, [user, fetchWithAuth]);
+
+  /**
+   * 🚫 Desactivar notificaciones (solo en este dispositivo)
+   */
+  const desactivarNotificaciones = useCallback(async () => {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+
+      if (subscription) {
+        const endpoint = subscription.endpoint;
+
+        // 1️⃣ Eliminar suscripción localmente
+        await subscription.unsubscribe();
+        console.log("🔕 Notificaciones desactivadas en este dispositivo");
+
+        // 2️⃣ Avisar al backend (eliminas solo esta suscripción)
+        await fetchWithAuth(
+          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/unsubscribe`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ endpoint }),
+          }
+        );
+
+        setEstado("disabled");
+      }
+    } catch (err) {
+      console.error("Error al desactivar notificaciones:", err);
+      setEstado("error");
+    }
+  }, [fetchWithAuth]);
+
+  return {
+    estado,
+    activarNotificaciones,
+    desactivarNotificaciones,
+  };
 }
 
-function urlBase64ToUint8Array(base64String: string) {
+/**
+ * Convierte la clave pública VAPID Base64URL a Uint8Array
+ */
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
   const rawData = atob(base64);

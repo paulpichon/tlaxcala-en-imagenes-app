@@ -19,12 +19,15 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
   const { handleLogout } = useLogout();
   const { user } = useAuth();
   
-  usePushNotifications(); // ✅ Usar el hook (sin más lógica aquí)
+  // usePushNotifications(); // ✅ Usar el hook (sin más lógica aquí)
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLLIElement>(null);
   const [showModal, setShowModal] = useState(false);
   const [showCrearPost, setShowCrearPost] = useState(false);
+  // 
+  const { estado, activarNotificaciones, desactivarNotificaciones } = usePushNotifications();
+
 
   const perfilHref = `/${user?.url ?? "#"}`;
   const isPerfilActivo = pathname === perfilHref;
@@ -134,13 +137,40 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
                   Mi perfil
                 </Link>
               </li>
-              <button
-                className="dropdown-item buttonDropDown"
-                onClick={() => setShowModal(true)}
-              >
-                Cerrar sesión
-              </button>
+            
+              {/* 🔔 Botón activar/desactivar notificaciones */}
+              <li>
+                <button
+                  className={`dropdown-item ${
+                    estado === "enabled" ? "text-danger" : "text-primary"
+                  }`}
+                  onClick={
+                    estado === "enabled"
+                      ? desactivarNotificaciones
+                      : activarNotificaciones
+                  }
+                  disabled={estado === "pending"}
+                >
+                  {estado === "pending"
+                    ? "Activando..."
+                    : estado === "enabled"
+                    ? "🔕 Desactivar notificaciones"
+                    : "🔔 Activar notificaciones"}
+                </button>
+              </li>
+            
+              {/* 🔒 Botón cerrar sesión */}
+              <li>
+                <button
+                  className="dropdown-item buttonDropDown"
+                  onClick={() => setShowModal(true)}
+                >
+                  Cerrar sesión
+                </button>
+              </li>
             </ul>
+          
+          
           )}
         </li>
       </ul>
