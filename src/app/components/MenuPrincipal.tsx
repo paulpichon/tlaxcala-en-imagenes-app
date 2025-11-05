@@ -8,8 +8,6 @@ import Image from "next/image";
 import CrearPosteoModal from "./CrearPosteoModal";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 import { useLogout } from "../hooks/auth/logout";
-import { usePushNotifications } from "../hooks/usePushNotifications"; // ✅ Importar el hook
-
 interface Props {
   onPostCreated?: () => void;
 }
@@ -18,19 +16,15 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
   const pathname = usePathname();
   const { handleLogout } = useLogout();
   const { user } = useAuth();
-  
-  // usePushNotifications(); // ✅ Usar el hook (sin más lógica aquí)
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLLIElement>(null);
   const [showModal, setShowModal] = useState(false);
   const [showCrearPost, setShowCrearPost] = useState(false);
   // 
-  const { estado, activarNotificaciones, desactivarNotificaciones } = usePushNotifications();
-
-
   const perfilHref = `/${user?.url ?? "#"}`;
   const isPerfilActivo = pathname === perfilHref;
+  const isNotificacionesActivo = pathname === "/configuracion/notificaciones";
 
   const baseLinks = [
     { name: "Inicio", href: "/inicio", icon: FiHome },
@@ -83,7 +77,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
 
         {/* Perfil del usuario */}
         {user && (
-          <li className="nav-item" title="Perfil">
+          <li className="nav-item" title={`${user?.nombre_completo?.nombre ?? "Usuario"} ${user?.nombre_completo?.apellido ?? ""}`}>
             <Link
               href={perfilHref}
               className={`nav-link opciones_menu ${isPerfilActivo ? "link-activo" : ""}`}
@@ -130,7 +124,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
               <li>
                 <Link
                   className={`dropdown-item ${
-                    isPerfilActivo ? "fw-bold opciones_menu" : ""
+                    isPerfilActivo ? "linkActivoDropdown fw-light" : ""
                   }`}
                   href={perfilHref}
                 >
@@ -138,25 +132,15 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
                 </Link>
               </li>
             
-              {/* 🔔 Botón activar/desactivar notificaciones */}
+              {/* 🔔 Notificaciones */}
               <li>
-                <button
-                  className={`dropdown-item ${
-                    estado === "enabled" ? "text-danger" : "text-primary"
-                  }`}
-                  onClick={
-                    estado === "enabled"
-                      ? desactivarNotificaciones
-                      : activarNotificaciones
-                  }
-                  disabled={estado === "pending"}
+              <Link
+                  className={`dropdown-item ${isNotificacionesActivo ? "linkActivoDropdown fw-light" : ""}
+                  `}
+                  href="/configuracion/notificaciones"
                 >
-                  {estado === "pending"
-                    ? "Activando..."
-                    : estado === "enabled"
-                    ? "🔕 Desactivar notificaciones"
-                    : "🔔 Activar notificaciones"}
-                </button>
+                  🔔 Notificaciones
+                </Link>
               </li>
             
               {/* 🔒 Botón cerrar sesión */}
