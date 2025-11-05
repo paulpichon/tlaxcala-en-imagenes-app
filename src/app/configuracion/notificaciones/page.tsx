@@ -16,8 +16,7 @@ import ImagenesMasVotadas from "../../components/ImagenesMasVotadas";
 import Publicidad from "../../components/Publicidad";
 // Footer sugerencias
 import FooterSugerencias from "../../components/FooterSugerencias";
-// Componente Editar Perfil
-import EditarPerfil from "@/app/components/EditarPerfil";
+import ConfiguracionNotificaciones from "@/app/components/configuracion/notificaciones/ConfiguracionNotificaciones";
 
 
 export const viewport: Viewport = {
@@ -58,7 +57,7 @@ export default function Configuracion() {
 					{/* <!-- Contenedor del contenido principal publicacion --> */}
 					<div className="contenedor_contenido_principal">
 						{/* Componente Configuraciones */}
-                        <EditarPerfil />
+                        <ConfiguracionNotificaciones />
 
 					</div>
 					{/* <!-- Contenedor del contenido principal publicacion --> */}
