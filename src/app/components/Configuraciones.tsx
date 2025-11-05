@@ -63,7 +63,7 @@ export default function Configuraciones() {
                 <li className="list-group-item p-0">
                   <Link 
                     className="d-flex align-items-center justify-content-between p-3 text-decoration-none text-dark"
-                    href="#"
+                    href="/configuracion/notificaciones"
                   >
                     <span>Notificaciones</span>
                     <span className="material-symbols-outlined text-secondary"><FiChevronRight size={18} /></span>
