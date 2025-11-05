@@ -2,8 +2,7 @@ self.addEventListener("push", (event) => {
     const data = event.data.json();
     const options = {
       body: data.body,
-      icon: data.icon || "/icon-192x192.png",
-      badge: "/icon-96x96.png",
+      icon: data.icon || "/icon-192x192.png", // Icono predeterminado - se puede personalizar
       data: { url: data.url },
     };
   

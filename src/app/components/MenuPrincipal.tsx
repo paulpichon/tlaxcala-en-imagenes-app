@@ -8,7 +8,6 @@ import Image from "next/image";
 import CrearPosteoModal from "./CrearPosteoModal";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 import { useLogout } from "../hooks/auth/logout";
-
 interface Props {
   onPostCreated?: () => void;
 }
@@ -16,17 +15,17 @@ interface Props {
 export default function MenuPrincipal({ onPostCreated }: Props) {
   const pathname = usePathname();
   const { handleLogout } = useLogout();
-  const { user, fetchWithAuth } = useAuth(); // 👈 usamos fetchWithAuth del contexto
+  const { user } = useAuth();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLLIElement>(null);
   const [showModal, setShowModal] = useState(false);
   const [showCrearPost, setShowCrearPost] = useState(false);
-
-  const perfilHref = `/${user?.url ?? "#"}`; // Ruta del perfil del usuario logueado
+  // 
+  const perfilHref = `/${user?.url ?? "#"}`;
   const isPerfilActivo = pathname === perfilHref;
+  const isNotificacionesActivo = pathname === "/configuracion/notificaciones";
 
-  // Enlaces base del menú
   const baseLinks = [
     { name: "Inicio", href: "/inicio", icon: FiHome },
     { name: "Notificaciones", href: "/notificaciones", icon: FiBell },
@@ -49,74 +48,6 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
   useEffect(() => {
     document.body.style.overflow = showModal || showCrearPost ? "hidden" : "auto";
   }, [showModal, showCrearPost]);
-
-  // 🚀 Registrar notificaciones push
-  useEffect(() => {
-    if (!user) return; // solo registrar si el usuario está logueado
-
-    async function registerPush() {
-      if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-        console.log("Las notificaciones push no están soportadas en este navegador.");
-        return;
-      }
-
-      try {
-        // 1️⃣ Registrar el Service Worker
-        const registration = await navigator.serviceWorker.register("/sw.js");
-        console.log("Service Worker registrado:", registration);
-
-        // 2️⃣ Pedir permiso al usuario
-        const permission = await Notification.requestPermission();
-        if (permission !== "granted") {
-          console.log("Permiso de notificaciones denegado por el usuario.");
-          return;
-        }
-
-        // 3️⃣ Evitar duplicar suscripciones
-        const existingSub = await registration.pushManager.getSubscription();
-        if (existingSub) {
-          console.log("Ya existe una suscripción activa.");
-          return;
-        }
-
-        // 4️⃣ Obtener clave pública VAPID desde el backend
-        const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/vapidPublicKey`);
-        if (!res.ok) throw new Error("No se pudo obtener la clave pública VAPID");
-        const { key } = await res.json();
-
-        // 5️⃣ Crear nueva suscripción en el navegador
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(key),
-        });
-
-        // 6️⃣ Enviar suscripción al backend
-        const resp = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/subscribe`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ subscription }),
-        });
-
-        if (!resp.ok) throw new Error("Error al registrar la suscripción");
-        const data = await resp.json();
-        console.log("✅", data.message);
-      } catch (err) {
-        console.error("Error al registrar notificaciones push:", err);
-      }
-    }
-
-    registerPush();
-  }, [user, fetchWithAuth]);
-
-  // 🔧 Función para convertir la clave pública VAPID
-  function urlBase64ToUint8Array(base64String: string) {
-    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-    const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-    const rawData = atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-    for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
-    return outputArray;
-  }
 
   return (
     <nav>
@@ -146,7 +77,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
 
         {/* Perfil del usuario */}
         {user && (
-          <li className="nav-item" title="Perfil">
+          <li className="nav-item" title={`${user?.nombre_completo?.nombre ?? "Usuario"} ${user?.nombre_completo?.apellido ?? ""}`}>
             <Link
               href={perfilHref}
               className={`nav-link opciones_menu ${isPerfilActivo ? "link-activo" : ""}`}
@@ -193,20 +124,37 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
               <li>
                 <Link
                   className={`dropdown-item ${
-                    isPerfilActivo ? "fw-bold opciones_menu" : ""
+                    isPerfilActivo ? "linkActivoDropdown fw-light" : ""
                   }`}
                   href={perfilHref}
                 >
                   Mi perfil
                 </Link>
               </li>
-              <button
-                className="dropdown-item buttonDropDown"
-                onClick={() => setShowModal(true)}
-              >
-                Cerrar sesión
-              </button>
+            
+              {/* 🔔 Notificaciones */}
+              <li>
+              <Link
+                  className={`dropdown-item ${isNotificacionesActivo ? "linkActivoDropdown fw-light" : ""}
+                  `}
+                  href="/configuracion/notificaciones"
+                >
+                  🔔 Notificaciones
+                </Link>
+              </li>
+            
+              {/* 🔒 Botón cerrar sesión */}
+              <li>
+                <button
+                  className="dropdown-item buttonDropDown"
+                  onClick={() => setShowModal(true)}
+                >
+                  Cerrar sesión
+                </button>
+              </li>
             </ul>
+          
+          
           )}
         </li>
       </ul>
