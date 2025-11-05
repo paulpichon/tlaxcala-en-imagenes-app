@@ -1,50 +1,77 @@
-// components/ui/ToastGlobal.tsx
 'use client';
 
-import { ToastGlobalProps } from "@/types/types";
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ToastGlobalProps } from "@/types/types";
 
-export default function ToastGlobal({ message, type = "creacion", onClose }: ToastGlobalProps) {
+/**
+ * ToastGlobal — Componente de notificación flotante global
+ * Tipos permitidos: "success" | "danger" | "creacion"
+ */
+
+export default function ToastGlobal({
+  message,
+  type = "creacion",
+  onClose,
+}: ToastGlobalProps) {
+  // Cerrar automáticamente después de unos segundos
+  useEffect(() => {
+    if (!message) return;
+    const timer = setTimeout(() => onClose?.(), 4000);
+    return () => clearTimeout(timer);
+  }, [message, onClose]);
+
+  if (!message) return null;
+
+  // Mapa de colores según tipo
+  const colorMap: Record<string, { bg: string; text: string }> = {
+    success: { bg: "#28a745", text: "#ffffff" },
+    danger: { bg: "#dc3545", text: "#ffffff" },
+    creacion: { bg: "#EBCA9A", text: "#000000" },
+  };
+
+  const { bg, text } = colorMap[type] ?? colorMap.creacion;
+
   return (
     <AnimatePresence>
       {message && (
         <motion.div
-          initial={{ opacity: 0, y: -40 }}
+          initial={{ opacity: 0, y: -24 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -40 }}
-          transition={{ duration: 0.3 }}
-          className="position-fixed top-0 start-50 translate-middle-x mt-3 z-50"
+          exit={{ opacity: 0, y: -24 }}
+          transition={{ duration: 0.25 }}
+          className="position-fixed top-0 start-50 translate-middle-x mt-3"
           style={{ zIndex: 4000 }}
         >
           <div
-            className={`toast align-items-center text-bg-${type} border-0 shadow-lg show px-4 py-2 rounded-pill`}
-            role="alert"
+            className="px-4 py-2 rounded-pill shadow-lg d-flex align-items-center gap-3"
             style={{
-              background:
-                type === "success"
-                  ? "#28a745"
-                  : type === "danger"
-                  ? "#dc3545"
-                  : type === "creacion"
-                  ? "#EBCA9A"
-                  : "#6c757d",
-              color: "white",
-              fontWeight: 500,
-              minWidth: "250px",
+              background: bg,
+              color: text,
+              fontWeight: 600,
+              minWidth: 260,
               textAlign: "center",
             }}
           >
-            <div className="d-flex justify-content-between align-items-center gap-3">
-              <span>{message}</span>
-              {onClose && (
-                <button
-                  type="button"
-                  className="btn-close btn-close-white"
-                  onClick={onClose}
-                  aria-label="Cerrar"
-                ></button>
-              )}
-            </div>
+            <span style={{ flex: 1 }}>{message}</span>
+            {onClose && (
+              <button
+                type="button"
+                aria-label="Cerrar"
+                onClick={onClose}
+                className="btn btn-sm"
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: text,
+                  fontSize: "16px",
+                  lineHeight: 1,
+                  cursor: "pointer",
+                }}
+              >
+                ✕
+              </button>
+            )}
           </div>
         </motion.div>
       )}
