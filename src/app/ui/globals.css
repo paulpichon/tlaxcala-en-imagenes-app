@@ -169,6 +169,15 @@ a.postear {
 /* 
   FIN LINK ACTIVO PARA EL MENU PRINCIPAL
 */
+/* 
+  LINK ACTIVO PARA EL DROPDOWN
+*/
+.linkActivoDropdown {
+  color: #cccccc!important;
+}
+/* 
+  FIN LINK ACTIVO PARA EL DROPDOWN
+*/
 
 
 /*
