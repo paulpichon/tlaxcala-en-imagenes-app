@@ -12,6 +12,7 @@
     "@hookform/resolvers": "^5.0.1",
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.23.22",
     "next": "^15.3.2",
     "react": "^19.1.0",
