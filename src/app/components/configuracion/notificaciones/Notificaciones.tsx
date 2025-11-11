@@ -4,18 +4,18 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useNotificaciones } from "@/context/NotificacionesContext"; // 👈 nuevo import
 import Spinner from "../../spinner";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import { format, isToday, isThisWeek, isThisMonth } from "date-fns";
-// Tiempo en español
-import { es } from "date-fns/locale"; 
+import { es } from "date-fns/locale";
 import { Notificacion } from "@/types/types";
-
-
 
 export default function Notificaciones() {
   const { fetchWithAuth } = useAuth();
+  const { setTotalNoLeidas } = useNotificaciones(); // 👈 accedemos al contador global
   const router = useRouter();
+
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -23,43 +23,55 @@ export default function Notificaciones() {
   const [loadingMore, setLoadingMore] = useState(false);
 
   // 🟢 Cargar notificaciones con paginación
-  const cargarNotificaciones = useCallback(async (pagina = 1) => {
-    try {
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones?page=${pagina}&limit=15`
-      );
-      if (!res.ok) throw new Error("Error al obtener notificaciones");
-      const data = await res.json();
-  
-      if (pagina === 1) setNotificaciones(data.notificaciones);
-      else setNotificaciones((prev) => [...prev, ...data.notificaciones]);
-  
-      setTotalPages(data.totalPages);
-      setPage(pagina);
-    } catch (error) {
-      console.error("Error cargando notificaciones:", error);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  }, [fetchWithAuth]); // 👈 dependencias del callback
+  const cargarNotificaciones = useCallback(
+    async (pagina = 1) => {
+      try {
+        const res = await fetchWithAuth(
+          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones?page=${pagina}&limit=15`
+        );
+        if (!res.ok) throw new Error("Error al obtener notificaciones");
+        const data = await res.json();
+
+        if (pagina === 1) setNotificaciones(data.notificaciones);
+        else setNotificaciones((prev) => [...prev, ...data.notificaciones]);
+
+        setTotalPages(data.totalPages);
+        setPage(pagina);
+      } catch (error) {
+        console.error("Error cargando notificaciones:", error);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    },
+    [fetchWithAuth]
+  );
 
   useEffect(() => {
     cargarNotificaciones(1);
   }, [cargarNotificaciones]);
 
-  // 🟡 Marcar como leída + redirigir
+  // 🟡 Marcar como leída + actualizar contador global + redirigir
   const handleClickNotificacion = async (id: string, urlUsuario: string) => {
     try {
-      await fetchWithAuth(
+      // 1️⃣ Marcar como leída en backend
+      const res = await fetchWithAuth(
         `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/marcar-notificacion-leida/${id}`,
         { method: "PATCH" }
       );
+      if (!res.ok) throw new Error("Error al marcar como leída");
 
+      // 2️⃣ Actualizar estado local (para cambiar estilo visual)
       setNotificaciones((prev) =>
-        prev.map((n) => (n._id === id ? { ...n, notificacion_leida: true } : n))
+        prev.map((n) =>
+          n._id === id ? { ...n, notificacion_leida: true } : n
+        )
       );
 
+      // 3️⃣ 🔥 Actualizar contador global instantáneamente
+      setTotalNoLeidas((prev) => Math.max(prev - 1, 0));
+
+      // 4️⃣ Redirigir al perfil del usuario emisor
       router.push(`/${urlUsuario}`);
     } catch (error) {
       console.error("Error al marcar notificación:", error);
@@ -78,7 +90,8 @@ export default function Notificaciones() {
     notificaciones.forEach((notif) => {
       const fecha = new Date(notif.createdAt);
       if (isToday(fecha)) grupos["Hoy"].push(notif);
-      else if (isThisWeek(fecha, { weekStartsOn: 1 })) grupos["Esta semana"].push(notif);
+      else if (isThisWeek(fecha, { weekStartsOn: 1 }))
+        grupos["Esta semana"].push(notif);
       else if (isThisMonth(fecha)) grupos["Este mes"].push(notif);
       else grupos["Anteriores"].push(notif);
     });
@@ -103,7 +116,9 @@ export default function Notificaciones() {
 
         <div className="container py-4">
           {notificaciones.length === 0 ? (
-            <p className="text-center text-muted">Aún no tienes notificaciones.</p>
+            <p className="text-center text-muted">
+              Aún no tienes notificaciones.
+            </p>
           ) : (
             <>
               {Object.entries(grupos).map(([titulo, notifs]) =>
@@ -115,11 +130,19 @@ export default function Notificaciones() {
                         <div
                           key={notif._id}
                           className={`list-group-item list-group-item-action d-flex align-items-center gap-3 ${
-                            notif.notificacion_leida ? "bg-light text-muted" : "bg-white fw-semibold"
+                            notif.notificacion_leida
+                              ? "bg-light text-muted"
+                              : "bg-white fw-semibold"
                           }`}
-                          onClick={() => handleClickNotificacion(notif._id, notif.emisor.url)}
+                          onClick={() =>
+                            handleClickNotificacion(
+                              notif._id,
+                              notif.emisor.url
+                            )
+                          }
                           style={{ cursor: "pointer" }}
                         >
+                          {/* Imagen del emisor */}
                           <Image
                             src={getCloudinaryUrl(
                               notif.emisor.imagen_perfil?.public_id ||
@@ -132,16 +155,23 @@ export default function Notificaciones() {
                             className="rounded-circle border"
                           />
 
+                          {/* Contenido de la notificación */}
                           <div className="flex-grow-1">
                             <p className="mb-1">
-                              <strong>{notif.emisor.nombre_completo.nombre}</strong>{" "}
+                              <strong>
+                                {notif.emisor.nombre_completo.nombre}
+                              </strong>{" "}
                               {notif.mensaje}
                               {!notif.notificacion_leida && (
-                                <span className="badge bg-danger ms-2 rounded-pill">No leido.</span>
+                                <span className="badge bg-danger ms-2 rounded-pill">
+                                  No leído
+                                </span>
                               )}
                             </p>
                             <small className="text-muted">
-                              {format(new Date(notif.createdAt), "d MMM, HH:mm", { locale: es })}
+                              {format(new Date(notif.createdAt), "d MMM, HH:mm", {
+                                locale: es,
+                              })}
                             </small>
                           </div>
                         </div>
