@@ -236,3 +236,17 @@ export interface FormDataEditarPerfil {
   nombreEntidad: string;
   claveEntidad: number;
 }
+// Iterface para las notificaciones
+export interface Notificacion {
+  _id: string;
+  tipo: "follow" | "like" | "comentario" | "nueva_publicacion";
+  mensaje: string;
+  createdAt: string;
+  notificacion_leida: boolean;
+  emisor: {
+    _id: UsuarioLogueado["_id"];
+    nombre_completo: UsuarioLogueado["nombre_completo"];
+    url: UsuarioLogueado["url"];
+    imagen_perfil?: UsuarioLogueado["imagen_perfil"];
+  };
+};

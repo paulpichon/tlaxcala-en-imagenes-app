@@ -7,21 +7,11 @@ import { useAuth } from "@/context/AuthContext";
 import Spinner from "../../spinner";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import { format, isToday, isThisWeek, isThisMonth } from "date-fns";
-import { es } from "date-fns/locale";
+// Tiempo en español
+import { es } from "date-fns/locale"; 
+import { Notificacion } from "@/types/types";
 
-type Notificacion = {
-  _id: string;
-  tipo: "follow" | "like" | "comentario" | "nueva_publicacion";
-  mensaje: string;
-  createdAt: string;
-  notificacion_leida: boolean;
-  emisor: {
-    _id: string;
-    nombre_completo: { nombre: string; apellido: string };
-    url: string;
-    imagen_perfil?: { public_id: string };
-  };
-};
+
 
 export default function Notificaciones() {
   const { fetchWithAuth } = useAuth();
