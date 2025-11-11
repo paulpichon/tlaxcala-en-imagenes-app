@@ -3,11 +3,13 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useNotificaciones } from "@/context/NotificacionesContext"; // 👈 nuevo import
 import { FiHome, FiBell, FiPlusCircle, FiSliders, FiAlignJustify } from "react-icons/fi";
 import Image from "next/image";
 import CrearPosteoModal from "./CrearPosteoModal";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 import { useLogout } from "../hooks/auth/logout";
+
 interface Props {
   onPostCreated?: () => void;
 }
@@ -16,15 +18,16 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
   const pathname = usePathname();
   const { handleLogout } = useLogout();
   const { user } = useAuth();
+  const { totalNoLeidas, refrescarNotificaciones } = useNotificaciones(); // 👈 desde el context
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLLIElement>(null);
   const [showModal, setShowModal] = useState(false);
   const [showCrearPost, setShowCrearPost] = useState(false);
-  // 
+
   const perfilHref = `/${user?.url ?? "#"}`;
   const isPerfilActivo = pathname === perfilHref;
-  const isNotificacionesActivo = pathname === "/configuracion/notificaciones";
+  const isNotificacionesActivo = pathname === "/notificaciones";
 
   const baseLinks = [
     { name: "Inicio", href: "/inicio", icon: FiHome },
@@ -32,6 +35,13 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
     { name: "Postear", action: () => setShowCrearPost(true), icon: FiPlusCircle },
     { name: "Configuraciones", href: "/configuracion", icon: FiSliders },
   ];
+
+  // 🔁 Actualizar notificaciones cada cierto tiempo (opcional)
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(refrescarNotificaciones, 60000); // cada 1 min
+    return () => clearInterval(interval);
+  }, [user, refrescarNotificaciones]);
 
   // Cerrar dropdown al hacer clic fuera
   useEffect(() => {
@@ -54,7 +64,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
       <ul className="nav justify-content-center menu_inferior_lateral">
         {/* Enlaces principales */}
         {baseLinks.map(({ name, href, icon: LinkIcon, action }) => (
-          <li className="nav-item" key={name} title={name}>
+          <li className="nav-item position-relative" key={name} title={name}>
             {action ? (
               <button
                 onClick={action}
@@ -68,7 +78,20 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
                 href={href!}
                 className={`nav-link opciones_menu ${pathname === href ? "link-activo" : ""}`}
               >
-                {LinkIcon && <LinkIcon className="icono_menu" />}
+                <div className="position-relative d-inline-block">
+                  {LinkIcon && <LinkIcon className="icono_menu" />}
+
+                  {/* 🔔 Badge persistente de notificaciones */}
+                  {name === "Notificaciones" && totalNoLeidas > 0 && (
+                    <span
+                      className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                      style={{ fontSize: "0.65rem" }}
+                    >
+                      {totalNoLeidas > 9 ? "9+" : totalNoLeidas}
+                      <span className="visually-hidden">nuevas notificaciones</span>
+                    </span>
+                  )}
+                </div>
                 <span className="nombre_opciones_menu">{name}</span>
               </Link>
             )}
@@ -77,7 +100,10 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
 
         {/* Perfil del usuario */}
         {user && (
-          <li className="nav-item" title={`${user?.nombre_completo?.nombre ?? "Usuario"} ${user?.nombre_completo?.apellido ?? ""}`}>
+          <li
+            className="nav-item"
+            title={`${user?.nombre_completo?.nombre ?? "Usuario"} ${user?.nombre_completo?.apellido ?? ""}`}
+          >
             <Link
               href={perfilHref}
               className={`nav-link opciones_menu ${isPerfilActivo ? "link-activo" : ""}`}
@@ -88,9 +114,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
                 alt={user?.nombre_completo?.nombre || "Usuario"}
                 width={100}
                 height={100}
-                className={`rounded-circle icono_menu ${
-                  isPerfilActivo ? "perfil-activo" : ""
-                }`}
+                className={`rounded-circle icono_menu ${isPerfilActivo ? "perfil-activo" : ""}`}
                 style={{
                   width: "30px",
                   height: "30px",
@@ -117,33 +141,25 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
           </button>
 
           {dropdownOpen && (
-            <ul
-              className="dropdown-menu show position-absolute"
-              style={{ minWidth: "10rem" }}
-            >
+            <ul className="dropdown-menu show position-absolute" style={{ minWidth: "10rem" }}>
               <li>
                 <Link
-                  className={`dropdown-item ${
-                    isPerfilActivo ? "linkActivoDropdown fw-light" : ""
-                  }`}
+                  className={`dropdown-item ${isPerfilActivo ? "linkActivoDropdown fw-light" : ""}`}
                   href={perfilHref}
                 >
                   Mi perfil
                 </Link>
               </li>
-            
-              {/* 🔔 Notificaciones */}
+
               <li>
-              <Link
-                  className={`dropdown-item ${isNotificacionesActivo ? "linkActivoDropdown fw-light" : ""}
-                  `}
-                  href="/configuracion/notificaciones"
+                <Link
+                  className={`dropdown-item ${isNotificacionesActivo ? "linkActivoDropdown fw-light" : ""}`}
+                  href="/notificaciones"
                 >
                   🔔 Notificaciones
                 </Link>
               </li>
-            
-              {/* 🔒 Botón cerrar sesión */}
+
               <li>
                 <button
                   className="dropdown-item buttonDropDown"
@@ -153,8 +169,6 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
                 </button>
               </li>
             </ul>
-          
-          
           )}
         </li>
       </ul>
