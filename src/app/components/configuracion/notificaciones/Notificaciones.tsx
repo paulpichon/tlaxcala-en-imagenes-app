@@ -38,7 +38,7 @@ export default function ListaNotificaciones() {
 
   const grupos = agruparPorFecha(notificaciones);
 
-  if (loading) return <Spinner />;
+  if (loading) return <div className="d-flex justify-content-center align-items-center vh-100"><Spinner /></div>;
 
   return (
     <div className="container py-4">
