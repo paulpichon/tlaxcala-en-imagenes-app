@@ -6,7 +6,7 @@ import { Notificacion } from "@/types/types";
 
 export function useNotifications() {
   const { fetchWithAuth } = useAuth();
-  const { setTotalNoLeidas } = useNotificaciones();
+  const { setTotalNoLeidas, refrescarNotificaciones } = useNotificaciones();
 
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
   const [page, setPage] = useState(1);
@@ -14,6 +14,7 @@ export function useNotifications() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
 
+  // 🔹 Cargar notificaciones con paginación
   const cargarNotificaciones = useCallback(
     async (pagina = 1) => {
       try {
@@ -38,30 +39,23 @@ export function useNotifications() {
     [fetchWithAuth]
   );
 
-  /**
-   * ✅ Corrige el bug: no decrementa el contador si ya estaba leída
-   */
+  // 🔸 Marcar como leída
   const marcarComoLeida = useCallback(
     async (id: string) => {
       try {
-        // 🧩 Verificar si ya estaba leída
         const notificacionActual = notificaciones.find((n) => n._id === id);
-        if (!notificacionActual) return;
-        if (notificacionActual.notificacion_leida) return; // 👈 evita doble decremento
+        if (!notificacionActual || notificacionActual.notificacion_leida) return;
 
-        // 🔹 Marcar como leída en backend
         const res = await fetchWithAuth(
           `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/marcar-notificacion-leida/${id}`,
           { method: "PATCH" }
         );
         if (!res.ok) throw new Error("Error al marcar notificación");
 
-        // 🔹 Actualizar estado local
         setNotificaciones((prev) =>
           prev.map((n) => (n._id === id ? { ...n, notificacion_leida: true } : n))
         );
 
-        // 🔹 Actualizar contador global
         setTotalNoLeidas((prev: number) => Math.max(prev - 1, 0));
       } catch (err) {
         console.error("Error marcando como leída:", err);
@@ -70,6 +64,29 @@ export function useNotifications() {
     [fetchWithAuth, notificaciones, setTotalNoLeidas]
   );
 
+  // 🔴 Eliminar notificación
+  const eliminarNotificacion = useCallback(
+    async (id: string) => {
+      try {
+        const res = await fetchWithAuth(
+          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/eliminar-notificacion/${id}`,
+          { method: "DELETE" }
+        );
+        if (!res.ok) throw new Error("Error al eliminar notificación");
+
+        // ✅ Quitarla del estado local
+        setNotificaciones((prev) => prev.filter((n) => n._id !== id));
+
+        // ✅ Refrescar el contador global
+        await refrescarNotificaciones();
+      } catch (err) {
+        console.error("Error eliminando notificación:", err);
+      }
+    },
+    [fetchWithAuth, refrescarNotificaciones]
+  );
+
+  // 🔁 Cargar al iniciar
   useEffect(() => {
     cargarNotificaciones(1);
   }, [cargarNotificaciones]);
@@ -82,6 +99,8 @@ export function useNotifications() {
     loadingMore,
     cargarNotificaciones,
     marcarComoLeida,
+    eliminarNotificacion, // 👈 exportamos la nueva función
     setLoadingMore,
+    setNotificaciones, // opcional, útil si algún día se necesita refrescar manualmente
   };
 }

@@ -16,15 +16,16 @@ export default function ListaNotificaciones() {
     loadingMore,
     cargarNotificaciones,
     marcarComoLeida,
+    eliminarNotificacion, // 👈 Importante
     setLoadingMore,
   } = useNotifications();
 
   const agruparPorFecha = (notificaciones: Notificacion[]) => {
     const grupos: Record<string, Notificacion[]> = {
-      "Hoy": [],
+      Hoy: [],
       "Esta semana": [],
       "Este mes": [],
-      "Anteriores": [],
+      Anteriores: [],
     };
     notificaciones.forEach((notif) => {
       const fecha = new Date(notif.createdAt);
@@ -38,7 +39,12 @@ export default function ListaNotificaciones() {
 
   const grupos = agruparPorFecha(notificaciones);
 
-  if (loading) return <div className="d-flex justify-content-center align-items-center vh-100"><Spinner /></div>;
+  if (loading)
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <Spinner />
+      </div>
+    );
 
   return (
     <div className="container py-4">
@@ -59,6 +65,7 @@ export default function ListaNotificaciones() {
                         marcarComoLeida(id);
                         router.push(`/${urlUsuario}`);
                       }}
+                      onEliminar={eliminarNotificacion} // 👈 pasamos la función al hijo
                     />
                   ))}
                 </div>
