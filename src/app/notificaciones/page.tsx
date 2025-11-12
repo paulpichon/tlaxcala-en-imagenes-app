@@ -17,7 +17,7 @@ import ImagenesMasVotadas from "../components/ImagenesMasVotadas";
 import Publicidad from "../components/Publicidad";
 // Footer sugerencias
 import FooterSugerencias from "../components/FooterSugerencias";
-import Notificaciones from "../components/configuracion/notificaciones/Notificaciones";
+import Notificaciones from "../components/notifications/Notificaciones";
 
 
 export const viewport: Viewport = {

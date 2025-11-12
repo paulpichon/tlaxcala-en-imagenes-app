@@ -3,8 +3,8 @@ import { useRouter } from "next/navigation";
 import { isToday, isThisWeek, isThisMonth } from "date-fns";
 import { Notificacion } from "@/types/types";
 import { useNotifications } from "@/app/hooks/useNotifications";
-import Spinner from "../../spinner";
-import NotificacionItem from "../../notifications/NotificacionItem";
+import Spinner from "../spinner";
+import NotificacionItem from "./NotificacionItem";
 
 export default function ListaNotificaciones() {
   const router = useRouter();
