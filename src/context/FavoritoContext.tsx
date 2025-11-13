@@ -9,7 +9,6 @@ interface FavoritoContextType {
   toggleFavorito: (
     posteoId: string,
     autorId: string,
-    imagenUrl: string,
     initialFavorito?: boolean
   ) => Promise<void>;
 }
@@ -27,7 +26,6 @@ export function FavoritoProvider({ children }: { children: ReactNode }) {
   const toggleFavorito = async (
     posteoId: string,
     autorId: string,
-    imagenUrl: string,
     initialFavorito?: boolean
   ) => {
     if (!posteoId) return;
@@ -49,7 +47,7 @@ export function FavoritoProvider({ children }: { children: ReactNode }) {
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ imagenUrl, autorId }),
+            body: JSON.stringify({ autorId }),
           }
         );
       }
