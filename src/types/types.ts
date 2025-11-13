@@ -169,7 +169,6 @@ export interface LikesUsuariosResponse {
 export interface FavoritoButtonProps {
   posteoId: string;
   autorId: string;
-  imagenUrl: string;
   initialFavorito: boolean;
   className?: string;
 }
