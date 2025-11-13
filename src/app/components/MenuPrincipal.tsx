@@ -28,6 +28,9 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
   const perfilHref = `/${user?.url ?? "#"}`;
   const isPerfilActivo = pathname === perfilHref;
   const isNotificacionesActivo = pathname === "/notificaciones";
+  const isSeguidosActivo = pathname === "/seguidos";
+  const isSeguidoresActivo = pathname === "/seguidores";
+  const isFavoritosActivo = pathname === "/favoritos";
 
   const baseLinks = [
     { name: "Inicio", href: "/inicio", icon: FiHome },
@@ -142,6 +145,33 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
 
           {dropdownOpen && (
             <ul className="dropdown-menu show position-absolute" style={{ minWidth: "10rem" }}>
+              {/* Seguidores */}
+              <li>
+                <Link
+                  className={`dropdown-item ${isSeguidosActivo ? "linkActivoDropdown fw-light" : ""}`}
+                  href="/seguidos"
+                >
+                  Seguidos
+                </Link>
+              </li>
+              {/* Seguidos */}
+              <li>
+                <Link
+                  className={`dropdown-item ${isSeguidoresActivo ? "linkActivoDropdown fw-light" : ""}`}
+                  href="/seguidores"
+                >
+                  Mis seguidores
+                </Link>
+              </li>
+              {/* Favoritos */}
+              <li>
+                <Link
+                  className={`dropdown-item ${isFavoritosActivo ? "linkActivoDropdown fw-light" : ""}`}
+                  href="/favoritos"
+                >
+                  Favoritos
+                </Link>
+              </li>
               <li>
                 <Link
                   className={`dropdown-item ${isPerfilActivo ? "linkActivoDropdown fw-light" : ""}`}
