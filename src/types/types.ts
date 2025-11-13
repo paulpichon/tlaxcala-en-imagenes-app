@@ -250,3 +250,38 @@ export interface Notificacion {
     imagen_perfil?: UsuarioLogueado["imagen_perfil"];
   };
 };
+// ======================================
+// 📦 Favoritos
+// ======================================
+
+// Tipo para cada elemento de la lista de favoritos
+export interface Favorito {
+  _id: string;
+  usuarioId: string; // usuario que guardó el favorito
+  posteoId: {
+    _id: string;
+    public_id: string;
+    posteo_publico: boolean;
+  };
+  autorId: {
+    nombre_completo: {
+      nombre: string;
+      apellido: string;
+    };
+    url: string;
+    uid: string;
+  };
+  createdAt: string;
+  __v: number;
+}
+
+// Tipo para la respuesta paginada de la API
+export interface ApiResponseFavoritos {
+  page: number;
+  next: string | null;
+  prev: string | null;
+  limite: number;
+  total_registros: number;
+  mostrando: number;
+  favoritos: Favorito[];
+}
