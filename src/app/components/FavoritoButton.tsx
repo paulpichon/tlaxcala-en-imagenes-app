@@ -8,7 +8,6 @@ import { useFavorito } from "@/context/FavoritoContext";
 const FavoritoButton: React.FC<FavoritoButtonProps> = ({
   posteoId,
   autorId,
-  imagenUrl,
   initialFavorito,
   className,
 }) => {
@@ -18,7 +17,7 @@ const FavoritoButton: React.FC<FavoritoButtonProps> = ({
   const loading = loadingMap[posteoId] ?? false;
 
   const handleClick = () => {
-    toggleFavorito(posteoId, autorId, imagenUrl, initialFavorito);
+    toggleFavorito(posteoId, autorId, initialFavorito);
   };
 
   return (
