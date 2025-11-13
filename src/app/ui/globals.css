@@ -84,10 +84,9 @@ button.opciones_menu {
 /*etiqueta a y button*/
 a.opciones_menu, button.opciones_menu {
   color: #EBCA9A;
-  padding: 20px 15px;
+  padding: 10px 10px;
   /*EFECTOS*/
   transition: all 0.3s ease 0s;
-  margin-bottom: 10px;
 }
 
 /* hover iconos menu*/
@@ -103,8 +102,8 @@ button.opciones_menu:hover, button.opciones_menu:focus {
 }
 /* Icono del menu react icons */
 .icono_menu {
-  font-size: 1.5rem;
-  margin: 0 5px;
+  font-size: 1.2rem;
+  margin: 0;
 }
 /* Boton POSTEAR */
 a.postear {
@@ -271,11 +270,14 @@ Spinner de carga
       font-size: 2.4rem;
   }
   /*Fin Titulo Tlaxcala En Imágenes*/
-
+  /* Icono del menu react icons */
+  .icono_menu {
+    font-size: 1.5rem;
+  }
   /*Menu inferior*/
   /*etiqueta a y button*/
   a.opciones_menu, button.opciones_menu  {
-      padding: 10px 25px;
+      padding: 5px 25px;
   }
   /*
   *
