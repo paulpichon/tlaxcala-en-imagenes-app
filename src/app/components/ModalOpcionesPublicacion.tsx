@@ -128,7 +128,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                       <FavoritoButton
                         posteoId={selectedImage._id}
                         autorId={selectedImage._idUsuario._id}
-                        imagenUrl={selectedImage.secure_url}
                         initialFavorito={esFavoritoGlobal}
                         className={perfil.btn_opciones_publicaciones}
                       />
