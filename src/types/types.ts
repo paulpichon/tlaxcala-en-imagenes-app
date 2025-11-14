@@ -171,7 +171,10 @@ export interface FavoritoButtonProps {
   autorId: string;
   initialFavorito: boolean;
   className?: string;
+  onRemoved?: (posteoId: string) => void;
+  iconOnly?: boolean; // 👈 nuevo: solo muestra el icono si es true
 }
+
 // Interface para las props del componente FollowButton
 export interface FollowButtonProps {
   userId: string;
