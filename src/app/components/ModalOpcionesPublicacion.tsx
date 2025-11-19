@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useFavorito } from "@/context/FavoritoContext";
 import { useState } from "react";
 import ToastGlobal from "./ToastGlobal";
+import EditarPosteoModal from "./posteo/EditarPosteoModal";
 // se agrega onPostDeleted como prop opcional
 interface ModalOpcionesPublicacionProps extends PropsModalOpcionesPublicacion {
   onPostDeleted?: (postId: string) => void; // ✅ Nuevo callback opcional
@@ -25,9 +26,16 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   const pathname = usePathname();
   const { favoritosMap } = useFavorito();
 
+  // Editar modal
+  // const [showEditModal, setShowEditModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+
+
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [toast, setToast] = useState<{ message: string; type?: "success" | "danger" | "creacion" } | null>(null);
+
 
   if (!isOpen || !selectedImage) return null;
 
@@ -110,9 +118,17 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                     >
                       Eliminar
                     </button>
-                    <button className={perfil.btn_opciones_publicaciones}>
+                    {/* <button className={perfil.btn_opciones_publicaciones}>
+                      Editar
+                    </button> */}
+                    <button
+                      className={perfil.btn_opciones_publicaciones}
+                      onClick={() => setShowEditModal(true)}
+                    >
                       Editar
                     </button>
+
+
                   </>
                 ) : (
                   <>
@@ -230,6 +246,25 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
           onClose={() => setToast(null)}
         />
       )}
+
+      {/* Editar Modal */}
+      {showEditModal && (
+        <EditarPosteoModal
+          isOpen={showEditModal}
+          posteo={selectedImage}
+          onClose={(updated, newText) => {
+            setShowEditModal(false);
+
+            if (updated && newText) {
+              // actualizar UI sin recargar
+              selectedImage.texto = newText;
+            }
+          }}
+        />
+      )}
+
+
+
     </>
   );
 };
