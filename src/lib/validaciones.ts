@@ -65,4 +65,26 @@ export const posteoSchema = posteoBaseSchema.refine(
   }
 );
 
+// Esquema para editar un posteo
+/**
+ * Bloquea spam típico y contenido repetido
+ */
+const spamRegex = /(http|www|free money|click here|suscríbete|followers|porno|xxx)/i;
+export const editarPosteoSchema = z.object({
+  texto: z
+    .string()
+    .trim()
+    .min(1, "El texto no puede estar vacío")
+    .max(200, "Máximo 200 caracteres")
+    .refine((val) => !spamRegex.test(val), {
+      message: "Tu texto parece contener spam ❌",
+    })
+    .refine((val) => {
+      // Al menos un caracter visible (emoji o texto)
+      return /\S/.test(val);
+    }, {
+      message: "Debes escribir al menos un caracter visible",
+    }),
+});
+
 export type PosteoSchema = z.infer<typeof posteoSchema>;
