@@ -260,24 +260,15 @@ export interface Notificacion {
 export interface Favorito {
   _id: string;
   usuarioId: string; // usuario que guardó el favorito
-  posteoId: {
-    _id: string;
-    public_id: string;
-    posteo_publico: boolean;
-  };
-  autorId: {
-    nombre_completo: {
-      nombre: string;
-      apellido: string;
-    };
-    url: string;
-    uid: string;
-  };
+  posteoId: Posteo;
+  autorId: UsuarioLogueado;
   createdAt: string;
   __v: number;
 }
 
-// Tipo para la respuesta paginada de la API
+// ======================================
+// 📦 Tipo para la respuesta paginada de la API
+// ======================================
 export interface ApiResponseFavoritos {
   page: number;
   next: string | null;
@@ -286,4 +277,15 @@ export interface ApiResponseFavoritos {
   total_registros: number;
   mostrando: number;
   favoritos: Favorito[];
+}
+// ======================================
+// 📦 Editar el posteo modal
+// ======================================
+export interface EditarPosteoModalProps {
+  isOpen: boolean;
+  posteo: {
+    _id: string;
+    texto?: string;
+  } | null;
+  onClose: (updated: boolean, newText?: string) => void;
 }
