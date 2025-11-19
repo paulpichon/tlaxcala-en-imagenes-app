@@ -48,11 +48,11 @@ export default function NotificacionItem({ notif, onClick, onEliminar }: Props) 
         style={{ cursor: "pointer" }}
       >
         <Image
-          src={getCloudinaryUrl(
-            notif.emisor.imagen_perfil?.public_id ||
-              "https://res.cloudinary.com/dy9prn3ue/image/upload/v1750995280/tlx-imagenes/assets/no-imagen-usuario_koriq0.webp",
-            "mini"
-          )}
+          src={
+            notif.emisor.imagen_perfil?.public_id ?     
+            getCloudinaryUrl( notif.emisor.imagen_perfil?.public_id, "mini" )
+            : "https://res.cloudinary.com/dy9prn3ue/image/upload/v1750995280/tlx-imagenes/assets/no-imagen-usuario_koriq0.webp"
+        }
           alt={notif.emisor.nombre_completo.nombre}
           width={50}
           height={50}
