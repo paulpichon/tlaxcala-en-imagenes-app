@@ -8,11 +8,12 @@ import FollowButton from "../FollowButton";
 import { useAuth } from "@/context/AuthContext";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 import CambiarImagenModal from "../CambiarImagenModal";
+import FollowersModal from "./FollowersModal";
 import { FiCamera } from "react-icons/fi";
 
 interface Props {
   usuario: UsuarioPerfil;
-  totalPosteos?: number; // 🔹 nuevo prop opcional
+  totalPosteos?: number;
 }
 
 export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Props) {
@@ -23,10 +24,10 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
     obtenerImagenPerfilUsuario(usuario, "perfil")
   );
   const [showModal, setShowModal] = useState(false);
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
   const [hover, setHover] = useState(false);
   const [totalPublicaciones, setTotalPublicaciones] = useState(usuario.totaltPosteos);
 
-  // 🔹 Si cambia el prop totalPosteos (por ejemplo, desde PublicacionesUsuarioGrid), actualizamos
   useEffect(() => {
     if (typeof totalPosteos === "number") {
       setTotalPublicaciones(totalPosteos);
@@ -35,7 +36,7 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
 
   return (
     <div className={perfil.contenedor_info_usuario}>
-      {/* Modal para cambiar imagen */}
+      {/* Modal cambiar imagen */}
       <CambiarImagenModal
         usuario={usuario}
         show={showModal}
@@ -43,9 +44,17 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
         onSuccess={(newUrl) => setImagenPerfil(newUrl)}
       />
 
+      {/* Modal de seguidores */}
+      <FollowersModal
+        userId={usuario._id}
+        loggedUserId={user?.uid}
+        show={showFollowersModal}
+        onClose={() => setShowFollowersModal(false)}
+      />
+
       <div className="container mt-4">
         <div className="row align-items-center">
-          {/* Imagen de perfil con hover */}
+          {/* Imagen perfil */}
           <div className="col-sm-12 col-md-4 text-center">
             <div
               className="position-relative d-inline-block"
@@ -90,7 +99,7 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
             </div>
           </div>
 
-          {/* Información del usuario */}
+          {/* Información usuario */}
           <div className="col-sm-12 col-md-8">
             <div className="d-flex align-items-center flex-wrap gap-2 mb-3">
               <h2 className="mb-0 fw-normal">{usuario.url || usuario.correo}</h2>
@@ -104,18 +113,26 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
               )}
             </div>
 
+            {/* Estadísticas */}
             <div className="d-flex flex-wrap gap-4 mb-2">
               <span>
                 <strong>{totalPublicaciones}</strong> publicaciones
               </span>
-              <span>
+
+              <span
+                role="button"
+                style={{ cursor: "pointer" }}
+                onClick={() => setShowFollowersModal(true)}
+              >
                 <strong>{usuario.totalSeguidores}</strong> seguidores
               </span>
+
               <span>
                 <strong>{usuario.totalSeguidos}</strong> seguidos
               </span>
             </div>
 
+            {/* Nombre + ubicación */}
             <div>
               <p className="mb-0 fw-bold">
                 {usuario.nombre_completo.nombre} {usuario.nombre_completo.apellido}
