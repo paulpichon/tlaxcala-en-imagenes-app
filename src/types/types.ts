@@ -289,3 +289,25 @@ export interface EditarPosteoModalProps {
   } | null;
   onClose: (updated: boolean, newText?: string) => void;
 }
+// ======================================
+// 📦 Interface para mostrar Followers del usuario logueado
+// ======================================
+export interface FollowerUserItemProps {
+  follower: {
+    _id: string;
+    url: string;
+    nombre_completo: {
+      nombre: string;
+      apellido: string;
+    };
+    imagen_perfil?: {
+      public_id?: string;
+      secure_url: string;
+    };
+  };
+  following: string;
+  createdAt: string;
+  uid: string;
+  isFollowing?: boolean; // Para verificar si el usuario logueado sigue a este follower
+}
+
