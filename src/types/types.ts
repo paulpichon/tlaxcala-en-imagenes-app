@@ -310,4 +310,22 @@ export interface FollowerUserItemProps {
   uid: string;
   isFollowing?: boolean; // Para verificar si el usuario logueado sigue a este follower
 }
-
+// ======================================
+// 📦 Interface para mostrar Followings en el modal
+// ======================================
+export interface FollowingUserItemProps {
+  _id: string; // ID del registro Follow
+  following: {
+    _id: string;
+    url: string;
+    nombre_completo: {
+      nombre: string;
+      apellido: string;
+    };
+    imagen_perfil?: {
+      public_id?: string;
+      secure_url?: string;
+    };
+  };
+  isFollowing: boolean; // si el usuario logueado sigue a este usuario
+}
