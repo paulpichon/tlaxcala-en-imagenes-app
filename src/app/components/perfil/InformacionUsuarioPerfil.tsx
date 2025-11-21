@@ -10,6 +10,7 @@ import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfil
 import CambiarImagenModal from "../CambiarImagenModal";
 import FollowersModal from "./FollowersModal";
 import { FiCamera } from "react-icons/fi";
+import FollowingModal from "./FollowingModal";
 
 interface Props {
   usuario: UsuarioPerfil;
@@ -27,6 +28,8 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
   const [showFollowersModal, setShowFollowersModal] = useState(false);
   const [hover, setHover] = useState(false);
   const [totalPublicaciones, setTotalPublicaciones] = useState(usuario.totaltPosteos);
+  const [showFollowingModal, setShowFollowingModal] = useState(false);
+
 
   useEffect(() => {
     if (typeof totalPosteos === "number") {
@@ -51,6 +54,14 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
         show={showFollowersModal}
         onClose={() => setShowFollowersModal(false)}
       />
+      {/* Modal de Seguidos */}
+      <FollowingModal
+        userId={usuario._id}
+        loggedUserId={user?.uid}
+        show={showFollowingModal}
+        onClose={() => setShowFollowingModal(false)}
+      />
+
 
       <div className="container mt-4">
         <div className="row align-items-center">
@@ -127,7 +138,11 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
                 <strong>{usuario.totalSeguidores}</strong> seguidores
               </span>
 
-              <span>
+              <span
+                role="button"
+                style={{ cursor: "pointer" }}
+                onClick={() => setShowFollowingModal(true)}
+              >
                 <strong>{usuario.totalSeguidos}</strong> seguidos
               </span>
             </div>
