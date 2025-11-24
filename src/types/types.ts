@@ -180,6 +180,7 @@ export interface FollowButtonProps {
   userId: string;
   initialFollowing: boolean;
   className?: string; // solo estilos base, no color
+  onToggle?: (newState: boolean) => void;
 }
 // Interface para todo lo que tenga que ver con publicaciones de usuario props 
 export interface PublicacionesUsuarioProps {
