@@ -187,6 +187,25 @@ a.postear {
 div.sugerencias {
   display: none;
 }
+/* Estilos para el boton seguir/dejar de seguir en la seccion NUEVOS USUARIOS */
+.btn-sidebar {
+  padding: 4px 10px !important;
+  border-radius: 20px !important;
+  font-size: 0.75rem !important;
+  min-width: 90px !important;
+  height: 30px !important;
+  line-height: 14px;
+}
+/* Opcional si quieres colores distintos */
+.btn-sidebar.btn_seguir_usuario {
+  background: #0d6efd !important;
+  color: #fff !important;
+}
+.btn-sidebar.btn_dejarSeguir_usuario {
+  background: #ffe3e3 !important;
+  color: #d60000 !important;
+}
+
 
 /* 
   COMPONENTE FOOTER 
@@ -234,7 +253,6 @@ Spinner de carga
     transform: rotate(360deg);
   }
 }
-
 /* 
   FIN COMPONENTE FOOTER 
 */
