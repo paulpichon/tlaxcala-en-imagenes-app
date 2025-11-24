@@ -2,7 +2,7 @@
 
 import MenuPrincipal from "@/app/components/MenuPrincipal";
 import HeaderSuperior from "@/app/components/HeaderSuperior";
-import ImagenesMasVotadas from "@/app/components/ImagenesMasVotadas";
+import ImagenesMasVotadas from "@/app/components/NuevosUsuariosRegistrados";
 import Publicidad from "@/app/components/Publicidad";
 import FooterSugerencias from "@/app/components/FooterSugerencias";
 
