@@ -10,6 +10,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
   userId,
   initialFollowing,
   className = "",
+  onToggle,   // ✅ ahora se recibe
 }) => {
   const { isFollowingMap, loadingMap, toggleFollow } = useFollow();
 
@@ -17,8 +18,13 @@ const FollowButton: React.FC<FollowButtonProps> = ({
   const isFollowing = isFollowingMap[userId] ?? initialFollowing;
   const loading = loadingMap[userId] ?? false;
 
-  const handleClick = () => {
-    toggleFollow(userId, isFollowing); // usar el estado actual
+  const handleClick = async () => {
+    const newState = !isFollowing;
+
+    await toggleFollow(userId, isFollowing);    
+
+    // ✅ notifica al padre si lo envió
+    if (onToggle) onToggle(newState);
   };
 
   // Combina clase base con color según isFollowing
