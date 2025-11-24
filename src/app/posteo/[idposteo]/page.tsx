@@ -3,7 +3,7 @@
 import { Viewport } from "next";
 import HeaderSuperior from "@/app/components/HeaderSuperior";
 import MenuPrincipal from "@/app/components/MenuPrincipal";
-import ImagenesMasVotadas from "@/app/components/ImagenesMasVotadas";
+import NuevosUsuariosRegistrados from "@/app/components/NuevosUsuariosRegistrados";
 import Publicidad from "@/app/components/Publicidad";
 import FooterSugerencias from "@/app/components/FooterSugerencias";
 // estilos 
@@ -68,7 +68,7 @@ export default async function Posteo() {
                         <div className="contenedor_sugerencias_seguir mt-4">
                             <div className="row d-flex justify-content-center contenedor_border_divs_sugerencias">
                                 {/* IMAGENES MAS VOTADAS */}
-                                <ImagenesMasVotadas />
+                                <NuevosUsuariosRegistrados />
    
                             </div>
                             {/* <!-- row publicidad --> */}
