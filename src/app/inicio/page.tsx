@@ -14,7 +14,7 @@ import HeaderSuperior from "../components/HeaderSuperior";
 // Publicaciones de usuarios
 import PublicacionUsuario from "../components/inicio/PublicacionUsuario";
 // Imagenes mas votadas por usuarios
-import ImagenesMasVotadas from "../components/ImagenesMasVotadas";
+import NuevosUsuariosRegistrados from "../components/NuevosUsuariosRegistrados";
 // Publicidad dentro del div sugerencias
 import Publicidad from "../components/Publicidad";
 // Footer sugerencias
@@ -74,8 +74,8 @@ export default function Inicio() {
 						{/* <!-- contenedor_sugerencias_seguir --> */}
 						<div className="contenedor_sugerencias_seguir mt-4">
 							<div className="row d-flex justify-content-center contenedor_border_divs_sugerencias">
-								{/* IMAGENES MAS VOTADAS */}
-								<ImagenesMasVotadas />
+								{/* Nuevos usuarios registrados */}
+								<NuevosUsuariosRegistrados />
 
 							</div>
 							{/* <!-- row publicidad --> */}

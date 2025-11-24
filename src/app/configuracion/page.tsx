@@ -10,7 +10,7 @@ import MenuPrincipal from "../components/MenuPrincipal";
 // Header superior
 import HeaderSuperior from "../components/HeaderSuperior";
 // Imagenes mas votadas por usuarios
-import ImagenesMasVotadas from "../components/ImagenesMasVotadas";
+import ImagenesMasVotadas from "../components/NuevosUsuariosRegistrados";
 // Publicidad dentro del div sugerencias
 import Publicidad from "../components/Publicidad";
 // Footer sugerencias
