@@ -11,8 +11,8 @@ import type { Viewport } from 'next';
 import MenuPrincipal from "../components/MenuPrincipal";
 // Header superior
 import HeaderSuperior from "../components/HeaderSuperior";
-// Imagenes mas votadas por usuarios
-import ImagenesMasVotadas from "../components/ImagenesMasVotadas";
+// Nuevos usuarios registrados
+import NuevosUsuariosRegistrados from "../components/NuevosUsuariosRegistrados";
 // Publicidad dentro del div sugerencias
 import Publicidad from "../components/Publicidad";
 // Footer sugerencias
@@ -74,7 +74,7 @@ export default function Favorito() {
 						<div className="contenedor_sugerencias_seguir mt-4">
 							<div className="row d-flex justify-content-center contenedor_border_divs_sugerencias">
 								{/* IMAGENES MAS VOTADAS */}
-								<ImagenesMasVotadas />
+								<NuevosUsuariosRegistrados />
 
 							</div>
 							{/* <!-- row publicidad --> */}
