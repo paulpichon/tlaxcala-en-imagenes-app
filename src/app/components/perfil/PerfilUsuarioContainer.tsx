@@ -8,7 +8,7 @@ import MenuPrincipal from "../../components/MenuPrincipal";
 import HeaderSuperior from "../../components/HeaderSuperior";
 import InformacionUsuarioPerfil from "../../components/perfil/InformacionUsuarioPerfil";
 import PublicacionesUsuarioGrid from "../../components/perfil/PublicacionesUsuarioGrid";
-import ImagenesMasVotadas from "../../components/ImagenesMasVotadas";
+import ImagenesMasVotadas from "../NuevosUsuariosRegistrados";
 import Publicidad from "../../components/Publicidad";
 import FooterSugerencias from "../../components/FooterSugerencias";
 import { useUsuarioPerfil } from "@/app/hooks/useUsuarioPerfil";
