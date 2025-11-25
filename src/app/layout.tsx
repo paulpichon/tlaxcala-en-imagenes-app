@@ -12,6 +12,7 @@ import './ui/fonts';
 import { NotificacionesProvider } from '@/context/NotificacionesContext';
 // NuevosUsuariosProvider
 import { NuevosUsuariosProvider } from '@/context/NuevosUsuariosContext';
+import { PublicidadProvider } from '@/context/PublicidadContext';
 // metadatos
 export const metadata: Metadata = {
   title: "Tlaxcala En Imágenes | Entrar o registrarse",
@@ -33,7 +34,9 @@ export default function RootLayout({
         <AuthProvider>
             <NotificacionesProvider>
               <NuevosUsuariosProvider>
-                {children}
+                <PublicidadProvider>
+                  {children}
+                </PublicidadProvider>
               </NuevosUsuariosProvider>
             </NotificacionesProvider>
         </AuthProvider>
