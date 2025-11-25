@@ -8,7 +8,10 @@ import type { Metadata } from "next";
 // Hay 2 formas de important las fuentes
 // import { open_sans, league_gothic } from './ui/fonts';
 import './ui/fonts';
+// NotificacionesProvider
 import { NotificacionesProvider } from '@/context/NotificacionesContext';
+// NuevosUsuariosProvider
+import { NuevosUsuariosProvider } from '@/context/NuevosUsuariosContext';
 // metadatos
 export const metadata: Metadata = {
   title: "Tlaxcala En Imágenes | Entrar o registrarse",
@@ -29,7 +32,9 @@ export default function RootLayout({
       <body>
         <AuthProvider>
             <NotificacionesProvider>
-              {children}
+              <NuevosUsuariosProvider>
+                {children}
+              </NuevosUsuariosProvider>
             </NotificacionesProvider>
         </AuthProvider>
       </body>
