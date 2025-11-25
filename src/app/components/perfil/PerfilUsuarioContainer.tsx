@@ -8,7 +8,7 @@ import MenuPrincipal from "../../components/MenuPrincipal";
 import HeaderSuperior from "../../components/HeaderSuperior";
 import InformacionUsuarioPerfil from "../../components/perfil/InformacionUsuarioPerfil";
 import PublicacionesUsuarioGrid from "../../components/perfil/PublicacionesUsuarioGrid";
-import ImagenesMasVotadas from "../NuevosUsuariosRegistrados";
+import NuevosUsuariosRegistrados from "../NuevosUsuariosRegistrados";
 import Publicidad from "../../components/Publicidad";
 import FooterSugerencias from "../../components/FooterSugerencias";
 import { useUsuarioPerfil } from "@/app/hooks/useUsuarioPerfil";
@@ -93,7 +93,8 @@ export default function PerfilUsuarioContainer({ url }: UrlProps) {
           <div className="contenedor_sugerencias sticky-top p-3">
             <div className="contenedor_sugerencias_seguir mt-4">
               <div className="row d-flex justify-content-center contenedor_border_divs_sugerencias">
-                <ImagenesMasVotadas />
+                {/* Nuevos usuarios registrados */}
+                <NuevosUsuariosRegistrados />
               </div>
               <div className="row d-flex justify-content-center contenedor_border_divs_sugerencias">
                 <div className="col-8">
