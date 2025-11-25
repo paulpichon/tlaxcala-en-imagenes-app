@@ -1,53 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
-import { useAuth } from "@/context/AuthContext";
+// import FollowButton from "@/components/FollowButton";
+import { useNuevosUsuarios } from "@/context/NuevosUsuariosContext";
 import FollowButton from "./FollowButton";
-// import FollowButton from "@/components/FollowButton"; // 👈 importa tu botón real
-
-interface UsuarioNuevo {
-  nombre_completo: { nombre: string; apellido: string };
-  imagen_perfil: { secure_url: string };
-  url: string;
-  _id: string;
-  isFollowing: boolean;
-};
 
 export default function NuevosUsuariosRegistrados() {
-  const [usuarios, setUsuarios] = useState<UsuarioNuevo[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const { fetchWithAuth } = useAuth();
-
-  useEffect(() => {
-    const fetchUsuarios = async () => {
-      try {
-        const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/usuarios/registrados/nuevos-usuarios-registrados`
-        );
-
-        if (!res.ok) throw new Error("Error al cargar nuevos usuarios");
-
-        const data = await res.json();
-        setUsuarios(data.nuevosUsuariosRegistrados || []);
-      } catch (error) {
-        console.error("Error:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUsuarios();
-  }, [fetchWithAuth]);
-
-  const handleToggleFollow = (userId: string, newState: boolean) => {
-    setUsuarios((prev) =>
-      prev.map((u) =>
-        u._id === userId ? { ...u, isFollowing: newState } : u
-      )
-    );
-  };
+  const { usuarios, loading } = useNuevosUsuarios();
 
   return (
     <>
@@ -59,11 +18,7 @@ export default function NuevosUsuariosRegistrados() {
 
       <div className="d-flex flex-column gap-3">
         {usuarios.map((u) => (
-          <div
-            key={u._id}
-            className="d-flex align-items-center gap-3 p-2 user-card"
-          >
-            {/* Imagen */}
+          <div key={u._id} className="d-flex align-items-center gap-3 p-2 user-card">
             <a href={`/${u.url}`}>
               <Image
                 src={u.imagen_perfil.secure_url}
@@ -74,7 +29,6 @@ export default function NuevosUsuariosRegistrados() {
               />
             </a>
 
-            {/* Info */}
             <div className="flex-grow-1">
               <a href={`/${u.url}`} className="text-decoration-none text-dark">
                 <p className="mb-0 fw-bold">
@@ -84,12 +38,10 @@ export default function NuevosUsuariosRegistrados() {
               </a>
             </div>
 
-            {/* Botón seguir real */}
             <FollowButton
               userId={u._id}
               initialFollowing={u.isFollowing}
               className="btn-sidebar"
-              onToggle={(newState) => handleToggleFollow(u._id, newState)}
             />
           </div>
         ))}
