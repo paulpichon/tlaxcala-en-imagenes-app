@@ -475,8 +475,6 @@ li.nav-item{
   }
   /* contenedor_border_divs_sugerencias */
   div.contenedor_border_divs_sugerencias {
-    border: 1px solid rgb(127, 127, 127, 0.2);
-    border-radius: 16px;
     margin: 20px 5px;
     padding: 15px 5px;
   }
@@ -497,13 +495,7 @@ li.nav-item{
     font-weight: lighter;
   }
   /* Publicidad leyenda */
-  p.publicidad {
-    font-family: 'Open Sans', sans-serif;
-    margin: 5px 0;
-    font-size: .8rem;
-    font-weight: lighter;
-    letter-spacing: 1px;
-  }
+  
   /* 
   *
   enlaces footer sugerencias 
