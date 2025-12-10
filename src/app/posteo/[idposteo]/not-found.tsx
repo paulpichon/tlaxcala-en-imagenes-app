@@ -1,3 +1,4 @@
+// Componente que se muestra cuando un posteo no es encontrado, ya sea por error o porque fue eliminado
 "use client";
 
 import MenuPrincipal from "@/app/components/MenuPrincipal";
@@ -6,7 +7,7 @@ import ImagenesMasVotadas from "@/app/components/NuevosUsuariosRegistrados";
 import Publicidad from "@/app/components/Publicidad";
 import FooterSugerencias from "@/app/components/FooterSugerencias";
 
-export default function PerfilNotFound() {
+export default function PosteoNotFound() {
   return (
     <div className="contenedor_principal">
       <div className="row g-0">
