@@ -45,12 +45,21 @@ export default function Configuraciones() {
                 <li className="list-group-item p-0">
                   <Link 
                     className="d-flex align-items-center justify-content-between p-3 text-decoration-none text-dark"
-                    href="#"
+                    href="/configuracion/eliminar-cuenta"
+                  >
+                    <span>Eliminar cuenta</span>
+                    <span className="material-symbols-outlined text-secondary"><FiChevronRight size={18} /></span>
+                  </Link>
+                </li>
+                {/* <li className="list-group-item p-0">
+                  <Link 
+                    className="d-flex align-items-center justify-content-between p-3 text-decoration-none text-dark"
+                    href="/configuracion/privacidad-y-seguridad"
                   >
                     <span>Privacidad y seguridad</span>
                     <span className="material-symbols-outlined text-secondary"><FiChevronRight size={18} /></span>
                   </Link>
-                </li>
+                </li> */}
               </ul>
             </div>
 
