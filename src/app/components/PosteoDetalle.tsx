@@ -8,7 +8,7 @@ import { PosteoDetalleResponse, Posteo } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 import Spinner from "./spinner";
 import PosteoCard from "./PosteoCard";
-
+import { notFound } from "next/navigation"; // 👈 importamos para usar la página not-found.tsx
 export default function PosteoDetalle() {
   const params = useParams() as { idposteo?: string } | null;
   const id = params?.idposteo ?? "";
@@ -63,7 +63,8 @@ export default function PosteoDetalle() {
   }, [fetchPost, fetchWithAuth]);
 
   if (loading) return <div className="d-flex justify-content-center align-items-center vh-100"><Spinner /></div>
-  if (error) return <p className="text-center text-danger mt-5">{error}</p>;
+  // 👇 Si hubo error de fetch o no existe usuario, mostramos la página not-found
+  if (error) return notFound();
   if (!post) return <p className="text-center mt-5">Publicación no encontrada.</p>;
 
   return (
