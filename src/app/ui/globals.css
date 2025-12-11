@@ -178,6 +178,32 @@ a.postear {
   FIN LINK ACTIVO PARA EL DROPDOWN
 */
 
+/* Estilos par ael boton de obtener ubicacion automaticamente */
+.iconLocationBtn {
+  background: #EBCA9A;
+  border: none;
+  padding: 6px 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconLocationBtn:hover {
+  background: #e3e3e3;
+}
+
+.iconLocationBtn:active {
+  background: #d6d6d6;
+}
+
+.iconLocationBtn svg {
+  color: #555;
+}
+/* Fin Estilos par ael boton de obtener ubicacion automaticamente */
+
 
 /*
 *
