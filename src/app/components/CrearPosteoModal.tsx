@@ -1,12 +1,13 @@
 'use client';
 
 import Image from "next/image";
-import { FiCamera, FiImage } from "react-icons/fi";
+import { FiCamera, FiImage, FiMapPin  } from "react-icons/fi";
 import { useCrearPosteo } from "../hooks/useCrearPosteo";
 import posteo from "../ui/posteos/CrearPosteoModal.module.css";
 import ToastGlobal from "./ToastGlobal";
 import { useEffect, useState } from "react";
 import { CrearPosteoModalProps } from "@/types/types";
+import ManualMunicipioSelector from "./ManualMunicipioSelector";
 
 export default function CrearPosteoModal({ show, onClose, onPostCreated }: CrearPosteoModalProps) {
   const [toastMessage, setToastMessage] = useState("");
@@ -28,7 +29,21 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
     processFile,
     handleSubmit,
     resetForm,
-  } = useCrearPosteo(onPostCreated, handleSuccess);  
+  
+    // 🌍 ubicación
+    obtenerUbicacion,
+    municipio,
+    ciudad,
+    estado,
+    pais,
+    setMunicipio,
+    setCiudad,
+    setEstado,
+    setPais,
+    loadingUbicacion,
+    ubicacionError,
+  } = useCrearPosteo(onPostCreated, handleSuccess);
+  ;  
 
   // ✅ Se ejecuta solo cuando el posteo se crea correctamente
   function handleSuccess() {
@@ -96,8 +111,8 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                 <button type="button" className="btn-close" onClick={handleClose}></button>
               </div>
 
-              <div className="modal-body text-center">
-                {!preview ? (
+                <div className="modal-body text-center">
+                  {!preview ? (
                   <>
                     <label
                       htmlFor="imageInput"
@@ -164,26 +179,77 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                 ) : (
                   <>
                     {/* Imagen seleccionada */}
-                    <div className="position-relative d-inline-block mb-3">
+                    <div className="position-relative d-inline-block mb-4">
                       <Image
                         src={preview}
                         alt="preview"
-                        width={300}
-                        height={300}
-                        className="img-fluid rounded"
+                        width={320}
+                        height={320}
+                        className="img-fluid rounded shadow-sm"
                       />
                       <button
                         type="button"
                         className="btn btn-sm btn-light position-absolute top-0 end-0 m-2 rounded-circle shadow"
-                        style={{ opacity: 0.8 }}
+                        style={{ opacity: 0.85 }}
                         onClick={handleRemoveImage}
                       >
                         ✕
                       </button>
                     </div>
 
-                    {/* Descripción */}
-                    <div className="mb-2">
+                    {/* ========================== */}
+                    {/* 📍 SECCIÓN: UBICACIÓN      */}
+                    {/* ========================== */}
+
+                    <div className="mt-4 border rounded p-3 mb-3 bg-light">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <h6 className="fw-bold mb-0">📍 Ubicación</h6>
+
+                      {/* Ícono de obtener ubicación */}
+                      {!ciudad && !loadingUbicacion && (
+                        <button
+                          onClick={obtenerUbicacion}
+                          className="iconLocationBtn"
+                          title="Detectar ubicación"
+                        >
+                          <FiMapPin size={20} />
+                        </button>
+                      )}
+                    </div>
+
+                    {loadingUbicacion && <p className="small text-muted">Obteniendo ubicación…</p>}
+
+                    {ciudad && (
+                      <div className="alert alert-success py-2 px-3">
+                        <strong>{ciudad}</strong>, {estado}, {pais}
+                        <div className="small text-muted">Seleccionado automáticamente</div>
+                      </div>
+                    )}
+
+                    {ubicacionError && (
+                      <div className="alert alert-warning py-2 px-3">
+                        No se pudo detectar la ubicación automática
+                      </div>
+                    )}
+                       {/* Selector manual */}
+                      <ManualMunicipioSelector
+                        municipio={municipio}
+                        onSelect={(id, data) => {
+                          setMunicipio(id);
+                          setCiudad(data.ciudad);
+                          setEstado(data.estado);
+                          setPais(data.pais);
+                        }}
+                      />
+                    </div>
+
+                    {/* ========================== */}
+                    {/* 📝 SECCIÓN: DESCRIPCIÓN    */}
+                    {/* ========================== */}
+
+                    <div className="border rounded p-3 mb-3 bg-light">
+                      <h6 className="fw-bold mb-2">📝 Descripción</h6>
+
                       <textarea
                         className="form-control"
                         rows={3}
@@ -192,53 +258,45 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                         onChange={(e) => setTexto(e.target.value)}
                         maxLength={200}
                       />
-                      <div className="text-end small text-muted">
+
+                      <div className="text-end small text-muted mt-1">
                         {texto.length}/200
                       </div>
                     </div>
 
-                    {/* Privacidad */}
-                    <div className="d-flex justify-content-around mt-3">
-                      <div className="form-check">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          name="privacidad"
-                          id="publicoRadio"
-                          checked={posteoPublico}
-                          onChange={() => setPosteoPublico(true)}
-                        />
-                        <label className="form-check-label" htmlFor="publicoRadio">
-                          Público
-                        </label>
-                      </div>
-                      <div className="form-check">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          name="privacidad"
-                          id="privadoRadio"
-                          checked={!posteoPublico}
-                          onChange={() => setPosteoPublico(false)}
-                        />
-                        <label className="form-check-label" htmlFor="privadoRadio">
-                          Solo yo
-                        </label>
-                      </div>
-                    </div>
+                    {/* ========================== */}
+                    {/* 🔐 SECCIÓN: PRIVACIDAD     */}
+                    {/* ========================== */}
 
-                    <div className="mt-2 text-muted small text-start">
-                      {posteoPublico ? (
-                        <p>
-                          🔓 <strong>Público:</strong> aparecerá en el inicio de todos los usuarios y en tu perfil.
-                        </p>
-                      ) : (
-                        <p>
-                          🔒 <strong>Solo yo:</strong> no se mostrará en el inicio de los demás, solo en tu perfil.
-                        </p>
-                      )}
+                    <div className="border rounded p-3 mb-3 bg-light">
+                      <h6 className="fw-bold mb-3">🔐 Privacidad</h6>
+
+                      <div className="d-flex gap-3">
+                        {/* Público */}
+                        <div
+                          className={`p-3 rounded border flex-fill btn ${
+                            posteoPublico ? "border-primary bg-white shadow-sm" : "bg-light"
+                          }`}
+                          onClick={() => setPosteoPublico(true)}
+                        >
+                          <div className="fw-bold">Público</div>
+                          <small className="text-muted">Aparecerá en el inicio de todos los usuarios y en tu perfil.</small>
+                        </div>
+
+                        {/* Privado */}
+                        <div
+                          className={`p-3 rounded border flex-fill btn ${
+                            !posteoPublico ? "border-primary bg-white shadow-sm" : "bg-light"
+                          }`}
+                          onClick={() => setPosteoPublico(false)}
+                        >
+                          <div className="fw-bold">Solo yo</div>
+                          <small className="text-muted">No se mostrará en el inicio de los demás, solo en tu perfil.</small>
+                        </div>
+                      </div>
                     </div>
                   </>
+
                 )}
 
                 {/* Errores */}
