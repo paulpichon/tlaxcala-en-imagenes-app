@@ -222,9 +222,20 @@ export interface CambiarImagenModalProps {
 }
 // Municipios
 export interface Municipio {
-  claveMunicipio: string;
+  _id: string;
+  claveEntidad: number;
+  nombreEntidad: string;
+  claveMunicipio: number;
   nombreMunicipio: string;
+  codigoPostal: string;
 }
+// Datos de ubicación cuando se selecciona un municipio manualmente
+export interface DatosUbicacion {
+  ciudad: string | null; // nombre de la ciudad o municipio
+  estado: string | null; // nombre de la entidad federativa
+  pais: string | null; // nombre del país
+}
+
 // FormData para Editar Perfil
 export interface FormDataEditarPerfil {
   nombre: string;
