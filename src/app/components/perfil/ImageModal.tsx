@@ -63,6 +63,15 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
       console.error("Error al cargar likes:", err);
     }
   };
+  // Mostrar la ubicación formateada
+  const obtenerTextoUbicacion = () => {
+    if (!selectedImage?.ubicacion) return null;
+  
+    const { ciudad, estado, pais } = selectedImage.ubicacion;
+  
+    return [ciudad, estado, pais].filter(Boolean).join(", ");
+  };
+  
 
   return (
     <AnimatePresence>
@@ -114,6 +123,14 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
                   {selectedImage._idUsuario.nombre_completo.nombre}{" "}
                   {selectedImage._idUsuario.nombre_completo.apellido}
                 </span>
+                {/* Mostrar la ubicacion, si viene en el posteo */}
+                {obtenerTextoUbicacion() && (
+                <span className="text-muted small d-flex align-items-center ms-2">
+                  <span className="me-1">📍</span>
+                  {obtenerTextoUbicacion()}
+                </span>
+              )}
+
               </div>
               <button
                 type="button"
@@ -177,10 +194,22 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
                         className="rounded-circle object-cover"
                       />
                     </div>
-                    <span className="fw-bold">
-                      {selectedImage._idUsuario.nombre_completo.nombre}{" "}
-                      {selectedImage._idUsuario.nombre_completo.apellido}
-                    </span>
+                    <div className="d-flex flex-column">
+                      <span className="fw-bold">
+                        {selectedImage._idUsuario.nombre_completo.nombre}{" "}
+                        {selectedImage._idUsuario.nombre_completo.apellido}
+                      </span>
+                      {/*  */}
+                      {obtenerTextoUbicacion() && (
+                        <span className="text-muted small d-flex align-items-center">
+                          <span className="me-1">📍</span>
+                          {obtenerTextoUbicacion()}
+                        </span>
+                      )}
+                    </div>
+
+                    
+
                   </div>
 
                   <button
