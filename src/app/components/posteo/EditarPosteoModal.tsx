@@ -1,12 +1,15 @@
 // Funcion para editar un posteo
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import ToastGlobal from "../ToastGlobal";
 import { editarPosteoSchema } from "@/lib/validaciones";
 import { AnimatePresence, motion } from "framer-motion";
 import { EditarPosteoModalProps } from "@/types/types";
+import { FiMapPin } from "react-icons/fi";
+import { useObtenerUbicacion } from "@/app/hooks/useObtenerUbicacion";
+import ManualMunicipioSelector from "../ManualMunicipioSelector";
 
 export default function EditarPosteoModal({
   isOpen,
@@ -18,13 +21,44 @@ export default function EditarPosteoModal({
   const [texto, setTexto] = useState(posteo?.texto || "");
   const [loading, setLoading] = useState(false);
 
+  // 📍 Hook reutilizable
+  const {
+    obtenerUbicacion,
+    loadingUbicacion,
+    ubicacionError,
+
+    municipioId,
+    ciudad,
+    estado,
+    pais,
+    setMunicipioId,
+    setCiudad,
+    setEstado,
+    setPais,
+  } = useObtenerUbicacion();
+
   const [toast, setToast] = useState<{
     message: string;
     type?: "success" | "danger" | "creacion";
   } | null>(null);
 
-  if (!isOpen || !posteo) return null;
+  // -------------------------
+  // CARGAR UBICACIÓN INICIAL
+  // -------------------------
+  useEffect(() => {
+    if (posteo?.ubicacion) {
+      setMunicipioId(posteo.ubicacion.municipio || null);
+      setCiudad(posteo.ubicacion.ciudad || null);
+      setEstado(posteo.ubicacion.estado || null);
+      setPais(posteo.ubicacion.pais || null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [posteo]);
 
+  // Este return evita errores cuando el modal está cerrado o no hay posteo
+  // Debe ejecutarse después del useEffect de arriba
+  if (!isOpen || !posteo) return null;
+  
   // -------------------------
   // VALIDACIÓN ZOD
   // -------------------------
@@ -41,7 +75,17 @@ export default function EditarPosteoModal({
   };
 
   // -------------------------
-  // GUARDAR CAMBIOS
+  // 📍 QUITAR UBICACIÓN
+  // -------------------------
+  const eliminarUbicacion = () => {
+    setMunicipioId(null);
+    setCiudad(null);
+    setEstado(null);
+    setPais(null);
+  };
+
+  // -------------------------
+  // GUARDAR CAMBIOS (PUT)
   // -------------------------
   const handleGuardar = async () => {
     if (!validarTexto()) return;
@@ -54,7 +98,19 @@ export default function EditarPosteoModal({
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ texto }),
+          body: JSON.stringify({
+            texto,
+            // Si hay municipio → enviamos ubicación completa
+            // Si no → enviar null para eliminarla
+            ubicacion: municipioId
+              ? {
+                  municipio: municipioId,
+                  ciudad,
+                  estado,
+                  pais,
+                }
+              : null,
+          }),
         }
       );
 
@@ -87,7 +143,6 @@ export default function EditarPosteoModal({
   // CONTADOR DE CARACTERES
   // -------------------------
   const maxChars = 200;
-//   const charsLeft = maxChars - texto.length;
 
   return (
     <>
@@ -100,8 +155,7 @@ export default function EditarPosteoModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-
-            {/* Modal interno */}
+            {/* MODAL */}
             <motion.div
               className="bg-white rounded-4 p-4 shadow-lg"
               style={{ maxWidth: 420, width: "90%" }}
@@ -111,9 +165,72 @@ export default function EditarPosteoModal({
             >
               <h5 className="mb-3 text-center">Editar publicación</h5>
 
-              {/* TEXTAREA */}
+              {/* ====================== */}
+              {/* 📍 SECCIÓN UBICACIÓN   */}
+              {/* ====================== */}
+
+              <div className="mt-1 border rounded p-3 bg-light">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <h6 className="fw-bold mb-0">📍 Ubicación</h6>
+
+                  {!ciudad && !loadingUbicacion && (
+                    <button
+                      onClick={obtenerUbicacion}
+                      className="iconLocationBtn"
+                      title="Detectar ubicación automáticamente"
+                    >
+                      <FiMapPin size={20} />
+                    </button>
+                  )}
+
+                  {(ciudad || municipioId) && (
+                    <button
+                      onClick={eliminarUbicacion}
+                      className="btn btn-sm btn-outline-danger"
+                    >
+                      Quitar
+                    </button>
+                  )}
+                </div>
+
+                {loadingUbicacion && (
+                  <p className="small text-muted">Obteniendo ubicación…</p>
+                )}
+
+                {ciudad && (
+                  <div className="alert alert-success py-2 px-3">
+                    <strong>{ciudad}</strong>, {estado}, {pais}
+                    <div className="small text-muted">
+                      {posteo.ubicacion
+                        ? "Ubicación editada"
+                        : "Detectada automáticamente"}
+                    </div>
+                  </div>
+                )}
+
+                {ubicacionError && (
+                  <div className="alert alert-warning py-2 px-3">
+                    No se pudo detectar la ubicación automáticamente
+                  </div>
+                )}
+
+                <ManualMunicipioSelector
+                  municipio={municipioId}
+                  onSelect={(id, data) => {
+                    setMunicipioId(id);
+                    setCiudad(data.ciudad);
+                    setEstado(data.estado);
+                    setPais(data.pais);
+                  }}
+                />
+              </div>
+
+              {/* ====================== */}
+              {/* 📝 TEXTO               */}
+              {/* ====================== */}
+
               <textarea
-                className="form-control mb-2"
+                className="form-control mt-3"
                 rows={4}
                 maxLength={maxChars}
                 value={texto}
@@ -121,7 +238,6 @@ export default function EditarPosteoModal({
                 placeholder="Escribe algo..."
               />
 
-              {/* CONTADOR */}
               <div className="text-end small mb-3">
                 {texto.length}/{maxChars}
               </div>
