@@ -4,6 +4,7 @@ import { posteoSchema, posteoBaseSchema } from "@/lib/validaciones";
 import { ZodError } from "zod";
 import { useAuth } from "@/context/AuthContext";
 import { Posteo } from "@/types/types";
+import { useObtenerUbicacion } from "./useObtenerUbicacion";
 
 export function useCrearPosteo(
   onPostCreated?: (newPost?: Posteo) => void,
@@ -24,18 +25,6 @@ export function useCrearPosteo(
   const [showConfirmDiscard, setShowConfirmDiscard] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [isMobile, setIsMobile] = useState(false);
-
-  /*
-  ─────────────────────────────────────
-  🌍 UBICACIÓN
-  ─────────────────────────────────────
-  */
-  const [municipio, setMunicipio] = useState<string | null>(null);
-  const [ciudad, setCiudad] = useState<string | null>(null);
-  const [estado, setEstado] = useState<string | null>(null);
-  const [pais, setPais] = useState<string | null>(null);
-  const [loadingUbicacion, setLoadingUbicacion] = useState(false);
-  const [ubicacionError, setUbicacionError] = useState<string | null>(null);
 
   /*
   ─────────────────────────────────────
@@ -68,11 +57,10 @@ export function useCrearPosteo(
     setErrors([]);
 
     // Reset ubicación
-    setMunicipio(null);
+    setMunicipioId(null);
     setCiudad(null);
     setEstado(null);
     setPais(null);
-    setUbicacionError(null);
   };
 
   /*
@@ -106,56 +94,24 @@ export function useCrearPosteo(
 
   /*
   ─────────────────────────────────────
-  🌍 OBTENER UBICACIÓN AUTOMÁTICAMENTE
+  🌍 OBTENER UBICACIÓN
   ─────────────────────────────────────
   */
-  const obtenerUbicacion = async () => {
-    try {
-      setLoadingUbicacion(true);
-      setUbicacionError(null);
-
-      const coords = await new Promise<GeolocationCoordinates>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => resolve(pos.coords),
-          (err) => reject(err),
-          {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0,
-          }
-        );
-      });
-
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/ubicacion/reverse`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            lat: coords.latitude,
-            lng: coords.longitude,
-          }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || data.msg || "Error al obtener ubicación");
-      }
-
-      // Ajustado a lo que realmente envía tu backend
-      setCiudad(data.municipio?.nombreMunicipio || null);
-      setEstado(data.municipio?.nombreEntidad || null);
-      setPais(data.pais || null);
-      setMunicipio(data.municipio?._id || null);
-    } catch (e) {
-      console.error(e);
-      setUbicacionError("No se pudo obtener ubicación automáticamente");
-    } finally {
-      setLoadingUbicacion(false);
-    }
-  };
+  const {
+    obtenerUbicacion,
+    loadingUbicacion,
+    ubicacionError,
+    municipioId,
+    ciudad,
+    estado,
+    pais,
+    setMunicipioId,
+    setCiudad,
+    setEstado,
+    setPais,
+  } = useObtenerUbicacion();
+  
+  
 
   /*
   ─────────────────────────────────────
@@ -178,7 +134,7 @@ export function useCrearPosteo(
       formData.append("posteo_publico", String(posteoPublico));
 
       // Ubicación opcional
-      if (municipio) formData.append("municipio", municipio);
+      if (municipioId) formData.append("municipio", municipioId);
       if (ciudad) formData.append("ciudad", ciudad);
       if (estado) formData.append("estado", estado);
       if (pais) formData.append("pais", pais);
@@ -234,11 +190,11 @@ export function useCrearPosteo(
 
     // ubicación
     obtenerUbicacion,
-    municipio,
+    municipioId,
     ciudad,
     estado,
     pais,
-    setMunicipio,
+    setMunicipioId,
     setCiudad,
     setEstado,
     setPais,
