@@ -32,10 +32,16 @@ export interface APIResponse {
     data?: APIResponseData;
     token?: string;
   }
+// Interface para el posteo 
 export interface Posteo {
   _idUsuario: UsuarioLogueado;
   public_id: string;
   texto: string;
+  ubicacion?: { // ubicacion opcional
+    ciudad?: string;
+    estado?: string;
+    pais?: string;
+  }
   secure_url: string;
   posteo_publico: boolean;
   fecha_creacion: string;

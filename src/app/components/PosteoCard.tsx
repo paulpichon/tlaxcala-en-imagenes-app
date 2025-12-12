@@ -46,6 +46,17 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
   const openOptions = () => setIsOptionsOpen(true);
   const closeOptions = () => setIsOptionsOpen(false);
 
+  //! AGREGADO
+  const obtenerTextoUbicacion = () => {
+    if (!post.ubicacion) return null;
+  
+    const { ciudad, estado, pais } = post.ubicacion;
+  
+    // Puedes ajustar el orden como más te guste
+    return [ciudad, estado, pais].filter(Boolean).join(", ");
+  };
+  //! FIN AGREGADO
+
   // 🚀 Callback cuando el post fue eliminado
   const handlePostDeleted = () => {
     closeOptions();
@@ -83,15 +94,28 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
               className="rounded-circle me-2 border"
             />
           </Link>
-          <strong>
+
+          <div className="d-flex flex-column">
+
+            {/* Nombre del usuario */}
             <Link
-              className="link_perfil_usuario text-dark text-decoration-none"
+              className="link_perfil_usuario text-dark text-decoration-none fw-bold"
               href={`/${post._idUsuario.url}`}
             >
               {post._idUsuario.nombre_completo.nombre}{" "}
               {post._idUsuario.nombre_completo.apellido}
             </Link>
-          </strong>
+
+            {/* 📍 Mostrar ubicación si existe */}
+            {obtenerTextoUbicacion() && (
+              <span className="text-muted small d-flex align-items-center">
+                <span className="me-1">📍</span>
+                {obtenerTextoUbicacion()}
+              </span>
+            )}
+
+          </div>
+
           <button
             type="button"
             className="btn btn-sm ms-auto"
@@ -101,6 +125,7 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
             <FiMoreHorizontal size={18} />
           </button>
         </div>
+
 
         {/* Imagen del post */}
         <div
