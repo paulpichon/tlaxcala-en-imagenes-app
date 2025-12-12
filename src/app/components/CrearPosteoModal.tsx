@@ -32,11 +32,11 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
   
     // 🌍 ubicación
     obtenerUbicacion,
-    municipio,
+    municipioId,
     ciudad,
     estado,
     pais,
-    setMunicipio,
+    setMunicipioId,
     setCiudad,
     setEstado,
     setPais,
@@ -53,6 +53,15 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
     // Cerramos el modal primero
     onClose();
   }
+  // -------------------------
+  // 📍 QUITAR UBICACIÓN
+  // -------------------------
+  const eliminarUbicacion = () => {
+    setMunicipioId(null);
+    setCiudad(null);
+    setEstado(null);
+    setPais(null);
+  };
 
   // Mantener visible el toast por unos segundos
   useEffect(() => {
@@ -215,6 +224,15 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                           <FiMapPin size={20} />
                         </button>
                       )}
+
+                      {(ciudad || municipioId) && (
+                        <button
+                          onClick={eliminarUbicacion}
+                          className="btn btn-sm btn-outline-danger"
+                        >
+                          Quitar
+                        </button>
+                      )}
                     </div>
 
                     {loadingUbicacion && <p className="small text-muted">Obteniendo ubicación…</p>}
@@ -233,9 +251,9 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                     )}
                        {/* Selector manual */}
                       <ManualMunicipioSelector
-                        municipio={municipio}
+                        municipio={municipioId}
                         onSelect={(id, data) => {
-                          setMunicipio(id);
+                          setMunicipioId(id);
                           setCiudad(data.ciudad);
                           setEstado(data.estado);
                           setPais(data.pais);
