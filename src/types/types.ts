@@ -304,6 +304,12 @@ export interface EditarPosteoModalProps {
   posteo: {
     _id: string;
     texto?: string;
+    ubicacion?: { // ubicacion opcional
+      municipio?: string;
+      ciudad?: string;
+      estado?: string;
+      pais?: string;
+    }
   } | null;
   onClose: (updated: boolean, newText?: string) => void;
 }
