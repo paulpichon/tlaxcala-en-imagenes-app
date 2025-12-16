@@ -38,16 +38,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# carpetas public/public/publicaciones/
-# public/publicidad/
-# public/usuarios/
-# public/imagenes_votadas/
-
-public/publicaciones/
-public/publicidad/
-public/usuarios/
-public/imagenes_votadas/
-
-# carpeta de pruebas
-modales/
