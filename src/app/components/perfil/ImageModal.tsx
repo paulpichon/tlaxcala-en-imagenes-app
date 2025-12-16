@@ -114,7 +114,7 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
                   // Se verifica si la imagen viene por default o si el usuario ya ha subido alguna imagen de perfil, despues llama a getCloudinaryUrl para obtener la URL optimizada
                   // obtenerImagenPerfilUsuario(usuarioLogueado, preset)
                   src={obtenerImagenPerfilUsuario(selectedImage._idUsuario, "mini")}
-                  alt={selectedImage.texto}
+                  alt={`Imagen de perfil de @${selectedImage._idUsuario.url}`}
                   width={40}
                   height={40}
                   className="rounded-circle me-2 border"
@@ -162,7 +162,7 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
             >
               <Image
                 src={postImageUrl}
-                alt={selectedImage.texto}
+                alt={`Posteo de @${selectedImage._idUsuario.url}, texto: ${selectedImage.texto || "Imagen del post"}`}
                 fill
                 priority
                 sizes="(max-width: 768px) 100vw, 60vw"

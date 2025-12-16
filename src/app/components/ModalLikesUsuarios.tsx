@@ -66,7 +66,7 @@ export default function ModalLikesUsuarios({
                             // obtenerImagenPerfilUsuario(usuarioLogueado, preset)
                             obtenerImagenPerfilUsuario(like._idUsuario, "mini")
                           }
-                          alt={`${like._idUsuario.nombre_completo.nombre}`}
+                          alt={`Imagen de perfil de @${like._idUsuario.url}`}
                           width={40}
                           height={40}
                           className="rounded-circle me-3"

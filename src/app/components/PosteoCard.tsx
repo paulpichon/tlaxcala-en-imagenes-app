@@ -88,7 +88,7 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
           <Link href={`/${post._idUsuario.url}`}>
             <Image
               src={obtenerImagenPerfilUsuario(post._idUsuario, "perfil")}
-              alt={post.texto}
+              alt={`Foto de perfil de @${post._idUsuario.url}`}
               width={40}
               height={40}
               className="rounded-circle me-2 border"
@@ -146,7 +146,7 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
         >
           <Image
             src={postImageUrl}
-            alt={post.texto}
+            alt={`Fotografía por @${post._idUsuario.url}, texto: ${post.texto || "Imagen del post"}`  }
             fill={!isDetail}
             width={isDetail ? 1080 : undefined}
             height={isDetail ? 1080 : undefined}

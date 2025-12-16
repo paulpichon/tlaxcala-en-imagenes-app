@@ -1,13 +1,15 @@
+// Publicidad
 "use client";
 
 import Image from "next/image";
 import { usePublicidad } from "@/context/PublicidadContext";
+import Link from "next/link";
 
 export default function Publicidad() {
   const { anuncioActual, pausar, reanudar } = usePublicidad();
 
   return (
-    <a
+    <Link
       href={anuncioActual.url}
       target="_blank"
       className="text-decoration-none"
@@ -30,6 +32,7 @@ export default function Publicidad() {
           fill
           priority
           style={{ objectFit: "cover" }}
+          sizes="(max-width: 768px) 100vw, 300px"
         />
 
         <span
@@ -65,6 +68,6 @@ export default function Publicidad() {
           </button> */}
         </div>
       </div>
-    </a>
+    </ Link>
   );
 }

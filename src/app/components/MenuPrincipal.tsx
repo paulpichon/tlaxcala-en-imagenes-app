@@ -112,7 +112,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
               <Image
                 key={user?.imagen_perfil?.secure_url || "default"}
                 src={obtenerImagenPerfilUsuario(user, "mini")}
-                alt={user?.nombre_completo?.nombre || "Usuario"}
+                alt={`${user?.nombre_completo?.nombre} ${user?.nombre_completo?.apellido} `}
                 width={100}
                 height={100}
                 className={`rounded-circle icono_menu ${isPerfilActivo ? "perfil-activo" : ""}`}

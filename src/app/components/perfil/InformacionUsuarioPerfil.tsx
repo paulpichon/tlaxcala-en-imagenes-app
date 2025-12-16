@@ -83,7 +83,7 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
                 width={150}
                 height={150}
                 className={`rounded-circle object-cover`}
-                alt={usuario.nombre_completo.nombre}
+                alt={`Imagen de perfil de @${usuario.url}`}
               />
 
               {isOwnProfile && hover && (
