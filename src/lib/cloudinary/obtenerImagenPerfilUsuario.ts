@@ -10,7 +10,8 @@ import { getCloudinaryUrl } from "./getCloudinaryUrl";
 export const obtenerImagenPerfilUsuario = (user: UsuarioLogueado, preset: CloudinaryPreset) => {
 
     // ✅ Imagen por defecto para usuarios sin imagen de perfil
-    const DEFAULT_PROFILE_IMAGE = "https://res.cloudinary.com/dy9prn3ue/image/upload/v1750995280/tlx-imagenes/assets/no-imagen-usuario_koriq0.webp";
+    const DEFAULT_PROFILE_IMAGE = `${process.env.NEXT_PUBLIC_IMAGEN_PERFIL_DEFAULT}`;
+    
     // ✅ Determinamos la imagen de perfil (si existe: public_id)
     const userProfileImage = user?.imagen_perfil?.public_id
       // Si viene public_id quiere decir que tiene imagen de perfil, entonces obtener la URL optimizada 
