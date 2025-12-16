@@ -20,8 +20,8 @@ export const viewport: Viewport = {
 }
 // metadatos
 export const metadata: Metadata = {
-    title: "Tlaxcala En Imágenes | Crear cuenta",
-    description: "El lugar donde encuentras gente de Tlaxcala",
+    title: "TlaxApp | Entrar o registrarse",
+    description: "Tlaxcala, en una sola app.",
   };
 
 export default function RootLayout({

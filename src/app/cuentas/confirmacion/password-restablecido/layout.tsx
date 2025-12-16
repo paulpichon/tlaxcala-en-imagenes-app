@@ -8,7 +8,7 @@ import { Metadata } from "next";
 import "../../../ui/fonts";
 // metadatos
 export const metadata: Metadata = {
-		title: "Contraseña restablecida | Tlaxcala En Imágenes",
+		title: "TlaxApp | Contraseña restablecida",
 		description: "Contraseña restablecido por el usuario.",
 };
 

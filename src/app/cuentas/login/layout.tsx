@@ -11,8 +11,8 @@ import type { Viewport } from 'next';
 import AlreadyAuthRedirect from "@/components/AlreadyAuthRedirect";
 // metadatos
 export const metadata: Metadata = {
-    title: "Tlaxcala En Imágenes | Iniciar sesión",
-    description: "El lugar donde encuentras gente de Tlaxcala",
+    title: "TlaxApp | Iniciar sesión",
+    description: "Tlaxcala, en una sola app",
 };
 export const viewport: Viewport = {
   width: 'device-width',

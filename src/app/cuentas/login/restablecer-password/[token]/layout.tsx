@@ -11,7 +11,7 @@ import type { Viewport } from 'next';
 
 // metadatos
 export const metadata: Metadata = {
-    title: "Tlaxcala En Imágenes | Restablecer contraseña",
+    title: "TlaxApp | Restablecer contraseña",
     description: "Restablecer la contraseña, introducir nueva contraseña.",
 };
 // Viewport

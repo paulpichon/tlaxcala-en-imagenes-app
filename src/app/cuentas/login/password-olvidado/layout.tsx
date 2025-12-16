@@ -18,8 +18,8 @@ export const viewport: Viewport = {
 }
 // metadatos
 export const metadata: Metadata = {
-    title: "Tlaxcala En Imágenes | Olvidé la contraseña",
-    description: "El lugar donde encuentras gente de Tlaxcala",
+    title: "TlaxApp | Olvidé la contraseña",
+    description: "Password olvidado, recuperar contraseña de usuario.",
   };
 
 export default function RootLayout({

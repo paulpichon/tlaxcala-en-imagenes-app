@@ -15,8 +15,8 @@ import { NuevosUsuariosProvider } from '@/context/NuevosUsuariosContext';
 import { PublicidadProvider } from '@/context/PublicidadContext';
 // metadatos
 export const metadata: Metadata = {
-  title: "Tlaxcala En Imágenes | Entrar o registrarse",
-  description: "El lugar donde encuentras gente de Tlaxcala",
+  title: "TlaxApp | Entrar o registrarse",
+  description: "Tlaxcala, en una sola app.",
 };
 
 export default function RootLayout({

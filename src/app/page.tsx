@@ -28,8 +28,8 @@ export default function Home() {
 				<div className={`row d-flex align-items-center ${home.contenedor_principal}`}>
 					<div className="col-md-5">
 						<div className="contenedor_tei_index">
-							<h1 className="titulo_principal_h1">TLAXCALA EN <span className="d-block">IMÁGENES</span></h1>
-							<h6 className="subtitulo_h6">por <span className="span_tad d-block">T A D</span></h6>
+							<h1 className="titulo_principal_h1">TLAXAPP</h1>
+							<h6 className="subtitulo_h6">Tlaxcala, en una sola app.</h6>
 						</div>
 					</div>
 					<div className="col-md-7">

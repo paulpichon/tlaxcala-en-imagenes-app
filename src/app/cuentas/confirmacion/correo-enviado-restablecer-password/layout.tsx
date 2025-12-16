@@ -7,7 +7,7 @@ import { Metadata } from "next";
 import "../../../ui/fonts";
 // metadatos
 export const metadata: Metadata = {
-    title: "Correo enviado para restablecer contraseña | Tlaxcala En Imágenes",
+    title: "TlaxApp | Correo enviado para restablecer contraseña",
     description: "Correo enviado para restablecer la contraseña de usuario.",
   };
 

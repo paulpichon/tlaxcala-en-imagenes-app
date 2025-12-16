@@ -5,14 +5,8 @@ export default function HeaderSuperior() {
         <>
             <nav className="navbar-expand-lg menu_superior_central">
                 <h1 className="titulo_header_superior_app">
-                    TLAXCALA EN 
-                    <span className="display_inline_titulo"> IMÁGENES</span>
+                    TLAXAPP
                 </h1>
-                <h6 className="mostrar_h6_por">por 
-                    <span className="span_tad_header_app d-block" data-bs-toggle="tooltip" data-bs-placement="right" title="Tlaxcala Al Descubierto">
-                        T A D
-                    </span>
-                </h6>
             </nav>
         </>
     );
