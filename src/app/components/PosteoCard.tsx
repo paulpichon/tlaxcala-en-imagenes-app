@@ -28,10 +28,13 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
   const [likesUsuarios, setLikesUsuarios] = useState<LikeUsuario[]>([]);
   const [loaded, setLoaded] = useState(false);
 
+  // ✅ Estado local para el posteo (se actualiza cuando se edita)
+  const [posteoActual, setPosteoActual] = useState<Posteo>(post);
+
   const openLikesModal = async () => {
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/likes/${post._id}/likes/usuarios`
+        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/likes/${posteoActual._id}/likes/usuarios`
       );
       if (!res.ok) return;
       const data = await res.json();
@@ -46,33 +49,35 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
   const openOptions = () => setIsOptionsOpen(true);
   const closeOptions = () => setIsOptionsOpen(false);
 
-  //! AGREGADO
   const obtenerTextoUbicacion = () => {
-    if (!post.ubicacion) return null;
+    if (!posteoActual.ubicacion) return null;
   
-    const { ciudad, estado, pais } = post.ubicacion;
+    const { ciudad, estado, pais } = posteoActual.ubicacion;
   
-    // Puedes ajustar el orden como más te guste
     return [ciudad, estado, pais].filter(Boolean).join(", ");
   };
-  //! FIN AGREGADO
 
   // 🚀 Callback cuando el post fue eliminado
   const handlePostDeleted = () => {
     closeOptions();
     if (isDetail && user) {
-      router.push(`/${user.url}`); // 🔄 redirige al perfil del usuario logueado
+      router.push(`/${user.url}`);
     }
+  };
+
+  // ✅ Callback cuando el post fue actualizado
+  const handlePostUpdated = (posteoEditado: Posteo) => {
+    setPosteoActual(posteoEditado);
   };
 
   const fechaFormateada = new Intl.DateTimeFormat("es-MX", {
     day: "numeric",
     month: "short",
     year: "numeric",
-  }).format(new Date(post.fecha_creacion));
+  }).format(new Date(posteoActual.fecha_creacion));
 
   const postImageUrl = getCloudinaryUrl(
-    post.public_id,
+    posteoActual.public_id,
     isDetail ? "detalle" : "feed"
   );
 
@@ -85,10 +90,10 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
       >
         {/* Header */}
         <div className="card-header bg-light d-flex align-items-center border-0">
-          <Link href={`/${post._idUsuario.url}`}>
+          <Link href={`/${posteoActual._idUsuario.url}`}>
             <Image
-              src={obtenerImagenPerfilUsuario(post._idUsuario, "perfil")}
-              alt={`Foto de perfil de @${post._idUsuario.url}`}
+              src={obtenerImagenPerfilUsuario(posteoActual._idUsuario, "perfil")}
+              alt={`Foto de perfil de @${posteoActual._idUsuario.url}`}
               width={40}
               height={40}
               className="rounded-circle me-2 border"
@@ -96,14 +101,13 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
           </Link>
 
           <div className="d-flex flex-column">
-
             {/* Nombre del usuario */}
             <Link
               className="link_perfil_usuario text-dark text-decoration-none fw-bold"
-              href={`/${post._idUsuario.url}`}
+              href={`/${posteoActual._idUsuario.url}`}
             >
-              {post._idUsuario.nombre_completo.nombre}{" "}
-              {post._idUsuario.nombre_completo.apellido}
+              {posteoActual._idUsuario.nombre_completo.nombre}{" "}
+              {posteoActual._idUsuario.nombre_completo.apellido}
             </Link>
 
             {/* 📍 Mostrar ubicación si existe */}
@@ -113,7 +117,6 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
                 {obtenerTextoUbicacion()}
               </span>
             )}
-
           </div>
 
           <button
@@ -125,7 +128,6 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
             <FiMoreHorizontal size={18} />
           </button>
         </div>
-
 
         {/* Imagen del post */}
         <div
@@ -146,7 +148,7 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
         >
           <Image
             src={postImageUrl}
-            alt={`Fotografía por @${post._idUsuario.url}, texto: ${post.texto || "Imagen del post"}`  }
+            alt={`Fotografía por @${posteoActual._idUsuario.url}, texto: ${posteoActual.texto || "Imagen del post"}`}
             fill={!isDetail}
             width={isDetail ? 1080 : undefined}
             height={isDetail ? 1080 : undefined}
@@ -161,20 +163,20 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
         {/* Body */}
         <div className="card-body bg-light">
           <div className="d-flex align-items-center mb-2">
-            <LikeButton postId={post._id} onOpenLikesModal={openLikesModal} />
+            <LikeButton postId={posteoActual._id} onOpenLikesModal={openLikesModal} />
           </div>
 
           <p className="mb-1">
             <Link
               className="link_perfil_usuario text-dark text-decoration-none"
-              href={`/${post._idUsuario.url}`}
+              href={`/${posteoActual._idUsuario.url}`}
             >
               <strong className="me-1">
-                {post._idUsuario.nombre_completo.nombre}{" "}
-                {post._idUsuario.nombre_completo.apellido}
+                {posteoActual._idUsuario.nombre_completo.nombre}{" "}
+                {posteoActual._idUsuario.nombre_completo.apellido}
               </strong>
             </Link>
-            {post.texto}
+            {posteoActual.texto}
           </p>
           <p className="text-muted small mb-0">{fechaFormateada}</p>
         </div>
@@ -183,9 +185,10 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
       {/* Modales */}
       <ModalOpcionesPublicacion
         isOpen={isOptionsOpen}
-        selectedImage={post}
+        selectedImage={posteoActual}
         onClose={closeOptions}
-        onPostDeleted={handlePostDeleted} // ✅ importante
+        onPostDeleted={handlePostDeleted}
+        onPostUpdated={handlePostUpdated} // ✅ Pasar callback
       />
 
       <ModalLikesUsuarios
