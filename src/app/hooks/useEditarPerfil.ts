@@ -32,10 +32,11 @@ export const perfilSchema = z
 
 export function useEditarPerfil() {
   const { user, fetchWithAuth, updateUser } = useAuth();
-
+  
   const [formData, setFormData] = useState({
     nombre: user?.nombre_completo?.nombre || '',
     apellido: user?.nombre_completo?.apellido || '',
+    correo: user?.correo || '',
     claveMunicipio: String(user?.lugar_radicacion?.claveMunicipio || ''), // 👈 fuerza a string
     nombreMunicipio: user?.lugar_radicacion?.nombreMunicipio || '',
     genero: user?.genero || '',
