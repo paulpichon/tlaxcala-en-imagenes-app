@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { FiCamera, FiImage, FiMapPin  } from "react-icons/fi";
+import { FiCamera, FiImage, FiMapPin } from "react-icons/fi";
 import { useCrearPosteo } from "../hooks/useCrearPosteo";
 import posteo from "../ui/posteos/CrearPosteoModal.module.css";
 import ToastGlobal from "./ToastGlobal";
@@ -43,16 +43,24 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
     loadingUbicacion,
     ubicacionError,
   } = useCrearPosteo(onPostCreated, handleSuccess);
-  ;  
 
   // ✅ Se ejecuta solo cuando el posteo se crea correctamente
   function handleSuccess() {
-    setToastMessage("¡Tu publicación se creó con éxito!");
+    setToastMessage("¡Tu publicación se creó con éxito! 🎉");
     setToastType("creacion");
 
     // Cerramos el modal primero
     onClose();
   }
+
+  // ✅ Mostrar errores como toast
+  useEffect(() => {
+    if (errors.length > 0) {
+      setToastMessage(errors[0]); // Mostrar el primer error
+      setToastType("danger");
+    }
+  }, [errors]);
+
   // -------------------------
   // 📍 QUITAR UBICACIÓN
   // -------------------------
@@ -120,8 +128,8 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                 <button type="button" className="btn-close" onClick={handleClose}></button>
               </div>
 
-                <div className="modal-body text-center">
-                  {!preview ? (
+              <div className="modal-body text-center">
+                {!preview ? (
                   <>
                     <label
                       htmlFor="imageInput"
@@ -211,45 +219,48 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                     {/* ========================== */}
 
                     <div className="mt-4 border rounded p-3 mb-3 bg-light">
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <h6 className="fw-bold mb-0">📍 Ubicación</h6>
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <h6 className="fw-bold mb-0">📍 Ubicación</h6>
 
-                      {/* Ícono de obtener ubicación */}
-                      {!ciudad && !loadingUbicacion && (
-                        <button
-                          onClick={obtenerUbicacion}
-                          className="iconLocationBtn"
-                          title="Detectar ubicación"
-                        >
-                          <FiMapPin size={20} />
-                        </button>
+                        {/* Ícono de obtener ubicación */}
+                        {!ciudad && !loadingUbicacion && (
+                          <button
+                            onClick={obtenerUbicacion}
+                            className="iconLocationBtn"
+                            title="Detectar ubicación"
+                          >
+                            <FiMapPin size={20} />
+                          </button>
+                        )}
+
+                        {(ciudad || municipioId) && (
+                          <button
+                            onClick={eliminarUbicacion}
+                            className="btn btn-sm btn-outline-danger"
+                          >
+                            Quitar
+                          </button>
+                        )}
+                      </div>
+
+                      {loadingUbicacion && (
+                        <p className="small text-muted mb-0">Obteniendo ubicación…</p>
                       )}
 
-                      {(ciudad || municipioId) && (
-                        <button
-                          onClick={eliminarUbicacion}
-                          className="btn btn-sm btn-outline-danger"
-                        >
-                          Quitar
-                        </button>
+                      {ciudad && (
+                        <div className="alert alert-success py-2 px-3 mb-2">
+                          <strong>{ciudad}</strong>, {estado}, {pais}
+                          <div className="small text-muted">Seleccionado automáticamente</div>
+                        </div>
                       )}
-                    </div>
 
-                    {loadingUbicacion && <p className="small text-muted">Obteniendo ubicación…</p>}
+                      {ubicacionError && (
+                        <div className="alert alert-warning py-2 px-3 mb-2">
+                          No se pudo detectar la ubicación automática
+                        </div>
+                      )}
 
-                    {ciudad && (
-                      <div className="alert alert-success py-2 px-3">
-                        <strong>{ciudad}</strong>, {estado}, {pais}
-                        <div className="small text-muted">Seleccionado automáticamente</div>
-                      </div>
-                    )}
-
-                    {ubicacionError && (
-                      <div className="alert alert-warning py-2 px-3">
-                        No se pudo detectar la ubicación automática
-                      </div>
-                    )}
-                       {/* Selector manual */}
+                      {/* Selector manual */}
                       <ManualMunicipioSelector
                         municipio={municipioId}
                         onSelect={(id, data) => {
@@ -298,7 +309,9 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                           onClick={() => setPosteoPublico(true)}
                         >
                           <div className="fw-bold">Público</div>
-                          <small className="text-muted">Aparecerá en el inicio de todos los usuarios y en tu perfil.</small>
+                          <small className="text-muted">
+                            Aparecerá en el inicio de todos los usuarios y en tu perfil.
+                          </small>
                         </div>
 
                         {/* Privado */}
@@ -309,23 +322,13 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                           onClick={() => setPosteoPublico(false)}
                         >
                           <div className="fw-bold">Solo yo</div>
-                          <small className="text-muted">No se mostrará en el inicio de los demás, solo en tu perfil.</small>
+                          <small className="text-muted">
+                            No se mostrará en el inicio de los demás, solo en tu perfil.
+                          </small>
                         </div>
                       </div>
                     </div>
                   </>
-
-                )}
-
-                {/* Errores */}
-                {errors.length > 0 && (
-                  <div className="alert alert-danger mt-3 text-start">
-                    <ul className="mb-0">
-                      {errors.map((err, i) => (
-                        <li key={i}>{err}</li>
-                      ))}
-                    </ul>
-                  </div>
                 )}
               </div>
 
