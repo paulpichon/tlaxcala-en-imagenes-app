@@ -6,10 +6,17 @@ import { useAuth } from "@/context/AuthContext";
 import ToastGlobal from "../ToastGlobal";
 import { editarPosteoSchema } from "@/lib/validaciones";
 import { AnimatePresence, motion } from "framer-motion";
-import { EditarPosteoModalProps } from "@/types/types";
+import { Posteo } from "@/types/types";
 import { FiMapPin } from "react-icons/fi";
 import { useObtenerUbicacion } from "@/app/hooks/useObtenerUbicacion";
 import ManualMunicipioSelector from "../ManualMunicipioSelector";
+
+// ✅ Actualizar la interfaz del callback
+interface EditarPosteoModalProps {
+  isOpen: boolean;
+  posteo: Posteo;
+  onClose: (updated: boolean, posteoActualizado?: Posteo) => void; // ✅ Devolver posteo completo
+}
 
 export default function EditarPosteoModal({
   isOpen,
@@ -21,12 +28,10 @@ export default function EditarPosteoModal({
   const [texto, setTexto] = useState(posteo?.texto || "");
   const [loading, setLoading] = useState(false);
 
-  // 📍 Hook reutilizable
   const {
     obtenerUbicacion,
     loadingUbicacion,
     ubicacionError,
-
     municipioId,
     ciudad,
     estado,
@@ -37,14 +42,17 @@ export default function EditarPosteoModal({
     setPais,
   } = useObtenerUbicacion();
 
-  const [toast, setToast] = useState<{
-    message: string;
-    type?: "success" | "danger" | "creacion";
-  } | null>(null);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState<"success" | "danger" | "creacion">("success");
 
-  // -------------------------
-  // CARGAR UBICACIÓN INICIAL
-  // -------------------------
+  // Limpiar toast automáticamente
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => setToastMessage(""), 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
+
   useEffect(() => {
     if (posteo?.ubicacion) {
       setMunicipioId(posteo.ubicacion.municipio || null);
@@ -55,28 +63,21 @@ export default function EditarPosteoModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [posteo]);
 
-  // Este return evita errores cuando el modal está cerrado o no hay posteo
-  // Debe ejecutarse después del useEffect de arriba
   if (!isOpen || !posteo) return null;
-  
-  // -------------------------
-  // VALIDACIÓN ZOD
-  // -------------------------
+
   const validarTexto = () => {
     const result = editarPosteoSchema.safeParse({ texto });
 
     if (!result.success) {
       const mensajeError = result.error.errors[0]?.message || "Campo inválido";
-      setToast({ message: mensajeError, type: "danger" });
+      setToastMessage(mensajeError);
+      setToastType("danger");
       return false;
     }
 
     return true;
   };
 
-  // -------------------------
-  // 📍 QUITAR UBICACIÓN
-  // -------------------------
   const eliminarUbicacion = () => {
     setMunicipioId(null);
     setCiudad(null);
@@ -84,9 +85,6 @@ export default function EditarPosteoModal({
     setPais(null);
   };
 
-  // -------------------------
-  // GUARDAR CAMBIOS (PUT)
-  // -------------------------
   const handleGuardar = async () => {
     if (!validarTexto()) return;
 
@@ -100,8 +98,6 @@ export default function EditarPosteoModal({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             texto,
-            // Si hay municipio → enviamos ubicación completa
-            // Si no → enviar null para eliminarla
             ubicacion: municipioId
               ? {
                   municipio: municipioId,
@@ -117,31 +113,39 @@ export default function EditarPosteoModal({
       const data = await res.json();
 
       if (res.ok) {
-        setToast({
-          message: "Publicación actualizada correctamente 🎉",
-          type: "success",
-        });
+        setToastMessage("Publicación actualizada correctamente 🎉");
+        setToastType("success");
+
+        // ✅ Crear objeto posteo actualizado
+        const posteoActualizado: Posteo = {
+          ...posteo,
+          texto,
+          ubicacion: municipioId
+            ? {
+                municipio: municipioId,
+                ciudad: ciudad || "",
+                estado: estado || "",
+                pais: pais || "",
+              }
+            : undefined,
+        };
 
         setTimeout(() => {
-          onClose(true, texto);
+          onClose(true, posteoActualizado); // ✅ Devolver posteo completo
         }, 600);
       } else {
-        setToast({
-          message: data.msg || "No se pudo actualizar ❌",
-          type: "danger",
-        });
+        setToastMessage(data.msg || "No se pudo actualizar ❌");
+        setToastType("danger");
       }
     } catch (err) {
       console.error("Error al actualizar:", err);
-      setToast({ message: "Error interno ❌", type: "danger" });
+      setToastMessage("Error interno ❌");
+      setToastType("danger");
     } finally {
       setLoading(false);
     }
   };
 
-  // -------------------------
-  // CONTADOR DE CARACTERES
-  // -------------------------
   const maxChars = 200;
 
   return (
@@ -155,21 +159,29 @@ export default function EditarPosteoModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            {/* MODAL */}
             <motion.div
               className="bg-white rounded-4 p-4 shadow-lg"
-              style={{ maxWidth: 420, width: "90%" }}
+              style={{ maxWidth: 500, width: "90%" }}
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
             >
-              <h5 className="mb-3 text-center">Editar publicación</h5>
+              {/* Header */}
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h5 className="mb-0">Editar publicación</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => onClose(false)}
+                  disabled={loading}
+                ></button>
+              </div>
 
               {/* ====================== */}
               {/* 📍 SECCIÓN UBICACIÓN   */}
               {/* ====================== */}
 
-              <div className="mt-1 border rounded p-3 bg-light">
+              <div className="border rounded p-3 mb-3 bg-light">
                 <div className="d-flex justify-content-between align-items-center mb-2">
                   <h6 className="fw-bold mb-0">📍 Ubicación</h6>
 
@@ -194,11 +206,11 @@ export default function EditarPosteoModal({
                 </div>
 
                 {loadingUbicacion && (
-                  <p className="small text-muted">Obteniendo ubicación…</p>
+                  <p className="small text-muted mb-0">Obteniendo ubicación…</p>
                 )}
 
                 {ciudad && (
-                  <div className="alert alert-success py-2 px-3">
+                  <div className="alert alert-success py-2 px-3 mb-2">
                     <strong>{ciudad}</strong>, {estado}, {pais}
                     <div className="small text-muted">
                       {posteo.ubicacion
@@ -209,7 +221,7 @@ export default function EditarPosteoModal({
                 )}
 
                 {ubicacionError && (
-                  <div className="alert alert-warning py-2 px-3">
+                  <div className="alert alert-warning py-2 px-3 mb-2">
                     No se pudo detectar la ubicación automáticamente
                   </div>
                 )}
@@ -226,20 +238,24 @@ export default function EditarPosteoModal({
               </div>
 
               {/* ====================== */}
-              {/* 📝 TEXTO               */}
+              {/* 📝 SECCIÓN DESCRIPCIÓN */}
               {/* ====================== */}
 
-              <textarea
-                className="form-control mt-3"
-                rows={4}
-                maxLength={maxChars}
-                value={texto}
-                onChange={(e) => setTexto(e.target.value)}
-                placeholder="Escribe algo..."
-              />
+              <div className="border rounded p-3 mb-3 bg-light">
+                <h6 className="fw-bold mb-2">📝 Descripción</h6>
 
-              <div className="text-end small mb-3">
-                {texto.length}/{maxChars}
+                <textarea
+                  className="form-control"
+                  rows={4}
+                  maxLength={maxChars}
+                  value={texto}
+                  onChange={(e) => setTexto(e.target.value)}
+                  placeholder="Escribe algo..."
+                />
+
+                <div className="text-end small text-muted mt-1">
+                  {texto.length}/{maxChars}
+                </div>
               </div>
 
               {/* BOTONES */}
@@ -252,7 +268,7 @@ export default function EditarPosteoModal({
                   Cancelar
                 </button>
                 <button
-                  className="btnGuardarCambiarMedium"
+                  className="btn btnCancelar"
                   disabled={loading}
                   onClick={handleGuardar}
                 >
@@ -260,18 +276,16 @@ export default function EditarPosteoModal({
                 </button>
               </div>
             </motion.div>
-
-            {/* TOAST */}
-            {toast && (
-              <ToastGlobal
-                message={toast.message}
-                type={toast.type}
-                onClose={() => setToast(null)}
-              />
-            )}
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ✅ Toast siempre se renderiza fuera del modal */}
+      <ToastGlobal
+        message={toastMessage}
+        type={toastType}
+        onClose={() => setToastMessage("")}
+      />
     </>
   );
 }
