@@ -18,15 +18,30 @@ interface PropsImageModal {
   isOpen: boolean;
   selectedImage: Posteo | null;
   onClose: () => void;
-  onPostDeleted?: (id: string) => void; // ✅ nueva prop
+  onPostDeleted?: (id: string) => void;
+  onPostUpdated?: (posteo: Posteo) => void; // ✅ Nueva prop para actualizar posteo
 }
 
-const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose, onPostDeleted }) => {
+const ImageModal: React.FC<PropsImageModal> = ({ 
+  isOpen, 
+  selectedImage, 
+  onClose, 
+  onPostDeleted,
+  onPostUpdated 
+}) => {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isLikesModalOpen, setIsLikesModalOpen] = useState(false);
   const [usuariosLikes, setUsuariosLikes] = useState<LikeUsuario[]>([]);
   const { fetchWithAuth } = useAuth();
   const [isMobile, setIsMobile] = useState(false);
+  
+  // ✅ Estado local para el posteo (se actualiza cuando se edita)
+  const [posteoActual, setPosteoActual] = useState<Posteo | null>(selectedImage);
+
+  // ✅ Sincronizar cuando cambia selectedImage
+  useEffect(() => {
+    setPosteoActual(selectedImage);
+  }, [selectedImage]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -35,12 +50,11 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  if (!isOpen || !selectedImage) return null;
+  if (!isOpen || !posteoActual) return null;
 
-  const fechaFormateada = new Date(selectedImage.fecha_creacion).toLocaleDateString();
+  const fechaFormateada = new Date(posteoActual.fecha_creacion).toLocaleDateString();
 
-  // ✅ Imagen principal del post (versión responsiva, sin recortes)
-  const postImageUrl = getCloudinaryUrl(selectedImage.public_id, "custom", {
+  const postImageUrl = getCloudinaryUrl(posteoActual.public_id, "custom", {
     width: 1400,
     height: 1400,
     crop: "limit",
@@ -48,11 +62,11 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
     quality: 90,
     useAutoTransforms: false,
   });
-  // 🔹 Abrir modal de usuarios que dieron like
+
   const openLikesModal = async () => {
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/likes/${selectedImage._id}/likes/usuarios`
+        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/likes/${posteoActual._id}/likes/usuarios`
       );
       if (!res.ok) throw new Error("Error al obtener usuarios que dieron like");
 
@@ -63,15 +77,23 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
       console.error("Error al cargar likes:", err);
     }
   };
-  // Mostrar la ubicación formateada
+
   const obtenerTextoUbicacion = () => {
-    if (!selectedImage?.ubicacion) return null;
+    if (!posteoActual?.ubicacion) return null;
   
-    const { ciudad, estado, pais } = selectedImage.ubicacion;
+    const { ciudad, estado, pais } = posteoActual.ubicacion;
   
     return [ciudad, estado, pais].filter(Boolean).join(", ");
   };
-  
+
+  // ✅ Función para actualizar el posteo localmente
+  const handlePosteoActualizado = (posteoEditado: Posteo) => {
+    setPosteoActual(posteoEditado);
+    // ✅ Propagar al componente padre si existe el callback
+    if (onPostUpdated) {
+      onPostUpdated(posteoEditado);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -82,7 +104,6 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
         className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
         style={{ backgroundColor: "rgba(0,0,0,0.8)", zIndex: 1050 }}
       >
-        {/* Botón cerrar */}
         <button
           onClick={onClose}
           className="btn btn-dark position-absolute"
@@ -91,7 +112,6 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
           <FiX size={28} />
         </button>
 
-        {/* Contenedor modal principal */}
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -106,31 +126,26 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
           }}
           onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
         >
-          {/* Header móvil arriba de la imagen */}
           {isMobile && (
             <div className="d-flex justify-content-between align-items-center p-2 border-bottom bg-white">
               <div className="d-flex align-items-center gap-2">
                 <Image
-                  // Se verifica si la imagen viene por default o si el usuario ya ha subido alguna imagen de perfil, despues llama a getCloudinaryUrl para obtener la URL optimizada
-                  // obtenerImagenPerfilUsuario(usuarioLogueado, preset)
-                  src={obtenerImagenPerfilUsuario(selectedImage._idUsuario, "mini")}
-                  alt={`Imagen de perfil de @${selectedImage._idUsuario.url}`}
+                  src={obtenerImagenPerfilUsuario(posteoActual._idUsuario, "mini")}
+                  alt={`Imagen de perfil de @${posteoActual._idUsuario.url}`}
                   width={40}
                   height={40}
                   className="rounded-circle me-2 border"
                 />
                 <span className="fw-bold text-dark">
-                  {selectedImage._idUsuario.nombre_completo.nombre}{" "}
-                  {selectedImage._idUsuario.nombre_completo.apellido}
+                  {posteoActual._idUsuario.nombre_completo.nombre}{" "}
+                  {posteoActual._idUsuario.nombre_completo.apellido}
                 </span>
-                {/* Mostrar la ubicacion, si viene en el posteo */}
                 {obtenerTextoUbicacion() && (
-                <span className="text-muted small d-flex align-items-center ms-2">
-                  <span className="me-1">📍</span>
-                  {obtenerTextoUbicacion()}
-                </span>
-              )}
-
+                  <span className="text-muted small d-flex align-items-center ms-2">
+                    <span className="me-1">📍</span>
+                    {obtenerTextoUbicacion()}
+                  </span>
+                )}
               </div>
               <button
                 type="button"
@@ -143,7 +158,6 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
             </div>
           )}
 
-          {/* Columna izquierda: Imagen */}
           <div
             className="flex-grow-1 bg-black position-relative d-flex justify-content-center align-items-center"
             style={{
@@ -162,7 +176,7 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
             >
               <Image
                 src={postImageUrl}
-                alt={`Posteo de @${selectedImage._idUsuario.url}, texto: ${selectedImage.texto || "Imagen del post"}`}
+                alt={`Posteo de @${posteoActual._idUsuario.url}, texto: ${posteoActual.texto || "Imagen del post"}`}
                 fill
                 priority
                 sizes="(max-width: 768px) 100vw, 60vw"
@@ -176,19 +190,17 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
             </motion.div>
           </div>
 
-          {/* Columna derecha: Info (solo escritorio) */}
           {!isMobile && (
             <div
               className="d-flex flex-column p-3 bg-white"
               style={{ width: "350px", borderLeft: "1px solid #ddd", height: "100%" }}
             >
-              {/* Parte superior: Header y texto */}
               <div>
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div className="d-flex align-items-center gap-2">
                     <div className="position-relative" style={{ width: 35, height: 35 }}>
                       <Image
-                        src={obtenerImagenPerfilUsuario(selectedImage._idUsuario, "mini")}
+                        src={obtenerImagenPerfilUsuario(posteoActual._idUsuario, "mini")}
                         alt="perfil"
                         fill
                         className="rounded-circle object-cover"
@@ -196,10 +208,9 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
                     </div>
                     <div className="d-flex flex-column">
                       <span className="fw-bold">
-                        {selectedImage._idUsuario.nombre_completo.nombre}{" "}
-                        {selectedImage._idUsuario.nombre_completo.apellido}
+                        {posteoActual._idUsuario.nombre_completo.nombre}{" "}
+                        {posteoActual._idUsuario.nombre_completo.apellido}
                       </span>
-                      {/*  */}
                       {obtenerTextoUbicacion() && (
                         <span className="text-muted small d-flex align-items-center">
                           <span className="me-1">📍</span>
@@ -207,9 +218,6 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
                         </span>
                       )}
                     </div>
-
-                    
-
                   </div>
 
                   <button
@@ -225,44 +233,42 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
                 <p className="mb-2">
                   <Link
                     className="link_perfil_usuario text-dark text-decoration-none"
-                    href={`/${selectedImage._idUsuario.url}`}
+                    href={`/${posteoActual._idUsuario.url}`}
                   >
                     <strong className="me-1">
-                      {selectedImage._idUsuario.nombre_completo.nombre}{" "}
-                      {selectedImage._idUsuario.nombre_completo.apellido}
+                      {posteoActual._idUsuario.nombre_completo.nombre}{" "}
+                      {posteoActual._idUsuario.nombre_completo.apellido}
                     </strong>
                   </Link>
-                  {selectedImage.texto}
+                  {posteoActual.texto}
                 </p>
               </div>
 
-              {/* Parte inferior: Like y fecha */}
               <div className="mt-auto">
                 <div className="d-flex gap-3 align-items-center mb-2">
-                  <LikeButton postId={selectedImage._id} onOpenLikesModal={openLikesModal} />
+                  <LikeButton postId={posteoActual._id} onOpenLikesModal={openLikesModal} />
                 </div>
                 <p className="text-muted small mb-0">{fechaFormateada}</p>
               </div>
             </div>
           )}
 
-          {/* Footer móvil debajo de la imagen */}
           {isMobile && (
             <div className="p-3 border-top bg-white">
               <div className="d-flex gap-3 align-items-center mb-2">
-                <LikeButton postId={selectedImage._id} onOpenLikesModal={openLikesModal} />
+                <LikeButton postId={posteoActual._id} onOpenLikesModal={openLikesModal} />
               </div>
               <p className="mb-1">
                 <Link
                   className="link_perfil_usuario text-dark text-decoration-none"
-                  href={`/${selectedImage._idUsuario.url}`}
+                  href={`/${posteoActual._idUsuario.url}`}
                 >
                   <strong className="me-1">
-                    {selectedImage._idUsuario.nombre_completo.nombre}{" "}
-                    {selectedImage._idUsuario.nombre_completo.apellido}
+                    {posteoActual._idUsuario.nombre_completo.nombre}{" "}
+                    {posteoActual._idUsuario.nombre_completo.apellido}
                   </strong>
                 </Link>
-                {selectedImage.texto}
+                {posteoActual.texto}
               </p>
               <p className="text-muted small mb-0">{fechaFormateada}</p>
             </div>
@@ -271,15 +277,16 @@ const ImageModal: React.FC<PropsImageModal> = ({ isOpen, selectedImage, onClose,
 
         <ModalOpcionesPublicacion
           isOpen={isOptionsOpen}
-          selectedImage={selectedImage}
+          selectedImage={posteoActual}
           onClose={() => setIsOptionsOpen(false)}
           onPostDeleted={() => {
             setIsOptionsOpen(false);
-            onClose(); // ✅ cerrar modal principal
-            if (onPostDeleted && selectedImage?._id) {
-              onPostDeleted(selectedImage._id); // ✅ notificar al padre para quitarlo del grid
+            onClose();
+            if (onPostDeleted && posteoActual?._id) {
+              onPostDeleted(posteoActual._id);
             }
           }}
+          onPostUpdated={handlePosteoActualizado} // ✅ Pasar callback
         />
 
         <ModalLikesUsuarios
