@@ -38,6 +38,7 @@ export interface Posteo {
   public_id: string;
   texto: string;
   ubicacion?: { // ubicacion opcional
+    municipio?: string;
     ciudad?: string;
     estado?: string;
     pais?: string;
