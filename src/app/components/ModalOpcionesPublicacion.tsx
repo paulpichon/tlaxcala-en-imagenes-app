@@ -5,15 +5,16 @@ import FollowButton from "./FollowButton";
 import FavoritoButton from "./FavoritoButton";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PropsModalOpcionesPublicacion } from "@/types/types";
+import { Posteo, PropsModalOpcionesPublicacion } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 import { useFavorito } from "@/context/FavoritoContext";
 import { useState } from "react";
 import ToastGlobal from "./ToastGlobal";
 import EditarPosteoModal from "./posteo/EditarPosteoModal";
-// se agrega onPostDeleted como prop opcional
+
 interface ModalOpcionesPublicacionProps extends PropsModalOpcionesPublicacion {
-  onPostDeleted?: (postId: string) => void; // ✅ Nuevo callback opcional
+  onPostDeleted?: (postId: string) => void;
+  onPostUpdated?: (posteo: Posteo) => void; // ✅ Nueva prop
 }
 
 const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
@@ -21,21 +22,16 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   selectedImage,
   onClose,
   onPostDeleted,
+  onPostUpdated, // ✅ Recibir callback
 }) => {
   const { user, fetchWithAuth } = useAuth();
   const pathname = usePathname();
   const { favoritosMap } = useFavorito();
 
-  // Editar modal
-  // const [showEditModal, setShowEditModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-
-
-
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [toast, setToast] = useState<{ message: string; type?: "success" | "danger" | "creacion" } | null>(null);
-
 
   if (!isOpen || !selectedImage) return null;
 
@@ -44,7 +40,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   const isOwnPost = user?.uid === selectedImage._idUsuario._id;
   const esFavoritoGlobal = favoritosMap[selectedImage._id] ?? selectedImage.isFavorito;
 
-  // 📋 Copiar enlace sin alert()
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(link);
@@ -54,7 +49,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
     }
   };
 
-  // 📤 Compartir
   const handleShare = async () => {
     if (navigator.share) {
       try {
@@ -71,7 +65,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
     }
   };
 
-  // 🗑️ Eliminar publicación con toast
   const handleDeletePost = async () => {
     if (!selectedImage?._id) return;
     setIsDeleting(true);
@@ -118,17 +111,12 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                     >
                       Eliminar
                     </button>
-                    {/* <button className={perfil.btn_opciones_publicaciones}>
-                      Editar
-                    </button> */}
                     <button
                       className={perfil.btn_opciones_publicaciones}
                       onClick={() => setShowEditModal(true)}
                     >
                       Editar
                     </button>
-
-
                   </>
                 ) : (
                   <>
@@ -151,7 +139,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                   </>
                 )}
 
-                {/* Ir a publicación / Compartir */}
                 <div className="col-md-12 mb-2">
                   {!isDetallePage ? (
                     <Link
@@ -173,7 +160,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                   )}
                 </div>
 
-                {/* Denunciar */}
                 <div className="col-md-12 mb-2">
                   <button
                     type="button"
@@ -183,7 +169,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                   </button>
                 </div>
 
-                {/* Cerrar */}
                 <div className="col-md-12">
                   <button
                     type="button"
@@ -238,7 +223,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
         </div>
       )}
 
-      {/* ✅ Toast visual */}
       {toast && (
         <ToastGlobal
           message={toast.message}
@@ -247,24 +231,21 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
         />
       )}
 
-      {/* Editar Modal */}
+      {/* ✅ Modal de edición con callback actualizado */}
       {showEditModal && (
         <EditarPosteoModal
           isOpen={showEditModal}
           posteo={selectedImage}
-          onClose={(updated, newText) => {
+          onClose={(updated, posteoActualizado) => {
             setShowEditModal(false);
 
-            if (updated && newText) {
-              // actualizar UI sin recargar
-              selectedImage.texto = newText;
+            if (updated && posteoActualizado) {
+              // ✅ Propagar al padre (ImageModal)
+              onPostUpdated?.(posteoActualizado);
             }
           }}
         />
       )}
-
-
-
     </>
   );
 };
