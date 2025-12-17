@@ -11,7 +11,7 @@ import { FollowProvider } from "@/context/FollowContext";
 import { FavoritoProvider } from "@/context/FavoritoContext";
 // metadatos
 export const metadata: Metadata = {
-    title: "Tlaxcala en imágenes | Favoritos",
+    title: "TlaxApp | Favoritos",
     description: "El lugar donde encuentras gente de Tlaxcala",
   };
 

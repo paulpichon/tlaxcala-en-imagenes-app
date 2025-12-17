@@ -13,7 +13,8 @@ import { FollowProvider } from "@/context/FollowContext";
 import { FavoritoProvider } from "@/context/FavoritoContext";
 // metadatos
 export const metadata: Metadata = {
-    title: "Tlaxcala en imágenes"
+    title: "TlaxApp | Perfil Usuario",
+    description: "El lugar donde encuentras gente de Tlaxcala",
   };
 
 export default function RootLayout({
