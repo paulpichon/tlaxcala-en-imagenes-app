@@ -76,6 +76,9 @@ export const editarPosteoSchema = z.object({
     .trim()
     .min(1, "El texto no puede estar vacío")
     .max(200, "Máximo 200 caracteres")
+    .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ.,!?¡¿()\s-]*$/, {
+      message: "La descripción contiene caracteres no permitidos",
+    })
     .refine((val) => !spamRegex.test(val), {
       message: "Tu texto parece contener spam ❌",
     })
