@@ -247,6 +247,7 @@ export interface DatosUbicacion {
 export interface FormDataEditarPerfil {
   nombre: string;
   apellido: string;
+  correo: string;
   claveMunicipio: string;
   nombreMunicipio: string;
   genero: string;
