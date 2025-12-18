@@ -81,17 +81,7 @@ export default function PublicacionesUsuarioGrid({
           setNextUrl(null);
           return;
         }
-
-        // 🔹 Evitar duplicados
-        // setPosteos((prev) => {
-        //   const combinados = url ? [...prev, ...nuevosPosteos] : nuevosPosteos;
-        //   const unicos = combinados.filter(
-        //     (post: Posteo, index: number, self: Posteo[]) =>
-        //       index === self.findIndex((p: Posteo) => p._id === post._id)
-        //   );
-        //   return unicos;
-        // });
-
+        // Evitar duplicadas
         setPosteos((prev) => {
           const combinados = url ? [...prev, ...nuevosPosteos] : nuevosPosteos;
           const unicos = combinados.filter(
@@ -192,13 +182,6 @@ export default function PublicacionesUsuarioGrid({
   };
 
   // 🗑️ Eliminar post del estado local tras confirmación
-  // const handlePostDeleted = (postId: string) => {
-  //   setPosteos((prev) => prev.filter((p) => p._id !== postId));
-  //   setIsFirstModalOpen(false);
-  //   setSelectedImage(null);
-  //   setToast({ message: "Publicación eliminada correctamente", type: "success" });
-  // };
-
   const handlePostDeleted = (postId: string) => {
     setPosteos((prev) => {
       const actualizados = prev.filter((p) => p._id !== postId);
@@ -240,12 +223,13 @@ export default function PublicacionesUsuarioGrid({
             <div className="card">
               <Image
                 src={getCloudinaryUrl(posteo.public_id, "grid")}
-                alt={posteo.texto}
+                alt={`Publicación de usuario: ${posteo._id}`}
                 width={200}
                 height={200}
                 className={`${perfil.imagen_grid_perfil_usuario} gallery-image`}
                 style={{ cursor: "pointer" }}
                 onClick={() => openFirstModal(posteo)}
+                priority
               />
             </div>
           </div>
@@ -273,6 +257,7 @@ export default function PublicacionesUsuarioGrid({
       {/* Modal de imagen */}
       {selectedImage && (
         <ImageModal
+          key={selectedImage._id} // 🔥 CLAVE, con esto tambien evitamos que se interpongan una imagen sobre otra al abrir el modal
           isOpen={isFirstModalOpen}
           selectedImage={selectedImage}
           onClose={() => setIsFirstModalOpen(false)}
