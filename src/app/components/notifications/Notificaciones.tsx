@@ -47,7 +47,74 @@ export default function ListaNotificaciones() {
     );
 
   return (
-    <div className="container py-4">
+    // <div className="d-flex flex-column vh-100 bg-light">
+    //   <header className="bg-white border-bottom shadow-sm mb-3">
+    //     <div className="container">
+    //       <div className="d-flex align-items-center justify-content-center py-3">
+    //         <h1 className="h4 mb-0 fw-bold">Notificaciones</h1>
+    //         {/* <div style={{ width: '32px' }}></div> */}
+    //       </div>
+    //     </div>
+    //   </header>
+
+    //   {notificaciones.length === 0 ? (
+    //     <p className="text-center text-muted">Aún no tienes notificaciones.</p>
+    //   ) : (
+    //     <>
+    //       {Object.entries(grupos).map(([titulo, notifs]) =>
+    //         notifs.length > 0 ? (
+    //           <div key={titulo} className="mb-4">
+    //             <h5 className="fw-bold text-secondary mb-3">{titulo}</h5>
+    //             <div className="list-group shadow-sm">
+    //               {notifs.map((notif) => (
+    //                 <NotificacionItem
+    //                   key={notif._id}
+    //                   notif={notif}
+    //                   onClick={(id, urlUsuario) => {
+    //                     marcarComoLeida(id);
+    //                     router.push(`/${urlUsuario}`);
+    //                   }}
+    //                   onEliminar={eliminarNotificacion} // 👈 pasamos la función al hijo
+    //                 />
+    //               ))}
+    //             </div>
+    //           </div>
+    //         ) : null
+    //       )}
+
+    //       {page < totalPages && (
+    //         <div className="text-center mt-3">
+    //           <button
+    //             className="btn btn-outline-secondary"
+    //             disabled={loadingMore}
+    //             onClick={() => {
+    //               setLoadingMore(true);
+    //               cargarNotificaciones(page + 1);
+    //             }}
+    //           >
+    //             {loadingMore ? "Cargando..." : "Ver más"}
+    //           </button>
+    //         </div>
+    //       )}
+    //     </>
+    //   )}
+    // </div>
+
+
+
+<div className="d-flex flex-column vh-100 bg-light">
+  <main className="flex-grow-1 overflow-auto">
+    <header className="bg-white border-bottom shadow-sm">
+      <div className="container">
+        <div className="d-flex align-items-center justify-content-center py-3">
+          <h1 className="h4 mb-0 fw-bold">Notificaciones</h1>
+          <div style={{ width: '32px' }}></div>
+        </div>
+      </div>
+    </header>
+    
+    <div className="container-fluid py-4">
+      <div className="d-flex flex-column gap-3">
       {notificaciones.length === 0 ? (
         <p className="text-center text-muted">Aún no tienes notificaciones.</p>
       ) : (
@@ -89,6 +156,14 @@ export default function ListaNotificaciones() {
           )}
         </>
       )}
+
+      </div>
     </div>
+  </main>
+</div>
+
+
+
+
   );
 }
