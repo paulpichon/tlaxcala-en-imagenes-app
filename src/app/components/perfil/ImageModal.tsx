@@ -130,6 +130,8 @@ const ImageModal: React.FC<PropsImageModal> = ({
             <div className="d-flex justify-content-between align-items-center p-2 border-bottom bg-white">
               <div className="d-flex align-items-center gap-2">
                 <Image
+                  priority
+                  key={posteoActual._id}
                   src={obtenerImagenPerfilUsuario(posteoActual._idUsuario, "mini")}
                   alt={`Imagen de perfil de @${posteoActual._idUsuario.url}`}
                   width={40}
