@@ -44,12 +44,24 @@ export default function PerfilForm({
       {errors[name] && <div className="invalid-feedback">{errors[name]}</div>}
     </div>
   );
-
+  
   return (
     <form onSubmit={handleSubmit}>
       {renderInput('Nombre', 'nombre')}
       {renderInput('Apellido', 'apellido')}
       {renderInput('Fecha de nacimiento', 'fecha_nacimiento', 'date')}
+
+      {/* Correo electronico solo para mostralo en el input, no se modifica!!!*/}
+      <div className="mb-3">
+        <label className="form-label fw-medium">Correo electronico</label>
+        <input
+          type="text"
+          value={formData.correo}
+          readOnly
+          className="form-control"
+          style={{ backgroundColor: '#e9ecef', cursor: 'not-allowed' }}
+        />
+      </div>
 
       {/* Entidad */}
       <div className="mb-3">
