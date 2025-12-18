@@ -79,6 +79,7 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
               onMouseLeave={() => setHover(false)}
             >
               <Image
+                priority
                 src={imagenPerfil}
                 width={150}
                 height={150}
