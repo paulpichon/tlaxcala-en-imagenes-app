@@ -81,13 +81,6 @@ export default function ModalLikesUsuarios({
                 </ul>
             )}
           </div>
-
-          {/* Footer */}
-          <div className="modal-footer">
-            <button type="button" className="btn btnCerrarModal" onClick={onClose}>
-              Cerrar
-            </button>
-          </div>
         </div>
       </div>
     </div>
