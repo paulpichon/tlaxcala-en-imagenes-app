@@ -150,30 +150,31 @@ export default function CambiarImagenModal({
 
             {/* 🌀 Contenedor con efecto de blur en el preview */}
             <div className="d-flex flex-column align-items-center mb-3">
-              <div
-                className="position-relative rounded-circle overflow-hidden mb-3"
-                style={{
-                  width: '150px',
-                  height: '150px',
-                  backgroundColor: '#f5f5f5',
-                  filter: imageLoaded ? 'none' : 'blur(10px)',
-                  transition: 'filter 0.5s ease',
-                }}
-              >
+              <div style={{ 
+                position: 'relative', 
+                width: '150px',   // Define un tamaño fijo o responsivo
+                height: '150px',  // Debe ser igual al ancho
+                overflow: 'hidden', 
+                borderRadius: '50%', // Asegura que el contenedor sea circular
+                filter: imageLoaded ? 'none' : 'blur(10px)',
+                transition: 'filter 0.5s ease',
+              }}>
                 {preview && (
                   <Image
                     src={preview}
                     alt="Vista previa"
-                    fill
-                    className="object-cover rounded-circle"
+                    fill 
+                    sizes="150px" // Ayuda a Next.js a optimizar el tamaño de carga
+                    style={{ objectFit: 'cover' }} // Se recomienda usar style o una clase CSS directa
+                    className="rounded-circle"
                     onLoadingComplete={() => setImageLoaded(true)}
-                  />
+                />
                 )}
               </div>
 
               <button
                 onClick={handleSelectImage}
-                className="btn btn-light btn-sm d-flex align-items-center gap-2"
+                className="btn btn-light btn-sm d-flex align-items-center gap-2 mt-2"
                 disabled={loading}
               >
                 <FiCamera /> Seleccionar imagen
