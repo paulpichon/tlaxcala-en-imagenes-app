@@ -110,6 +110,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
               className={`nav-link opciones_menu ${isPerfilActivo ? "link-activo" : ""}`}
             >
               <Image
+                key={user?.imagen_perfil?.secure_url || "default"}
                 src={obtenerImagenPerfilUsuario(user, "mini")}
                 alt={`${user?.nombre_completo?.nombre} ${user?.nombre_completo?.apellido} `}
                 width={100}
