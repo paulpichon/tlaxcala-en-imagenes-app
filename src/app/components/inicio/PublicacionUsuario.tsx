@@ -45,7 +45,7 @@ export default function PublicacionUsuario() {
         />
       ))}
       <div ref={observerRef} />
-      {loading && !finished && <Spinner />}
+      {loading && !finished && <div className="d-flex justify-content-center align-items-center mb-5 pb-5"><Spinner /></div>}
       {finished && posts.length > 0 && (
         <p className="text-center mt-3 mb-5 pb-5 text-muted">
           No hay más publicaciones
