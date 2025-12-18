@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from "react";
-import perfil from "../../ui/perfil/perfil.module.css";
 import { notFound } from "next/navigation"; // 👈 importamos para usar la página not-found.tsx
 
 import MenuPrincipal from "../../components/MenuPrincipal";
@@ -52,16 +51,14 @@ export default function PerfilUsuarioContainer({ url }: UrlProps) {
         </div>
 
         {/* Contenido principal */}
-        <div className="col-md-10 col-lg-10 col-xl-6 contenedor_central_contenido">
+        <div className="col-md-10 col-lg-10 col-xl-6 contenedor_central_contenido" style={{ height:"100dvh"}}>
           <div className="contenedor_menu_superior sticky-top">
             <HeaderSuperior />
           </div>
           <div className="contenedor_contenido_principal">
             <div className="container-fluid">
-              <div className={`${perfil.contenedor_info_usuario}`}>
               {/* ✅ Pasamos el total sincronizado */}
                 <InformacionUsuarioPerfil usuario={usuario} totalPosteos={totalPosteos} />
-              </div>
             </div>
           </div>
 
@@ -69,7 +66,7 @@ export default function PerfilUsuarioContainer({ url }: UrlProps) {
           <div className="publicaciones_usuario bg-light">
             <div className="container-fluid">
               <div className="row">
-                <div className="col-12">
+                <div className="col-12 ">
                   <div className="contenedor_publicacion_usuario mb-5">
                     <div className="mt-3">
                       <div className="titulo_contenedor text-center">
