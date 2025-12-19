@@ -131,15 +131,21 @@ a.postear {
 }
 /* Botones modal confirmacion */
 /* btn cancelar */
-.btnCancelar {
-  background-color: #EBCA9A!important;
-  color: #FFFFFF!important;
-  transform: .3s ease-in-out!important;
+.btnPublicarDescartar {
+  cursor: pointer;
+  background-color: #EBCA9A;
+  color: #FFFFFF;
+  transform: .3s ease-in-out;
+  border: none;
+  display: inline-block;
+  width: 100px;
+  height: 38px;
+  border-radius: 5px;
 }
-.btnCancelar:hover {
-  background-color: #FFFFFF!important;
-  color: #000000!important;
-  border: 1px solid #EBCA9A!important;
+.btnPublicarDescartar:hover {
+  background-color: #D4B68B;
+  color: #FFFFFF;
+  border: 1px solid #EBCA9A;
 }
 /* btn cerrar sesion */
 .btnCerrarSesion {

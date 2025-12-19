@@ -337,7 +337,7 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                   Cancelar
                 </button>
                 <button
-                  className="btn btnCancelar"
+                  className="btnPublicarDescartar"
                   disabled={loading || !file}
                   onClick={handleSubmit}
                 >
@@ -384,7 +384,8 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                 <h5 className="modal-title">Descartar publicación</h5>
               </div>
               <div className="modal-body text-center">
-                <p>¿Seguro que quieres descartar este post? Perderás la imagen y la descripción.</p>
+                <p>¿Seguro que quieres descartar este post?</p>
+                <p>Perderás la imagen y la descripción.</p>
               </div>
               <div className="modal-footer">
                 <button
@@ -396,7 +397,7 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                 </button>
                 <button
                   type="button"
-                  className="btn btnCerrarSesion"
+                  className="btnPublicarDescartar"
                   onClick={confirmDiscard}
                 >
                   Descartar

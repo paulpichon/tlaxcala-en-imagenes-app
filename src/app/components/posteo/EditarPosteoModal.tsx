@@ -268,11 +268,11 @@ export default function EditarPosteoModal({
                   Cancelar
                 </button>
                 <button
-                  className="btn btnCancelar"
+                  className="btnPublicarDescartar"
                   disabled={loading}
                   onClick={handleGuardar}
                 >
-                  {loading ? "Guardando..." : "Guardar cambios"}
+                  {loading ? "Guardando..." : "Guardar"}
                 </button>
               </div>
             </motion.div>
