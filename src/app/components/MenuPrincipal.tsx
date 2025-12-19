@@ -166,7 +166,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
                   className={`dropdown-item ${isNotificacionesActivo ? "linkActivoDropdown fw-light" : ""}`}
                   href="/notificaciones"
                 >
-                  🔔 Notificaciones
+                  Notificaciones
                 </Link>
               </li>
 
@@ -202,14 +202,14 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
               <div className="modal-footer">
                 <button
                   type="button"
-                  className="btn btnCancelar"
+                  className="btn btn-secondary"
                   onClick={() => setShowModal(false)}
                 >
                   Cancelar
                 </button>
                 <button
                   type="button"
-                  className="btn btnCerrarSesion"
+                  className="btn btn-danger"
                   onClick={handleLogout}
                 >
                   Cerrar sesión
