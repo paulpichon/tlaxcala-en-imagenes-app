@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import perfil from "../../ui/perfil/perfil.module.css";
+import favoritoStyles from "../../ui/favoritos/Favorito.module.css";
 import { Favorito, ApiResponseFavoritos } from "@/types/types";
 import Spinner from "../spinner";
 import FavoritoButton from "../FavoritoButton";
@@ -91,7 +91,7 @@ export default function Favoritos() {
                   return (
                     <div key={fav._id} className="col-6 col-md-4 col-lg-3">
                       <div
-                        className={`${perfil.contenedor_publicacion_usuario} position-relative`}
+                        className="position-relative"
                       >
                         {/* Imagen */}
                         <Link
@@ -149,7 +149,7 @@ export default function Favoritos() {
           <button
             onClick={cargarMas}
             disabled={loading}
-            className="btn btn-outline-primary btn-sm"
+            className={favoritoStyles.btnCargarMas}
           >
             {loading ? <Spinner size="20px" /> : "Cargar más"}
           </button>
