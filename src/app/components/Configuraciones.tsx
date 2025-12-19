@@ -122,14 +122,14 @@ export default function Configuraciones() {
               <div className="modal-footer">
                 <button
                   type="button"
-                  className="btn btnCancelar"
+                  className="btn btn-secondary"
                   onClick={() => setShowModal(false)}
                 >
                   Cancelar
                 </button>
                 <button
                   type="button"
-                  className="btn btnCerrarSesion"
+                  className="btn btn-danger"
                   onClick={confirmarCierreSesion}
                 >
                   Cerrar sesión
