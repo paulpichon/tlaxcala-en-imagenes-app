@@ -238,7 +238,7 @@ div.pie_pagina_index{
 }
 /*Links de pie de pagina*/
 a.pie_pagina_links {
-  color: #000000;
+  color: #2b2b2b;
   font-family: 'Open Sans', sans-serif;
   font-weight: lighter;
   font-size: .9rem;
@@ -247,21 +247,10 @@ a.pie_pagina_links {
 }
 /*HOVER A_LINKS*/
 a.pie_pagina_links:hover {
-  color:  #EBCA9A;
+  color:  #000000;
 }
 /*FIN HOVER A_LINKS*/
 
-/*Links de pie de pagina*/
-a.tad {
-  color: #EBCA9A!important;
-  font-family: 'Open Sans', sans-serif;
-  /*EFECTOS*/
-  transition: all 0.3s ease 0s;
-}
-/*HOVER*/
-a.tad:hover {
-  color: #000000!important;
-}
 /* 
 Spinner de carga
 */

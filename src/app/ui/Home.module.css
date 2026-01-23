@@ -1,162 +1,104 @@
-/*ESTILOS GENERALES*/
-/******  
-            SECCION REGISTRARSE-INICIAR SECION
-*******/
-
-/*contenedor_enlaces_index*/
-div.contenedor_enlaces_index{
-    padding: 0px 5px 5px 5px;
-}
-/*contenedor_titulos unete hoy*/
-div.contenedor_titulos {
-    text-align: center;
-}
-/*h3*/
-h3.subtitulo_h3 {
-    font-family: 'Open Sans', sans-serif;
-    font-weight: bold;
-    font-size: .8rem;
-}
-/*subtitulo_h4*/
-h4.subtitulo_h4 {
-    font-family: 'Open Sans', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 300;
-}
-/*contenedor_enlaces botones*/
-div.contenedor_enlaces{
-    text-align: center;
-    margin-top: 30px;
-}
-/*a_links botones links*/
-a.a_links {
-    /*estilos del boton*/
-    display: block;
-    border: 2px solid #000000;
-    margin: 7px 0;  
-    border-radius: 20px; 
-    padding: 3px 0; 
-    /*estilos de texto del boton*/
-    color: #000000;
-    font-family: 'Open Sans', sans-serif;
-    text-decoration: none;
-    font-size: 1rem;
-    /*EFECTOS*/
-    transition: all 0.3s ease 0s;
-}
-/*HOVER A_LINKS*/
-a.a_links:hover {
-    transform: translateY(-4px);
-}
-/* Estilos de menu activo */
-.perfil-activo {
-    box-shadow: 0 0 0 2px #000000; /* resalta como un anillo */
-    transition: box-shadow 0.3s ease;
-}
-  
-/*FIN HOVER A_LINKS*/
-/*Icono Google*/
-.google_icon {
-    width: 15px;
-    height: 15px;
-    margin-right: 3px;
-    margin-bottom: 2px;
-}
-/*span_o*/
-span.span_o {
-    font-family: 'Open Sans', sans-serif;
-    font-size: .8rem;
-}
-/******  
-            FIN SECCION REGISTRARSE-INICIAR SECION
-*******/
-
-
-/*X-Small devices (portrait phones, less than 576px)*/
-/* No media query for `xs` since this is the default in Bootstrap*/
-
-/*Small devices (landscape phones, 576px and up)*/
-@media (min-width: 576px) {  
-    /*contenedor_enlaces_index*/
-    div.contenedor_enlaces_index{
-        padding: 10px;
-        margin-top: 10%;
-    }
-    /*h3 Una imagen vale más que mil palabras*/
-    h3.subtitulo_h3 {
-        font-size: 1.4rem;
-        padding: 20px 0;
-    }
-    /*subtitulo_h4 Únete Hoy*/
-    h4.subtitulo_h4 {
-        font-size: 2rem;
-        font-weight: 300;
-        padding: 10px 0;
-    }
-    /*contenedor_enlaces botones*/
-    div.contenedor_enlaces{
-        margin-top: 30px;
-    }
-    /*a_links botones links*/
-    a.a_links {
-        font-size: 1.2rem;
-    }
-    /*span_o*/
-    span.span_o {
-        font-size: 1.3rem;
-    }
-}
-/*Medium devices (tablets, 768px and up)*/
-@media (min-width: 768px) { 
-    /*Estos estilso nos ayudaran a que el div.row del index puedan tener efecto con las clases d-flex align-items-center*/
-    div.contenedor_principal {
-        height: 100vh;
-    }
-    /*contenedor_enlaces_index*/
-    div.contenedor_enlaces_index{
-        margin-top: 0;
-    }
-    /*h3 Una imagen vale más que mil palabras*/
-    h3.subtitulo_h3 {
-        font-size: 1.6rem;
-    }
-    /*subtitulo_h4 Únete Hoy*/
-    h4.subtitulo_h4 {
-        font-size: 2.5rem;
-        padding: 0;
-    }
-    /*span_o*/
-    span.span_o {
-        font-size: 1.4rem;
-    }
+/* Wrapper */
+.wrapper {
+  min-height: 100vh;
+  background-color: #EBCA9A;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-/* Large devices (desktops, 992px and up)*/
-@media (min-width: 992px) {
-    /*contenedor_enlaces_index*/
-    div.contenedor_enlaces_index{
-        margin-top: 0;
-    }
-    /*h3 Una imagen vale más que mil palabras*/
-    h3.subtitulo_h3 {
-        font-size: 1.6rem;
-    }
-    /*subtitulo_h4 Únete Hoy*/
-    h4.subtitulo_h4 {
-        font-size: 2.5rem;
-        padding: 0;
-    }
-    /*Icono Google*/
-    .google_icon {
-        width: 20px;
-        height: 20px;
-    }
-    /*span_o*/
-    span.span_o {
-        font-size: 1.4rem;
-    }
+/* Hero */
+.hero {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
 }
-/*X-Large devices (large desktops, 1200px and up)*/
-@media (min-width: 1200px) {}
-/* XX-Large devices (larger desktops, 1400px and up)*/
-@media (min-width: 1400px) {}
+
+/* Content */
+.heroContent {
+  max-width: 520px;
+  text-align: center;
+}
+
+/* Icon */
+.icono {
+  animation: float 6s ease-in-out infinite;
+  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.15));
+}
+
+/* Title */
+.title {
+  font-size: 3.2rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: #2b2b2b;
+  margin-bottom: 0.5rem;
+}
+
+/* Subtitle */
+.subtitle {
+  font-size: 1.25rem;
+  color: #4b4b4b;
+  margin-bottom: 2.5rem;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Buttons */
+.primaryBtn {
+  background: #ffffff;
+  color: #2b2b2b;
+  padding: 0.9rem 1.8rem;
+  border-radius: 999px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.primaryBtn:hover {
+  transform: translateY(-2px);
+  background: #f7f7f7;
+}
+
+.secondaryBtn {
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  padding: 0.9rem 1.8rem;
+  border-radius: 999px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.secondaryBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+
+/* Animation */
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+  .actions {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
