@@ -26,7 +26,13 @@ export default function CrearCuenta() {
 				<div className="col-sm-9 col-md-7 col-lg-6">
 					<div className="text-center">
 						<div className={`${crearCuenta.contenedor_titulos}`}>
-							<h3 className={`${crearCuenta.subtitulo_h3}`}>Crear cuenta</h3>
+						<h3 className={crearCuenta.subtitulo_h3}>
+							Únete a TlaxApp
+						</h3>
+						<p className={crearCuenta.descripcion}>
+							Comparte y descubre Tlaxcala en imágenes.
+						</p>
+
 						</div>
 						{/* FormularioRegistro */}
 						<FormularioRegistro />

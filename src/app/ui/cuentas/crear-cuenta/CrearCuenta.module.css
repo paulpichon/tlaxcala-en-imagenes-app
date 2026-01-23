@@ -12,9 +12,13 @@ h3.subtitulo_h3 {
     padding: 10px 0;
 }
 /*contenedor_formulario*/
-div.contenedor_formulario{
-    margin-top: 20px;
+.contenedor_formulario {
+  background: rgba(255, 255, 255, 0.35);
+  padding: 2rem;
+  border-radius: 16px;
+  backdrop-filter: blur(6px);
 }
+
 /* contenedor del input */
 div.contenedor_input {
     margin-bottom: 15px;
@@ -35,10 +39,12 @@ button.boton_registrarse {
     font-family: 'Open Sans', sans-serif;
     font-size: 1.2rem;
     background-color: #FFFFFF;
-    border-radius: 20px;
-    padding: 3px 25px;
     border: 2px solid #EBCA9A;
     color: #EBCA9A;
+    width: 100%;
+    padding: 0.9rem;
+    border-radius: 999px;
+    font-weight: 500;
     /*EFECTOS*/
     transition: all 0.3s ease 0s;
 }
