@@ -6,7 +6,7 @@ import Link from "next/link";
 export default function FooterPrincipal() {
     return (
         <div className="col-md-12">
-          <div className="pie_pagina_index fixed-bottom">
+          <div className="pie_pagina_index">
             <ul className="nav justify-content-center">
               <li className="nav-item">
                 <Link className="nav-link pie_pagina_links tad" href="https://joyful-palmier-7fd55a.netlify.app/" aria-current="page" target="_blank">
