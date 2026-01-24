@@ -14,10 +14,24 @@ h3.subtitulo_h3 {
 div.contenedor_formulario{
     text-align: center;
 }
+/* Descripcion */
+.descripcion {
+    font-size: 0.95rem;
+    color: #4b4b4b;
+    margin-top: 0.25rem;
+    margin-bottom: 1.5rem;
+  }
+  
 /* contenedor inputs login */
 div.contenedor_inputs_login {
     margin-bottom: 20px;
 }
+/* Labels */
+.label {
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 0.25rem;
+  }  
 /*Inputs formulario*/
 input.inputs_crear_cuenta{
     border-radius: 20px;
@@ -41,6 +55,20 @@ button.boton_registrarse {
     /*EFECTOS*/
     transition: all 0.3s ease 0s;
 }
+/* Boton con estado loading */
+.boton_registrarse:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+/* Errores */
+.error_servidor {
+    font-size: 0.9rem;
+    color: #b02a37;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
 /*Hover boton*/
 button.boton_registrarse:hover {
     background-color: #EBCA9A;

@@ -23,6 +23,14 @@ h3.subtitulo_h3 {
 div.contenedor_input {
     margin-bottom: 15px;
 }
+/* Labels */
+.label {
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 0.25rem;
+    display: block;
+  }
+  
 /*Inputs formulario*/
 input.inputs_crear_cuenta{
     border-radius: 20px;

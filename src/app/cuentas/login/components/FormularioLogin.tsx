@@ -94,34 +94,69 @@ export default function FormularioLogin() {
     };
     
     return (
-        <form className="formulario_crear_cuenta" onSubmit={handleSubmit} noValidate>
-            <div className={`${loginEstilos.contenedor_inputs_login}`}>
-                <input 
-                    type="text" 
-                    className={`form-control ${loginEstilos.inputs_crear_cuenta} ${errors.correo ? 'is-invalid' : ''}`} 
-                    id="correo" 
-                    aria-describedby="correo" 
-                    placeholder="Correo electrónico" 
-                    value={formData.correo}
-                    onChange={handleChange}
-                />
-                {errors.correo && <div className="invalid-feedback">{errors.correo}</div>}
-            </div>
-            <div className={`${loginEstilos.contenedor_inputs_login}`}>
-                <input 
-                    type="password" 
-                    className={`form-control ${loginEstilos.inputs_crear_cuenta} ${errors.password ? 'is-invalid' : ''}`} 
-                    id="password" 
-                    placeholder="Contraseña" 
-                    value={formData.password}
-                    onChange={handleChange}
-                />
-                {errors.password && <div className="invalid-feedback">{errors.password}</div>}
-            </div>
-            {serverError && <div className="alert alert-danger">{serverError}</div>}
-            <button type="submit" className={`${loginEstilos.boton_registrarse}`} disabled={loading}>
-                {loading ? 'Iniciando...' : 'Iniciar sesión'}
-            </button>
-        </form>
+      <form
+        className={loginEstilos.formulario_login}
+        onSubmit={handleSubmit}
+        noValidate
+      >
+        {/* Correo */}
+        <div className={loginEstilos.contenedor_inputs_login}>
+          <label htmlFor="correo" className={loginEstilos.label}>
+            Correo electrónico
+          </label>
+          <input
+            type="email"
+            className={`form-control ${loginEstilos.inputs_crear_cuenta} ${
+              errors.correo ? 'is-invalid' : ''
+            }`}
+            id="correo"
+            placeholder="tucorreo@ejemplo.com"
+            value={formData.correo}
+            onChange={handleChange}
+            autoComplete="email"
+          />
+          {errors.correo && (
+            <div className="invalid-feedback">{errors.correo}</div>
+          )}
+        </div>
+      
+        {/* Password */}
+        <div className={loginEstilos.contenedor_inputs_login}>
+          <label htmlFor="password" className={loginEstilos.label}>
+            Contraseña
+          </label>
+          <input
+            type="password"
+            className={`form-control ${loginEstilos.inputs_crear_cuenta} ${
+              errors.password ? 'is-invalid' : ''
+            }`}
+            id="password"
+            placeholder="••••••••"
+            value={formData.password}
+            onChange={handleChange}
+            autoComplete="current-password"
+          />
+          {errors.password && (
+            <div className="invalid-feedback">{errors.password}</div>
+          )}
+        </div>
+      
+        {/* Error servidor */}
+        {serverError && (
+          <p className={loginEstilos.error_servidor}>
+            {serverError}
+          </p>
+        )}
+      
+        {/* Botón */}
+        <button
+          type="submit"
+          className={loginEstilos.boton_registrarse}
+          disabled={loading}
+        >
+          {loading ? 'Iniciando sesión…' : 'Iniciar sesión'}
+        </button>
+      </form>
+    
     );
 }
