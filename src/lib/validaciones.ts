@@ -7,7 +7,7 @@ export const usuarioSchema = z.object({
     nombre: z.string().min(1, { message: "El nombre es requerido" }),
     apellido: z.string().min(1, { message: "El apellido es requerido" }),
     correo: z.string().email({ message: "Ingresa un correo válido" }),
-    password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres" })
+    password: z.string().min(8, { message: "La contraseña debe tener al menos 8 caracteres" })
 });
 // Tipo derivado del esquema
 export type UsuarioSchema = z.infer<typeof usuarioSchema>;
