@@ -42,6 +42,11 @@ export default function CrearCuenta() {
 					<p className={`${crearCuenta.pregunta}`}>¿Tienes una cuenta? 
                         <Link href="/cuentas/login" className={`${crearCuenta.enlace_iniciar_sesion}`}>Entrar</Link>
                     </p>
+					<p className="text-center mt-3">
+						<Link href="/" className={`text-decoration-none text-black`}>
+							Volver al inicio
+						</Link>
+					</p>
 				</div>
 				{/* Footer */}
                 <FooterMain />

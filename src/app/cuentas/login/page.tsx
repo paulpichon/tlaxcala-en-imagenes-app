@@ -36,6 +36,11 @@ export default function IniciarSesion() {
               >
                 ¿Olvidaste tu contraseña?
               </Link>
+              <p className="text-center mt-3">
+								<Link href="/" className={`${login.enlace_recuperar_password}`}>
+									Volver al inicio
+								</Link>
+							</p>
             </div>
           </div>
         </div>

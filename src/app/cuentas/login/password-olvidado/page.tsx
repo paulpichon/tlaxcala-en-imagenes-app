@@ -15,6 +15,7 @@ import FooterMain from "../../../components/FooterMain";
 import { envioCorreoRestablecerPassword } from "@/lib/actions";
 // Validacion de correo electronico desde usuarioschema usando un .pick()
 import { correoSchema } from "@/lib/validaciones";
+import Link from "next/link";
 
 // Tiempo 5 minutos
 const FIVE_MINUTES_MS = 5 * 60 * 1000;
@@ -147,11 +148,17 @@ export default function PasswordOlvidada() {
 					<div className={`${passwordOlvidado.contenedor_formulario}`}>
 						<div className={`${passwordOlvidado.contenedor_titulos}`}>
 							<h3 className={`${passwordOlvidado.subtitulo_h3}`}>Recuperar contraseña</h3>
-                            <p className={`${passwordOlvidado.texto}`}>Introduce tu correo electrónico</p>
+                            <p className={passwordOlvidado.texto}>
+								Te enviaremos un correo con instrucciones para restablecer tu contraseña.
+							</p>
+
 						</div>
 						<div className={`${passwordOlvidado.contenedor_formulario}`}>
 						<form className="formulario_crear_cuenta" id="iniciar_sesion" onSubmit={handleSubmit}>
 							<div className="mb-4">
+								<label className={passwordOlvidado.label} htmlFor="correo">
+									Correo electrónico
+								</label>
 								<input
 									type="email"
 									className={`form-control ${passwordOlvidado.inputs_crear_cuenta} ${validationError ? "is-invalid" : ""}`}
@@ -172,10 +179,16 @@ export default function PasswordOlvidada() {
 								className={`${passwordOlvidado.boton_registrarse}`}
 								disabled={cargando || botonDeshabilitado}
 							>
-								{cargando ? "Enviando..." : botonDeshabilitado ? "Espera unos minutos..." : "Recuperar contraseña"}
+								{/* {cargando ? "Enviando..." : botonDeshabilitado ? "Espera unos minutos..." : "Recuperar contraseña"} */}
+								{cargando
+									? "Enviando..."
+									: botonDeshabilitado
+									? "Correo enviado"
+									: "Recuperar contraseña"}
+
 							</button>
 								{botonDeshabilitado && tiempoRestante !== null && (
-								<p className="text-danger mt-2">
+								<p className="text-muted mt-2 small">
 									Puedes volver a intentarlo en {Math.floor(tiempoRestante / 60)}:
 									{String(tiempoRestante % 60).padStart(2, '0')} minutos
 								</p>
@@ -183,6 +196,12 @@ export default function PasswordOlvidada() {
 								{mensaje && <div className="alert alert-success mt-3">{mensaje}</div>}
 								{error && <div className="alert alert-danger mt-3">{error}</div>}
 							</form>
+							{/* Volver a iniciar sesion */}
+							<p className="text-center mt-3">
+								<Link href="/cuentas/login" className={`text-decoration-none text-black ${passwordOlvidado.enlace}`}>
+									Volver a iniciar sesión
+								</Link>
+							</p>
 						</div>
 					</div>
 				</div>
