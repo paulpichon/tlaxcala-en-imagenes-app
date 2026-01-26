@@ -17,6 +17,7 @@ import  {  reenviarCorreo,
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer
 import FooterMain from "@/app/components/FooterMain";
+import Link from "next/link";
 // Rutas de la paginas de registro y restablecer contraseña
 const rutas = {
   registro: "/cuentas/confirmacion/correo-enviado",
@@ -140,13 +141,13 @@ export default function CorreoEnviado() {
   const mensajes = {
     [rutas.registro]: {
       titulo: "Cuenta registrada",
-      texto:
-        "Te enviamos un correo electrónico con un link para poder verificar tu registro, ten en cuenta que el link solo estará activo por una hora. Si no lo encuentras en tu bandeja de entrada, busca en correo no deseado o en spam."
+        textoUno: "Te enviamos un correo electrónico con un enlace para continuar la verificación de tu registro.",
+        textoDos: "El enlace estará activo por 1 hora. Si no lo encuentras, revisa spam o correo no deseado."
     },
     [rutas.restablecer]: {
       titulo: "Correo enviado",
-      texto:
-        "Te enviamos un correo electrónico con un link para poder restablecer tu contraseña, ten en cuenta que el link solo estará activo por una hora. Si no lo encuentras en tu bandeja de entrada, busca en correo no deseado o en spam."
+      textoUno: "Te enviamos un correo electrónico con un enlace para restablecer tu contraseña.",
+      textoDos: "El enlace estará activo por 1 hora. Si no lo encuentras, revisa spam o correo no deseado."
     }
   };
   // Se obtiene el mensaje dependiendo de la ruta
@@ -160,13 +161,24 @@ export default function CorreoEnviado() {
         <div className={`${estilosCorreoEnviado.contenedor_formulario} d-block`}>
           <div className={estilosCorreoEnviado.contenedor_titulos}>
             <h3 className={estilosCorreoEnviado.subtitulo_h3}>{contenido.titulo}</h3>
-            <p className={estilosCorreoEnviado.texto}>{contenido.texto}</p>
+            <div className={estilosCorreoEnviado.icono}>
+              ✓
+            </div>
+
+            <p className={estilosCorreoEnviado.texto}>{contenido.textoUno}</p>
+            <p className={estilosCorreoEnviado.texto}>{contenido.textoDos}</p>
           </div>
           <div className={`${estilosCorreoEnviado.contenedor_formulario} d-block`}>
-            <a href="#" className={`${estilosCorreoEnviado.texto} d-block`} onClick={openModal}>
+            <a className={estilosCorreoEnviado.reenviar} onClick={openModal}>
               ¿No recibiste el correo electrónico?
             </a>
           </div>
+          {pathname === rutas.restablecer && (
+            <Link href="/cuentas/login" className="text-decoration-none mt-3 d-inline-block text-black">
+              Volver a iniciar sesión
+            </Link>
+          )}
+
         </div>
       </div>
       <FooterMain />

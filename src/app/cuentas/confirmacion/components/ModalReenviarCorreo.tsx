@@ -1,6 +1,8 @@
 'use client';
 // interface ModalReenviarCorreoProps 
 import { ModalReenviarCorreoProps } from "@/types/types";
+// CSS
+import styles from "../../../ui/cuentas/confirmacion/correo-enviado/CorreoEnviado.module.css";
 
 const ModalReenviarCorreo: React.FC<ModalReenviarCorreoProps> = ({
   show,
@@ -15,8 +17,6 @@ const ModalReenviarCorreo: React.FC<ModalReenviarCorreoProps> = ({
 }) => {
     // Si el modal no se debe mostrar, se retorna null
     if (!show) return null;
-    // estilos del mensaje dependiendo de si es un error o un exito
-    const estiloMensaje = esExito == null ? {} : { color: esExito ? 'green' : 'red' };
 
     const renderBotonReenvio = () => {
         // Si la cuenta ya fue verificada, no se muestra el boton de reenvio
@@ -30,10 +30,10 @@ const ModalReenviarCorreo: React.FC<ModalReenviarCorreoProps> = ({
                 disabled={bloqueado}
             >
                 {bloqueado ? (
-                <span className="text-danger">
+                <small className="text-muted">
                     Puedes reenviar en {Math.floor((tiempoRestante || 0) / 60)}:
                     {String((tiempoRestante || 0) % 60).padStart(2, '0')} minutos
-                </span>
+                </small>
                 ) : (
                 "Reenviar correo electrónico"
                 )}
@@ -54,7 +54,7 @@ const ModalReenviarCorreo: React.FC<ModalReenviarCorreoProps> = ({
             <div className="modal-dialog modal-dialog-centered">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h1 className="modal-title fs-5">¿No recibiste el correo electrónico?</h1>
+                        <h1 className="modal-title fs-5">Reenviar correo</h1>
                         <button
                         type="button"
                         className="btn-close"
@@ -63,8 +63,16 @@ const ModalReenviarCorreo: React.FC<ModalReenviarCorreoProps> = ({
                         />
                     </div>
                     <div className="modal-body text-center">
+                        <p className="text-muted small mb-3">
+                            El correo puede tardar unos minutos en llegar.
+                        </p>
+                        {mensaje && (
+                            <p className={esExito ? styles.mensajeExito : styles.mensajeError}>
+                                {mensaje}
+                            </p>
+                        )} 
+                        {/* Reenviar correo */}
                         {renderBotonReenvio()}
-                        {mensaje && <p style={estiloMensaje}>{mensaje}</p>}
                     </div>
                 </div>
             </div>

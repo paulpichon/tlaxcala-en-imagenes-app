@@ -28,7 +28,36 @@ button.boton_reenviar_correo {
     background-color: transparent;
     border: none;
 }
+/* Icono check ok todo bien */
+.icono {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #EBCA9A;
+    color: #000;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+/* Reenviar */
+.reenviar {
+    color: #555;
+    font-size: 0.85rem;
+    text-decoration: underline;
+    cursor: pointer;
+}
+/* Modal reenviar correo */
+.mensajeExito {
+    color: #2e7d32;
+    font-size: 0.9rem;
+}
 
+.mensajeError {
+    color: #c62828;
+    font-size: 0.9rem;
+}  
 /*X-Small devices (portrait phones, less than 576px)*/
 /* No media query for `xs` since this is the default in Bootstrap*/
 
