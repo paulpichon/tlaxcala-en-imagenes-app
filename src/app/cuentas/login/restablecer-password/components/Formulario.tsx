@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { resetPasswordSchema, ResetPasswordSchema } from "@/lib/validaciones";
+import styles from "@/app/ui/cuentas/login/restablecer-password/RestablecerPassword.module.css";
 
 export default function FormularioNuevaPassword({ token }: { token: string }) {
 	const {
@@ -57,6 +58,7 @@ export default function FormularioNuevaPassword({ token }: { token: string }) {
 	return (
 		<form onSubmit={handleSubmit(onSubmit)} className="formulario_crear_cuenta">
 			<div className="mb-4">
+				<label className="form-label">Nueva contraseña</label>
 				<input
 					type="password"
 					className="form-control"
@@ -68,6 +70,7 @@ export default function FormularioNuevaPassword({ token }: { token: string }) {
 			</div>
 
 			<div className="mb-4">
+			<label className="form-label">Repite tu contraseña</label>
 				<input
 					type="password"
 					className="form-control"
@@ -80,7 +83,11 @@ export default function FormularioNuevaPassword({ token }: { token: string }) {
 
 			{serverError && <p className="text-danger mt-1">{serverError}</p>}
 
-			<button type="submit" className="btn btn-primary" disabled={loading}>
+			<button 
+				type="submit" 
+				className={`btn ${styles.boton_registrarse}`} 
+				disabled={loading}
+			>
 				{loading ? (
 					<>
 						<span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>

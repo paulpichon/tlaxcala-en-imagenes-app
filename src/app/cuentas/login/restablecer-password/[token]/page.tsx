@@ -11,12 +11,7 @@ import FooterMain from "@/app/components/FooterMain";
 import FormularioNuevaPassword from "../components/Formulario";
 // Importar la funcion para validar el token
 import { validarTokenRestablecerPassword } from "@/lib/actions";
-
-// type Props = {
-// 	params: {
-// 	  token: string;
-// 	};
-// };
+import Link from "next/link";
 
 // export default async function RestablecerPassword({ params }: Props) {
 export default async function RestablecerPassword({ 
@@ -45,7 +40,13 @@ export default async function RestablecerPassword({
 						<div className={`${restaPasssword.contenedor_formulario}`}>
 							<div className={`${restaPasssword.contenedor_titulos}`}>
 								<h3 className={`${restaPasssword.subtitulo_h3}`}>Reestablecer contraseña</h3>
-								<p className={`${restaPasssword.texto}`}>Introduce tu nueva contraseña</p>
+								<div className={restaPasssword.icono}>
+									🔒
+								</div>
+								<p className={restaPasssword.texto}>
+									Elige una nueva contraseña segura para tu cuenta.
+								</p>
+
 							</div>
 							{/* Formulario para restablecer la contraseña */}
 							{/* Se le pasa el token como prop al formulario */}
@@ -57,8 +58,11 @@ export default async function RestablecerPassword({
 						</div>
 					) : (
 						<div className="text-center mt-5">
-							<h3>Token inválido o expirado</h3>
-							<p>Por favor solicita nuevamente el restablecimiento de contraseña.</p>
+							<h3>Este enlace ya no es válido</h3>
+							<p>Por seguridad, los enlaces para cambiar contraseña solo funcionan por tiempo limitado.</p>
+							<Link className="text-decoration-none text-black" href="/cuentas/login/password-olvidado">
+								Solicitar uno nuevo
+							</Link>
 						</div>
 					)}
 				</div>
