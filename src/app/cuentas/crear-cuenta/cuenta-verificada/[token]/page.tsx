@@ -31,15 +31,29 @@ export default async function CuentaVerificada ({
                         <div className={cuentaVerificada.contenedor_formulario}>
                             {data.ok ? (
                                 <div className={cuentaVerificada.contenedor_titulos}>   
-                                    <h3 className={cuentaVerificada.subtitulo_h3}>Cuenta verificada</h3>
-                                    <p className={cuentaVerificada.texto}>Ahora puedes  
-                                        <Link className={cuentaVerificada.link_inciar_sesion} href="/cuentas/login"> iniciar sesión.</Link>
+                                    {/* <h3 className={cuentaVerificada.subtitulo_h3}>Cuenta verificada</h3> */}
+                                    <h3>¡Tu cuenta ha sido verificada!</h3>
+                                    <p>
+                                        Ya puedes iniciar sesión y comenzar a usar TlaxApp.
                                     </p>
+
+                                        <div className={cuentaVerificada.icono}>
+                                            ✅
+                                        </div>
+                                        <Link
+                                            href="/cuentas/login"
+                                            className={cuentaVerificada.boton_login}
+                                        >
+                                            Iniciar sesión
+                                        </Link>
                                 </div>    
                             ) : (
                                 <div className={cuentaVerificada.contenedor_titulos}>   
-                                    <h3 className={cuentaVerificada.subtitulo_h3}>Token inválido o ha expirado.</h3>
-                                    <p className={cuentaVerificada.texto}><Link className={cuentaVerificada.link_inciar_sesion} href="/cuentas/login"> iniciar sesión</Link>
+                                    <h3>Este enlace ya no es válido</h3>
+                                    <p>
+                                        Por seguridad, los enlaces de verificación tienen un tiempo limitado.
+                                    </p>
+                                    <p className={cuentaVerificada.texto}><Link className={cuentaVerificada.link_inciar_sesion} href="/cuentas/login"> Iniciar sesión</Link>
                                     </p>
                                 </div> 
                             )}
