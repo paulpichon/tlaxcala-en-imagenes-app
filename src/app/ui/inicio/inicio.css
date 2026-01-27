@@ -12,14 +12,12 @@
     border-bottom: 1px solid #eee;
     background-color: #fff;
 }
-
 .header_marca {
     display: flex;
     align-items: center;
     gap: 8px;
     text-decoration: none;
 }
-
 .titulo_header_superior_app {
     font-size: 1.1rem;
     font-weight: 600;
