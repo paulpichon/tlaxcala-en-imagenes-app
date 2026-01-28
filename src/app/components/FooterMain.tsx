@@ -14,18 +14,18 @@ export default function FooterPrincipal() {
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link pie_pagina_links" href="/informacion">
+                <Link className="nav-link pie_pagina_links" href="/legal/informacion">
                     Información
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link pie_pagina_links" href="/politica-de-privacidad">
+                <Link className="nav-link pie_pagina_links" href="/legal/politica-de-privacidad" target="_blank">
                     Política de Privacidad
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link pie_pagina_links" href="/condiciones-de-servicio">
-                    Condiciones de Servicio
+                <Link className="nav-link pie_pagina_links" href="/legal/terminos-y-condiciones" target="_blank">
+                    Términos y Condiciones
                 </Link>
               </li>
             </ul>

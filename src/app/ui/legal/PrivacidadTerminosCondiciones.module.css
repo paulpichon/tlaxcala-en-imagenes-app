@@ -1,0 +1,87 @@
+/* Contenedor principal */
+.contenedor_formulario {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 2.5rem 2.5rem;
+  margin: 2rem 0;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+}
+
+/* Encabezado */
+.contenedor_titulos {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.titulo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #111111;
+  margin-bottom: 0.5rem;
+}
+
+.fecha {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+/* Contenido */
+.contenido {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #333333;
+}
+
+/* Párrafos */
+.contenido p {
+  margin-bottom: 1rem;
+}
+
+/* Títulos de sección */
+.contenido h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  color: #111111;
+}
+
+/* Subtítulos */
+.contenido h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: #222222;
+}
+
+/* Listas */
+.contenido ul {
+  padding-left: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.contenido li {
+  margin-bottom: 0.4rem;
+}
+
+/* Negritas */
+.contenido strong {
+  font-weight: 600;
+  color: #000000;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .contenedor_formulario {
+    padding: 1.5rem 1.2rem;
+  }
+
+  .titulo {
+    font-size: 1.5rem;
+  }
+
+  .contenido {
+    font-size: 0.9rem;
+  }
+}
