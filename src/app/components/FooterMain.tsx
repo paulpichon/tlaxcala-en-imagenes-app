@@ -21,8 +21,12 @@ export default function FooterMain() {
           </li>
 
           <li className="nav-item">
-            <Link className="nav-link pie_pagina_links" href="/legal/informacion">
-              Información
+            <Link 
+              className="nav-link pie_pagina_links" 
+              href="/contacto" 
+              target="_blank"
+            >
+              Contacto
             </Link>
           </li>
 
