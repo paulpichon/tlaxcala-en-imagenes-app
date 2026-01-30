@@ -43,8 +43,8 @@ export default function CrearCuenta() {
                         <Link href="/cuentas/login" className={`${crearCuenta.enlace_iniciar_sesion}`}>Entrar</Link>
                     </p>
 					<p className="text-center mt-3">
-						<Link href="/" className={`text-decoration-none text-black`}>
-							Volver al inicio
+						<Link href="/" className="btn  btn-sm">
+							← Volver al inicio
 						</Link>
 					</p>
 				</div>

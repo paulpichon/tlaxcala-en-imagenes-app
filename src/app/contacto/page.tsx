@@ -7,6 +7,7 @@ import contacto from "@/app/ui/legal/PrivacidadTerminosCondiciones.module.css";
 // Header y Footer
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 import FooterMain from "@/app/components/FooterMain";
+import Link from "next/link";
 
 export default function Contacto() {
   return (
@@ -72,7 +73,12 @@ export default function Contacto() {
             </div>
           </div>
         </div>
-
+        {/* Boton para volver al inicio */}
+        <div className="text-center mt-4">
+          <Link href="/" className="btn btn-outline-secondary btn-sm">
+            ← Volver al inicio
+          </Link>
+        </div>
         {/* Footer */}
         <FooterMain />
       </div>

@@ -198,9 +198,9 @@ export default function PasswordOlvidada() {
 							</form>
 							{/* Volver a iniciar sesion */}
 							<p className="text-center mt-3">
-								<Link href="/cuentas/login" className={`text-decoration-none text-black ${passwordOlvidado.enlace}`}>
-									Volver a iniciar sesión
-								</Link>
+							<Link href="/" className="btn  btn-sm">
+								← Volver al inicio
+							</Link>
 							</p>
 						</div>
 					</div>

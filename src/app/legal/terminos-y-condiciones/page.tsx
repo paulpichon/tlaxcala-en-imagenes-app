@@ -7,6 +7,7 @@ import condiciones from "@/app/ui/legal/PrivacidadTerminosCondiciones.module.css
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 // Footer principal
 import FooterMain from "@/app/components/FooterMain";
+import Link from "next/link";
 
 export default function TerminosCondicionesServicio() {
   return (
@@ -349,7 +350,12 @@ export default function TerminosCondicionesServicio() {
             </div>
           </div>
         </div>
-
+        {/* Boton para volver al inicio */}
+        <div className="text-center mt-4">
+          <Link href="/" className="btn btn-outline-secondary btn-sm">
+            ← Volver al inicio
+          </Link>
+        </div>
         {/* Footer */}
         <FooterMain />
       </div>

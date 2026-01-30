@@ -174,8 +174,8 @@ export default function CorreoEnviado() {
             </a>
           </div>
           {pathname === rutas.restablecer && (
-            <Link href="/cuentas/login" className="text-decoration-none mt-3 d-inline-block text-black">
-              Volver a iniciar sesión
+            <Link href="/" className="btn  btn-sm">
+              ← Volver a iniciar sesión
             </Link>
           )}
 
