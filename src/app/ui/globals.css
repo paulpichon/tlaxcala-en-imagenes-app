@@ -199,7 +199,12 @@ a.postear {
 }
 /* Fin Estilos par ael boton de obtener ubicacion automaticamente */
 
-
+/* ! Esto corrige el 60% del problema del reecalado de las imagenes: aveces se desproporcionaban en cuanto el tamaño */
+/* contenerdor central */
+.contenedor_central_contenido {
+  max-width: 620px!important; /* similar a Twitter */
+  margin: 0 auto!important;
+}
 /*
 *
 *   Div publicidad/sugerencias
