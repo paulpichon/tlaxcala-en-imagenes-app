@@ -16,54 +16,33 @@ div.contenedor_tei_index{
   text-align: center;
   margin-top: 20px;
 }
-/*Titulo Tlaxcala En Imágenes*/
-h1.titulo_principal_h1{
-  color: #EBCA9A;
-  font-family: 'League Gothic', sans-serif;
-  font-size: 2.7rem;
-}
-/*subtitulo_h6 por tad*/
-h6.subtitulo_h6 {
-  font-family: 'Open Sans', sans-serif;
-}
-/*span_tad TAD*/
-span.span_tad {
-  color: #EBCA9A;
-  font-weight: bold;
-  margin-left: 70px;
-  margin-top: 8px;
-}
 /*
   FIN HEADER PRINCIPAL
 */
 
-/*
-*
-  Header principal superior de APP
-*
-*/
-div.contenedor_menu_superior{
-  text-align: center;
-  background-color: rgba(255,255,255,0.95);
-  border-bottom: 1px solid #EBCA9A;
+/*! ESTILOS DEL NUEVO HEADER  */
+/* Estilos header principal logo + tlaxapp */
+.menu_superior_central {
+    display: flex;
+    justify-content: center; /* o flex-start si lo quieres a la izquierda */
+    align-items: center;
+    height: 56px;
+    border-bottom: 1px solid #eee;
+    background-color: #fff;
 }
-/*Titulo Tlaxcala En Imágenes*/
-h1.titulo_header_superior_app{
-    margin-top: 10px;
-    color: #EBCA9A;
-    font-family: 'League Gothic', sans-serif;
-    font-size: 1.8rem;
+.header_marca {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
 }
-/*mostrar_h6_por por tad*/
-h6.mostrar_h6_por {
-    display: none;
+.titulo_header_superior_app {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #000;
+    letter-spacing: 0.3px;
 }
-/*Fin Titulo Tlaxcala En Imágenes*/
-/*
-*
-  Fin Header principal superior de APP
-*
-*/
+/* Fin Estilos header principal logo + tlaxapp */
 
 
 /*Menu inferior*/
@@ -280,10 +259,7 @@ Spinner de carga
   /* 
       HEADER BIENVENIDA A LA APP
   */
-  /*subtitulo_h6 POR*/
-  h6.subtitulo_h6 {
-    font-size: 1.5rem;
-  }
+ 
   /*span_tad TAD*/
   span.span_tad {
     font-size: 1.1rem;
@@ -299,9 +275,7 @@ Spinner de carga
   * HEADER PRINCIPAL DE LA APP
   *
   */
-  h1.titulo_header_superior_app{
-      font-size: 2.4rem;
-  }
+
   /*Fin Titulo Tlaxcala En Imágenes*/
   /* Icono del menu react icons */
   .icono_menu {
@@ -339,16 +313,8 @@ Spinner de carga
   /* 
       HEADER BIENVENIDA A LA APP
   */
-  /*Titulo Tlaxcala En Imágenes*/
-  h1.titulo_principal_h1{
-    font-size: 4rem;
-  }
   /*subtitulo_h6 POR*/
   h6.subtitulo_h6 {
-      font-size: 1rem;
-  }
-  /*span_tad TAD*/
-  span.span_tad {
       font-size: 1rem;
   }
   /* 
@@ -362,35 +328,7 @@ Spinner de carga
     /* Dar un padding al contenedor central */
     padding: 0 10px 10px 10px;
 }
-/*
-*
-*Titulo Tlaxcala En Imágenes
-*
-*/
-h1.titulo_header_superior_app{
-    font-size: 4rem;
-}
-/*mostrar_h6_por por tad*/
-h6.mostrar_h6_por {
-    display: block;
-    font-family: 'Open Sans', sans-serif;
-}
-/*Por TAD*/
-h6.mostrar_h6_por {
-    font-size: 0.9rem;
-}
-/*span_tad_header_app TAD*/
-span.span_tad_header_app {
-    color: #EBCA9A;
-    font-weight: bold;
-    margin-left: 70px;
-    font-size: .8rem;
-}
-/*
-*
-Fin Titulo Tlaxcala En Imágenes
-*
-*/
+
 
 /*Contenedor menu lateral-superior*/
 div.contenedor_menu_lateral_inferior {
@@ -437,21 +375,6 @@ li.nav-item{
 
 /* Large devices (desktops, 992px and up)*/
 @media (min-width: 992px) {
-  /* 
-    HEADER BIENVENIDA A LA APP
-  */
-  /*Titulo Tlaxcala En Imágenes*/
-  h1.titulo_principal_h1{
-    font-size: 4rem;
-  }
-  /*span_tad TAD*/
-  span.span_tad {
-      font-size: 0.8rem;
-      margin-top: 0px;
-  }
-  /* 
-    FIN HEADER BIENVENIDA A LA APP
-  */
   /*pie_pagina_index*/
   div.pie_pagina_index{
       padding: 10px;
@@ -468,20 +391,6 @@ li.nav-item{
 
 /*X-Large devices (large desktops, 1200px and up)*/
 @media (min-width: 1200px) {
-  /* 
-    HEADER BIENVEIDA A LA APP
-  */
-  /*Titulo Tlaxcala En Imágenes*/
-  h1.titulo_principal_h1{
-    font-size: 5rem;
-  }
-  /*span_tad TAD*/
-  span.span_tad {
-      font-size: 0.9rem;
-  }
-  /*  
-    FIN HEADER BIENVENIDA A LA APP
-  */
 
   /* Div publicidad/sugerencias */
     /* Se muestra el DIV SUGERENCIAS */
@@ -547,7 +456,6 @@ li.nav-item{
 *
 */
 }
-
 /* XX-Large devices (larger desktops, 1400px and up)*/
 @media (min-width: 1400px) {
   /*este contenedor es igual a container-xxl de bootstrap*/
@@ -562,18 +470,6 @@ li.nav-item{
       margin-right: auto;
       margin-left: auto;
       max-width: 1320px;
-  }
-  /*Titulo Tlaxcala En Imágenes*/
-  h1.titulo_principal_h1{
-    font-size: 6rem;
-  }
-  /*subtitulo_h6 por tad*/
-  h6.subtitulo_h6 {
-    font-size: 1.2rem;
-  }
-  /*span_tad TAD*/
-  span.span_tad {
-    font-size: 1.3rem;
   }
   /*Contenedor de pie de pagina index*/
   div.pie_pagina_index {
