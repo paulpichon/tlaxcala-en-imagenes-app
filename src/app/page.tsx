@@ -2,7 +2,6 @@
 // Next
 import Link from "next/link";
 import Image from "next/image";
-import type { Viewport } from "next";
 
 // Bootstrap
 import "bootstrap/dist/css/bootstrap.css";
@@ -14,15 +13,8 @@ import styles from "./ui/Home.module.css";
 import FooterMain from "./components/FooterMain";
 import AlreadyAuthRedirect from "@/components/AlreadyAuthRedirect";
 
-// Assets
+// Asset
 import iconoTlaxapp from "@/../public/assets/icono-tlaxapp-blanco.png";
-
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-};
 
 export default function Home() {
   return (
@@ -32,7 +24,7 @@ export default function Home() {
           <div className={styles.heroContent}>
             <Image
               src={iconoTlaxapp}
-              alt="TlaxApp"
+              alt="TlaxApp, la red social de Tlaxcala"
               width={200}
               height={200}
               priority
