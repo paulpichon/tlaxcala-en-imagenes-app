@@ -66,12 +66,12 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
       <div className="container mt-4">
         <div className="row align-items-center">
           {/* Imagen perfil */}
-          <div className="col-sm-12 col-md-4 text-center">
+          <div className="col-sm-12 col-md-4 text-center mb-3 mb-md-0">
             <div
               className="position-relative d-inline-block"
               style={{
-                width: "150px",
-                height: "150px",
+                width: "100px",
+                height: "100px",
                 cursor: isOwnProfile ? "pointer" : "default",
               }}
               onClick={() => isOwnProfile && setShowModal(true)}
@@ -81,8 +81,8 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
               <Image
                 priority
                 src={imagenPerfil}
-                width={150}
-                height={150}
+                width={100}
+                height={100}
                 className={`rounded-circle object-cover`}
                 alt={`Imagen de perfil de @${usuario.url}`}
               />

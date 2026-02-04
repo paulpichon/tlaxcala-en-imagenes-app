@@ -16,7 +16,13 @@ export default function PerfilHeader({ url, imagenPerfil, onCambiarFoto }: Perfi
       <em className="fs-5 fw-bold mb-3">{`@${url}`}</em>
       <div className="position-relative mb-3">
         <div className="rounded-circle overflow-hidden position-relative" style={{ width: '128px', height: '128px' }}>
-          <Image src={imagenPerfil} alt="Foto de perfil" fill className="object-cover rounded-circle" />
+          <Image 
+            priority
+            src={imagenPerfil} 
+            alt="Foto de perfil" 
+            fill 
+            className="object-cover rounded-circle" 
+          />
         </div>
         <button
           onClick={onCambiarFoto}
