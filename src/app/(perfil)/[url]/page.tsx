@@ -1,7 +1,6 @@
 "use client";
 
 import "bootstrap/dist/css/bootstrap.css";
-import "../../ui/inicio/inicio.css";
 import { useParams } from "next/navigation";
 import PerfilUsuarioContainer from "@/app/components/perfil/PerfilUsuarioContainer";
 
