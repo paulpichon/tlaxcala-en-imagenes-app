@@ -14,10 +14,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           priority: 0.6,
         },
         {
-          url: `${baseUrl}/cuentas/login/password-olvidado`,
-          priority: 0.6,
-        },
-        {
           url: `${baseUrl}/cuentas/crear-cuenta`,
           priority: 0.6,
         },
