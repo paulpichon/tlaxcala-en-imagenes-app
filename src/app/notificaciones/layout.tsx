@@ -1,43 +1,38 @@
-// Inicio
+// Notificaciones
 // Se usara Layouts Anidados en la estructura del proyecto
 // https://chatgpt.com/c/674542f3-d5bc-8002-847c-c817ca29ba97
 
-// Meta datos NEXTJS
-import { Metadata } from "next";
-// Fonts
-import "../ui/fonts";
+// ❌ NO incluir metadata aquí - se define en page.tsx para mayor flexibilidad
+// ❌ NO incluir <html>, <body>, <head> - solo en el layout raíz (src/app/layout.tsx)
+// ✅ Este layout solo contiene providers y componentes de protección
+
+// Componente de protección de rutas
 import ProtectedRoute from "@/components/ProtectedRoute";
+// Contextos globales
 import { FollowProvider } from "@/context/FollowContext";
 import { FavoritoProvider } from "@/context/FavoritoContext";
-// metadatos
-export const metadata: Metadata = {
-    title: "TlaxApp | Notificaciones",
-    description: "El lugar donde encuentras gente de Tlaxcala",
-  };
 
-export default function RootLayout({
-    children,
-  }: Readonly<{
-    children: React.ReactNode;
-  }>) {
-    return (
-      <html lang="es">
-        <head>
-            <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-            />
-        </head>
-        
-        <body>
-          <ProtectedRoute>
-            <FollowProvider>
-              <FavoritoProvider>
-                {children}
-              </FavoritoProvider>
-             </FollowProvider>
-          </ProtectedRoute>
-        </body>
-      </html>
-    );
-  }
+/**
+ * Layout anidado para la página de notificaciones
+ * - Protege la ruta con autenticación
+ * - Provee contextos de seguimiento y favoritos
+ * - No incluye metadata (se define en page.tsx)
+ */
+export default function NotificacionesLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    // Ruta protegida - requiere autenticación
+    <ProtectedRoute>
+      {/* Provider para funcionalidad de seguir/dejar de seguir usuarios */}
+      <FollowProvider>
+        {/* Provider para funcionalidad de favoritos */}
+        <FavoritoProvider>
+          {children}
+        </FavoritoProvider>
+      </FollowProvider>
+    </ProtectedRoute>
+  );
+}
