@@ -18,7 +18,7 @@ import CorreoEnviado from "../components/CorreoEnviado";
  */
 export const metadata: Metadata = {
   // Título que aparecerá en la pestaña del navegador
-  title: "Correo Enviado | Restablecer Contraseña",
+  title: "Restablecer Contraseña",
   
   description: "Hemos enviado las instrucciones para restablecer tu contraseña a tu correo electrónico.",
   
