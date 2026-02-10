@@ -1,73 +1,85 @@
-// Página password restablecida
-"use client";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-// bootstrap
-import "bootstrap/dist/css/bootstrap.css";
-// estilos de la pagina CSS modules
-import styPassRes from "../../../ui/cuentas/confirmacion/password-restablecido/PasswordRestablecido.module.css";
-// Header principal
-import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
-// Footer principal
-import FooterPrincipal from "@/app/components/FooterMain";
-import Link from "next/link";
+// Página de Confirmación de que la contraseña ha sido cambiada con éxito
+// Server Component wrapper que permite exportar metadata
+// El Client Component contiene la lógica de redirección y validación
 
-export default function ConfirmacionPasswordRestablecido() {
-    // Hook para redireccionar
-    // useRouter es un hook de Next.js que permite acceder a la instancia del router
-    const router = useRouter();
-    // Hook para manejar el estado de la confirmación
-    const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
-    // Hook para manejar el estado de la carga
-    useEffect(() => {
-        // Verifica si el sessionStorage tiene el flag de éxito
-        const success = sessionStorage.getItem("passwordResetSuccess");
-        // Si el flag existe, significa que la contraseña fue restablecida exitosamente
-        if (success) {
-            // Muestra la confirmación
-            setMostrarConfirmacion(true);
-            // Redirige después de 5 segundos
-            const timer = setTimeout(() => {
-                // Limpia el sessionStorage
-                // Esto es para evitar que el usuario acceda a esta página directamente sin haber restablecido la contraseña
-                sessionStorage.removeItem("passwordResetSuccess");
-                // Redirige al usuario a la página de inicio de sesión
-                // Esto es para evitar que el usuario acceda a esta página directamente sin haber restablecido la contraseña
-                router.replace("/cuentas/login");
-            }, 7000);
-            // Limpieza en caso de desmontaje
-            return () => clearTimeout(timer); 
-        } else {
-            // Si no hay un flag en el sessionStorage, redirigir al usuario a la página de inicio de sesión
-            // Esto es para evitar que el usuario acceda a esta página directamente sin haber restablecido la contraseña
-            router.replace("/cuentas/login");
-        }
-    }, [router]);
-    // Si no hay un flag en el sessionStorage, redirigir al usuario a la página de inicio de sesión
-    // Esto es para evitar que el usuario acceda a esta página directamente sin haber restablecido la contraseña
-    if (!mostrarConfirmacion) return null;
+import { Metadata } from "next";
+import ConfirmacionPasswordRestablecidoClient from "../components/ConfirmacionPasswordRestablecidoClient";
+// import ConfirmacionPasswordRestablecidoClient from "./ConfirmacionPasswordRestablecidoClient";
 
-  return (
-        <div className="container-fluid container-xl">
-            <div className="row justify-content-center contenedor_principal">
-                {/* Header principal */}
-                < HeaderPrincipalTei />
-                <div className="col-sm-9 col-md-7 col-lg-6">
-                    <div className={`${styPassRes.contenedor_formulario}`}>
-                        <div className={`${ styPassRes.contenedor_titulos}`}>
-                            <h3 className={`${ styPassRes.subtitulo_h3}`}>Contraseña restablecida</h3>
-                            <p className={`${ styPassRes.texto}`}>Ahora puedes iniciar sesión</p>
-                        </div>
-                        <div className="cool-md-12 text-center mt-2">
-                            <p className={`${ styPassRes.pregunta}`}>
-                                <Link href="/cuentas/login" className={`${ styPassRes.boton_registrarse}`}>Iniciar sesión</ Link>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                {/* Footer principal */}
-                <FooterPrincipal />
-            </div>
-        </div>
-    );
+// ✅ Metadata optimizada para SEO
+// ⚠️ IMPORTANTE: Esta página NO debe ser indexada porque:
+// 1. Es una página de confirmación temporal (solo se ve después de solicitar recuperación)
+// 2. No tiene valor SEO (nadie busca "correo enviado restablecer password")
+// 3. Es parte de un flujo de recuperación, no contenido independiente
+// 4. Requiere contexto previo (haber solicitado restablecimiento)
+export const metadata: Metadata = {
+  // Título que aparecerá en la pestaña del navegador
+  // Usará el template del layout principal: "Email Enviado | TlaxApp"
+  title: "Contraseña Restablecida",
+  
+  // Descripción genérica (no aparecerá en resultados de búsqueda)
+  description: "Página de confirmación para que el usuario sepa que ha restablecido su contraseña.",
+  
+  // Open Graph mínimo (por si alguien comparte accidentalmente)
+  openGraph: {
+    title: "Contraseña Restablecida | TlaxApp",
+    description: "Revisa tu correo para restablecer tu contraseña.",
+    url: `${process.env.NEXT_PUBLIC_BASE_URL}/cuentas/confirmacion/correo-enviado-restablecer-password`,
+    siteName: "TlaxApp",
+    type: "website",
+  },
+  
+  // Twitter Card mínimo
+  twitter: {
+    card: "summary",
+    title: "Contraseña Restablecida | TlaxApp",
+    description: "Confirmación de contraseña restablecida con éxito",
+  },
+  
+  // Configuración de robots - NIVEL MÁXIMO DE RESTRICCIÓN
+  // ⚠️ CRÍTICO: Esta página NO debe ser indexada porque:
+  // - Es una página de estado/confirmación temporal
+  // - Solo tiene sentido en el contexto del flujo de recuperación
+  // - Requiere haber pasado por /password-olvidado primero
+  // - No tiene contenido valioso para búsquedas
+  robots: {
+    index: false, // ❌ NO indexar
+    follow: false, // ❌ NO seguir enlaces (máxima restricción)
+    noarchive: true, // No guardar en caché
+    nosnippet: true, // No mostrar fragmentos
+    nocache: true, // No cachear
+    googleBot: {
+      index: false,
+      follow: false,
+      noarchive: true,
+      nosnippet: true,
+    },
+  },
+  
+  // Metadata adicional de seguridad
+  other: {
+    'referrer': 'no-referrer', // No enviar referrer
+    'googlebot': 'noindex, nofollow, noarchive, nosnippet',
+  },
+};
+
+/**
+ * Server Component wrapper para la página de confirmación de email enviado
+ * 
+ * Este componente permite:
+ * - Exportar metadata para SEO (solo posible en Server Components)
+ * - Renderizar el Client Component que contiene la lógica de validación y redirección
+ * 
+ * Flujo:
+ * 1. Usuario solicita recuperación en /password-olvidado
+ * 2. Sistema envía email con enlace de restablecimiento
+ * 3. Sistema crea token en sessionStorage
+ * 4. Sistema redirige a ESTA página
+ * 5. Usuario ve confirmación
+ * 6. Usuario revisa su email
+ * 7. Usuario hace clic en enlace del email
+ * 8. Sistema valida token y muestra formulario de nueva contraseña
+ */
+export default function CorreoEnviadoRestablecerPage() {
+  return <ConfirmacionPasswordRestablecidoClient />;
 }
