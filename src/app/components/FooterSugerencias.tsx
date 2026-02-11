@@ -1,14 +1,31 @@
-// Footer del div sugerencias
+import Link from "next/link";
+
 export default function FooterSugerencias() {
-    return (
-        <div className="enlaces_informacion_general">
-                <a className="enlaces_footer_sugerencias" href="">Condiciones de servicio</a>
-                <br />
-                <a className="enlaces_footer_sugerencias" href="">Política de Privacidad</a>
-                <br />
-                <a className="enlaces_footer_sugerencias" href="">Información sobre Tlaxcala en Imagénes</a>
-                <br />
-                <h6 className="tei_footer_sugerencias mt-5">© 2024 Tlaxcala En Imágenes</h6>
-            </div>
-    );
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <div className="text-center small text-muted px-3">
+      <div className="mb-2 d-flex flex-wrap justify-content-center gap-2">
+        <Link href="/legal/politica-de-privacidad" target="_blank" className="text-muted text-decoration-none">
+          Privacidad
+        </Link>
+        <span>·</span>
+        <Link href="/legal/terminos-y-condiciones" target="_blank" className="text-muted text-decoration-none">
+          Términos
+        </Link>
+        <span>·</span>
+        <Link href="/contacto" target="_blank" className="text-muted text-decoration-none">
+          Contacto
+        </Link>
+        <span>·</span>
+        {/* <Link href="/legal/informacion" className="text-muted text-decoration-none">
+          Información
+        </Link> */}
+      </div>
+
+      <div>
+        © {currentYear} TlaxApp
+      </div>
+    </div>
+  );
 }
