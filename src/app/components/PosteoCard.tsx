@@ -9,18 +9,15 @@ import { useRouter } from "next/navigation";
 import LikeButton from "./LikeButton";
 import ModalOpcionesPublicacion from "./ModalOpcionesPublicacion";
 import ModalLikesUsuarios from "./ModalLikesUsuarios";
-import { Posteo, LikeUsuario } from "@/types/types";
+import { Posteo, LikeUsuario, PosteoCardProps } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import posteoCard from "../ui/posteos/PosteoCard.module.css";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 
-interface PosteoCardProps {
-  post: Posteo;
-  isDetail?: boolean;
-}
 
-export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) {
+
+export default function PosteoCard({ post, isDetail = false, showUserUrl = false  }: PosteoCardProps) {
   const { fetchWithAuth, user } = useAuth();
   const router = useRouter();
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -101,23 +98,35 @@ export default function PosteoCard({ post, isDetail = false }: PosteoCardProps) 
           </Link>
 
           <div className="d-flex flex-column">
-            {/* Nombre del usuario */}
-            <Link
-              className="link_perfil_usuario text-dark text-decoration-none fw-bold"
+          {/* mostrar URL de usuario */}
+          <Link
+            className="text-dark text-decoration-none fw-bold"
+            href={`/${posteoActual._idUsuario.url}`}
+          >
+            {posteoActual._idUsuario.url}
+          </Link>
+          <Link  
+              className="text-dark text-decoration-none fw-bold"
               href={`/${posteoActual._idUsuario.url}`}
             >
+          {/* 👇 Mostrar Nombre del usuario solo si se indica */}
+          {showUserUrl && (
+            <span className="fw-normal small text-muted">
               {posteoActual._idUsuario.nombre_completo.nombre}{" "}
               {posteoActual._idUsuario.nombre_completo.apellido}
-            </Link>
+            </span>
+          )}
+          </Link>
 
-            {/* 📍 Mostrar ubicación si existe */}
-            {obtenerTextoUbicacion() && (
-              <span className="text-muted small d-flex align-items-center">
-                <span className="me-1">📍</span>
-                {obtenerTextoUbicacion()}
-              </span>
-            )}
-          </div>
+          {/* Ubicación */}
+          {obtenerTextoUbicacion() && (
+            <span className="text-muted small d-flex align-items-center">
+              {/* <span className="me-1">📍</span> // No estoy seguro de poner esto */   } 
+              {obtenerTextoUbicacion()}
+            </span>
+          )}
+        </div>
+
 
           <button
             type="button"

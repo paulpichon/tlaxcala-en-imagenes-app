@@ -57,7 +57,13 @@ export interface CrearPosteoModalProps {
   show: boolean;
   onClose: () => void;
   onPostCreated?: (newPost?: Posteo) => void;
-} 
+}
+//  interface para las props del componente PosteoCard
+export interface PosteoCardProps {
+  post: Posteo;
+  isDetail?: boolean;
+  showUserUrl?: boolean;
+}
 
 // Response de la API para los posteos
 // Esta interface es la que se espera recibir de la API al hacer una petición para obtener los posteos

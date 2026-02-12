@@ -74,6 +74,7 @@ export default function PosteoDetalle() {
       <PosteoCard
           post={post}
           isDetail={true}
+          showUserUrl={true}
       />
     </>
   );

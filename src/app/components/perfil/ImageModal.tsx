@@ -144,7 +144,7 @@ const ImageModal: React.FC<PropsImageModal> = ({
                 </span>
                 {obtenerTextoUbicacion() && (
                   <span className="text-muted small d-flex align-items-center ms-2">
-                    <span className="me-1">📍</span>
+                    {/* <span className="me-1">📍</span> */}
                     {obtenerTextoUbicacion()}
                   </span>
                 )}
@@ -209,13 +209,16 @@ const ImageModal: React.FC<PropsImageModal> = ({
                       />
                     </div>
                     <div className="d-flex flex-column">
-                      <span className="fw-bold">
+                      <span className="text-dark text-decoration-none fw-bold">
+                        {posteoActual._idUsuario.url}
+                      </span>
+                      <span className="fw-normal small text-muted">
                         {posteoActual._idUsuario.nombre_completo.nombre}{" "}
                         {posteoActual._idUsuario.nombre_completo.apellido}
                       </span>
                       {obtenerTextoUbicacion() && (
                         <span className="text-muted small d-flex align-items-center">
-                          <span className="me-1">📍</span>
+                          {/* <span className="me-1">📍</span> */}
                           {obtenerTextoUbicacion()}
                         </span>
                       )}
