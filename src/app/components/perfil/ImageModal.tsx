@@ -138,9 +138,8 @@ const ImageModal: React.FC<PropsImageModal> = ({
                   height={40}
                   className="rounded-circle me-2 border"
                 />
-                <span className="fw-bold text-dark">
-                  {posteoActual._idUsuario.nombre_completo.nombre}{" "}
-                  {posteoActual._idUsuario.nombre_completo.apellido}
+                <span className="text-dark text-decoration-none fw-bold">
+                  {posteoActual._idUsuario.url}
                 </span>
                 {obtenerTextoUbicacion() && (
                   <span className="text-muted small d-flex align-items-center ms-2">
@@ -212,10 +211,6 @@ const ImageModal: React.FC<PropsImageModal> = ({
                       <span className="text-dark text-decoration-none fw-bold">
                         {posteoActual._idUsuario.url}
                       </span>
-                      <span className="fw-normal small text-muted">
-                        {posteoActual._idUsuario.nombre_completo.nombre}{" "}
-                        {posteoActual._idUsuario.nombre_completo.apellido}
-                      </span>
                       {obtenerTextoUbicacion() && (
                         <span className="text-muted small d-flex align-items-center">
                           {/* <span className="me-1">📍</span> */}
@@ -235,16 +230,11 @@ const ImageModal: React.FC<PropsImageModal> = ({
                   </button>
                 </div>
 
-                <p className="mb-2">
-                  <Link
-                    className="link_perfil_usuario text-dark text-decoration-none"
-                    href={`/${posteoActual._idUsuario.url}`}
-                  >
-                    <strong className="me-1">
-                      {posteoActual._idUsuario.nombre_completo.nombre}{" "}
-                      {posteoActual._idUsuario.nombre_completo.apellido}
-                    </strong>
-                  </Link>
+                <p className="mb-1">
+                  <span className="fw-bold text-dark">
+                      {posteoActual._idUsuario.url} {" "}
+                  </span>
+                  {/* Texto de la publicacion */}
                   {posteoActual.texto}
                 </p>
               </div>
@@ -264,15 +254,10 @@ const ImageModal: React.FC<PropsImageModal> = ({
                 <LikeButton postId={posteoActual._id} onOpenLikesModal={openLikesModal} />
               </div>
               <p className="mb-1">
-                <Link
-                  className="link_perfil_usuario text-dark text-decoration-none"
-                  href={`/${posteoActual._idUsuario.url}`}
-                >
-                  <strong className="me-1">
-                    {posteoActual._idUsuario.nombre_completo.nombre}{" "}
-                    {posteoActual._idUsuario.nombre_completo.apellido}
-                  </strong>
-                </Link>
+                <span className="fw-bold text-dark">
+                    {posteoActual._idUsuario.url} {" "}
+                </span>
+                {/* Texto de la publicacion */}
                 {posteoActual.texto}
               </p>
               <p className="text-muted small mb-0">{fechaFormateada}</p>
