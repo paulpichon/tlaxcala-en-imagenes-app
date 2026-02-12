@@ -251,9 +251,46 @@ Spinner de carga
   FIN COMPONENTE FOOTER 
 */
 
-/***** 
-      MEDIAS QUERYS
-*****/
+/* Estilos del boton LIKE */
+/* Boton me gusta */
+button.like-button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 15px 0 15px 10px;
+    margin: 5px 0;
+}
+/* numero me gustas */
+p.votaciones {
+    margin: 0 0 0 8px;
+    font-weight: bold;
+    font-size: 15px!important;
+}
+/* Etiqueta strong me gusta y votaciones tamaño de fuente */
+strong.etiqueta_strong, p.votaciones {
+    font-size: 0.9rem;
+}
+/* SVG icon */
+button.like-button svg {
+    color: black;
+    stroke-width: 2px;
+    width: 24px;
+    height: 24px;
+    /* transition: color 0.3s ease, stroke-width 0.3s ease; */
+    transition: transform 0.2s ease-in-out;
+}
+/* Efecto hover al pasar el apuntador por el corazon */
+/* Debemos mantener el estilo al precionar el boton me gusta */
+button.like-button svg:hover {
+    transform: scale(1.1); /* Agranda ligeramente el botón */
+    fill: #EBCA9A; /*Relleno del icono*/
+    stroke: #EBCA9A; /* Para cambiar el color de la línea del ícono */
+    stroke-width: 2.5px; 
+  }
+
+/* 
+ *     MEDIAS QUERYS
+*/
 /*Small devices (landscape phones, 576px and up)*/
 @media (min-width: 576px) { 
   /* 
