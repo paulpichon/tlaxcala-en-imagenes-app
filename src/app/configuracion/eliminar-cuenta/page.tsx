@@ -15,7 +15,7 @@ import HeaderSuperior from "../../components/HeaderSuperior";
 import Publicidad from "../../components/Publicidad";
 import FooterSugerencias from "../../components/FooterSugerencias";
 import NuevosUsuariosRegistrados from "../../components/NuevosUsuariosRegistrados";
-import EliminarCuenta from "@/app/components/EliminarCuenta";
+import EliminarCuenta from "@/app/components/configuracion/eliminar-cuenta-usuario/EliminarCuenta";
 
 // ✅ Metadata optimizada para SEO
 // Nota: Esta página NO debe ser indexada por buscadores porque:
