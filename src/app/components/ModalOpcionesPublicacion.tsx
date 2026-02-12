@@ -159,15 +159,15 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                     </button>
                   )}
                 </div>
-
-                <div className="col-md-12 mb-2">
+                {/* // TODO: Hacer a corto plazo esta pagina, para denunciar alguna publicacion */}
+                {/* <div className="col-md-12 mb-2">
                   <button
                     type="button"
                     className={`${perfil.btn_opciones_publicaciones} ${perfil.btn_rojo}`}
                   >
                     Denunciar
                   </button>
-                </div>
+                </div> */}
 
                 <div className="col-md-12">
                   <button
