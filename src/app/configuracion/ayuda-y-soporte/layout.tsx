@@ -1,11 +1,10 @@
-// Editar Perfil
+// Ayuda y Soporte Layout
 // Se usara Layouts Anidados en la estructura del proyecto
 // https://chatgpt.com/c/674542f3-d5bc-8002-847c-c817ca29ba97
 
 // ❌ NO incluir metadata aquí - se define en page.tsx para mayor flexibilidad
-// ❌ NO incluir <html>, <body>, <head> - solo en el layout raíz (src/app/layout.tsx)
-// ❌ NO incluir viewport aquí - ya está definido en el layout raíz
-// ✅ Este layout solo contiene providers y componentes de protección
+// ❌ NO incluir <html>, <body>, <head> - solo en el layout raíz
+// ✅ Este layout solo contiene providers y componente de protección
 
 // Fonts globales
 import "../../ui/fonts";
@@ -16,13 +15,15 @@ import { FollowProvider } from "@/context/FollowContext";
 import { FavoritoProvider } from "@/context/FavoritoContext";
 
 /**
- * Layout anidado para la página de edición de perfil
+ * Layout anidado para la página de Ayuda y Soporte
  * - Protege la ruta con autenticación (solo usuarios autenticados)
- * - Provee contextos de seguimiento y favoritos necesarios para editar perfil
+ * - Provee contextos de seguimiento y favoritos
  * - No incluye metadata (se define en page.tsx)
- * - Hereda viewport del layout raíz
+ * 
+ * Esta página proporciona recursos de ayuda, FAQs y opciones de contacto
+ * para usuarios que necesitan asistencia con la plataforma
  */
-export default function EditarPerfilLayout({
+export default function AyudaSoporteLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -32,7 +33,7 @@ export default function EditarPerfilLayout({
     <ProtectedRoute>
       {/* Provider para funcionalidad de seguir/dejar de seguir usuarios */}
       <FollowProvider>
-        {/* Provider para funcionalidad de favoritos */}
+        {/* Provider para funcionalidad de favoritos (marcar/desmarcar publicaciones) */}
         <FavoritoProvider>
           {children}
         </FavoritoProvider>
