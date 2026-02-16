@@ -1,0 +1,15 @@
+/* Boton para guardar la imagen en el Modal */
+.btnGuardarCambiarMedium {
+    background-color: #EBCA9A;
+    border: none;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+/* :hover- */
+.btnGuardarCambiarMedium:hover {
+    background-color: #d4a76a;
+}
