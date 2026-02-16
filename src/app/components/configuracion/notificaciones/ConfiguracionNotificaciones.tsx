@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { FiArrowLeft, FiBell, FiBellOff } from "react-icons/fi";
 import { usePushNotifications } from "@/app/hooks/usePushNotifications";
 import ToastGlobal from "../../ToastGlobal";
+import notificacionesdStyles from "@/app/ui/configuracion/notificaciones/Notificaciones.module.css"
 
 export default function ConfiguracionNotificaciones() {
   const router = useRouter();
@@ -73,7 +74,7 @@ export default function ConfiguracionNotificaciones() {
           <div className="bg-white shadow-sm rounded-4 p-4 border text-center">
             <div className="mb-3">
               {estado === "enabled" ? (
-                <FiBell size={40} className="text-primary" />
+                <FiBell size={40} className={`${notificacionesdStyles.icono_notificaciones}`} />
               ) : (
                 <FiBellOff size={40} className="text-muted" />
               )}
@@ -86,7 +87,7 @@ export default function ConfiguracionNotificaciones() {
 
             <div className="form-check form-switch d-flex justify-content-center align-items-center gap-2">
               <input
-                className="form-check-input"
+                className={`form-check-input ${notificacionesdStyles.check_notificaciones}`}
                 type="checkbox"
                 role="switch"
                 id="switchNotificaciones"
