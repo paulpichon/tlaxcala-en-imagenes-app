@@ -90,4 +90,23 @@ export const editarPosteoSchema = z.object({
     }),
 });
 
+// Schema para formulario de ayuda y soporte, envio de correo ellectronico
+export const schemaAyudaSoporte = z.object({
+  tipo_problema: z.enum([
+    "cuenta",
+    "publicacion",
+    "seguridad",
+    "reporte",
+    "otro"
+  ], {
+    errorMap: () => ({ message: "Debes seleccionar un tipo de ayuda." })
+  }),
+  descripcion_problema_usuario: z
+    .string()
+    .trim()
+    .min(10, "La descripción debe tener al menos 10 caracteres.")
+    .max(1000, "La descripción no puede exceder 1000 caracteres.")
+});
+
+
 export type PosteoSchema = z.infer<typeof posteoSchema>;
