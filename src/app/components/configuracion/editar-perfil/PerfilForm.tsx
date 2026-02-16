@@ -2,7 +2,7 @@
 'use client';
 
 import { FormDataEditarPerfil, Municipio } from '@/types/types';
-import { ChangeEvent, FormEvent } from 'react';
+import { ChangeEvent, SubmitEvent } from 'react';
 
 
 interface PerfilFormProps {
@@ -11,7 +11,7 @@ interface PerfilFormProps {
   municipios: Municipio[];
   loading: boolean;
   handleChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  handleSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  handleSubmit: (e: SubmitEvent<HTMLFormElement>) => void;
 }
 
 export default function PerfilForm({
