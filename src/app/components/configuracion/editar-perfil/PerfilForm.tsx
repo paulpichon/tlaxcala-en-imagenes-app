@@ -119,7 +119,7 @@ export default function PerfilForm({
         })}
 
       <div className="border-top p-4">
-        <button type="submit" className="btnGuardarCambiar w-100" disabled={loading}>
+        <button type="submit" className="btnGuardarCambiarMedium w-100" disabled={loading}>
           {loading ? 'Guardando...' : 'Guardar cambios'}
         </button>
       </div>
