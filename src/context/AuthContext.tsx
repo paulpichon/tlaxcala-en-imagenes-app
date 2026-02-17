@@ -1,9 +1,18 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+} from 'react';
 import { UsuarioLogueado, IAuthContext } from '@/types/types';
 
-// Creamos el contexto de autenticación
+// =========================
+// Contexto
+// =========================
 const AuthContext = createContext<IAuthContext | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -11,117 +20,139 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   /**
-   * Función para renovar el accessToken usando refreshToken
+   * Ref para evitar múltiples refresh simultáneos
    */
-  const refreshToken = async (): Promise<boolean> => {
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/refresh`,
-        { method: 'POST', credentials: 'include' }
-      );
-      return res.ok;
-    } catch (err) {
-      console.error('Error al refrescar token:', err);
-      return false;
+  const isRefreshing = useRef(false);
+  const refreshPromise = useRef<Promise<boolean> | null>(null);
+  // URL base de la API (Puede venir de env)
+  const API_URL = process.env.NEXT_PUBLIC_API_URL_LOCAL;
+
+  // =========================
+  // Refresh Token (con control de concurrencia)
+  // =========================
+  const refreshToken = useCallback(async (): Promise<boolean> => {
+    if (isRefreshing.current && refreshPromise.current) {
+      return refreshPromise.current;
     }
-  };
 
-  /**
-   * Helper para llamadas protegidas que maneja 401 automáticamente
-   */
-  const fetchWithAuth = async (input: RequestInfo, init?: RequestInit) => {
-    let res = await fetch(input, { ...init, credentials: 'include' });
+    isRefreshing.current = true;
 
-    if (res.status === 401) {
-      // Token expirado, intentamos renovar
-      const refreshed = await refreshToken();
-      if (refreshed) {
-        // Reintentamos la petición original
-        res = await fetch(input, { ...init, credentials: 'include' });
-      } else {
-        // No se pudo renovar, cerramos sesión
-        setUser(null);
+    refreshPromise.current = (async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/auth/refresh`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+
+        if (!res.ok) return false;
+
+        return true;
+      } catch (error) {
+        console.error('Error al refrescar token:', error);
+        return false;
+      } finally {
+        isRefreshing.current = false;
       }
-    }
+    })();
 
-    return res;
-  };
+    return refreshPromise.current;
+  }, [API_URL]);
 
-  /**
-   * Función para login manual
-   */
-  const login = (user: UsuarioLogueado) => {
+  // =========================
+  // Fetch protegido inteligente
+  // =========================
+  const fetchWithAuth = useCallback(
+    async (input: RequestInfo, init?: RequestInit) => {
+      let response = await fetch(input, {
+        ...init,
+        credentials: 'include',
+      });
+
+      if (response.status === 401) {
+        const refreshed = await refreshToken();
+
+        if (refreshed) {
+          response = await fetch(input, {
+            ...init,
+            credentials: 'include',
+          });
+        } else {
+          setUser(null);
+        }
+      }
+
+      return response;
+    },
+    [refreshToken]
+  );
+
+  // =========================
+  // Login manual
+  // =========================
+  const login = useCallback((user: UsuarioLogueado) => {
     setUser(user);
-  };
+  }, []);
 
-  /**
-   * 🔄 Nueva función: actualizar parcialmente el usuario global
-   * Permite cambiar solo ciertos campos sin afectar todo el estado
-   */
-  const updateUser = (newData: Partial<UsuarioLogueado>) => {
+  // =========================
+  // Actualización parcial de usuario
+  // =========================
+  const updateUser = useCallback((newData: Partial<UsuarioLogueado>) => {
     setUser((prev) => (prev ? { ...prev, ...newData } : prev));
-  };
+  }, []);
 
-  /**
-   * Función de logout
-   */
-  const logout = async () => {
+  // =========================
+  // Logout
+  // =========================
+  const logout = useCallback(async () => {
     try {
-      // Petición normal al endpoint de logout
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/logout`, {
+      await fetch(`${API_URL}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });
-    } catch (err) {
-      console.error('Error al cerrar sesión:', err);
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
     } finally {
-      // Borramos el estado del usuario en el frontend
       setUser(null);
     }
-  };
+  }, [API_URL]);
 
-  /**
-   * useEffect para recuperar sesión al montar el provider
-   */
+  // =========================
+  // Inicialización de sesión
+  // =========================
   useEffect(() => {
-    const fetchUser = async () => {
+    const initializeAuth = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/me`, {
+        let res = await fetch(`${API_URL}/api/auth/me`, {
           credentials: 'include',
         });
+
+        // Si token expiró, intentamos refresh
+        if (res.status === 401) {
+          const refreshed = await refreshToken();
+
+          if (refreshed) {
+            res = await fetch(`${API_URL}/api/auth/me`, {
+              credentials: 'include',
+            });
+          }
+        }
 
         if (res.ok) {
           const data = await res.json();
           setUser(data.usuario);
-          return;
+        } else {
+          setUser(null);
         }
-
-        if (res.status === 401) {
-          const refreshed = await refreshToken();
-          if (refreshed) {
-            const retry = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/me`, {
-              credentials: 'include',
-            });
-            if (retry.ok) {
-              const data = await retry.json();
-              setUser(data.usuario);
-            } else {
-              setUser(null);
-            }
-          } else {
-            setUser(null);
-          }
-        }
-      } catch (err) {
-        console.error('Error recuperando sesión:', err);
+      } catch (error) {
+        console.error('Error recuperando sesión:', error);
         setUser(null);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUser();
-  }, []); // sin dependencias
+    initializeAuth();
+  }, [API_URL, refreshToken]);
 
   return (
     <AuthContext.Provider
@@ -131,7 +162,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         login,
         logout,
         fetchWithAuth,
-        updateUser, // ✅ agregamos aquí
+        updateUser,
       }}
     >
       {children}
@@ -139,9 +170,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-// Hook personalizado para usar autenticación
+// =========================
+// Hook personalizado
+// =========================
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth debe usarse dentro de AuthProvider');
+  if (!context) {
+    throw new Error('useAuth debe usarse dentro de AuthProvider');
+  }
   return context;
 };
