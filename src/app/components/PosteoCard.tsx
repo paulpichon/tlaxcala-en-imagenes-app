@@ -161,6 +161,7 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
             fill={!isDetail}
             width={isDetail ? 1080 : undefined}
             height={isDetail ? 1080 : undefined}
+            loading="eager" //Carga inmediatamente
             className={`${
               isDetail ? posteoCard.detalleImagen : "object-fit-cover"
             } ${loaded ? posteoCard.fadeIn : posteoCard.hidden}`}
