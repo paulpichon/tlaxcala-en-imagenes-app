@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     siteName: "TlaxApp",
     images: [
       {
-        url: "/assets/og-eliminar-cuenta.png", // Imagen genérica de configuración
+        url: "/assets/og-image.png", // Imagen genérica de configuración
         width: 1200,
         height: 630,
         alt: "Eliminar Cuenta - TlaxApp",
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     card: "summary",
     title: "Eliminar Cuenta | TlaxApp",
     description: "Gestión de eliminación de cuenta.",
-    images: ["/assets/og-eliminar-cuenta.png"],
+    images: ["/assets/og-image.png"],
   },
   
   // URL canónica para evitar contenido duplicado

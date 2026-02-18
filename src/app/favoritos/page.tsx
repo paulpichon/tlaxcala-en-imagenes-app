@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     siteName: "TlaxApp",
     images: [
       {
-        url: "/assets/og-inicio.png", // Reutilizar imagen genérica de la app
+        url: "/assets/og-image.png", // Reutilizar imagen genérica de la app
         width: 1200,
         height: 630,
         alt: "Favoritos - TlaxApp",
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Favoritos | TlaxApp",
     description: "Mis publicaciones favoritas guardadas.",
-    images: ["/assets/og-inicio.png"],
+    images: ["/assets/og-image.png"],
   },
   
   // URL canónica para evitar contenido duplicado

@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     siteName: "TlaxApp",
     images: [
       {
-        url: "/assets/og-legal.png", // Imagen genérica para páginas legales
+        url: "/assets/og-image.png", // Imagen genérica para páginas legales
         width: 1200,
         height: 630,
         alt: "Política de Privacidad - TlaxApp",
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     card: "summary",
     title: "Política de Privacidad | TlaxApp",
     description: "Consulta nuestra política de privacidad y protección de datos personales.",
-    images: ["/assets/og-legal.png"],
+    images: ["/assets/og-image.png"],
   },
   
   // URL canónica

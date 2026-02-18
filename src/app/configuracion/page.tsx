@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     siteName: "TlaxApp",
     images: [
       {
-        url: "/assets/og-configuracion.png", // Imagen específica para configuración
+        url: "/assets/og-image.png", // Imagen específica para configuración
         width: 1200,
         height: 630,
         alt: "Configuración - TlaxApp",
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Configuración | TlaxApp",
     description: "Gestiona tu cuenta y preferencias en TlaxApp.",
-    images: ["/assets/og-configuracion.png"],
+    images: ["/assets/og-image.png"],
   },
   
   // URL canónica para evitar contenido duplicado

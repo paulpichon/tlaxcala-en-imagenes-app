@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     siteName: "TlaxApp",
     images: [
       {
-        url: "/assets/og-signup.png", // Imagen específica para registro
+        url: "/assets/og-image.png", // Imagen específica para registro
         width: 1200,
         height: 630,
         alt: "Únete a TlaxApp - Registro Gratuito",
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Únete a TlaxApp | Crea tu Cuenta Gratis",
     description: "Comparte y descubre Tlaxcala en imágenes. Regístrate ahora.",
-    images: ["/assets/og-signup.png"],
+    images: ["/assets/og-image.png"],
   },
   
   // URL canónica

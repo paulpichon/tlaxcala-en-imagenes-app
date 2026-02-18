@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     siteName: "TlaxApp",
     images: [
       {
-        url: "/assets/og-login.png", // Imagen específica para login
+        url: "/assets/og-image.png", // Imagen específica para login
         width: 1200,
         height: 630,
         alt: "Iniciar Sesión en TlaxApp",
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Iniciar Sesión | TlaxApp",
     description: "Accede a tu cuenta de TlaxApp.",
-    images: ["/assets/og-login.png"],
+    images: ["/assets/og-image.png"],
   },
   
   // URL canónica

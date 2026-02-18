@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     siteName: "TlaxApp",
     images: [
       {
-        url: "/assets/og-contacto.png", // Imagen específica de contacto
+        url: "/assets/og-image.png", // Imagen específica de contacto
         width: 1200,
         height: 630,
         alt: "Contacto TlaxApp - Soporte y Atención al Cliente",
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Contacto | TlaxApp",
     description: "¿Necesitas ayuda con TlaxApp? Contáctanos para soporte técnico, dudas o reportes.",
-    images: ["/assets/og-contacto.png"],
+    images: ["/assets/og-image.png"],
   },
   
   // URL canónica

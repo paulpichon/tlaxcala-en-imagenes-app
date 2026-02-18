@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     siteName: "TlaxApp",
     images: [
       {
-        url: "/assets/og-editar-perfil.png", // Imagen específica para edición de perfil
+        url: "/assets/og-image.png", // Imagen específica para edición de perfil
         width: 1200,
         height: 630,
         alt: "Editar Perfil - TlaxApp",
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Editar Perfil | TlaxApp",
     description: "Actualiza tu información personal en TlaxApp.",
-    images: ["/assets/og-editar-perfil.png"],
+    images: ["/assets/og-image.png"],
   },
   
   // URL canónica para evitar contenido duplicado

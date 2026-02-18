@@ -30,7 +30,7 @@ export async function generateMetadata({
       type: "profile",
       images: [
         {
-          url: `${baseUrl}/assets/og-profile-default.png`,
+          url: `${baseUrl}/assets/og-image.png`,
           width: 1200,
           height: 630,
           alt: `Perfil de ${url} en TlaxApp`,
@@ -42,7 +42,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: `@${url} en TlaxApp`,
       description: `Perfil de @${url} en TlaxApp.`,
-      images: [`${baseUrl}/assets/og-profile-default.png`],
+      images: [`${baseUrl}/assets/og-image.png`], 
     },
 
     robots: {

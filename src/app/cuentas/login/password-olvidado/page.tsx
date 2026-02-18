@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     siteName: "TlaxApp",
     images: [
       {
-        url: "/assets/og-password-recovery.png", // Imagen específica
+        url: "/assets/og-image.png", // Imagen específica
         width: 1200,
         height: 630,
         alt: "Recuperar Contraseña - TlaxApp",
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     card: "summary",
     title: "Recuperar Contraseña | TlaxApp",
     description: "¿Olvidaste tu contraseña? Recupérala fácilmente.",
-    images: ["/assets/og-password-recovery.png"],
+    images: ["/assets/og-image.png"],
   },
   
   // URL canónica

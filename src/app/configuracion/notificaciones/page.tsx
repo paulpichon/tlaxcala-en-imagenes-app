@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     siteName: "TlaxApp",
     images: [
       {
-        url: "/assets/og-configuracion.png", // Reutilizar imagen de configuración
+        url: "/assets/og-image.png", // Reutilizar imagen de configuración
         width: 1200,
         height: 630,
         alt: "Configuración de Notificaciones - TlaxApp",
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Configuración de Notificaciones | TlaxApp",
     description: "Controla tus preferencias de notificaciones.",
-    images: ["/assets/og-configuracion.png"],
+    images: ["/assets/og-image.png"],
   },
   
   // URL canónica para evitar contenido duplicado
