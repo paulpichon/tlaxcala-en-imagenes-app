@@ -16,7 +16,7 @@ export function HeaderPrincipalTei() {
       />
 
       <h1 className="titulo_principal_h1">TlaxApp</h1>
-      <p className="subtitulo_h6">Tlaxcala, contada por su gente.</p>
+      <p className="subtitulo_h6">La red social de Tlaxcala.</p>
     </div>
   );
 }

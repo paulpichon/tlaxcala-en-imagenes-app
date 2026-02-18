@@ -33,7 +33,7 @@ export default function Home() {
 
             <h1 className={styles.title}>TlaxApp</h1>
             <p className={styles.subtitle}>
-              Tlaxcala, contada por su gente.
+              La red social de Tlaxcala.
             </p>
 
             <div className={styles.actions}>
