@@ -32,14 +32,14 @@ export const metadata: Metadata = {
   authors: [{ name: "TlaxApp" }],
   creator: "TlaxApp",
   openGraph: {
-    title: "TlaxApp | Tlaxcala, contada por su gente",
+    title: "TlaxApp | La red social de Tlaxcala",
     description:
       "Descubre Tlaxcala a través de fotos, historias y personas reales.",
     url: `${process.env.NEXT_PUBLIC_BASE_URL}`,
     siteName: "TlaxApp",
     images: [
       {
-        url: "/assets/og-image.png",
+        url: `${process.env.NEXT_PUBLIC_BASE_URL}/assets/og-image.png`,
         width: 1200,
         height: 630,
         alt: "TlaxApp - Tlaxcala",
@@ -51,8 +51,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "TlaxApp",
-    description: "Tlaxcala, contada por su gente.",
-    images: ["/assets/og-image.png"],
+    description: "La red social de Tlaxcala.",
+    images: [`${process.env.NEXT_PUBLIC_BASE_URL}/assets/og-image.png`],
   },
   robots: {
     index: true,
