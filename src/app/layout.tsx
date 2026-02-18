@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     siteName: "TlaxApp",
     images: [
       {
-        url: `${process.env.NEXT_PUBLIC_BASE_URL}/assets/og-image.png`,
+        url: "/assets/og-image.png",
         width: 1200,
         height: 630,
         alt: "TlaxApp - Tlaxcala",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "TlaxApp",
     description: "La red social de Tlaxcala.",
-    images: [`${process.env.NEXT_PUBLIC_BASE_URL}/assets/og-image.png`],
+    images: ["/assets/og-image.png"],
   },
   robots: {
     index: true,
