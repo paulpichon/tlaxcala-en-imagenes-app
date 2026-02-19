@@ -64,102 +64,88 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
 
 
       <div className="container mt-4">
-        <div className="row align-items-center">
-          {/* Imagen perfil */}
-          <div className="col-sm-12 col-md-4 text-center mb-3 mb-md-0">
-            <div
-              className="position-relative d-inline-block"
-              style={{
-                width: "100px",
-                height: "100px",
-                cursor: isOwnProfile ? "pointer" : "default",
-              }}
-              onClick={() => isOwnProfile && setShowModal(true)}
-              onMouseEnter={() => setHover(true)}
-              onMouseLeave={() => setHover(false)}
-            >
-              <Image
-                priority
-                src={imagenPerfil}
-                width={100}
-                height={100}
-                className={`rounded-circle object-cover`}
-                alt={`Imagen de perfil de @${usuario.url}`}
-              />
+  <div className="row align-items-start">
+    
+    {/* FOTO */}
+    <div className="col-12 col-md-4 text-center mb-3 mb-md-0">
+      <div
+        className="position-relative d-inline-block"
+        style={{
+          width: "100px",
+          height: "100px",
+          cursor: isOwnProfile ? "pointer" : "default",
+        }}
+        onClick={() => isOwnProfile && setShowModal(true)}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+      >
+        <Image
+          priority
+          src={imagenPerfil}
+          width={100}
+          height={100}
+          className="rounded-circle object-cover"
+          alt={`Imagen de perfil de @${usuario.url}`}
+        />
+      </div>
+    </div>
 
-              {isOwnProfile && hover && (
-                <div
-                  className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center rounded-circle"
-                  style={{
-                    backgroundColor: "rgba(0, 0, 0, 0.5)",
-                    transition: "opacity 0.3s ease",
-                  }}
-                >
-                  <FiCamera color="white" size={28} />
-                  <span
-                    style={{
-                      color: "white",
-                      fontSize: "13px",
-                      marginTop: "4px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    Cambiar foto
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
+    {/* INFO */}
+    <div className="col-12 col-md-8">
 
-          {/* Información usuario */}
-          <div className="col-sm-12 col-md-8">
-            <div className="d-flex align-items-center flex-wrap gap-2 mb-3">
-              <h2 className="mb-0 fw-normal">{usuario.url || usuario.correo}</h2>
+      {/* USERNAME + BOTON */}
+      <div className="d-flex align-items-center flex-wrap gap-3 mb-2">
+        <h2 className="mb-0 fw-semibold">
+          {usuario.url}
+        </h2>
 
-              {!isOwnProfile && (
-                <FollowButton
-                  userId={usuario._id}
-                  initialFollowing={usuario.isFollowing}
-                  className={`${perfil.btn_base_usuario}`}
-                />
-              )}
-            </div>
+        {!isOwnProfile && (
+          <FollowButton
+            userId={usuario._id}
+            initialFollowing={usuario.isFollowing}
+          />
+        )}
+      </div>
 
-            {/* Estadísticas */}
-            <div className="d-flex flex-wrap gap-4 mb-2">
-              <span>
-                <strong>{totalPublicaciones}</strong> publicaciones
-              </span>
+      {/* NOMBRE Y UBICACION */}
+      <div className="mb-3">
+        <p className="mb-0 fw-bold">
+          {usuario.nombre_completo.nombre}{" "}
+          {usuario.nombre_completo.apellido}
+        </p>
+        <p className="text-muted small">
+          {usuario.lugar_radicacion?.nombreMunicipio || ""}
+        </p>
+      </div>
 
-              <span
-                role="button"
-                style={{ cursor: "pointer" }}
-                onClick={() => setShowFollowersModal(true)}
-              >
-                <strong>{usuario.totalSeguidores}</strong> seguidores
-              </span>
+      {/* ESTADISTICAS */}
+      <div className="d-flex gap-4 border-top pt-3">
+        <div className="stat-item">
+          <strong>{totalPublicaciones}</strong>
+          <div className="text-muted small">Publicaciones</div>
+        </div>
 
-              <span
-                role="button"
-                style={{ cursor: "pointer" }}
-                onClick={() => setShowFollowingModal(true)}
-              >
-                <strong>{usuario.totalSeguidos}</strong> seguidos
-              </span>
-            </div>
+        <div
+          className="stat-item cursor-pointer"
+          onClick={() => setShowFollowersModal(true)}
+        >
+          <strong>{usuario.totalSeguidores}</strong>
+          <div className="text-muted small">Seguidores</div>
+        </div>
 
-            {/* Nombre + ubicación */}
-            <div>
-              <p className="mb-0 fw-bold">
-                {usuario.nombre_completo.nombre} {usuario.nombre_completo.apellido}
-              </p>
-              <p className="text-muted">
-                {usuario.lugar_radicacion?.nombreEntidad || "Sin ubicación"}
-              </p>
-            </div>
-          </div>
+        <div
+          className="stat-item cursor-pointer"
+          onClick={() => setShowFollowingModal(true)}
+        >
+          <strong>{usuario.totalSeguidos}</strong>
+          <div className="text-muted small">Siguiendo</div>
         </div>
       </div>
+
+    </div>
+  </div>
+</div>
+
     </div>
   );
 }
