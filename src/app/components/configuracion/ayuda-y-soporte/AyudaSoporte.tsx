@@ -166,8 +166,8 @@ export default function AyudaSoporte() {
         {/* =============================
             🔹 CONTENIDO PRINCIPAL
         ============================== */}
-        <div className="flex-grow-1 overflow-auto p-4">
-          <div className="container" style={{ maxWidth: '448px' }}>
+        <div className="flex-grow-1 p-4">
+          <div className="container" style={{ maxWidth: '500px' }}>
 
             <div className="card shadow-sm border-0">
               <div className="card-body">

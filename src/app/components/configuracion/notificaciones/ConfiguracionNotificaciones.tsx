@@ -69,8 +69,8 @@ export default function ConfiguracionNotificaciones() {
       </div>
 
       {/* Contenido principal */}
-      <div className="flex-grow-1 overflow-auto p-4">
-        <div className="container" style={{ maxWidth: "448px" }}>
+      <div className="flex-grow-1 p-4">
+        <div className="container" style={{ maxWidth: '500px' }}>
           <div className="bg-white shadow-sm rounded-4 p-4 border text-center">
             <div className="mb-3">
               {estado === "enabled" ? (

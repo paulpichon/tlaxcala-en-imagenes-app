@@ -71,8 +71,8 @@ export default function EliminarCuenta() {
       </div>
 
       {/* Contenido */}
-      <div className="flex-grow-1 overflow-auto p-4">
-        <div className="container" style={{ maxWidth: "480px" }}>
+      <div className="flex-grow-1 p-4">
+        <div className="container" style={{ maxWidth: '500px' }}>
           <div className="bg-white shadow-sm rounded-4 p-4 border text-center">
 
             <FiAlertTriangle size={50} className="text-danger mb-3" />

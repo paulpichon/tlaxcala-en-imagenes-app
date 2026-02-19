@@ -43,17 +43,19 @@ export default function EditarPerfil() {
         </div>
       </div>
 
-      <div className="flex-grow-1 overflow-auto p-4">
-        <div className="container" style={{ maxWidth: '448px' }}>
-          <PerfilHeader url={formData.url} imagenPerfil={imagenPerfil} onCambiarFoto={() => setShowModal(true)} />
-          <PerfilForm
-            formData={formData}
-            errors={errors}
-            municipios={municipios}
-            loading={loading}
-            handleChange={handleChange}
-            handleSubmit={handleSubmit}
-          />
+      <div className="flex-grow-1 p-4">
+        <div className="container mt-4" style={{ maxWidth: '500px' }}>
+        <div className="bg-white shadow-sm rounded-4 p-4 border text-center">
+            <PerfilHeader url={formData.url} imagenPerfil={imagenPerfil} onCambiarFoto={() => setShowModal(true)} />
+            <PerfilForm
+              formData={formData}
+              errors={errors}
+              municipios={municipios}
+              loading={loading}
+              handleChange={handleChange}
+              handleSubmit={handleSubmit}
+            />
+          </div> 
         </div>
       </div>
 
