@@ -22,7 +22,7 @@ export const perfilSchema = z
     password: z
       .string()
       .optional()
-      .refine((val) => !val || val.length >= 6, 'La contraseña debe tener al menos 6 caracteres'),
+      .refine((val) => !val || val.length >= 8, 'La contraseña debe tener al menos 8 caracteres'),
     confirmPassword: z.string().optional(),
   })
   .refine(
