@@ -40,28 +40,28 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   const isOwnPost = user?.uid === selectedImage._idUsuario._id;
   const esFavoritoGlobal = favoritosMap[selectedImage._id] ?? selectedImage.isFavorito;
 
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(link);
-      setToast({ message: "Enlace copiado al portapapeles ✅", type: "success" });
-    } catch {
-      setToast({ message: "No se pudo copiar el enlace ❌", type: "danger" });
-    }
-  };
-
   const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "Mira esta publicación",
-          text: selectedImage.texto ?? "Publicación interesante",
-          url: link,
-        });
-      } catch {
-        // si cancela, no pasa nada
+    if (!selectedImage) return;
+  
+    const link = `${process.env.NEXT_PUBLIC_BASE_URL}/posteo/${selectedImage._id}`;
+  
+    const shareData = {
+      title: `Mira la publicación de ${selectedImage._idUsuario.nombre_completo.nombre} en TlaxApp`,
+      text: selectedImage.texto ?? "Publicación interesante",
+      url: link,
+    };
+  
+    try {
+      // Verificar soporte real del navegador
+      if (navigator.share && navigator.canShare?.(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.share(shareData);
       }
-    } else {
-      handleCopyLink();
+    } catch (error: any) {
+      if (error?.name !== "AbortError") {
+        console.error("Error al compartir:", error);
+      }
     }
   };
 
