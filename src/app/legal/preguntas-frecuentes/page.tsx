@@ -73,7 +73,7 @@ const faqs = [
 // ===============================================
 
 export const metadata: Metadata = {
-  title: "Preguntas Frecuentes | TlaxApp",
+  title: "Preguntas Frecuentes",
   description:
     "Consulta las preguntas frecuentes sobre TlaxApp. Aprende cómo crear tu cuenta, publicar contenido, proteger tu información y contactar soporte.",
 
@@ -129,11 +129,11 @@ export const metadata: Metadata = {
 // ===============================================
 
 export default function FAQPublica() {
-  // ===============================================
-  // 📊 Structured Data (FAQPage para Google)
-  // ===============================================
+  // =======================================================
+  // 📊 FAQ Structured Data
+  // =======================================================
 
-  const jsonLd = {
+  const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: faqs.map((faq) => ({
@@ -146,12 +146,45 @@ export default function FAQPublica() {
     })),
   };
 
+  // =======================================================
+  // 📍 Breadcrumb Structured Data
+  // =======================================================
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Inicio",
+        item: baseUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Preguntas Frecuentes",
+        item: pageUrl,
+      },
+    ],
+  };
+
   return (
     <>
-      {/* JSON-LD para Google Rich Results */}
+      {/* FAQ Structured Data */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqJsonLd),
+        }}
+      />
+
+      {/* Breadcrumb Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbJsonLd),
+        }}
       />
 
       <div className="container-fluid container-xl">
