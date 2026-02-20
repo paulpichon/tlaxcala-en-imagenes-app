@@ -1,29 +1,25 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+// Spinner de carga
 import Spinner from '@/app/components/spinner';
+// Bootstrap
 import "bootstrap/dist/css/bootstrap.css";
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
+    // Solo redirige si ya terminó de cargar y no hay usuario
     if (!loading && !user) {
-      // Construimos la URL completa actual
-      const fullPath =
-        pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
-
-      router.replace(
-        `/cuentas/login?redirect=${encodeURIComponent(fullPath)}`
-      );
+      router.push('/cuentas/login');
     }
-  }, [user, loading, router, pathname, searchParams]);
+  }, [user, loading, router]);
 
+  // Puedes mostrar una pantalla de carga mientras se verifica
   if (loading || !user) {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100">
