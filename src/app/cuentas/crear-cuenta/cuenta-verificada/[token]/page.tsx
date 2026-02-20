@@ -98,7 +98,7 @@ export default async function CuentaVerificadaPage({
     // Esta petición verifica si el token es válido y no ha expirado
     // Si es válido, también marca la cuenta como verificada en la base de datos
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/verificar-correo/${token}`, 
+      `${process.env.NEXT_PUBLIC_API_URL}/api/auth/verificar-correo/${token}`, 
       { 
         cache: "no-store" // No cachear para obtener siempre el estado más reciente
       }

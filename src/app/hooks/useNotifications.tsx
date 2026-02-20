@@ -19,7 +19,7 @@ export function useNotifications() {
     async (pagina = 1) => {
       try {
         const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones?page=${pagina}&limit=15`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/notificaciones?page=${pagina}&limit=15`
         );
         if (!res.ok) throw new Error("Error al obtener notificaciones");
         const data = await res.json();
@@ -47,7 +47,7 @@ export function useNotifications() {
         if (!notificacionActual || notificacionActual.notificacion_leida) return;
 
         const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/marcar-notificacion-leida/${id}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/notificaciones/marcar-notificacion-leida/${id}`,
           { method: "PATCH" }
         );
         if (!res.ok) throw new Error("Error al marcar notificación");
@@ -69,7 +69,7 @@ export function useNotifications() {
     async (id: string) => {
       try {
         const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/eliminar-notificacion/${id}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/notificaciones/eliminar-notificacion/${id}`,
           { method: "DELETE" }
         );
         if (!res.ok) throw new Error("Error al eliminar notificación");

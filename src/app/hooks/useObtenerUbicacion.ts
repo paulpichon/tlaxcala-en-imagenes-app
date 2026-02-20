@@ -36,7 +36,7 @@ export function useObtenerUbicacion() {
 
       // 2️⃣ Consultar tu backend para convertir coords → municipio
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/ubicacion/reverse`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/ubicacion/reverse`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

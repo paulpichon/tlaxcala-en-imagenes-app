@@ -30,7 +30,7 @@ export function NuevosUsuariosProvider({ children }: { children: React.ReactNode
     try {
       setLoading(true);
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/usuarios/registrados/nuevos-usuarios-registrados`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/registrados/nuevos-usuarios-registrados`
       );
       const data = await res.json();
       setUsuarios(data.nuevosUsuariosRegistrados || []);

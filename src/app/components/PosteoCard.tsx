@@ -31,7 +31,7 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
   const openLikesModal = async () => {
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/likes/${posteoActual._id}/likes/usuarios`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/likes/${posteoActual._id}/likes/usuarios`
       );
       if (!res.ok) return;
       const data = await res.json();

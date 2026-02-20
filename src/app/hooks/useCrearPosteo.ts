@@ -140,7 +140,7 @@ export function useCrearPosteo(
       if (pais) formData.append("pais", pais);
 
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/posteos`,
         {
           method: "POST",
           body: formData,

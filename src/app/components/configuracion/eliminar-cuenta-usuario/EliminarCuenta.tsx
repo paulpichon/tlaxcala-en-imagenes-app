@@ -20,7 +20,7 @@ export default function EliminarCuenta() {
 
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/usuarios/delete`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/delete`,
         { method: "DELETE" }
       );
 
