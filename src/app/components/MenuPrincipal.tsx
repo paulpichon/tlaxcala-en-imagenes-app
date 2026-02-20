@@ -169,56 +169,10 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
                   Notificaciones
                 </Link>
               </li>
-
-              <li>
-                <button
-                  className="dropdown-item buttonDropDown"
-                  onClick={() => setShowModal(true)}
-                >
-                  Cerrar sesión
-                </button>
-              </li>
             </ul>
           )}
         </li>
       </ul>
-
-      {/* Modal Cerrar sesión */}
-      {showModal && (
-        <div
-          className="modal fade show d-block"
-          tabIndex={-1}
-          role="dialog"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-        >
-          <div className="modal-dialog modal-dialog-centered" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Confirmar cierre de sesión</h5>
-              </div>
-              <div className="modal-body text-center">
-                <p>¿Estás seguro de que quieres cerrar sesión?</p>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowModal(false)}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  onClick={handleLogout}
-                >
-                  Cerrar sesión
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Modal Crear posteo */}
       <CrearPosteoModal
