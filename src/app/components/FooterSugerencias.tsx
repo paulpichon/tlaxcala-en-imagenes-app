@@ -6,21 +6,18 @@ export default function FooterSugerencias() {
   return (
     <div className="text-center small text-muted px-3">
       <div className="mb-2 d-flex flex-wrap justify-content-center gap-2">
-        <Link href="/legal/politica-de-privacidad" target="_blank" className="text-muted text-decoration-none">
+        <Link href="/legal/politica-de-privacidad" className="text-muted text-decoration-none">
           Privacidad
         </Link>
         <span>·</span>
-        <Link href="/legal/terminos-y-condiciones" target="_blank" className="text-muted text-decoration-none">
+        <Link href="/legal/terminos-y-condiciones" className="text-muted text-decoration-none">
           Términos
         </Link>
         <span>·</span>
-        <Link href="/contacto" target="_blank" className="text-muted text-decoration-none">
+        <Link href="/contacto" className="text-muted text-decoration-none">
           Contacto
         </Link>
         <span>·</span>
-        {/* <Link href="/legal/informacion" className="text-muted text-decoration-none">
-          Información
-        </Link> */}
       </div>
 
       <div>

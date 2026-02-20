@@ -49,6 +49,15 @@ export default function FooterMain() {
               Términos y Condiciones
             </Link>
           </li>
+          <li className="nav-item">
+            <Link
+              className="nav-link pie_pagina_links"
+              href="/legal/preguntas-frecuentes"
+              target="_blank"
+            >
+              Preguntas Frecuentes (FAQ)
+            </Link>
+          </li>
         </ul>
 
         {/* Copy */}
