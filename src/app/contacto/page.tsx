@@ -379,7 +379,7 @@ export default function Contacto() {
                   y profesionalismo. Nos reservamos el derecho de no responder a
                   solicitudes que no cumplan con estas condiciones o que violen
                   nuestros{" "}
-                  <Link href="/legal/terminos-y-condiciones" target="_blank" className="text-primary">
+                  <Link href="/legal/terminos-y-condiciones" className="text-primary">
                     Términos y Condiciones
                   </Link>
                   .
@@ -390,7 +390,7 @@ export default function Contacto() {
                 <p>
                   Antes de contactarnos, te recomendamos revisar nuestra sección
                   de{" "}
-                  <Link href="/ayuda" className="text-primary">
+                  <Link href="/legal/preguntas-frecuentes" className="text-primary">
                     Preguntas Frecuentes (FAQ)
                   </Link>{" "}
                   donde podrás encontrar respuestas a las dudas más comunes sobre:
@@ -418,7 +418,7 @@ export default function Contacto() {
                 <p>
                   Al contactarnos, aceptas que procesemos la información que nos
                   proporciones de acuerdo con nuestra{" "}
-                  <Link href="/aviso-privacidad" className="text-primary">
+                  <Link href="/legal/politica-de-privacidad" className="text-primary">
                     Política de Privacidad
                   </Link>
                   . Tus datos personales serán utilizados exclusivamente para
