@@ -24,7 +24,7 @@ export default function Favoritos() {
         setLoading(true);
         const endpoint =
           url ||
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/favoritos?limite=10`;
+          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/favoritos`;
 
         const res = await fetchWithAuth(endpoint);
         if (!res.ok) throw new Error("Error al obtener favoritos");
