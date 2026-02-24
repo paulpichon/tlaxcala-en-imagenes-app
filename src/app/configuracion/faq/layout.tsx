@@ -9,7 +9,6 @@
 import type { Metadata } from "next";
 import "../../ui/fonts";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { FollowProvider } from "@/context/FollowContext";
 import { FavoritoProvider } from "@/context/FavoritoContext";
 
 // =============================
@@ -160,9 +159,7 @@ export default function FaqLayout({
 
       {/* Protección de ruta */}
       <ProtectedRoute>
-        <FollowProvider>
           <FavoritoProvider>{children}</FavoritoProvider>
-        </FollowProvider>
       </ProtectedRoute>
     </>
   );

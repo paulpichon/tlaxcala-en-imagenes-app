@@ -13,6 +13,7 @@ import { NotificacionesProvider } from '@/context/NotificacionesContext';
 // NuevosUsuariosProvider
 import { NuevosUsuariosProvider } from '@/context/NuevosUsuariosContext';
 import { PublicidadProvider } from '@/context/PublicidadContext';
+import { FollowProvider } from '@/context/FollowContext';
 // metadatos
 export const metadata: Metadata = {
   title: {
@@ -81,11 +82,13 @@ export default function RootLayout({
       <body>
         <AuthProvider>
             <NotificacionesProvider>
-              <NuevosUsuariosProvider>
-                <PublicidadProvider>
-                  {children}
-                </PublicidadProvider>
-              </NuevosUsuariosProvider>
+              <FollowProvider>
+                <NuevosUsuariosProvider>
+                  <PublicidadProvider>
+                    {children}
+                  </PublicidadProvider>
+                </NuevosUsuariosProvider>
+              </FollowProvider>
             </NotificacionesProvider>
         </AuthProvider>
       </body>

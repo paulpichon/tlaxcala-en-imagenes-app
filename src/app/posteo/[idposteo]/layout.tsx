@@ -15,7 +15,6 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 
 // 🌐 Contextos específicos para esta sección
 // Se usan solo en detalle de posteo.
-import { FollowProvider } from "@/context/FollowContext";
 import { FavoritoProvider } from "@/context/FavoritoContext";
 
 /**
@@ -38,13 +37,10 @@ export default function PosteoLayout({
   return (
     // 🔒 Ruta protegida - requiere autenticación obligatoria
     <ProtectedRoute>
-      {/* 👇 Provider para funcionalidad de seguir/dejar de seguir usuarios */}
-      <FollowProvider>
         {/* 👇 Provider para funcionalidad de favoritos (marcar/desmarcar publicaciones) */}
         <FavoritoProvider>
           {children}
         </FavoritoProvider>
-      </FollowProvider>
     </ProtectedRoute>
   );
 }

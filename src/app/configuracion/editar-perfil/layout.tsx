@@ -12,7 +12,6 @@ import "../../ui/fonts";
 // Componente de protección de rutas
 import ProtectedRoute from "@/components/ProtectedRoute";
 // Contextos globales
-import { FollowProvider } from "@/context/FollowContext";
 import { FavoritoProvider } from "@/context/FavoritoContext";
 
 /**
@@ -30,13 +29,10 @@ export default function EditarPerfilLayout({
   return (
     // Ruta protegida - requiere autenticación obligatoria
     <ProtectedRoute>
-      {/* Provider para funcionalidad de seguir/dejar de seguir usuarios */}
-      <FollowProvider>
         {/* Provider para funcionalidad de favoritos */}
         <FavoritoProvider>
           {children}
         </FavoritoProvider>
-      </FollowProvider>
     </ProtectedRoute>
   );
 }

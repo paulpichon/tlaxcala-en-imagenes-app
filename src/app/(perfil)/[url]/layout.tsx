@@ -1,6 +1,4 @@
-import { Metadata } from "next";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { FollowProvider } from "@/context/FollowContext";
 import { FavoritoProvider } from "@/context/FavoritoContext";
 
 // SEO en la pagina page.tsx
@@ -12,11 +10,9 @@ export default function PerfilLayout({
 }) {
   return (
     <ProtectedRoute>
-      <FollowProvider>
         <FavoritoProvider>
           {children}
         </FavoritoProvider>
-      </FollowProvider>
     </ProtectedRoute>
   );
 }
