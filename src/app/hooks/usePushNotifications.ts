@@ -100,7 +100,7 @@ export function usePushNotifications() {
       // ✅ Mostrar notificación de confirmación
       new Notification("🔔 Notificaciones activadas", {
         body: "Recibirás avisos cuando tengas nuevos seguidores o actividad.",
-        icon: "/icon-192x192.png",
+        icon: "/public/assets/icono-tlaxapp-blanco.png",
       });
 
       setEstado("enabled");
