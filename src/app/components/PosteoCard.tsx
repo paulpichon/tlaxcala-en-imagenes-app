@@ -181,9 +181,9 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
               className="link_perfil_usuario text-dark text-decoration-none"
               href={`/${posteoActual._idUsuario.url}`}
             >
+              {/* Mostramos el nombre del usuario(URL del usuario) en todos lados donde se muestre*/}
               <strong className="me-1">
-                {posteoActual._idUsuario.nombre_completo.nombre}{" "}
-                {posteoActual._idUsuario.nombre_completo.apellido}
+                { posteoActual._idUsuario.url }
               </strong>
             </Link>
             {posteoActual.texto}
