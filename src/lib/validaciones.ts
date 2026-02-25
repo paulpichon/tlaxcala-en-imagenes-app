@@ -110,3 +110,18 @@ export const schemaAyudaSoporte = z.object({
 
 
 export type PosteoSchema = z.infer<typeof posteoSchema>;
+
+// Validacion para extenciones de imagen de perfil
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp"];
+export const imageFileSchema = z
+  .instanceof(File)
+  .refine((file) => ALLOWED_TYPES.includes(file.type), {
+    message: "Solo se permiten archivos de imagen (JPG, JPEG, PNG o WebP)",
+  })
+  .refine((file) => {
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    return ext && ALLOWED_EXTENSIONS.includes(ext);
+  }, {
+    message: "Extensión no válida. Solo JPG, JPEG, PNG o WebP.",
+});

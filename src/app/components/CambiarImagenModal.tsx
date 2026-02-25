@@ -8,6 +8,8 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiCamera } from 'react-icons/fi';
 import { UsuarioLogueado } from '@/types/types';
+// Validacion de la extencion de la imagen a subir
+import { imageFileSchema } from '@/lib/validaciones';
 
 interface CambiarImagenModalProps {
   usuario: UsuarioLogueado;
@@ -52,13 +54,16 @@ export default function CambiarImagenModal({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // ✅ Validar tipo de archivo
-    if (!file.type.startsWith('image/')) {
-      setToast({ message: 'Solo se permiten archivos de imagen (JPG, JPEG, PNG, WebP...)', type: 'danger' });
+    // Validar la extension de la imagen a subir
+    const result = imageFileSchema.safeParse(file);
+    // Si el resultado de la validacion es un tipo no permitido
+    if (!result.success) {
+      const errorMessage = result.error.issues[0].message;
+      setToast({ message: errorMessage, type: "danger" });
       e.target.value = '';
       return;
     }
+
 
     // ✅ Validar tamaño (máx. 5 MB)
     const maxSizeMB = 5;
@@ -167,7 +172,7 @@ export default function CambiarImagenModal({
                     sizes="150px" // Ayuda a Next.js a optimizar el tamaño de carga
                     style={{ objectFit: 'cover' }} // Se recomienda usar style o una clase CSS directa
                     className="rounded-circle"
-                    onLoadingComplete={() => setImageLoaded(true)}
+                    onLoad={() => setImageLoaded(true)} // onLoadingComplete esta deprecado ahora es onLoad
                 />
                 )}
               </div>
@@ -198,7 +203,7 @@ export default function CambiarImagenModal({
                 Cancelar
               </button>
               <button
-                className="btnGuardarCambiarMedium"
+                className="btnPublicarDescartar"
                 onClick={handleUpload}
                 disabled={loading || !fileInputRef.current?.files?.length}
               >
