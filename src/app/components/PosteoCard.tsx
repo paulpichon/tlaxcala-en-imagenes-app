@@ -87,7 +87,10 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
       >
         {/* Header */}
         <div className="card-header bg-light d-flex align-items-center border-0">
-          <Link href={`/${posteoActual._idUsuario.url}`}>
+          <Link 
+            href={`/${posteoActual._idUsuario.url}`}
+            aria-label={`Perfil de ${posteoActual._idUsuario.url}`}
+            >
             <Image
               src={obtenerImagenPerfilUsuario(posteoActual._idUsuario, "perfil")}
               alt={`Foto de perfil de @${posteoActual._idUsuario.url}`}
@@ -102,21 +105,23 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
           <Link
             className="text-dark text-decoration-none fw-bold"
             href={`/${posteoActual._idUsuario.url}`}
+            aria-label={`Perfil de ${posteoActual._idUsuario.url}`}
           >
             {posteoActual._idUsuario.url}
           </Link>
-          <Link  
-              className="text-dark text-decoration-none fw-bold"
-              href={`/${posteoActual._idUsuario.url}`}
-            >
           {/* 👇 Mostrar Nombre del usuario solo si se indica */}
           {showUserUrl && (
-            <span className="fw-normal small text-muted">
-              {posteoActual._idUsuario.nombre_completo.nombre}{" "}
-              {posteoActual._idUsuario.nombre_completo.apellido}
-            </span>
+            <Link  
+                className="text-dark text-decoration-none fw-bold"
+                href={`/${posteoActual._idUsuario.url}`}
+                aria-label={`Perfil de ${posteoActual._idUsuario.url}`}
+              >
+              <span className="fw-normal small text-muted">
+                {posteoActual._idUsuario.nombre_completo.nombre}{" "}
+                {posteoActual._idUsuario.nombre_completo.apellido}
+              </span>
+            </Link>
           )}
-          </Link>
 
           {/* Ubicación */}
           {obtenerTextoUbicacion() && (
@@ -180,6 +185,7 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
             <Link
               className="link_perfil_usuario text-dark text-decoration-none"
               href={`/${posteoActual._idUsuario.url}`}
+              aria-label={`Perfil de ${posteoActual._idUsuario.url}`}
             >
               {/* Mostramos el nombre del usuario(URL del usuario) en todos lados donde se muestre*/}
               <strong className="me-1">
