@@ -20,6 +20,7 @@ export default function LikeButton({ postId, onOpenLikesModal }: LikeButtonProps
         onClick={handleClick}
         disabled={loading}
         className={`like-button ${likeState.hasLiked ? "liked" : ""}`}
+        aria-label="Boton like"
       >
         {loading ? (
           <span className="spinner-border spinner-border-sm" role="status" />

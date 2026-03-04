@@ -70,6 +70,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
               <button
                 onClick={action}
                 className="nav-link opciones_menu bg-transparent border-0"
+                aria-label={name}
               >
                 {LinkIcon && <LinkIcon className="icono_menu" />}
                 <span className="nombre_opciones_menu">{name}</span>
@@ -78,6 +79,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
               <Link
                 href={href!}
                 className={`nav-link opciones_menu ${pathname === href ? "link-activo" : ""}`}
+                aria-label={name}
               >
                 <div className="position-relative d-inline-block">
                   {LinkIcon && <LinkIcon className="icono_menu" />}
@@ -108,6 +110,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
             <Link
               href={perfilHref}
               className={`nav-link opciones_menu ${isPerfilActivo ? "link-activo" : ""}`}
+              aria-label={`Perfil de @${user.url}`}
             >
               <Image
                 key={user?.imagen_perfil?.secure_url || "default"}
@@ -148,6 +151,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
                 <Link
                   className={`dropdown-item ${isFavoritosActivo ? "linkActivoDropdown fw-light" : ""}`}
                   href="/favoritos"
+                  aria-label="Favoritos"
                 >
                   Favoritos
                 </Link>
@@ -156,6 +160,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
                 <Link
                   className={`dropdown-item ${isPerfilActivo ? "linkActivoDropdown fw-light" : ""}`}
                   href={perfilHref}
+                  aria-label="Mi perfil"
                 >
                   Mi perfil
                 </Link>
@@ -165,6 +170,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
                 <Link
                   className={`dropdown-item ${isNotificacionesActivo ? "linkActivoDropdown fw-light" : ""}`}
                   href="/notificaciones"
+                  aria-label="Notificaciones"
                 >
                   Notificaciones
                 </Link>
