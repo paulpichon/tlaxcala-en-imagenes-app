@@ -5,11 +5,15 @@ import Link from "next/link";
 
 export default function HeaderSuperior() {
     return (
-        <nav className="menu_superior_central">
-            <Link href="/inicio" className="header_marca">
+        <div className="menu_superior_central" role="banner">
+            <Link 
+                href="/inicio" 
+                className="header_marca"
+                aria-label="Banner de bienvenida"
+                >
                 <Image
                     src="/assets/icono-tlaxapp-beige.png"
-                    alt="TlaxApp"
+                    alt="Logotipo de la app"
                     width={50}
                     height={50}
                     priority
@@ -18,6 +22,6 @@ export default function HeaderSuperior() {
                     TlaxApp
                 </span>
             </Link>
-        </nav>
+        </div>
     );
 }
