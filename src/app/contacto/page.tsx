@@ -85,7 +85,7 @@ export const metadata: Metadata = {
   
   // Metadata adicional
   other: {
-    'contact-email': 'contacto@tlaxapp.com', // Metadato personalizado
+    'contact-email': `${process.env.CORREO_CONTACTO}`, // Metadato personalizado
   },
 };
 
@@ -126,7 +126,7 @@ export default function Contacto() {
           '@type': 'ContactPoint',
           telephone: '', // Agregar cuando esté disponible
           contactType: 'customer support',
-          email: 'contacto@tlaxapp.com', // ← Reemplaza con tu email real
+          email: `${process.env.CORREO_CONTACTO}`, // ← Reemplaza con tu email real
           areaServed: 'MX',
           availableLanguage: ['Spanish', 'es'],
           contactOption: 'TollFree',
@@ -142,8 +142,8 @@ export default function Contacto() {
       
       // Redes sociales (descomentar y agregar cuando estén disponibles)
       sameAs: [
+        'https://www.instagram.com/tlaxapp',
         // 'https://facebook.com/tlaxapp',
-        // 'https://instagram.com/tlaxapp',
         // 'https://twitter.com/tlaxapp',
         // 'https://www.linkedin.com/company/tlaxapp',
       ],
@@ -185,7 +185,7 @@ export default function Contacto() {
           name: '¿Cómo puedo contactar a TlaxApp?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Puedes contactarnos a través de nuestro formulario de contacto en la plataforma o enviando un correo electrónico a contacto@tlaxapp.com',
+            text: `Puedes contactarnos a través de nuestro formulario de contacto en la plataforma o enviando un correo electrónico a ${process.env.CORREO_CONTACTO}`,
           },
         },
         {
@@ -288,11 +288,11 @@ export default function Contacto() {
                   <li>
                     <strong>Correo electrónico:</strong>{" "}
                     <a 
-                      href="mailto:contacto@tlaxapp.com"
+                      href={`mailto:${process.env.CORREO_CONTACTO}`}
                       className="text-primary"
                       aria-label="Enviar correo a TlaxApp"
                     >
-                      contacto@tlaxapp.com
+                      {process.env.CORREO_CONTACTO}
                     </a>
                     {/* ☝️ Reemplazar con el email real cuando esté disponible */}
                   </li>
@@ -310,14 +310,14 @@ export default function Contacto() {
                       +52 246 123 4567
                     </a>
                   </li>
+                  */}
                   <li>
                     <strong>Redes sociales:</strong> Síguenos en{" "}
-                    <a href="https://facebook.com/tlaxapp" target="_blank" rel="noopener noreferrer">Facebook</a>,{" "}
-                    <a href="https://instagram.com/tlaxapp" target="_blank" rel="noopener noreferrer">Instagram</a> y{" "}
-                    <a href="https://twitter.com/tlaxapp" target="_blank" rel="noopener noreferrer">Twitter</a>
-                    {" "}(las respuestas en redes sociales no son inmediatas)
+                    <a href="https://www.instagram.com/tlaxapp" target="_blank" rel="noopener noreferrer">Instagram</a>
+                    {/* <a href="https://facebook.com/tlaxapp" target="_blank" rel="noopener noreferrer">Facebook</a>,{" "} */}
+                    {/* <a href="https://twitter.com/tlaxapp" target="_blank" rel="noopener noreferrer">Twitter</a>
+                    {" "}(las respuestas en redes sociales no son inmediatas) */}
                   </li>
-                  */}
                 </ul>
                 
                 <p className="text-muted small">
