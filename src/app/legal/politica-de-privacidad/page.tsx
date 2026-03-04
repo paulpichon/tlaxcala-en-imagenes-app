@@ -231,11 +231,11 @@ export default function PoliticaDePrivacidad() {
                   a través de la Plataforma es{" "}
                   <strong>TlaxApp</strong> (
                   <a 
-                    href="mailto:legal@tlaxapp.com"
+                    href={`mailto:${process.env.CORREO_LEGAL}`}
                     className="text-primary"
                     aria-label="Contacto legal de TlaxApp"
                   >
-                    legal@tlaxapp.com
+                    { process.env.CORREO_LEGAL }
                   </a>
                   ), quien actúa como responsable conforme a la LFPDPPP.
                 </p>
@@ -363,8 +363,8 @@ export default function PoliticaDePrivacidad() {
                 </ul>
                 <p>
                   Para ejercer tus derechos ARCO, puedes contactarnos a través de:{" "}
-                  <a href="mailto:legal@tlaxapp.com" className="text-primary">
-                    legal@tlaxapp.com
+                  <a href={`mailto:${process.env.CORREO_LEGAL}`} className="text-primary">
+                    { process.env.CORREO_LEGAL }
                   </a>{" "}
                   o mediante los canales de contacto indicados en{" "}
                   <Link href="/contacto" className="text-primary">
@@ -482,8 +482,8 @@ export default function PoliticaDePrivacidad() {
                   </h3>
                   <p className="mb-1">
                     <strong>Email:</strong>{" "}
-                    <a href="mailto:legal@tlaxapp.com" className="text-primary">
-                      legal@tlaxapp.com
+                    <a href={`mailto:${process.env.CORREO_LEGAL}`} className="text-primary">
+                      { process.env.CORREO_LEGAL } 
                     </a>
                   </p>
                   <p className="mb-0">
