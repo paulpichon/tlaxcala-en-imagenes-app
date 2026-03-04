@@ -61,7 +61,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
   }, [showModal, showCrearPost]);
 
   return (
-    <nav>
+    <nav role="navigation">
       <ul className="nav justify-content-center menu_inferior_lateral">
         {/* Enlaces principales */}
         {baseLinks.map(({ name, href, icon: LinkIcon, action }) => (

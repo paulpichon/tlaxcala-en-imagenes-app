@@ -6,7 +6,7 @@ export default function FooterMain() {
 
   return (
     <div className="col-md-12">
-      <footer className="pie_pagina_index">
+      <footer className="pie_pagina_index" role="contentinfo">
         {/* Navegación legal */}
         <ul className="nav justify-content-center mb-2">
           <li className="nav-item">

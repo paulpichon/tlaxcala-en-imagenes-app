@@ -91,7 +91,7 @@ export default function Inicio() {
               <HeaderSuperior />
             </div>
             
-            <div className="contenedor_contenido_principal">
+            <div className="contenedor_contenido_principal" role="main">
               <PublicacionUsuario />
             </div>
           </div>

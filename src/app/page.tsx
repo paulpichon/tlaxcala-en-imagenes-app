@@ -19,7 +19,7 @@ import iconoTlaxapp from "@/../public/assets/icono-tlaxapp-blanco.png";
 export default function Home() {
   return (
     <AlreadyAuthRedirect>
-      <main className={styles.wrapper}>
+      <main className={styles.wrapper} role="main">
         <section className={styles.hero}>
           <div className={styles.heroContent}>
             <Image
