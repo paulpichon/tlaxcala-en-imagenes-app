@@ -164,6 +164,7 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
             src={postImageUrl}
             alt={`Fotografía por @${posteoActual._idUsuario.url}, texto: ${posteoActual.texto || "Imagen del post"}`}
             fill={!isDetail}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 600px"
             width={isDetail ? 1080 : undefined}
             height={isDetail ? 1080 : undefined}
             loading="eager" //Carga inmediatamente
