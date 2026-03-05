@@ -6,8 +6,6 @@
 import { useState, useEffect } from "react";
 // Redireccionar a otra página
 import { useRouter } from "next/navigation";
-// Bootstrap CSS
-import "bootstrap/dist/css/bootstrap.css";
 // Estilos de página
 import passwordOlvidado from "../../../ui/cuentas/login/password-olvidado/PasswordOlvidado.module.css";
 // Componentes

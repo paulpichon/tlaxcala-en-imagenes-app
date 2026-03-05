@@ -16,13 +16,8 @@ import FooterSugerencias from "@/app/components/FooterSugerencias";
 
 // 🎨 Estilos
 import "../../ui/inicio/inicio.css";
-
-// Bootstrap
-import "bootstrap/dist/css/bootstrap.css";
-
 // Componente que obtiene y renderiza el posteo (Client Component)
 import PosteoDetalle from "@/app/components/PosteoDetalle";
-
 import { Metadata } from "next";
 
 /**

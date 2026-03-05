@@ -1,8 +1,6 @@
 // Pagina no encontrada
 // Next Link
 import Link from "next/link";
-// bootstrap
-import "bootstrap/dist/css/bootstrap.css";
 // estilos pagina not faound
 import "./ui/not-found.css";
 // Header principal

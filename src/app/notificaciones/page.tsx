@@ -3,8 +3,6 @@
 
 // Meta datos NEXTJS
 import { Metadata } from "next";
-// Bootstrap CSS
-import "bootstrap/dist/css/bootstrap.css";
 // Estilos de página
 import "../ui/inicio/inicio.css";
 

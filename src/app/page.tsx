@@ -2,10 +2,6 @@
 // Next
 import Link from "next/link";
 import Image from "next/image";
-
-// Bootstrap
-import "bootstrap/dist/css/bootstrap.css";
-
 // Styles
 import styles from "./ui/Home.module.css";
 
@@ -41,7 +37,11 @@ export default function Home() {
                 Crear cuenta
               </Link>
 
-              <Link href="/cuentas/login" className={styles.secondaryBtn}>
+              <Link 
+                href="/cuentas/login" 
+                className={styles.secondaryBtn}
+                aria-label="Página de inicio de sesión"
+              >
                 Iniciar sesión
               </Link>
             </div>

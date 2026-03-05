@@ -4,8 +4,6 @@
 
 // Meta datos NEXTJS
 import { Metadata } from "next";
-// Bootstrap CSS
-import "bootstrap/dist/css/bootstrap.css";
 // Estilos (reutilizamos el mismo módulo de páginas legales)
 import contacto from "@/app/ui/legal/PrivacidadTerminosCondiciones.module.css";
 // Componentes

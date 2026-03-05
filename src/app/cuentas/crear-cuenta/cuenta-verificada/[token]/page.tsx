@@ -4,8 +4,6 @@
 
 // Meta datos NEXTJS
 import { Metadata } from "next";
-// Bootstrap CSS
-import "bootstrap/dist/css/bootstrap.css";
 // Estilos de la página
 import cuentaVerificada from "../../../../ui/cuentas/crear-cuenta/cuenta-verificada/CuentaVerificada.module.css";
 // Componentes

@@ -6,7 +6,6 @@
 // Diseñada similar a Términos y Condiciones
 
 import { Metadata } from "next";
-import "bootstrap/dist/css/bootstrap.css";
 import condiciones from "@/app/ui/legal/PrivacidadTerminosCondiciones.module.css";
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 import FooterMain from "@/app/components/FooterMain";

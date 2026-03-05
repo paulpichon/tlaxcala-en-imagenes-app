@@ -4,8 +4,6 @@
 
 // Meta datos NEXTJS
 import { Metadata } from "next";
-// Bootstrap CSS
-import "bootstrap/dist/css/bootstrap.css";
 // Componente
 import CorreoEnviado from "../components/CorreoEnviado";
 

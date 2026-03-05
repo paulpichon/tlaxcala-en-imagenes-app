@@ -1,5 +1,7 @@
 // AuthProvider
 import { AuthProvider } from '@/context/AuthContext';
+// Bootstrap
+import 'bootstrap/dist/css/bootstrap.min.css';
 // Estilos globales
 import "./ui/globals.css";
 // metadatos

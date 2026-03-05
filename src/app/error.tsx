@@ -3,8 +3,6 @@
 // Pagina no encontrada
 // use effect
 import { useEffect } from 'react';
-// bootstrap
-import "bootstrap/dist/css/bootstrap.css";
 // estilos pagina not faound
 import "./ui/error.css";
 // Header principal

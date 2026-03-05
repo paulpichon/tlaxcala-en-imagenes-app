@@ -1,6 +1,4 @@
 'use client';
-// bootstrap
-import "bootstrap/dist/css/bootstrap.css";
 // Estilos de pagina
 import crearCuenta from "../../../ui/cuentas/crear-cuenta/CrearCuenta.module.css";
 // para redireccionar a otra pagina
@@ -247,6 +245,7 @@ export function FormularioRegistro() {
           type="submit"
           className={crearCuenta.boton_registrarse}
           disabled={isLoading || Object.keys(validationErrors).length > 0}
+          aria-label="Botón para registrar cuenta"
         >
           {isLoading ? 'Registrando...' : 'Registrarse'}
         </button>

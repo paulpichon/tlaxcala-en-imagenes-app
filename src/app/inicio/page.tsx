@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import "bootstrap/dist/css/bootstrap.css";
 import "../ui/inicio/inicio.css";
 
 // Componentes

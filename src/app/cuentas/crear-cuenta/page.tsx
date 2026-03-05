@@ -8,8 +8,6 @@
 import { Metadata } from "next";
 // Link nextjs
 import Link from "next/link";
-// Bootstrap CSS
-import "bootstrap/dist/css/bootstrap.css";
 // Estilos de página
 import crearCuenta from "../../ui/cuentas/crear-cuenta/CrearCuenta.module.css";
 // Componentes

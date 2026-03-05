@@ -6,11 +6,6 @@
 
 // Meta datos NEXTJS
 import { Metadata } from "next";
-// Bootstrap CSS
-import "bootstrap/dist/css/bootstrap.css";
-// Estilos específicos de la página
-import "../../ui/configuracion/editar-perfil/editarPerfil.css";
-
 // Componentes
 import MenuPrincipal from "../../components/MenuPrincipal";
 import HeaderSuperior from "../../components/HeaderSuperior";

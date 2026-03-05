@@ -4,8 +4,6 @@
 
 // Meta datos NEXTJS
 import { Metadata } from "next";
-// Bootstrap CSS
-import "bootstrap/dist/css/bootstrap.css";
 // Estilos de página
 import restaPasssword from "@/app/ui/cuentas/login/restablecer-password/RestablecerPassword.module.css";
 // Componentes

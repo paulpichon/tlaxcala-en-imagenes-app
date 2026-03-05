@@ -7,7 +7,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 // Bootstrap CSS
-import "bootstrap/dist/css/bootstrap.css";
+// import "bootstrap/dist/css/bootstrap.css";
 // Estilos de la página CSS modules
 import styPassRes from "../../../ui/cuentas/confirmacion/password-restablecido/PasswordRestablecido.module.css";
 // Componentes

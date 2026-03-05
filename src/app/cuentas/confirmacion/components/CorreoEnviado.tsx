@@ -1,7 +1,7 @@
 // Función para el envio de correo para las paginas de: restablecer contraseña y registro de usuarios
 'use client';
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 // useRouter para redireccionar a otra pagina
 // usePathname para obtener la ruta actual
 import { usePathname, useRouter } from 'next/navigation';
@@ -174,7 +174,11 @@ export default function CorreoEnviado() {
             </a>
           </div>
           {pathname === rutas.restablecer && (
-            <Link href="/" className="btn  btn-sm">
+            <Link 
+              href="/" 
+              className="btn  btn-sm"
+              aria-label="Enlace volver a iniciar sesión"
+            >
               ← Volver a iniciar sesión
             </Link>
           )}
