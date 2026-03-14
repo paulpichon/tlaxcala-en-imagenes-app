@@ -27,7 +27,7 @@ export default function FormularioNuevaPassword({ token }: { token: string }) {
 	
 		try {
 			// hace una petición POST a tu API, enviando el nuevo password y el token (ya recibido en la URL).
-			const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/auth/cuentas/reestablecer-password/${token}`, {
+			const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/cuentas/reestablecer-password/${token}`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({

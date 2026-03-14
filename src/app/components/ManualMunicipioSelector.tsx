@@ -25,7 +25,7 @@ export default function ManualMunicipioSelector({
         try {
         // Obtener lista de municipios desde el backend
         const res = await fetchWithAuth(
-            `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/municipios`
+            `${process.env.NEXT_PUBLIC_API_URL}/api/municipios`
         );
         // respuesta del backend
         const data = await res.json();
