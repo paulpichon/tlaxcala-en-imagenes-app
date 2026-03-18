@@ -1,5 +1,3 @@
-// AuthProvider
-import { AuthProvider } from '@/context/AuthContext';
 // Bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
 // Estilos globales
@@ -10,12 +8,7 @@ import type { Metadata, Viewport } from "next";
 // Hay 2 formas de important las fuentes
 // import { open_sans, league_gothic } from './ui/fonts';
 import './ui/fonts';
-// NotificacionesProvider
-import { NotificacionesProvider } from '@/context/NotificacionesContext';
 // NuevosUsuariosProvider
-import { NuevosUsuariosProvider } from '@/context/NuevosUsuariosContext';
-import { PublicidadProvider } from '@/context/PublicidadContext';
-import { FollowProvider } from '@/context/FollowContext';
 // metadatos
 export const metadata: Metadata = {
   title: {
@@ -38,7 +31,7 @@ export const metadata: Metadata = {
     title: "TlaxApp | La red social de Tlaxcala",
     description:
       "Descubre Tlaxcala a través de fotos, historias y personas reales.",
-    url: `${process.env.NEXT_PUBLIC_BASE_URL}`,
+    url: `https://www.tlaxapp.com`,
     siteName: "TlaxApp",
     images: [
       {
@@ -82,17 +75,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body>
-        <AuthProvider>
-            <NotificacionesProvider>
-              <FollowProvider>
-                <NuevosUsuariosProvider>
-                  <PublicidadProvider>
-                    {children}
-                  </PublicidadProvider>
-                </NuevosUsuariosProvider>
-              </FollowProvider>
-            </NotificacionesProvider>
-        </AuthProvider>
+        {children}
       </body>
     </html>
   );

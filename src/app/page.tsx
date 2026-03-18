@@ -1,20 +1,14 @@
 
 // Next
-import Link from "next/link";
 import Image from "next/image";
 // Styles
 import styles from "./ui/Home.module.css";
-
 // Components
 import FooterMain from "./components/FooterMain";
-import AlreadyAuthRedirect from "@/components/AlreadyAuthRedirect";
-
 // Asset
 import iconoTlaxapp from "@/../public/assets/icono-tlaxapp-blanco.png";
-
 export default function Home() {
   return (
-    <AlreadyAuthRedirect>
       <main className={styles.wrapper} role="main">
         <section className={styles.hero}>
           <div className={styles.heroContent}>
@@ -32,24 +26,12 @@ export default function Home() {
               La red social de Tlaxcala.
             </p>
 
-            <div className={styles.actions}>
-              <Link href="/cuentas/crear-cuenta" className={styles.primaryBtn}>
-                Crear cuenta
-              </Link>
-
-              <Link 
-                href="/cuentas/login" 
-                className={styles.secondaryBtn}
-                aria-label="Página de inicio de sesión"
-              >
-                Iniciar sesión
-              </Link>
-            </div>
+              <div className={styles.primaryBtn}>
+                <h4>Próximamente 2026</h4>
+              </div>
           </div>
         </section>
-
         <FooterMain />
       </main>
-    </AlreadyAuthRedirect>
   );
 }

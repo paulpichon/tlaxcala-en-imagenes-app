@@ -1,9 +1,0 @@
-/* Checked del input notifiaciones activadas */
-.check_notificaciones:checked {
-    background-color: #ebca9a;
-    border-color: #ebca9a;
-}
-/* Icono de notificaciones */
-.icono_notificaciones {
-    color: #EBCA9A;
-}

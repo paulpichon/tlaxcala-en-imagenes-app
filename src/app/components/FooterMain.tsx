@@ -9,22 +9,11 @@ export default function FooterMain() {
       <footer className="pie_pagina_index" role="contentinfo">
         {/* Navegación legal */}
         <ul className="nav justify-content-center mb-2">
-          <li className="nav-item">
-            <Link
-              className="nav-link pie_pagina_links tad"
-              href="https://joyful-palmier-7fd55a.netlify.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Tlaxcala Al Descubierto
-            </Link>
-          </li>
 
           <li className="nav-item">
             <Link 
               className="nav-link pie_pagina_links" 
               href="/contacto" 
-              target="_blank"
             >
               Contacto
             </Link>
@@ -34,7 +23,6 @@ export default function FooterMain() {
             <Link
               className="nav-link pie_pagina_links"
               href="/legal/politica-de-privacidad"
-              target="_blank"
             >
               Política de Privacidad
             </Link>
@@ -44,7 +32,6 @@ export default function FooterMain() {
             <Link
               className="nav-link pie_pagina_links"
               href="/legal/terminos-y-condiciones"
-              target="_blank"
             >
               Términos y Condiciones
             </Link>
@@ -53,7 +40,6 @@ export default function FooterMain() {
             <Link
               className="nav-link pie_pagina_links"
               href="/legal/preguntas-frecuentes"
-              target="_blank"
             >
               Preguntas Frecuentes (FAQ)
             </Link>
