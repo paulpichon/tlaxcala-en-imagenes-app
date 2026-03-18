@@ -94,7 +94,7 @@ export default function CambiarImagenModal({
       formData.append('img', file);
 
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/uploads/usuarios`,
+        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/uploads/usuarios`,
         {
           method: 'PUT',
           body: formData,

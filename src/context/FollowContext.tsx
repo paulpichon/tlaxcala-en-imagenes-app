@@ -26,7 +26,7 @@ export function FollowProvider({ children }: { children: ReactNode }) {
       // Usa el estado local si existe, si no, cae en el initialFollowing que viene del prop
       const current = isFollowingMap[userId] ?? initialFollowing ?? false;
 
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/followers/${current ? "unfollow" : "follow"}/${userId}`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/followers/${current ? "unfollow" : "follow"}/${userId}`;
       const method = current ? "DELETE" : "POST";
 
       const res = await fetchWithAuth(url, { method });
