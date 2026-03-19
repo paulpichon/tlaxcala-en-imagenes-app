@@ -32,7 +32,7 @@ export default function PerfilUsuarioContainer({ url }: UrlProps) {
 
   // 🔹 Al cargar el usuario, sincroniza el total inicial
   if (usuario && totalPosteos === undefined) {
-    setTotalPosteos(usuario.totaltPosteos);
+    setTotalPosteos(usuario.totalPosteos);
   }
 
   if (loading) return <div className="d-flex justify-content-center align-items-center vh-100"><Spinner /></div>;

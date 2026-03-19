@@ -137,7 +137,7 @@ export interface UsuarioLogueado {
 // Tipo de datos para el perfil de usuario
 // Extiende de UsuarioLogueado y agrega estadísticas adicionales 
 export interface UsuarioPerfil extends UsuarioLogueado {
-  totaltPosteos: number;
+  totalPosteos: number;
   totalSeguidores: number;
   totalSeguidos: number;
   isFollowing: boolean; // Si el usuario actual sigue a este usuario

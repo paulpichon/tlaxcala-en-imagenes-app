@@ -27,7 +27,7 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
   const [showModal, setShowModal] = useState(false);
   const [showFollowersModal, setShowFollowersModal] = useState(false);
   const [hover, setHover] = useState(false);
-  const [totalPublicaciones, setTotalPublicaciones] = useState(usuario.totaltPosteos);
+  const [totalPublicaciones, setTotalPublicaciones] = useState(usuario.totalPosteos);
   const [showFollowingModal, setShowFollowingModal] = useState(false);
 
 
