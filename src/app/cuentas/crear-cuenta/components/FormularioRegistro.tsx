@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 // Funcion para Crear usuario
 import { createUsuario } from '@/lib/actions';
 // UseState, formEvent
-import { FormEvent, useState } from 'react';
+import { SubmitEvent, useState } from 'react';
 // interfaces, types
 import { 
   APIError, 
@@ -82,7 +82,7 @@ export function FormularioRegistro() {
   };
 
   // Envío del formulario
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
