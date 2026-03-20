@@ -201,10 +201,13 @@ const ImageModal: React.FC<PropsImageModal> = ({
                   <div className="d-flex align-items-center gap-2">
                     <div className="position-relative" style={{ width: 35, height: 35 }}>
                       <Image
+                        priority
+                        key={posteoActual._id}
                         src={obtenerImagenPerfilUsuario(posteoActual._idUsuario, "mini")}
-                        alt="perfil"
-                        fill
-                        className="rounded-circle object-cover"
+                        alt={`Imagen de perfil de @${posteoActual._idUsuario.url}`}
+                        width={40}
+                        height={40}
+                        className="rounded-circle me-2 border"
                       />
                     </div>
                     <div className="d-flex flex-column">
