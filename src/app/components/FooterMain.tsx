@@ -13,6 +13,14 @@ export default function FooterMain() {
           <li className="nav-item">
             <Link 
               className="nav-link pie_pagina_links" 
+              href="/que-es-tlaxapp" 
+            >
+              ¿Qué es TlaxApp?
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link 
+              className="nav-link pie_pagina_links" 
               href="/contacto" 
             >
               Contacto
