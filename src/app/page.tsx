@@ -97,8 +97,7 @@ export default function Home() {
           </p>
 
           <p className={styles.subtitle}>
-            Estamos construyendo la plataforma para descubrir los mejores lugares de Tlaxcala.
-            Únete para tener acceso antes del lanzamiento.
+            TlaxApp está en acceso privado. Regístrate para obtener tu invitación y ser de los primeros en mapear el estado
           </p>
 
           {/* INPUT */}
