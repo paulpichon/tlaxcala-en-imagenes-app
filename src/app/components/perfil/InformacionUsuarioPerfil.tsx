@@ -40,8 +40,9 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
   return (
     <div className={perfil.contenedor_info_usuario}>
       {/* Modal cambiar imagen */}
+      {/* Cualquier PROP que se necesite agregar o quitar, tambien debe de revisarse en el archivo InformacionUsuarioPerfil.tsx ya que es el que llama a este modal y se le pasan los props */}
       <CambiarImagenModal
-        usuario={usuario}
+        currentImage={imagenPerfil}
         show={showModal}
         onClose={() => setShowModal(false)}
         onSuccess={(newUrl) => setImagenPerfil(newUrl)}
@@ -81,6 +82,7 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
       >
         <Image
           priority
+          key={imagenPerfil} // Asegura que se recargue la imagen al cambiar
           src={imagenPerfil}
           width={100}
           height={100}
