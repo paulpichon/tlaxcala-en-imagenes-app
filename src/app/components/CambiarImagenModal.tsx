@@ -12,14 +12,14 @@ import { UsuarioLogueado } from '@/types/types';
 import { imageFileSchema } from '@/lib/validaciones';
 
 interface CambiarImagenModalProps {
-  usuario: UsuarioLogueado;
+  currentImage: string; // 👈 nueva
   show: boolean;
   onClose: () => void;
   onSuccess: (newUrl: string) => void;
 }
 
 export default function CambiarImagenModal({
-  usuario,
+  currentImage,
   show,
   onClose,
   onSuccess,
@@ -37,17 +37,15 @@ export default function CambiarImagenModal({
   // 🔹 Al abrir/cerrar modal
   useEffect(() => {
     if (!show) {
-      // 🔸 Resetear completamente cuando se cierra
       setPreview(null);
       setImageLoaded(false);
       setToast({ message: '', type: undefined });
       if (fileInputRef.current) fileInputRef.current.value = '';
     } else {
-      // 🔸 Cuando se abre, aseguramos el preview base (imagen actual)
-      setPreview(obtenerImagenPerfilUsuario(usuario, 'perfil'));
-      setImageLoaded(true);
+      setPreview(currentImage);
+      setImageLoaded(false);
     }
-  }, [show, usuario]);
+  }, [show, currentImage]);
 
   const handleSelectImage = () => fileInputRef.current?.click();
 
@@ -166,6 +164,7 @@ export default function CambiarImagenModal({
               }}>
                 {preview && (
                   <Image
+                    key={preview}
                     src={preview}
                     alt="Vista previa"
                     fill 

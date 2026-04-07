@@ -60,7 +60,13 @@ export default function EditarPerfil() {
       </div>
 
       {user && (
-        <CambiarImagenModal usuario={user} show={showModal} onClose={() => setShowModal(false)} onSuccess={setImagenPerfil} />
+        // Cualquier PROP que se necesite agregar o quitar, tambien debe de revisarse en el archivo InformacionUsuarioPerfil.tsx ya que es el que llama a este modal y se le pasan los props
+        <CambiarImagenModal
+          currentImage={imagenPerfil}
+          show={showModal}
+          onClose={() => setShowModal(false)}
+          onSuccess={(newUrl) => setImagenPerfil(newUrl)}
+        />
       )}
     </div>
   );
