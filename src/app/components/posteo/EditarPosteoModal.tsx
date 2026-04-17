@@ -29,6 +29,8 @@ export default function EditarPosteoModal({
   const [loading, setLoading] = useState(false);
 
   const {
+    lat,
+    lng,
     obtenerUbicacion,
     loadingUbicacion,
     ubicacionError,
@@ -40,6 +42,8 @@ export default function EditarPosteoModal({
     setCiudad,
     setEstado,
     setPais,
+    setLat,
+    setLng,
   } = useObtenerUbicacion();
 
   const [toastMessage, setToastMessage] = useState("");
@@ -59,10 +63,26 @@ export default function EditarPosteoModal({
       setCiudad(posteo.ubicacion.ciudad || null);
       setEstado(posteo.ubicacion.estado || null);
       setPais(posteo.ubicacion.pais || null);
+      
+      // ✅ Verificación ultra-segura
+      // Comprobamos que existan las coordenadas y que el array interno no sea null
+      const coordsArray = posteo.ubicacion.coordinates?.coordinates;
+  
+      if (Array.isArray(coordsArray) && coordsArray.length >= 2) {
+        setLng(coordsArray[0]); // Longitud
+        setLat(coordsArray[1]); // Latitud
+      } else {
+        // Si no hay coordenadas exactas, nos aseguramos de limpiar el estado
+        setLat(null);
+        setLng(null);
+      }
+    } else {
+      // Si el posteo no tiene ninguna ubicación, reseteamos todo
+      eliminarUbicacion();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [posteo]);
-
+  
   if (!isOpen || !posteo) return null;
 
   const validarTexto = () => {
@@ -83,6 +103,8 @@ export default function EditarPosteoModal({
     setCiudad(null);
     setEstado(null);
     setPais(null);
+    setLat(null);
+    setLng(null);
   };
 
   const handleGuardar = async () => {
@@ -98,14 +120,21 @@ export default function EditarPosteoModal({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             texto,
-            ubicacion: municipioId
+            // ✅ Campos planos, tal como el backend los espera
+            ...(municipioId
               ? {
                   municipio: municipioId,
                   ciudad,
                   estado,
                   pais,
+                  // ✅ Si vienen de GPS, esExacta=true; si es manual, lat/lng son null → esExacta=false
+                  ...(lat && lng ? { lat, lng } : {}),
                 }
-              : null,
+              : {
+                  // ✅ Eliminación explícita: mandar null en los campos
+                  municipio: null,
+                  lat: null,    // necesario para que el backend entre al "Caso A"
+                }),
           }),
         }
       );
@@ -145,7 +174,7 @@ export default function EditarPosteoModal({
       setLoading(false);
     }
   };
-
+  // Maximmo de caracteres para la descripcion
   const maxChars = 200;
 
   return (
@@ -185,6 +214,7 @@ export default function EditarPosteoModal({
                 <div className="d-flex justify-content-between align-items-center mb-2">
                   <h6 className="fw-bold mb-0">📍 Ubicación</h6>
 
+                  {/* Si no hay una ciudad seleccionada/detectada, mostrar botón de GPS */}
                   {!ciudad && !loadingUbicacion && (
                     <button
                       onClick={obtenerUbicacion}
@@ -195,6 +225,7 @@ export default function EditarPosteoModal({
                     </button>
                   )}
 
+                  {/* Si ya hay datos, mostrar botón de quitar */}
                   {(ciudad || municipioId) && (
                     <button
                       onClick={eliminarUbicacion}
@@ -213,9 +244,12 @@ export default function EditarPosteoModal({
                   <div className="alert alert-success py-2 px-3 mb-2">
                     <strong>{ciudad}</strong>, {estado}, {pais}
                     <div className="small text-muted">
-                      {posteo.ubicacion
-                        ? "Ubicación editada"
-                        : "Detectada automáticamente"}
+                      {/* Lógica dinámica para el origen de la ubicación */}
+                      {lat && lng ? (
+                        <span className="text-success">✨ Detectada automáticamente</span>
+                      ) : (
+                        <span className="text-success">🖐️ Selección manual</span>
+                      )}
                     </div>
                   </div>
                 )}
@@ -233,6 +267,10 @@ export default function EditarPosteoModal({
                     setCiudad(data.ciudad);
                     setEstado(data.estado);
                     setPais(data.pais);
+                    // Al seleccionar manualmente, nos aseguramos de limpiar las coordenadas GPS
+                    // para que el texto cambie a "Selección manual"
+                    if (typeof setLat === 'function') setLat(null);
+                    if (typeof setLng === 'function') setLng(null);
                   }}
                 />
               </div>
