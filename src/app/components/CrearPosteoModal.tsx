@@ -32,6 +32,8 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
   
     // 🌍 ubicación
     obtenerUbicacion,
+    lat,
+    lng,
     municipioId,
     ciudad,
     estado,
@@ -40,6 +42,8 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
     setCiudad,
     setEstado,
     setPais,
+    setLat,
+    setLng,
     loadingUbicacion,
     ubicacionError,
   } = useCrearPosteo(onPostCreated, handleSuccess);
@@ -69,6 +73,8 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
     setCiudad(null);
     setEstado(null);
     setPais(null);
+    setLat(null);
+    setLng(null);
   };
 
   // Mantener visible el toast por unos segundos
@@ -222,20 +228,23 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                       <div className="d-flex justify-content-between align-items-center mb-2">
                         <h6 className="fw-bold mb-0">📍 Ubicación</h6>
 
-                        {/* Ícono de obtener ubicación */}
+                        {/* Ícono de obtener ubicación (GPS) */}
                         {!ciudad && !loadingUbicacion && (
                           <button
                             onClick={obtenerUbicacion}
                             className="iconLocationBtn"
-                            title="Detectar ubicación"
+                            type="button" // Siempre define el tipo en botones dentro de forms
+                            title="Detectar ubicación automáticamente"
                           >
                             <FiMapPin size={20} />
                           </button>
                         )}
 
+                        {/* Botón para quitar ubicación */}
                         {(ciudad || municipioId) && (
                           <button
                             onClick={eliminarUbicacion}
+                            type="button"
                             className="btn btn-sm btn-outline-danger"
                           >
                             Quitar
@@ -250,13 +259,19 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                       {ciudad && (
                         <div className="alert alert-success py-2 px-3 mb-2">
                           <strong>{ciudad}</strong>, {estado}, {pais}
-                          <div className="small text-muted">Seleccionado automáticamente</div>
+                          <div className="small mt-1">
+                            {lat && lng ? (
+                              <span className="text-success">✨ Detectada automáticamente</span>
+                            ) : (
+                              <span className="text-success">🖐️ Selección manual</span>
+                            )}
+                          </div>
                         </div>
                       )}
 
                       {ubicacionError && (
                         <div className="alert alert-warning py-2 px-3 mb-2">
-                          No se pudo detectar la ubicación automática
+                          No se pudo detectar la ubicación automáticamente
                         </div>
                       )}
 
@@ -268,6 +283,9 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                           setCiudad(data.ciudad);
                           setEstado(data.estado);
                           setPais(data.pais);
+                          // Al elegir manualmente, "matamos" las coordenadas GPS
+                          setLat(null);
+                          setLng(null);
                         }}
                       />
                     </div>
