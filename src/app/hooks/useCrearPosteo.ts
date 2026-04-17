@@ -105,10 +105,14 @@ export function useCrearPosteo(
     ciudad,
     estado,
     pais,
+    lat,
+    lng,
     setMunicipioId,
     setCiudad,
     setEstado,
     setPais,
+    setLat,
+    setLng,
   } = useObtenerUbicacion();
   
   
@@ -138,6 +142,10 @@ export function useCrearPosteo(
       if (ciudad) formData.append("ciudad", ciudad);
       if (estado) formData.append("estado", estado);
       if (pais) formData.append("pais", pais);
+
+      // 🆕 Agregamos las coordenadas si existen
+      if (lat) formData.append("lat", String(lat));
+      if (lng) formData.append("lng", String(lng));
 
       const res = await fetchWithAuth(
         `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos`,
@@ -190,6 +198,8 @@ export function useCrearPosteo(
 
     // ubicación
     obtenerUbicacion,
+    lat,
+    lng,
     municipioId,
     ciudad,
     estado,
@@ -198,6 +208,8 @@ export function useCrearPosteo(
     setCiudad,
     setEstado,
     setPais,
+    setLat,
+    setLng,
     loadingUbicacion,
     ubicacionError,
   };
