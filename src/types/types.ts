@@ -42,6 +42,10 @@ export interface Posteo {
     ciudad?: string;
     estado?: string;
     pais?: string;
+    coordinates?: {
+      type: "Point",
+      coordinates: [number, number] //[lng, lat]
+    }
   }
   secure_url: string;
   posteo_publico: boolean;
