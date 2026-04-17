@@ -15,6 +15,10 @@ export function useObtenerUbicacion() {
   const [estado, setEstado] = useState<string | null>(null);
   const [pais, setPais] = useState<string | null>(null);
 
+  // Guardar coordenadas y datos de ubicacion en el estado del componente
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
+
   // ⚡ Función reutilizable
   const obtenerUbicacion = async () => {
     try {
@@ -33,6 +37,10 @@ export function useObtenerUbicacion() {
           }
         );
       });
+      // ! NUEVO 
+      // Guardamos las coordenadas locales
+      setLat(coords.latitude);
+      setLng(coords.longitude);
 
       // 2️⃣ Consultar tu backend para convertir coords → municipio
       const res = await fetchWithAuth(
@@ -54,13 +62,15 @@ export function useObtenerUbicacion() {
       setMunicipioId(data.municipio?._id || null);
       setCiudad(data.municipio?.nombreMunicipio || null);
       setEstado(data.municipio?.nombreEntidad || null);
-      setPais(data.pais || null);
+      setPais("México"); // Asumimos que siempre sera Mexico, ya que el servicio solo devuelve municipios mexicanos
 
       return {
+        lat: coords.latitude, 
+        lng: coords.longitude,
         municipioId: data.municipio?._id || null,
         ciudad: data.municipio?.nombreMunicipio || null,
         estado: data.municipio?.nombreEntidad || null,
-        pais: data.pais || null,
+        pais: "México", // Asumimos que siempre sera Mexico, ya que el servicio solo devuelve municipios mexicanos
       };
     } catch (error) {
       console.error(error);
@@ -72,6 +82,8 @@ export function useObtenerUbicacion() {
   };
 
   return {
+    lat,
+    lng,
     obtenerUbicacion,
     loadingUbicacion,
     ubicacionError,
@@ -84,5 +96,7 @@ export function useObtenerUbicacion() {
     setCiudad,
     setEstado,
     setPais,
+    setLat,
+    setLng,
   };
 }
