@@ -73,7 +73,7 @@ export function usePushNotifications() {
 
       // 3️⃣ Obtener clave pública VAPID
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/vapidPublicKey`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/notificaciones/vapidPublicKey`
       );
       if (!res.ok) throw new Error("No se pudo obtener clave pública VAPID");
 
@@ -87,7 +87,7 @@ export function usePushNotifications() {
 
       // 5️⃣ Enviar suscripción al backend
       const response = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/subscribe`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/notificaciones/subscribe`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -129,7 +129,7 @@ export function usePushNotifications() {
 
         // 2️⃣ Avisar al backend (eliminas solo esta suscripción)
         await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/unsubscribe`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/notificaciones/unsubscribe`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
