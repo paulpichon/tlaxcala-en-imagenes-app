@@ -86,15 +86,16 @@ export default function EditarPosteoModal({
   if (!isOpen || !posteo) return null;
 
   const validarTexto = () => {
+    // Ahora aceptará "" o texto válido
     const result = editarPosteoSchema.safeParse({ texto });
-
+  
     if (!result.success) {
       const mensajeError = result.error.errors[0]?.message || "Campo inválido";
       setToastMessage(mensajeError);
       setToastType("danger");
       return false;
     }
-
+  
     return true;
   };
 
@@ -113,29 +114,32 @@ export default function EditarPosteoModal({
     try {
       setLoading(true);
 
+      // Preparamos el body
+      const body: any = {
+        texto: texto.trim(), // Enviamos el texto (aunque sea "")
+      };
+
+      // Lógica de ubicación (se mantiene igual a tu código)
+      if (municipioId) {
+        body.municipio = municipioId;
+        body.ciudad = ciudad;
+        body.estado = estado;
+        body.pais = pais;
+        if (lat && lng) {
+          body.lat = lat;
+          body.lng = lng;
+        }
+      } else {
+        body.municipio = null;
+        body.lat = null;
+      }
+
       const res = await fetchWithAuth(
         `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/${posteo._id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            texto,
-            // ✅ Campos planos, tal como el backend los espera
-            ...(municipioId
-              ? {
-                  municipio: municipioId,
-                  ciudad,
-                  estado,
-                  pais,
-                  // ✅ Si vienen de GPS, esExacta=true; si es manual, lat/lng son null → esExacta=false
-                  ...(lat && lng ? { lat, lng } : {}),
-                }
-              : {
-                  // ✅ Eliminación explícita: mandar null en los campos
-                  municipio: null,
-                  lat: null,    // necesario para que el backend entre al "Caso A"
-                }),
-          }),
+          body: JSON.stringify(body),
         }
       );
 

@@ -74,20 +74,21 @@ export const editarPosteoSchema = z.object({
   texto: z
     .string()
     .trim()
-    .min(1, "El texto no puede estar vacío")
+    // .min(1, "El texto no puede estar vacío")
     .max(200, "Máximo 200 caracteres")
+    // El regex permite strings vacíos por el '*' al final de la clase de caracteres
     .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ.,!?¡¿()\s-]*$/, {
       message: "La descripción contiene caracteres no permitidos",
     })
-    .refine((val) => !spamRegex.test(val), {
+    .optional() // Permite que sea undefined
+    .or(z.literal("")) // Permite que sea un string vacío
+    .refine((val) => {
+      // Si no hay texto, saltamos la validación de spam
+      if (!val) return true;
+      return !spamRegex.test(val);
+    }, {
       message: "Tu texto parece contener spam ❌",
     })
-    .refine((val) => {
-      // Al menos un caracter visible (emoji o texto)
-      return /\S/.test(val);
-    }, {
-      message: "Debes escribir al menos un caracter visible",
-    }),
 });
 
 // Schema para formulario de ayuda y soporte, envio de correo ellectronico
