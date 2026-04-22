@@ -5,7 +5,6 @@ import perfil from "../../ui/perfil/perfil.module.css";
 import Image from "next/image";
 import ImageModal from "./ImageModal";
 import ImagePreloader from "../ImagePreloader";
-// import ToastGlobal from "../ui/ToastGlobal";
 import {
   Posteo,
   PosteoDetalleResponse,
@@ -81,19 +80,17 @@ export default function PublicacionesUsuarioGrid({
           setNextUrl(null);
           return;
         }
-        // Evitar duplicadas
-        setPosteos((prev) => {
-          const combinados = url ? [...prev, ...nuevosPosteos] : nuevosPosteos;
-          const unicos = combinados.filter(
-            (post: Posteo, index: number, self: Posteo[]) =>
-              index === self.findIndex((p: Posteo) => p._id === post._id)
-          );
-        
-          // 🔹 Notificar nuevo total
-          onPostCountChange?.(unicos.length);
-        
-          return unicos;
-        });
+    
+        // ✅ DESPUÉS — calcula primero, luego dos setStates separados
+        const combinados = url ? [...posteos, ...nuevosPosteos] : nuevosPosteos;
+        const unicos = combinados.filter(
+          (post: Posteo, index: number, self: Posteo[]) =>
+            index === self.findIndex((p: Posteo) => p._id === post._id)
+        );
+
+        setPosteos(unicos);
+        onPostCountChange?.(unicos.length); // ✅ fuera del updater, al mismo nivel
+
 
         // 🧭 Normalizamos el next
         const siguiente = normalizarNext(data.next);
@@ -183,11 +180,9 @@ export default function PublicacionesUsuarioGrid({
 
   // 🗑️ Eliminar post del estado local tras confirmación
   const handlePostDeleted = (postId: string) => {
-    setPosteos((prev) => {
-      const actualizados = prev.filter((p) => p._id !== postId);
-      onPostCountChange?.(actualizados.length); // 🔹 actualizar contador
-      return actualizados;
-    });
+    const actualizados = posteos.filter((p) => p._id !== postId);
+    setPosteos(actualizados);
+    onPostCountChange?.(actualizados.length); // ✅
     setIsFirstModalOpen(false);
     setSelectedImage(null);
     setToast({ message: "Publicación eliminada correctamente", type: "success" });

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { notFound } from "next/navigation"; // 👈 importamos para usar la página not-found.tsx
 
 import MenuPrincipal from "../../components/MenuPrincipal";
@@ -22,9 +22,15 @@ export default function PerfilUsuarioContainer({ url }: UrlProps) {
   const { usuario, loading, error } = useUsuarioPerfil(url);
   const [refreshPosteos, setRefreshPosteos] = useState(0);
 
-  // 🔹 Nuevo: estado local sincronizado con el total del usuario
-  const [totalPosteos, setTotalPosteos] = useState<number | undefined>(undefined);
+  // 1️⃣ Inicializa con el valor del usuario si ya existe (lazy init)
+  const [totalPosteos, setTotalPosteos] = useState<number | undefined>(
+    usuario?.totalPosteos
+  );
 
+  // 2️⃣ Sincroniza cuando el usuario cambia (por navegación entre perfiles, etc.)
+  useEffect(() => {
+    if (usuario) setTotalPosteos(usuario.totalPosteos);
+  }, [usuario]);
 
   const handlePostCreated = () => {
     setRefreshPosteos((prev) => prev + 1);
