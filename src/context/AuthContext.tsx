@@ -91,6 +91,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // =========================
   const login = useCallback((user: UsuarioLogueado) => {
     setUser(user);
+     // Limpiar variables de recuperación de contraseña
+    //  O cualquier otra variable que deba desaparecer una vez autenticado
+    localStorage.removeItem('lastPasswordRequest');
+    localStorage.removeItem('bloqueoReenvioCorreo');
+    sessionStorage.removeItem('passForgetToken');
   }, []);
 
   // =========================
