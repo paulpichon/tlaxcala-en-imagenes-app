@@ -96,6 +96,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.removeItem('lastPasswordRequest');
     localStorage.removeItem('bloqueoReenvioCorreo');
     sessionStorage.removeItem('passForgetToken');
+    sessionStorage.removeItem('registroToken');
   }, []);
 
   // =========================
