@@ -31,7 +31,7 @@ export function NotificacionesProvider({ children }: { children: ReactNode }) {
     if (!user) return; // Si no hay usuario logueado, no hacemos nada
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/notificaciones/nuevas-notificaciones`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/notificaciones/nuevas-notificaciones`
       );
 
       if (!res.ok) throw new Error("Error al obtener notificaciones");
