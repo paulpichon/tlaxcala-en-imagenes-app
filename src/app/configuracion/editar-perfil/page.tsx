@@ -4,7 +4,7 @@
 // Meta datos NEXTJS
 import { Metadata } from "next";
 // Estilos específicos de la página
-import "../../ui/configuracion/editar-perfil/editarPerfil.css";
+import "../../ui/configuracion/editar-perfil/EditarPerfil.module.css";
 
 // ⚠️ IMPORTANTE: viewport NO se define aquí
 // El viewport ya está configurado en src/app/layout.tsx (layout raíz)
