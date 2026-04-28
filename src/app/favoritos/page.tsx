@@ -5,9 +5,9 @@
 // Meta datos NEXTJS
 import { Metadata } from "next";
 // Bootstrap CSS
-import "bootstrap/dist/css/bootstrap.css";
+// import "bootstrap/dist/css/bootstrap.css";
 // Estilos de página
-import "../ui/inicio/inicio.css";
+import "../ui/inicio/Inicio.module.css";
 
 // ⚠️ IMPORTANTE: viewport NO se define aquí
 // El viewport ya está configurado en src/app/layout.tsx (layout raíz)

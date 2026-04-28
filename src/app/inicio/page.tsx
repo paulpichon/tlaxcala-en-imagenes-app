@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import "../ui/inicio/inicio.css";
+import "@/app/ui/inicio/Inicio.module.css";
 
 // Componentes
 import MenuPrincipal from "../components/MenuPrincipal";

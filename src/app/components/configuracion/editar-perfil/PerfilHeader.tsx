@@ -3,6 +3,8 @@
 
 import Image from 'next/image';
 import { FiCamera } from 'react-icons/fi';
+// Estilos específicos de la página
+import editarPerfil from "@/app/ui/configuracion/editar-perfil/EditarPerfil.module.css";
 
 interface PerfilHeaderProps {
   url: string;
@@ -27,13 +29,13 @@ export default function PerfilHeader({ url, imagenPerfil, onCambiarFoto }: Perfi
         </div>
         <button
           onClick={onCambiarFoto}
-          className="iconoCambiarImgPerfil rounded-circle position-absolute bottom-0 end-0"
+          className={`${editarPerfil.iconoCambiarImgPerfil} rounded-circle position-absolute bottom-0 end-0`}
           style={{ width: '40px', height: '40px', border: '2px solid white' }}
         >
           <FiCamera size={20} />
         </button>
       </div>
-      <button onClick={onCambiarFoto} className="btnGuardarCambiar">
+      <button onClick={onCambiarFoto} className={editarPerfil.btnGuardarCambiar}>
         Cambiar foto
       </button>
     </div>

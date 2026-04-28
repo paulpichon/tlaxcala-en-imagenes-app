@@ -3,7 +3,8 @@
 
 import { FormDataEditarPerfil, Municipio } from '@/types/types';
 import { ChangeEvent, SubmitEvent } from 'react';
-
+// Estilos específicos de la página
+import editarPerfil from "@/app/ui/configuracion/editar-perfil/EditarPerfil.module.css";
 
 interface PerfilFormProps {
   formData: FormDataEditarPerfil;
@@ -119,7 +120,7 @@ export default function PerfilForm({
         })}
 
       <div className="border-top p-4">
-        <button type="submit" className="btnGuardarCambiarMedium w-100" disabled={loading}>
+        <button type="submit" className={`${editarPerfil.btnGuardarCambiarMedium} w-100`} disabled={loading}>
           {loading ? 'Guardando...' : 'Guardar cambios'}
         </button>
       </div>

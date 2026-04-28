@@ -5,7 +5,7 @@
 // Meta datos NEXTJS
 import { Metadata } from "next";
 // Estilos de página
-import "../../ui/inicio/inicio.css";
+import "../../ui/inicio/Inicio.module.css";
 // Componentes
 import MenuPrincipal from "@/app/components/MenuPrincipal";
 import HeaderSuperior from "@/app/components/HeaderSuperior";

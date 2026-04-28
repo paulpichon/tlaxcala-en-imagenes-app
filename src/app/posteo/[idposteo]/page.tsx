@@ -15,7 +15,7 @@ import Publicidad from "@/app/components/Publicidad";
 import FooterSugerencias from "@/app/components/FooterSugerencias";
 
 // 🎨 Estilos
-import "../../ui/inicio/inicio.css";
+import "../../ui/inicio/Inicio.module.css";
 // Componente que obtiene y renderiza el posteo (Client Component)
 import PosteoDetalle from "@/app/components/PosteoDetalle";
 import { Metadata } from "next";
