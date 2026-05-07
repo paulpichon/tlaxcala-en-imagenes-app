@@ -1,4 +1,4 @@
-
+// Prueba vercel-render solo para SOCIOS
 // Next
 import Link from "next/link";
 import Image from "next/image";
