@@ -25,8 +25,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const isRefreshing = useRef(false);
   const refreshPromise = useRef<Promise<boolean> | null>(null);
   // URL base de la API (Puede venir de env)
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
-console.log(API_URL, "API URL VERCEL");
+  const API_URL = process.env.NEXT_PUBLIC_API_URL_LOCAL;
 
   // =========================
   // Refresh Token (con control de concurrencia)
