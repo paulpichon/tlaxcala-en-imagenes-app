@@ -45,7 +45,7 @@ export function NuevosUsuariosProvider({ children }: { children: React.ReactNode
 
       // Petición al endpoint
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/registrados/nuevos-usuarios-registrados`
+        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/usuarios/registrados/nuevos-usuarios-registrados`
       );
 
       // Se parsea la respuesta
