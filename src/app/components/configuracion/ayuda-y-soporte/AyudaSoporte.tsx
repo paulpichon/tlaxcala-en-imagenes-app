@@ -90,7 +90,7 @@ export default function AyudaSoporte() {
 
       // Petición autenticada al backend
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/ayuda-soporte/envio-correo`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/ayuda-soporte/envio-correo`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
