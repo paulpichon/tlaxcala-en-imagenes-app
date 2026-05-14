@@ -36,11 +36,6 @@ export default function PerfilUsuarioContainer({ url }: UrlProps) {
     setRefreshPosteos((prev) => prev + 1);
   };
 
-  // 🔹 Al cargar el usuario, sincroniza el total inicial
-  if (usuario && totalPosteos === undefined) {
-    setTotalPosteos(usuario.totalPosteos);
-  }
-
   if (loading) return <div className="d-flex justify-content-center align-items-center vh-100"><Spinner /></div>;
 
   // 👇 Si hubo error de fetch o no existe usuario, mostramos la página not-found

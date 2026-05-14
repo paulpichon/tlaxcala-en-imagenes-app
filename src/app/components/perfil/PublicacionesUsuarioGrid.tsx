@@ -1,3 +1,4 @@
+// FUFUFU
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -81,29 +82,29 @@ export default function PublicacionesUsuarioGrid({
           return;
         }
     
-        // ✅ DESPUÉS — calcula primero, luego dos setStates separados
-        const combinados = url ? [...posteos, ...nuevosPosteos] : nuevosPosteos;
-        const unicos = combinados.filter(
-          (post: Posteo, index: number, self: Posteo[]) =>
-            index === self.findIndex((p: Posteo) => p._id === post._id)
-        );
+        setPosteos((prev) => {
+          const combinados = url ? [...prev, ...nuevosPosteos] : nuevosPosteos;
+          const unicos = combinados.filter(
+            (post: Posteo, index: number, self: Posteo[]) =>
+              index === self.findIndex((p: Posteo) => p._id === post._id)
+          );
+          return unicos;
+        });
 
-        setPosteos(unicos);
-        onPostCountChange?.(unicos.length); // ✅ fuera del updater, al mismo nivel
-
-
-        // 🧭 Normalizamos el next
         const siguiente = normalizarNext(data.next);
 
         if (!siguiente) {
           setNextUrl(null);
         } else {
-          setNextUrl(
-            siguiente.startsWith("http")
-              ? siguiente
-              : `${process.env.NEXT_PUBLIC_API_URL_LOCAL}${siguiente}`
-          );
-          fetchedPages.current.add(siguiente);
+          const fullNextUrl = siguiente.startsWith("http")
+            ? siguiente
+            : `${process.env.NEXT_PUBLIC_API_URL_LOCAL}${siguiente}`;
+          setNextUrl(fullNextUrl);
+          if (url) fetchedPages.current.add(url);
+        }
+
+        if (!url && data.total_registros !== undefined) {
+          onPostCountChange?.(data.total_registros);
         }
 
         if (isFirstLoad.current) isFirstLoad.current = false;
@@ -116,7 +117,7 @@ export default function PublicacionesUsuarioGrid({
         setLoadingMore(false);
       }
     },
-    [usuarioId, fetchWithAuth, onPostCountChange]
+    [usuarioId, fetchWithAuth]
   );
 
   // 🧩 Carga inicial
@@ -180,9 +181,8 @@ export default function PublicacionesUsuarioGrid({
 
   // 🗑️ Eliminar post del estado local tras confirmación
   const handlePostDeleted = (postId: string) => {
-    const actualizados = posteos.filter((p) => p._id !== postId);
-    setPosteos(actualizados);
-    onPostCountChange?.(actualizados.length); // ✅
+    setPosteos((prev) => prev.filter((p) => p._id !== postId));
+    onPostCountChange?.(posteos.length - 1);
     setIsFirstModalOpen(false);
     setSelectedImage(null);
     setToast({ message: "Publicación eliminada correctamente", type: "success" });
