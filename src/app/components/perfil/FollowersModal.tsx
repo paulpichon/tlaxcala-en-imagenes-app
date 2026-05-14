@@ -30,7 +30,7 @@ export default function FollowersModal({ userId, loggedUserId, show, onClose }: 
       setLoading(true);
       try {
         const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/followers/usuario/lista-followers/${userId}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/followers/usuario/lista-followers/${userId}`
         );
 
         const data = await res.json();
