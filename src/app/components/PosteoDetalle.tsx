@@ -30,7 +30,7 @@ export default function PosteoDetalle() {
 
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos/post/${id}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/posteos/post/${id}`
       );
       if (!res.ok) {
         const text = await res.text().catch(() => null);
