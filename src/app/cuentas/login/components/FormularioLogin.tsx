@@ -38,7 +38,7 @@ export default function FormularioLogin() {
   
       if (!result.success) {
         const formErrors: typeof errors = {};
-        result.error.errors.forEach((err) => {
+        result.error.issues.forEach((err) => {
           if (err.path[0]) {
             formErrors[err.path[0] as keyof typeof errors] = err.message;
           }

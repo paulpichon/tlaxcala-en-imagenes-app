@@ -79,7 +79,7 @@ export function useCrearPosteo(
     const result = posteoBaseSchema.pick({ file: true }).safeParse({ file: f });
 
     if (!result.success) {
-      setErrors(result.error.errors.map((e) => e.message));
+      setErrors(result.error.issues.map((e) => e.message));
       setFile(null);
       setPreview(null);
       return;
@@ -164,7 +164,7 @@ export function useCrearPosteo(
       onSuccess?.();
     } catch (err) {
       if (err instanceof ZodError) {
-        setErrors(err.errors.map((e) => e.message));
+        setErrors(err.issues.map((e) => e.message));
       } else {
         setErrors(["Ocurrió un error al crear la publicación"]);
       }

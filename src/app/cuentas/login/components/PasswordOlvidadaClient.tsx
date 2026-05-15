@@ -127,7 +127,7 @@ export default function PasswordOlvidadaClient() {
 		// Usando el correoSchema de Zod para validación robusta
 		const validation = correoSchema.safeParse({ correo });
 		if (!validation.success) {
-			setValidationError(validation.error.errors[0].message);
+			setValidationError(validation.error.issues[0].message);
 			setCargando(false);
 			return;
 		}
