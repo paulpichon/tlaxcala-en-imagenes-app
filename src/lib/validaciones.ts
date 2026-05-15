@@ -100,7 +100,7 @@ export const schemaAyudaSoporte = z.object({
     "reporte",
     "otro"
   ], {
-    errorMap: () => ({ message: "Debes seleccionar un tipo de ayuda." })
+    error: () => ({ message: "Debes seleccionar un tipo de ayuda." })
   }),
   descripcion_problema_usuario: z
     .string()

@@ -120,8 +120,8 @@ export default function AyudaSoporte() {
       if (error instanceof z.ZodError) {
 
         const errors: any = {};
-
-        error.errors.forEach((err) => {
+      
+        error.issues.forEach((err) => {
           errors[err.path[0]] = err.message;
         });
 

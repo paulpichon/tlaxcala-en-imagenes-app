@@ -17,7 +17,7 @@ export const perfilSchema = z
       .refine((date) => !isNaN(Date.parse(date)), 'Debe ingresar una fecha válida'),
     claveMunicipio: z.string().min(1, 'Debe seleccionar un municipio'),
     genero: z.enum(['MASCULINO', 'FEMENINO', 'PREFIERO NO DECIR'], {
-      errorMap: () => ({ message: 'Debe seleccionar un género' }),
+      error: () => ({ message: 'Debe seleccionar un género' }),
     }),
     password: z
       .string()
@@ -146,7 +146,7 @@ export function useEditarPerfil() {
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
-        error.errors.forEach((err) => (fieldErrors[err.path[0] as string] = err.message));
+        error.issues.forEach((err) => (fieldErrors[err.path[0] as string] = err.message));
         setErrors(fieldErrors);
         setToast({ message: 'Por favor corrige los campos en rojo', type: 'danger' });
       } else {

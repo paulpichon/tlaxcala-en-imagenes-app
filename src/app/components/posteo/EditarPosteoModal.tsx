@@ -90,7 +90,7 @@ export default function EditarPosteoModal({
     const result = editarPosteoSchema.safeParse({ texto });
   
     if (!result.success) {
-      const mensajeError = result.error.errors[0]?.message || "Campo inválido";
+      const mensajeError = result.error.issues[0]?.message || "Campo inválido";
       setToastMessage(mensajeError);
       setToastType("danger");
       return false;

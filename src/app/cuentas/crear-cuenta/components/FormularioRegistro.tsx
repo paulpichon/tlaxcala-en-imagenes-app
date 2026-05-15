@@ -38,7 +38,7 @@ export function FormularioRegistro() {
 
     if (!result.success) {
       const errorMessage =
-        result.error.errors[0]?.message || `El campo ${name} es inválido`;
+        result.error.issues[0]?.message || `El campo ${name} es inválido`;
 
       setValidationErrors(prev => ({ ...prev, [name]: errorMessage }));
       return false;
@@ -91,7 +91,7 @@ export function FormularioRegistro() {
 
     if (!validationResult.success) {
       const errors: FormErrors = {};
-      validationResult.error.errors.forEach(err => {
+      validationResult.error.issues.forEach(err => {
         const path = err.path[0] as keyof UsuarioSchema;
         errors[path] = err.message;
       });
