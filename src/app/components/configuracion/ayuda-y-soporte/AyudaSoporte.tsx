@@ -101,6 +101,9 @@ export default function AyudaSoporte() {
       const data = await res.json();
 
       if (!res.ok) {
+        if (res.status === 429) {
+          throw new Error(data?.msg || "Demasiados tickets de soporte, intenta de nuevo más tarde");
+        }
         throw new Error(data?.msg || "Error al enviar solicitud");
       }
 

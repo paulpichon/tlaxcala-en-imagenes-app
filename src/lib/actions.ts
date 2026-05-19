@@ -89,6 +89,13 @@ export async function reenviarCorreo(token: string): Promise<ReenviarCorreoRespo
                     cuentaVerificada: true, //Quitar boton si status === 400
                 };
             }
+            if (data.status === 429) {
+                return {
+                    mensaje: data.msg,
+                    esExito: false,
+                    cuentaVerificada: false,
+                };
+            }
             return {
                 // mensaje: data.msg || "Error al reenviar el correo",
                 esExito: false, //sirve para cambiar el color de el mensaje
@@ -160,6 +167,13 @@ export async function reenviarCorreoRestablecerPassword(token: string): Promise<
                     mensaje: "Reinicia el proceso para restablecer contraseña.",
                     esExito: false, //sirve para cambiar el color de el mensaje
                     cuentaVerificada: true, //Quitar boton si status === 400
+                };
+            }
+            if (data.status === 429) {
+                return {
+                    mensaje: data.msg,
+                    esExito: false,
+                    cuentaVerificada: false,
                 };
             }
             return {

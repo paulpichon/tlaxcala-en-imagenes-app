@@ -60,6 +60,11 @@ export default function FormularioLogin() {
         const data = await res.json();
         // Manejo de errores de la API
         if (!res.ok) {
+            // Rate-limit (demasiados intentos)
+            if (data.status === 429) {
+              setServerError(data.msg);
+              return;
+            }
             // No existe correo en la BD
             if ( data.status === 401 && data.msg === 'Correo no existe') {
               setServerError('Correo o contraseña incorrectos.');
@@ -80,6 +85,9 @@ export default function FormularioLogin() {
               setServerError('Esta cuenta no está disponible. Contacta a soporte para más información.');
               return;
             }
+            // Otro error del servidor
+            setServerError('Error en el servidor');
+            return;
         }
   
         login(data.usuario); // el backend debe devolver los datos del usuario

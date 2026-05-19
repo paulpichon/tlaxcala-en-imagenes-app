@@ -208,7 +208,7 @@ export interface PublicacionesUsuarioProps {
 // Interface props de TOAST
 export interface ToastGlobalProps {
   message: string;
-  type?: "success" | "danger" | "creacion";
+  type?: "success" | "danger" | "warning" | "creacion";
   onClose?: () => void;
 }
 // Predefinidos de Cloudinary

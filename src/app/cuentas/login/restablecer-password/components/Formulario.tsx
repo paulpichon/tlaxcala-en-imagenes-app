@@ -34,11 +34,14 @@ export default function FormularioNuevaPassword({ token }: { token: string }) {
 					password: data.password, // es el valor del campo password del formulario
 				}),
 			});
-			// Si la respuesta del servidor no es 200 OK, extrae el mensaje de error de la API y lanza una excepción.
-			if (!res.ok) {
-				const result = await res.json();
-				throw new Error(result.message || "Error al restablecer contraseña, favor de reiniciar el proceso.");
-			}
+      // Si la respuesta del servidor no es 200 OK, extrae el mensaje de error de la API y lanza una excepción.
+      if (!res.ok) {
+        const result = await res.json();
+        if (res.status === 429) {
+          throw new Error(result.msg || "Demasiados intentos de recuperación de contraseña, intenta de nuevo en 15 minutos");
+        }
+        throw new Error(result.message || result.msg || "Error al restablecer contraseña, favor de reiniciar el proceso.");
+      }
 			// Después de restablecer la contraseña exitosamente, creamos un sessionStorage para indicar que la contraseña fue restablecida.
 			// Esto puede ser útil para mostrar un mensaje de éxito en la página de confirmación.
 			sessionStorage.setItem('passwordResetSuccess', 'true');

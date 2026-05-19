@@ -155,7 +155,13 @@ export function useCrearPosteo(
         }
       );
 
-      if (!res.ok) throw new Error("Error al crear posteo");
+      if (!res.ok) {
+        if (res.status === 429) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.msg || "Demasiadas publicaciones, intenta de nuevo más tarde");
+        }
+        throw new Error("Error al crear posteo");
+      }
 
       const newPost = await res.json();
       onPostCreated?.(newPost);

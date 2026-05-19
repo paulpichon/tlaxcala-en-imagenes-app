@@ -6,7 +6,7 @@ import { ToastGlobalProps } from "@/types/types";
 
 /**
  * ToastGlobal — Componente de notificación flotante global
- * Tipos permitidos: "success" | "danger" | "creacion"
+ * Tipos permitidos: "success" | "danger" | "warning" | "creacion"
  */
 
 export default function ToastGlobal({
@@ -27,6 +27,7 @@ export default function ToastGlobal({
   const colorMap: Record<string, { bg: string; text: string }> = {
     success: { bg: "#28a745", text: "#ffffff" },
     danger: { bg: "#dc3545", text: "#ffffff" },
+    warning: { bg: "#ffc107", text: "#000000" },
     creacion: { bg: "#EBCA9A", text: "#000000" },
   };
 

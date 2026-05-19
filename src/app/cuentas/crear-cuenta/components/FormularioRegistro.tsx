@@ -107,6 +107,8 @@ export function FormularioRegistro() {
       if (resultado.status === 200) {
         sessionStorage.setItem('registroToken', resultado.token);
         router.push('/cuentas/confirmacion/correo-enviado');
+      } else if (resultado.status === 429) {
+        setError(resultado.msg || "Demasiadas cuentas creadas desde esta conexión, intenta de nuevo más tarde");
       } else if (resultado.status === 409) {
         handleAPIError({
           status: 409,
