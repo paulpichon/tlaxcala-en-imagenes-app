@@ -55,6 +55,7 @@ export interface Posteo {
   _id: string;
   isFollowing: boolean;   // 👈 añadido
   isFavorito: boolean;    // 👈 añadido
+  comentariosActivos?: boolean;
 }
 // Interface para crear Posteo Modal
 export interface CrearPosteoModalProps {
@@ -230,6 +231,45 @@ export interface CloudinaryCustomOptions {
   format?: "auto" | "jpg" | "webp" | "avif" | "png" | null;
   useAutoTransforms?: boolean;
 }
+// ======================================
+// 📦 Comentarios
+// ======================================
+
+export interface Comentario {
+  _id: string;
+  texto: string;
+  createdAt: string;
+  autor: {
+    _id: string;
+    nombre_completo: {
+      nombre: string;
+      apellido: string;
+    };
+    imagen_perfil?: {
+      secure_url: string;
+    };
+    url: string;
+  };
+}
+
+export interface ComentariosResponse {
+  ok: boolean;
+  status: number;
+  page: number;
+  limit: number;
+  next: string | null;
+  prev: string | null;
+  total: number;
+  totalPages: number;
+  comentarios: Comentario[];
+}
+
+export interface ComentariosCountResponse {
+  ok: boolean;
+  status: number;
+  count: number;
+}
+
 // Props para cambio de imagen de perfil modal
 export interface CambiarImagenModalProps {
   usuario: UsuarioLogueado;

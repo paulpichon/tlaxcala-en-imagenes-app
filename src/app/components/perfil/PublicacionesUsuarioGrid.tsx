@@ -250,15 +250,13 @@ export default function PublicacionesUsuarioGrid({
       )}
 
       {/* Modal de imagen */}
-      {selectedImage && (
-        <ImageModal
-          key={selectedImage._id} // 🔥 CLAVE, con esto tambien evitamos que se interpongan una imagen sobre otra al abrir el modal
-          isOpen={isFirstModalOpen}
-          selectedImage={selectedImage}
-          onClose={() => setIsFirstModalOpen(false)}
-          onPostDeleted={handlePostDeleted} // ✅ callback conectado
-        />
-      )}
+      <ImageModal
+        key={selectedImage?._id || "no-image"}
+        isOpen={isFirstModalOpen}
+        selectedImage={selectedImage}
+        onClose={() => setIsFirstModalOpen(false)}
+        onPostDeleted={handlePostDeleted}
+      />
 
       {/* ✅ Toast visual global */}
       {toast && (

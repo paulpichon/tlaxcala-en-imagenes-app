@@ -91,6 +91,41 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
     }
   };
 
+  const handleToggleComentarios = async () => {
+    if (!selectedImage?._id) return;
+
+    const activar = selectedImage.comentariosActivos === false;
+
+    try {
+      const res = await fetchWithAuth(
+        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/comentarios/${selectedImage._id}/comentarios/toggle`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ activar }),
+        }
+      );
+
+      const data = await res.json();
+      if (res.ok) {
+        const posteoActualizado: Posteo = {
+          ...selectedImage,
+          comentariosActivos: data.comentariosActivos,
+        };
+        onPostUpdated?.(posteoActualizado);
+        setToast({
+          message: data.msg || "Comentarios actualizados",
+          type: "success",
+        });
+      } else {
+        setToast({ message: data.msg || "Error al actualizar comentarios", type: "danger" });
+      }
+    } catch (err) {
+      console.error("Error al toggle comentarios:", err);
+      setToast({ message: "Error interno", type: "danger" });
+    }
+  };
+
   return (
     <>
       {/* Modal principal */}
@@ -116,6 +151,14 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                       onClick={() => setShowEditModal(true)}
                     >
                       Editar
+                    </button>
+                    <button
+                      className={perfil.btn_opciones_publicaciones}
+                      onClick={handleToggleComentarios}
+                    >
+                      {selectedImage.comentariosActivos === false
+                        ? "Activar comentarios"
+                        : "Desactivar comentarios"}
                     </button>
                   </>
                 ) : (

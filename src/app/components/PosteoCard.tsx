@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FiMoreHorizontal } from "react-icons/fi";
+import { FiMoreHorizontal, FiMessageCircle } from "react-icons/fi";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import LikeButton from "./LikeButton";
@@ -14,6 +14,9 @@ import { useAuth } from "@/context/AuthContext";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import posteoCard from "../ui/posteos/PosteoCard.module.css";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
+import { useComentarios } from "@/app/hooks/useComentarios";
+import ComentariosModal from "./ComentariosModal";
+import ComentariosSection from "./posteo/ComentariosSection";
 
 
 
@@ -27,6 +30,9 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
 
   // ✅ Estado local para el posteo (se actualiza cuando se edita)
   const [posteoActual, setPosteoActual] = useState<Posteo>(post);
+
+  const { total: totalComentarios } = useComentarios(post._id);
+  const [showComments, setShowComments] = useState(false);
 
   const openLikesModal = async () => {
     try {
@@ -178,8 +184,29 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
 
         {/* Body */}
         <div className="card-body bg-light">
-          <div className="d-flex align-items-center mb-2">
+          <div className="d-flex align-items-center gap-3 mb-2">
             <LikeButton postId={posteoActual._id} onOpenLikesModal={openLikesModal} />
+
+            <button
+              onClick={() => setShowComments(true)}
+              className="like-button"
+              aria-label="Comentar"
+              disabled={posteoActual.comentariosActivos === false}
+            >
+              <FiMessageCircle
+                size={24}
+                color={posteoActual.comentariosActivos === false ? "#ccc" : "black"}
+              />
+            </button>
+            <span
+              className={`small ${posteoActual.comentariosActivos === false ? "text-muted" : ""}`}
+              style={{ cursor: "pointer" }}
+              onClick={() => posteoActual.comentariosActivos !== false && setShowComments(true)}
+            >
+              {posteoActual.comentariosActivos === false
+                ? "Comentarios desactivados"
+                : `${totalComentarios} ${totalComentarios === 1 ? "comentario" : "comentarios"}`}
+            </span>
           </div>
 
           <p className="mb-1">
@@ -213,6 +240,24 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
         onClose={closeLikesModal}
         usuarios={likesUsuarios}
       />
+
+      {!isDetail && (
+        <ComentariosModal
+          isOpen={showComments}
+          onClose={() => setShowComments(false)}
+          postId={posteoActual._id}
+          comentariosActivos={posteoActual.comentariosActivos}
+          posteoAutorId={posteoActual._idUsuario._id}
+        />
+      )}
+
+      {isDetail && (
+        <ComentariosSection
+          postId={posteoActual._id}
+          comentariosActivos={posteoActual.comentariosActivos}
+          posteoAutorId={posteoActual._idUsuario._id}
+        />
+      )}
     </>
   );
 }

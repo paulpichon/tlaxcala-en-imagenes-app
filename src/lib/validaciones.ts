@@ -112,6 +112,22 @@ export const schemaAyudaSoporte = z.object({
 
 export type PosteoSchema = z.infer<typeof posteoSchema>;
 
+// Schema para crear comentarios (reusa spamRegex de editarPosteoSchema)
+export const comentarioSchema = z.object({
+  texto: z
+    .string()
+    .trim()
+    .min(1, "El comentario no puede estar vacío")
+    .max(250, "El comentario no puede exceder 250 caracteres")
+    .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ.,!?¡¿()\s-]*$/, {
+      message: "El comentario contiene caracteres no permitidos",
+    })
+    .refine((val) => !spamRegex.test(val), {
+      message: "El comentario parece contener spam",
+    }),
+});
+export type ComentarioFormData = z.infer<typeof comentarioSchema>;
+
 // Validacion para extenciones de imagen de perfil
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp"];
