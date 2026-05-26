@@ -1,0 +1,26 @@
+.comentariosList {
+  max-height: 400px;
+  overflow-y: auto;
+}
+.comentariosInput {
+  border: none;
+  border-top: 1px solid #dee2e6;
+}
+
+.sendBtn {
+  background: none;
+  border: none;
+  color: #EBCA9A;
+  cursor: pointer;
+  padding: 8px 12px;
+  transition: color 0.2s;
+}
+
+.sendBtn:hover {
+  color: #d4b68b;
+}
+
+.sendBtn:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
