@@ -167,7 +167,7 @@ export interface IAuthContext {
 export interface LikeUsuario {
   _id: string;
   _idUsuario: UsuarioLogueado;
-  _idPosteo: string;
+  posteoId: string;
   createdAt: string;
   updatedAt: string;
   __v: number;
