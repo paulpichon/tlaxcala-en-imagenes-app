@@ -82,7 +82,7 @@ export function useComentarios(postId: string) {
       _id: tempId,
       texto: trimmedTexto,
       createdAt: new Date().toISOString(),
-      autor: {
+      autorId: {
         _id: user.uid,
         nombre_completo: user.nombre_completo,
         imagen_perfil: user.imagen_perfil
