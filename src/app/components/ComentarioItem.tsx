@@ -19,8 +19,8 @@ export default function ComentarioItem({ comentario, onDelete, posteoAutorId }: 
   const { user } = useAuth();
   const [deleting, setDeleting] = useState(false);
 
-  const puedeEliminar = !!(user && (user.uid === comentario.autor._id || user.uid === posteoAutorId));
-  const avatarUrl = comentario.autor.imagen_perfil?.secure_url || DEFAULT_PROFILE;
+  const puedeEliminar = !!(user && (user.uid === comentario.autorId._id || user.uid === posteoAutorId));
+  const avatarUrl = comentario.autorId.imagen_perfil?.secure_url || DEFAULT_PROFILE;
 
   const fecha = new Date(comentario.createdAt);
   const fechaFormateada = new Intl.DateTimeFormat("es-MX", {
@@ -39,10 +39,10 @@ export default function ComentarioItem({ comentario, onDelete, posteoAutorId }: 
 
   return (
     <div className="d-flex gap-2 py-2">
-      <Link href={`/${comentario.autor.url}`}>
+      <Link href={`/${comentario.autorId.url}`}>
         <Image
           src={avatarUrl}
-          alt={`@${comentario.autor.url}`}
+          alt={`@${comentario.autorId.url}`}
           width={32}
           height={32}
           className="rounded-circle border flex-shrink-0"
@@ -53,11 +53,11 @@ export default function ComentarioItem({ comentario, onDelete, posteoAutorId }: 
       <div className="flex-grow-1 min-w-0">
         <div className="d-flex align-items-center gap-1 flex-wrap">
           <Link
-            href={`/${comentario.autor.url}`}
+            href={`/${comentario.autorId.url}`}
             className="text-dark text-decoration-none fw-bold small"
           >
-            {comentario.autor.nombre_completo.nombre}{" "}
-            {comentario.autor.nombre_completo.apellido}
+            {comentario.autorId.nombre_completo.nombre}{" "}
+            {comentario.autorId.nombre_completo.apellido}
           </Link>
           <span className="text-muted" style={{ fontSize: "0.7rem" }}>
             {fechaFormateada}
