@@ -239,7 +239,7 @@ export interface Comentario {
   _id: string;
   texto: string;
   createdAt: string;
-  autor: {
+  autorId: {
     _id: string;
     nombre_completo: {
       nombre: string;
