@@ -148,7 +148,7 @@ export function useCrearPosteo(
       if (lng) formData.append("lng", String(lng));
 
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/posteos`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/posteos`,
         {
           method: "POST",
           body: formData,

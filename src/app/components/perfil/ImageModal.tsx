@@ -73,7 +73,7 @@ const ImageModal: React.FC<PropsImageModal> = ({
     if (!posteoActual) return;
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/likes/${posteoActual._id}/likes/usuarios`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/likes/${posteoActual._id}/likes/usuarios`
       );
       if (!res.ok) throw new Error("Error al obtener usuarios que dieron like");
 
