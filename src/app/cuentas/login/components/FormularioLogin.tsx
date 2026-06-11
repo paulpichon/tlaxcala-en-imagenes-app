@@ -55,7 +55,6 @@ export default function FormularioLogin() {
           body: JSON.stringify(formData),
           credentials: 'include'
         });
-  console.log(process.env.NEXT_PUBLIC_API_URL_LOCAL, "API URL DESDE FORM NEXT_PUBLIC_API_URL_LOCAL");
   
         const data = await res.json();
         // Manejo de errores de la API
