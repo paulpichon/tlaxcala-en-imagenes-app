@@ -116,7 +116,15 @@ export function FormularioRegistro() {
           field: "correo",
         });
       } else if (resultado.status === 400) {
-        if (resultado.data?.field) {
+        if (Array.isArray(resultado.errores)) {
+          resultado.errores.forEach((err: { path: string; msg: string }) => {
+            if (err.path && err.msg) {
+              setValidationErrors(prev => ({ ...prev, [err.path]: err.msg }));
+            } else {
+              setError(err.msg || "Los datos enviados son inválidos.");
+            }
+          });
+        } else if (resultado.data?.field) {
           handleAPIError({
             status: 400,
             message: resultado.data.message || "Datos inválidos",
