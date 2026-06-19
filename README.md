@@ -1,40 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tlaxcala en Imágenes App (TlaxApp)
 
-## Getting Started
+Red social enfocada en Tlaxcala, México. Comparte fotos, sigue perfiles, da likes y comentarios.
 
-First, run the development server:
+## Stack
+
+- **Framework:** Next.js 16 (App Router), React 19, TypeScript 6
+- **UI:** Bootstrap 5.3, CSS Modules, Framer Motion
+- **Formularios:** react-hook-form + Zod 4
+- **Imágenes:** Cloudinary (presets: feed/detalle/perfil/grid/mini)
+- **Auth:** Cookie-based JWT con refresh automático
+- **Notificaciones Push:** Service Worker (Web Push API)
+- **Paquetería:** pnpm
+
+## Comandos
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm dev      # Desarrollo (Turbopack)
+pnpm build    # Build producción
+pnpm start    # Iniciar servidor producción
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Variables de Entorno
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Ver `.env` para valores actuales. Variables principales:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Descripción |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | Backend producción |
+| `NEXT_PUBLIC_API_URL_LOCAL` | Backend local |
+| `NEXT_PUBLIC_CLOUDINARY_NAME` | Cloudinary cloud name |
+| `NEXT_PUBLIC_IMAGEN_PERFIL_DEFAULT` | Avatar por defecto |
+| `NEXT_PUBLIC_BASE_URL` | URL del frontend |
 
-## Learn More
+## Documentación
 
-To learn more about Next.js, take a look at the following resources:
+- `DOCUMENTACION.md` — Documentación completa del frontend
+- `API.md` — Endpoints del backend
+- `DOCUMENTACION-BACKEND.md` — Documentación del backend
+- `AGENTS.md` — Contexto para asistentes IA
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Rutas Principales
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-## Estructura de este proyecto, visitar el siguiente link
-https://nextjs.org/docs/app/getting-started/project-structure#store-project-files-in-top-level-folders-inside-of-app
-https://nextjs.org/docs/app/getting-started/project-structure#split-project-files-by-feature-or-route
+| Ruta | Descripción | Auth |
+|---|---|---|
+| `/` | Landing page | Pública |
+| `/inicio` | Feed principal | Requiere login |
+| `/cuentas/login` | Inicio de sesión | Solo no auth |
+| `/cuentas/crear-cuenta` | Registro | Solo no auth |
+| `/[url]` | Perfil de usuario | Requiere login |
+| `/posteo/[id]` | Detalle de publicación | Requiere login |
+| `/configuracion` | Ajustes | Requiere login |
+| `/notificaciones` | Centro notificaciones | Requiere login |
+| `/favoritos` | Publicaciones favoritas | Requiere login |
+| `/contacto` | Contacto | Pública |
+| `/legal/*` | Términos, privacidad, FAQ | Pública |

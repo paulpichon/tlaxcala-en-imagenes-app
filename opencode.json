@@ -1,0 +1,45 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "documentador": {
+      "mode": "subagent",
+      "description": "Genera y mantiene documentación técnica del proyecto.",
+      "prompt": "{file:./.opencode/agents/documentador.md}",
+      "permission": {
+        "*": "deny",
+        "read": {
+            "*": "allow",
+            "*.env": "deny",
+            "*.env.*": "deny",
+            "*.env.example": "allow"
+        },
+        "glob": "allow",
+        "grep": "allow",
+        "edit": {
+            "*": "deny",
+            "DOCUMENTACION.md": "allow"
+        }
+      }
+    },
+    "technical-analysis": {
+      "mode": "subagent",
+      "description": "Genera un analisis técnico del proyecto, incluyendo arquitectura, dependencias y puntos críticos.",
+      "prompt": "{file:./.opencode/agents/technical-analysis.md}",
+      "permission": {
+        "*": "deny",
+        "read": {
+            "*": "allow",
+            "*.env": "deny",
+            "*.env.*": "deny",
+            "*.env.example": "allow"
+        },
+        "glob": "allow",
+        "grep": "allow",
+        "edit": {
+            "*": "deny",
+            "reports/*": "allow"
+        }
+      }
+    }
+  }
+}
