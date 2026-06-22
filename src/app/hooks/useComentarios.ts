@@ -15,7 +15,7 @@ export function useComentarios(postId: string) {
   const fetchTotal = useCallback(async () => {
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/comentarios/${postId}/comentarios/count`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/comentarios/${postId}/comentarios/count`
       );
       if (res.ok) {
         const data: ComentariosCountResponse = await res.json();
@@ -36,7 +36,7 @@ export function useComentarios(postId: string) {
     setNextUrl(null);
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/comentarios/${postId}/comentarios`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/comentarios/${postId}/comentarios`
       );
       if (res.ok) {
         const data: ComentariosResponse = await res.json();
@@ -57,7 +57,7 @@ export function useComentarios(postId: string) {
     try {
       const url = nextUrl.startsWith("http")
         ? nextUrl
-        : `${process.env.NEXT_PUBLIC_API_URL_LOCAL}${nextUrl}`;
+        : `${process.env.NEXT_PUBLIC_API_URL}${nextUrl}`;
       const res = await fetchWithAuth(url);
       if (res.ok) {
         const data: ComentariosResponse = await res.json();
@@ -97,7 +97,7 @@ export function useComentarios(postId: string) {
 
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/comentarios/${postId}/comentarios`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/comentarios/${postId}/comentarios`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -128,7 +128,7 @@ export function useComentarios(postId: string) {
   const eliminarComentario = useCallback(async (commentId: string): Promise<boolean> => {
     try {
       const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL_LOCAL}/api/comentarios/${commentId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/comentarios/${commentId}`,
         { method: "DELETE" }
       );
 
