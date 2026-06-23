@@ -4,7 +4,7 @@
     "documentador": {
       "mode": "subagent",
       "description": "Genera y mantiene documentación técnica del proyecto.",
-      "prompt": "{file:./.opencode/agents/documentador.md}",
+      "prompt": "{file:./opencode/agents/documentador.md}",
       "permission": {
         "*": "deny",
         "read": {
@@ -24,7 +24,7 @@
     "technical-analysis": {
       "mode": "subagent",
       "description": "Genera un analisis técnico del proyecto, incluyendo arquitectura, dependencias y puntos críticos.",
-      "prompt": "{file:./.opencode/agents/technical-analysis.md}",
+      "prompt": "{file:./opencode/agents/technical-analysis.md}",
       "permission": {
         "*": "deny",
         "read": {
