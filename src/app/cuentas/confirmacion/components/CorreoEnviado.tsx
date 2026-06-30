@@ -146,7 +146,7 @@ export default function CorreoEnviado() {
     },
     [rutas.restablecer]: {
       titulo: "Correo enviado",
-      textoUno: "Te enviamos un correo electrónico con un enlace para restablecer tu contraseña.",
+      textoUno: "Si el correo está registrado, recibirás un enlace para restablecer tu contraseña.",
       textoDos: "El enlace estará activo por 1 hora. Si no lo encuentras, revisa spam o correo no deseado."
     }
   };

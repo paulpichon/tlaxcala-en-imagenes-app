@@ -65,12 +65,12 @@ export default function FormularioLogin() {
               return;
             }
             // No existe correo en la BD
-            if ( data.status === 401 && data.msg === 'Correo no existe') {
+            if ( data.status === 401 && data.msg === 'Credenciales inválidas') {
               setServerError('Correo o contraseña incorrectos.');
               return;  
             }
             // Contraseña incorrecta
-            if ( data.status === 401 && data.msg === 'Password incorrecto') {
+            if ( data.status === 401 && data.msg === 'Credenciales inválidas') {
               setServerError('Correo o contraseña incorrectos.');
               return;
             }
