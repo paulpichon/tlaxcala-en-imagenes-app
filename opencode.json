@@ -3,22 +3,33 @@
   "agent": {
     "documentador": {
       "mode": "subagent",
-      "description": "Genera y mantiene documentación técnica del proyecto.",
+      "description": "Analiza el frontend del proyecto y genera documentación técnica completa en español.",
       "prompt": "{file:./opencode/agents/documentador/documentador.md}",
+      "tools": {
+        "read": true,
+        "grep": true,
+        "glob": true,
+        "list": true,
+        "write": true,
+        "edit": true,
+        "bash": true,
+        "webfetch": false
+      },
       "permission": {
-        "*": "deny",
-        "read": {
-            "*": "allow",
-            "*.env": "deny",
-            "*.env.*": "deny",
-            "*.env.example": "allow"
-        },
-        "glob": "allow",
-        "grep": "allow",
         "edit": {
-            "*": "deny",
-            "reports/documentador/*": "allow"
-        }
+          "*": "deny",
+          "reports/documentador/*": "allow"
+        },
+        "bash": {
+          "*": "deny",
+          "find *": "allow",
+          "ls *": "allow",
+          "wc -l *": "allow",
+          "grep *": "allow",
+          "cat package.json": "allow",
+          "cat *.config.*": "allow"
+        },
+        "webfetch": "deny"
       }
     },
     "technical-analysis": {
@@ -26,15 +37,25 @@
       "description": "Genera un analisis técnico del proyecto, incluyendo arquitectura, dependencias y puntos críticos.",
       "prompt": "{file:./opencode/agents/technical-analysis/technical-analysis.md}",
       "permission": {
-        "*": "deny",
-        "read": {
-            "*": "allow",
-            "*.env": "deny",
-            "*.env.*": "deny",
-            "*.env.example": "allow"
+        "bash": {
+          "*": "deny",
+          "ls *": "allow",
+          "find *": "allow",
+          "grep *": "allow",
+          "rg *": "allow",
+          "cat *": "allow",
+          "tree *": "allow",
+          "wc *": "allow"
         },
-        "glob": "allow",
-        "grep": "allow",
+        "read": {
+          "*": "allow",
+          ".env": "deny",
+          ".env.local": "deny",
+          ".env.development": "deny",
+          ".env.production": "deny",
+          ".env.*.local": "deny"
+        },
+        "webfetch": "deny",
         "edit": {
             "*": "deny",
             "reports/technical-analysis/*": "allow"
