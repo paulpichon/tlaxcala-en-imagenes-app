@@ -1,6 +1,5 @@
 // hooks/useLikes.ts
-import { useState, useEffect } from "react";
-import { LikesUsuariosResponse } from "@/types/types";
+import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 
 type LikeState = {
@@ -8,50 +7,16 @@ type LikeState = {
   hasLiked: boolean;
 };
 
-export function useLikes(postId: string) {
-  const { fetchWithAuth, user } = useAuth();
+export function useLikes(
+  postId: string,
+  initialCount?: number,
+  initialHasLiked?: boolean
+) {
+  const { fetchWithAuth } = useAuth();
   const [likeState, setLikeState] = useState<LikeState>({
-    count: 0,
-    hasLiked: false,
+    count: initialCount ?? 0,
+    hasLiked: initialHasLiked ?? false,
   });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user || !postId) return;
-
-    let cancelled = false;
-    (async () => {
-      try {
-        // Endpoint: api/likes/${postId}/likes/usuarios --> Mostrar usuarios que dieron LIKE a un posteo
-        const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/likes/${postId}/likes/usuarios`
-        );
-        if (!res.ok) return;
-
-        const data: LikesUsuariosResponse = await res.json();
-        if (cancelled) return;
-
-        const count = data.likes_usuarios_posteo.length;
-
-        // ✅ Comparación más robusta
-        const hasLiked = data.likes_usuarios_posteo.some(
-          (like) =>
-            like._idUsuario?.uid === user.uid ||
-            like._idUsuario?._id === user.uid
-        );
-
-        setLikeState({ count, hasLiked });
-      } catch (err) {
-        console.error("Error cargando likes:", err);
-      } finally {
-        setLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [postId, user, fetchWithAuth]);
 
   const toggleLike = async () => {
     try {
@@ -76,5 +41,5 @@ export function useLikes(postId: string) {
     }
   };
 
-  return { likeState, toggleLike, loading };
+  return { likeState, toggleLike, loading: false };
 }

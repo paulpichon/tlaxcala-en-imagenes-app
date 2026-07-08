@@ -6,7 +6,6 @@ export type FormErrors = {
   [key in keyof UsuarioSchema]?: string;
 };
 // Interface para definir los tipos de datos del formulario de registro
-// Interface
 export interface IUsuarioData {
 	nombre: string;
 	apellido: string;
@@ -53,8 +52,10 @@ export interface Posteo {
   fecha_actualizacion?: string;
   idPost: string;
   _id: string;
-  isFollowing: boolean;   // 👈 añadido
-  isFavorito: boolean;    // 👈 añadido
+  isFollowing: boolean;
+  isFavorito: boolean;
+  likesCount?: number;
+  hasLiked?: boolean;
   comentariosActivos?: boolean;
 }
 // Interface para crear Posteo Modal
@@ -175,6 +176,8 @@ export interface LikeUsuario {
 // Interface Props LikeButton.tsx
 export interface LikeButtonProps {
   postId: string;
+  likesCount?: number;
+  hasLiked?: boolean;
   onOpenLikesModal?: () => void;
 }
 // Respuesta de la API para likes de un posteo

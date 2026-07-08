@@ -280,7 +280,7 @@ const ImageModal: React.FC<PropsImageModal> = ({
 
               <div className="bg-white px-3 py-2 border-bottom flex-shrink-0">
                 <div className="d-flex gap-3 align-items-center mb-2">
-                  <LikeButton postId={posteoActual._id} onOpenLikesModal={openLikesModal} />
+                  <LikeButton postId={posteoActual._id} likesCount={posteoActual.likesCount} hasLiked={posteoActual.hasLiked} onOpenLikesModal={openLikesModal} />
                 </div>
                 <p className="mb-1">
                   <span className="fw-bold text-dark">
@@ -437,7 +437,7 @@ const ImageModal: React.FC<PropsImageModal> = ({
 
                 <div className={`px-3 py-2 ${posteoActual.comentariosActivos !== false ? "border-top" : ""}`}>
                   <div className="d-flex gap-3 align-items-center mb-2">
-                    <LikeButton postId={posteoActual._id} onOpenLikesModal={openLikesModal} />
+                    <LikeButton postId={posteoActual._id} likesCount={posteoActual.likesCount} hasLiked={posteoActual.hasLiked} onOpenLikesModal={openLikesModal} />
                   </div>
                   <p className="text-muted small mb-0">{fechaFormateada}</p>
                 </div>

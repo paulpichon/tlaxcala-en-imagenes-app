@@ -6,8 +6,8 @@ import { useLikes } from "@/app/hooks/useLikes";
 import { LikeButtonProps } from "@/types/types";
 import { FiHeart } from "react-icons/fi";
 
-export default function LikeButton({ postId, onOpenLikesModal }: LikeButtonProps) {
-  const { likeState, toggleLike, loading } = useLikes(postId);
+export default function LikeButton({ postId, likesCount, hasLiked, onOpenLikesModal }: LikeButtonProps) {
+  const { likeState, toggleLike, loading } = useLikes(postId, likesCount, hasLiked);
 
   const handleClick = () => {
     toggleLike();

@@ -185,7 +185,7 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
         {/* Body */}
         <div className="card-body bg-light">
           <div className="d-flex align-items-center gap-3 mb-2">
-            <LikeButton postId={posteoActual._id} onOpenLikesModal={openLikesModal} />
+            <LikeButton postId={posteoActual._id} likesCount={posteoActual.likesCount} hasLiked={posteoActual.hasLiked} onOpenLikesModal={openLikesModal} />
 
             <button
               onClick={() => setShowComments(true)}
