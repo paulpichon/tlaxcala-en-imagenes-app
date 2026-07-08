@@ -32,6 +32,39 @@ written in Spanish.
 
 ---
 
+## Output Location & File Permissions (NON-NEGOTIABLE)
+
+- This agent has **read-only** access to the entire project, with a single
+  write exception: the `reports/documentador/` directory.
+- Permission pattern (last-rule-wins):
+  ```json
+  { "edit": { "*": "deny", "reports/documentador/*": "allow" } }
+  ```
+- Never write, edit, or delete any file outside `reports/documentador/`.
+- If `reports/documentador/` does not exist, create it before writing the
+  output file. Do not create or write to any sibling folder (e.g.
+  `reports/`, `reports/auditor/`, `reports/analisis-backend/`) — those
+  belong to other agents.
+
+### File Naming Convention
+- The output file must be named using the project's timestamp convention:
+  `YYYY-MM-DD_HH-mm-ss.md`
+- Full output path:
+  ```
+  reports/documentador/YYYY-MM-DD_HH-mm-ss.md
+  ```
+- Example: `reports/documentador/2026-07-07_14-32-05.md`
+- Never overwrite a previous report. Each run produces a new timestamped
+  file so that historical documentation snapshots are preserved for
+  comparison.
+- Before finishing, check `reports/documentador/` for prior reports. If
+  relevant, note in section 23 ("Problemas Conocidos y Limitaciones") any
+  significant structural changes detected versus the most recent prior
+  report (new/removed routes, stores, or major dependencies). This is a
+  comparison note only — never read/write outside `reports/documentador/`.
+
+---
+
 ## Phase 1 — Project Discovery (READ-ONLY)
 
 Before writing anything, explore the project structure. Do not modify files.
@@ -48,16 +81,16 @@ Before writing anything, explore the project structure. Do not modify files.
    folder structure, imports, module boundaries, and naming conventions.
 
 ### Configuration Discovery
-Locate and analyze: `next.config.*`, `vite.config.*`, `webpack.config.*`, 
+Locate and analyze: `next.config.*`, `vite.config.*`, `webpack.config.*`,
 `tsconfig.json`, eslint, prettier, husky, lint-staged, Docker, and CI/CD files.
 
 CRITICAL ENV RULE:
 - For environment variables, ONLY read and analyze the `.env.example` file.
-- DO NOT attempt to read `.env`, `.env.local`, `.env.production`, `.env.deployment`, or any other 
-  active environment file containing real credentials, even if they exist in 
+- DO NOT attempt to read `.env`, `.env.local`, `.env.development`, `.env.production`, `.env.deployment`, or any other
+  active environment file containing real credentials, even if they exist in
   the workspace.
-- If `.env.example` is missing, document the required variables based strictly 
-  on where they are referenced in the source code (e.g., `process.env` or 
+- If `.env.example` is missing, document the required variables based strictly
+  on where they are referenced in the source code (e.g., `process.env` or
   `import.meta.env`).
 
 ### Routing Discovery
@@ -162,8 +195,14 @@ dependencies if detectable.
 
 ## Phase 3 — Documentation Generation
 
-Produce a single Markdown file named `DOCUMENTACION.md` with the following
-structure:
+Produce a single Markdown file at:
+
+```
+reports/documentador/YYYY-MM-DD_HH-mm-ss.md
+```
+
+(replace `YYYY-MM-DD_HH-mm-ss` with the actual current timestamp), with the
+following structure:
 
 ---
 
@@ -283,7 +322,8 @@ Nomenclatura, carpetas, componentes, commits, organización.
 ---
 
 ## Output Rules
-- Generate a single file named `DOCUMENTACION.md`.
+- Generate a single file at `reports/documentador/YYYY-MM-DD_HH-mm-ss.md`.
+- Do not write to any other path. Do not overwrite prior reports.
 - All prose, headings, table headers, descriptions, and code comments must
   be in Spanish.
 - Use real project code in examples. Do not invent examples.
@@ -296,7 +336,9 @@ Nomenclatura, carpetas, componentes, commits, organización.
 
 ## Final Summary
 
-After generating `DOCUMENTACION.md`, print a summary in Spanish with:
+After generating `reports/documentador/YYYY-MM-DD_HH-mm-ss.md`, print a
+summary in Spanish with:
+- Ruta completa del archivo generado
 - Total de componentes documentados
 - Total de hooks documentados
 - Total de servicios documentados
