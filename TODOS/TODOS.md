@@ -9,7 +9,7 @@
 
 ---
 
-## 🥇 Prioridad 1 — Ineficiencia en `useLikes.ts`
+## ✅ ~~🥇 Prioridad 1~~ — Ineficiencia en `useLikes.ts` — **Completado**
 
 **Problema:** Se usa `GET /api/likes/{postId}/likes/usuarios` para obtener el conteo de likes y saber si el usuario ya dio like. Este endpoint devuelve **todos** los usuarios que likearon, lo cual es ineficiente a escala (si un posteo tiene 1000 likes, descarga 1000 objetos).
 
@@ -45,7 +45,7 @@ Agregar `likesCount` y `hasLiked` en la respuesta de los endpoints de posteos:
 
 ---
 
-## 🥇 Prioridad 2 — Cliente API centralizado
+## ✅ ~~🥇 Prioridad 2~~ — Cliente API centralizado — **Completado**
 
 **Problema:** Más de 40 lugares construyen la URL manualmente con `process.env.NEXT_PUBLIC_API_URL + "/api/..."`. Frágil ante cambios de esquema de URLs.
 
@@ -106,7 +106,7 @@ Agregar `likesCount` y `hasLiked` en la respuesta de los endpoints de posteos:
 
 ---
 
-## 🥈 Prioridad 3 — `uid` vs `_id` en Favoritos
+## ✅ ~~🥈 Prioridad 3~~ — `uid` vs `_id` en Favoritos — **Completado**
 
 **Problema:** `src/app/components/favoritos/Favoritos.tsx:118` usa `fav.autorId.uid`. La API documentada devuelve `autorId._id`. Si el backend no serializa `uid`, `FavoritoButton` recibe `undefined`.
 
@@ -132,7 +132,7 @@ Cambiar `Favoritos.tsx` para usar `fav.autorId._id` en lugar de `uid`. Ajustar l
 
 ---
 
-## 🥈 Prioridad 4 — Estado mutable compartido en `actions.ts`
+## ✅ ~~🥈 Prioridad 4~~ — Estado mutable compartido en `actions.ts` — **Completado**
 
 **Problema:** `funcionRequestOptions` muta una variable `requestOptions` global al módulo. Si dos llamadas ocurren casi simultáneas, hay race condition.
 
@@ -158,7 +158,7 @@ Eliminar la variable global `requestOptions` y la función `funcionRequestOption
 
 ---
 
-## 🥈 Prioridad 5 — `fetchWithAuth` sin reintento ante error de red
+## ✅ ~~🥈 Prioridad 5~~ — `fetchWithAuth` sin reintento ante error de red — **Completado**
 
 **Problema:** Solo reintenta si el backend responde con `401`. Si hay error de red (fetch lanza excepción), la petición falla sin reintento.
 
@@ -258,11 +258,11 @@ Eliminar el parámetro `limit=15` y dejar que la API use su default:
 
 ---
 
-## Resumen de cambios requeridos en backend
+## Resumen de cambios requeridos en backend — ✅ Todos completados
 
-| Prioridad | Endpoint | Campo a agregar |
-|---|---|---|
-| Alta | `GET /api/posteos/` | `likesCount: number`, `hasLiked: boolean` en cada posteo |
-| Alta | `GET /api/posteos/post/:id` | `likesCount: number`, `hasLiked: boolean` en el posteo |
-| Alta | `GET /api/posteos/usuario/:idUsuario` | `likesCount: number`, `hasLiked: boolean` en cada posteo |
-| Media | `GET /api/favoritos/` | `uid` en `autorId` (si se elige Opción A) |
+| Prioridad | Endpoint | Campo a agregar | Estado |
+|---|---|---|---|
+| Alta | `GET /api/posteos/` | `likesCount: number`, `hasLiked: boolean` en cada posteo | ✅ |
+| Alta | `GET /api/posteos/post/:id` | `likesCount: number`, `hasLiked: boolean` en el posteo | ✅ |
+| Alta | `GET /api/posteos/usuario/:idUsuario` | `likesCount: number`, `hasLiked: boolean` en cada posteo | ✅ |
+| Media | `GET /api/favoritos/` | Ninguno (se eligió Opción B — frontend usa `_id`) | ✅ N/A |
