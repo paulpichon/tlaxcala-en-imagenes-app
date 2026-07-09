@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { FollowerUserItemProps } from "@/types/types";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import Link from "next/link";
+import { apiGet } from "@/lib/apiClient";
 
 interface Props {
   userId: string;
@@ -29,13 +30,12 @@ export default function FollowersModal({ userId, loggedUserId, show, onClose }: 
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/followers/usuario/lista-followers/${userId}`
+        const data = await apiGet<{ seguidores: FollowerUserItemProps[] }>(
+          fetchWithAuth,
+          `/api/followers/usuario/lista-followers/${userId}`
         );
 
-        const data = await res.json();
-
-        setFollowers(data.seguidores); // incluye isFollowing
+        setFollowers(data.seguidores);
       } catch (error) {
         console.error("Error obteniendo seguidores", error);
       } finally {

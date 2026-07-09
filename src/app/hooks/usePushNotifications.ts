@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { apiGet, apiPost } from "@/lib/apiClient";
 
 type EstadoNotificacion = "idle" | "pending" | "enabled" | "disabled" | "error";
 
@@ -72,12 +73,10 @@ export function usePushNotifications() {
       }
 
       // 3️⃣ Obtener clave pública VAPID
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/notificaciones/vapidPublicKey`
+      const { key } = await apiGet<{ key: string }>(
+        fetchWithAuth,
+        "/api/notificaciones/vapidPublicKey"
       );
-      if (!res.ok) throw new Error("No se pudo obtener clave pública VAPID");
-
-      const { key } = await res.json();
 
       // 4️⃣ Crear suscripción
       const subscription = await registration.pushManager.subscribe({
@@ -86,16 +85,7 @@ export function usePushNotifications() {
       });
 
       // 5️⃣ Enviar suscripción al backend
-      const response = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/notificaciones/subscribe`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ subscription }),
-        }
-      );
-
-      if (!response.ok) throw new Error("Error registrando suscripción en el servidor");
+      await apiPost(fetchWithAuth, "/api/notificaciones/subscribe", { subscription });
 
       // ✅ Mostrar notificación de confirmación
       new Notification("🔔 Notificaciones activadas", {
@@ -128,14 +118,7 @@ export function usePushNotifications() {
         console.log("🔕 Notificaciones desactivadas en este dispositivo");
 
         // 2️⃣ Avisar al backend (eliminas solo esta suscripción)
-        await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/notificaciones/unsubscribe`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ endpoint }),
-          }
-        );
+        await apiPost(fetchWithAuth, "/api/notificaciones/unsubscribe", { endpoint });
 
         setEstado("disabled");
       }

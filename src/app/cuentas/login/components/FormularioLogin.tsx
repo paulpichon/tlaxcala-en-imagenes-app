@@ -1,13 +1,11 @@
 'use client';
-// Auth context
 import { useAuth } from '@/context/AuthContext';
-// Userouter redirigir al usuario
 import { useRouter } from 'next/navigation';
-// Estilos de pagina
 import loginEstilos from "../../../ui/cuentas/login/login.module.css";
-
 import { useState } from 'react';
 import { z } from 'zod';
+import { apiPost, ApiError } from '@/lib/apiClient';
+import { UsuarioLogueado } from '@/types/types';
 
 const schema = z.object({
     correo: z.string().email('Correo inválido'),
@@ -15,9 +13,7 @@ const schema = z.object({
 });
 
 export default function FormularioLogin() {
-    // useAuth: Hook para acceder al contexto de autenticación
     const { login } = useAuth();
-    // Redirigir al usuario
     const router = useRouter();
 
     const [formData, setFormData] = useState({ correo: '', password: '' });
@@ -49,54 +45,31 @@ export default function FormularioLogin() {
   
       try {
         setLoading(true);
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
-          credentials: 'include'
-        });
+        const data = await apiPost<{ usuario: UsuarioLogueado }>(
+          fetch,
+          '/api/auth/login',
+          formData
+        );
   
-        const data = await res.json();
-        // Manejo de errores de la API
-        if (!res.ok) {
-            // Rate-limit (demasiados intentos)
-            if (data.status === 429) {
-              setServerError(data.msg);
-              return;
-            }
-            // No existe correo en la BD
-            if ( data.status === 401 && data.msg === 'Credenciales inválidas') {
-              setServerError('Correo o contraseña incorrectos.');
-              return;  
-            }
-            // Contraseña incorrecta
-            if ( data.status === 401 && data.msg === 'Credenciales inválidas') {
-              setServerError('Correo o contraseña incorrectos.');
-              return;
-            }
-            // Cuenta no verificada
-            if (data.status === 403 && data.msg === 'Cuenta no verificada') {
-              setServerError('La cuenta no ha sido verificada, revisa tu correo.');
-              return;
-            }
-            // Cuenta no activada/bloqueada
-            if ( data.status === 403 && data.msg === 'Cuenta no activada') {
-              setServerError('Esta cuenta no está disponible. Contacta a soporte para más información.');
-              return;
-            }
-            // Otro error del servidor
-            setServerError('Error en el servidor');
-            return;
-        }
-  
-        login(data.usuario); // el backend debe devolver los datos del usuario
-        // Redirigir al usuario a la página de inicio
+        login(data.usuario);
         router.push('/inicio');
       } catch (error) {
-          console.log(error);
-        
+        if (error instanceof ApiError) {
+          if (error.status === 429) {
+            setServerError(error.data.msg as string);
+          } else if (error.status === 401) {
+            setServerError('Correo o contraseña incorrectos.');
+          } else if (error.status === 403 && error.data.msg === 'Cuenta no verificada') {
+            setServerError('La cuenta no ha sido verificada, revisa tu correo.');
+          } else if (error.status === 403 && error.data.msg === 'Cuenta no activada') {
+            setServerError('Esta cuenta no está disponible. Contacta a soporte para más información.');
+          } else {
+            setServerError('Error en el servidor');
+          }
+        } else {
           setServerError('Error en el servidor');
-      }   finally {
+        }
+      } finally {
           setLoading(false);
       }
     };

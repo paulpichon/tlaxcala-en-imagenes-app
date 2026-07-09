@@ -14,6 +14,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import ToastGlobal from "../ToastGlobal";
+import { apiGet } from "@/lib/apiClient";
 
 type NextResponse = string | { url?: string } | null | undefined;
 
@@ -65,16 +66,12 @@ export default function PublicacionesUsuarioGrid({
 
       try {
         const endpoint =
-          url ||
-          `${process.env.NEXT_PUBLIC_API_URL}/api/posteos/usuario/${usuarioId}`;
+          url || `/api/posteos/usuario/${usuarioId}`;
 
-        const res = await fetchWithAuth(endpoint);
-        if (!res.ok) {
-          console.error("Error HTTP al obtener posteos:", res.status);
-          return;
-        }
-
-        const data = await res.json();
+        const data = await apiGet<{ posteos: Posteo[]; next: string | null; total_registros?: number }>(
+          fetchWithAuth,
+          endpoint
+        );
         const nuevosPosteos = data.posteos || [];
 
         if (nuevosPosteos.length === 0) {
@@ -96,10 +93,7 @@ export default function PublicacionesUsuarioGrid({
         if (!siguiente) {
           setNextUrl(null);
         } else {
-          const fullNextUrl = siguiente.startsWith("http")
-            ? siguiente
-            : `${process.env.NEXT_PUBLIC_API_URL}${siguiente}`;
-          setNextUrl(fullNextUrl);
+          setNextUrl(siguiente);
           if (url) fetchedPages.current.add(url);
         }
 
@@ -157,16 +151,10 @@ export default function PublicacionesUsuarioGrid({
   // 🖼 Modal abrir detalle
   const openFirstModal = async (posteo: Posteo) => {
     try {
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/posteos/post/${posteo._id}`
+      const data = await apiGet<PosteoDetalleResponse>(
+        fetchWithAuth,
+        `/api/posteos/post/${posteo._id}`
       );
-      if (!res.ok) {
-        console.error("Error HTTP al obtener detalle:", res.status);
-        setToast({ message: "Error al abrir la publicación", type: "danger" });
-        return;
-      }
-
-      const data: PosteoDetalleResponse = await res.json();
       setSelectedImage({
         ...data.posteo,
         isFollowing: data.isFollowing,

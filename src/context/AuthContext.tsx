@@ -9,27 +9,17 @@ import {
   useRef,
 } from 'react';
 import { UsuarioLogueado, IAuthContext } from '@/types/types';
+import { apiPost, apiGet, ApiError } from '@/lib/apiClient';
 
-// =========================
-// Contexto
-// =========================
 const AuthContext = createContext<IAuthContext | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UsuarioLogueado | null>(null);
   const [loading, setLoading] = useState(true);
 
-  /**
-   * Ref para evitar múltiples refresh simultáneos
-   */
   const isRefreshing = useRef(false);
   const refreshPromise = useRef<Promise<boolean> | null>(null);
-  // URL base de la API (Puede venir de env)
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  // =========================
-  // Refresh Token (con control de concurrencia)
-  // =========================
   const refreshToken = useCallback(async (): Promise<boolean> => {
     if (isRefreshing.current && refreshPromise.current) {
       return refreshPromise.current;
@@ -39,16 +29,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     refreshPromise.current = (async () => {
       try {
-        const res = await fetch(`${API_URL}/api/auth/refresh`, {
-          method: 'POST',
-          credentials: 'include',
-        });
-
-        if (!res.ok) return false;
-
+        await apiPost(fetch, '/api/auth/refresh');
         return true;
-      } catch (error) {
-        console.error('Error al refrescar token:', error);
+      } catch {
         return false;
       } finally {
         isRefreshing.current = false;
@@ -56,101 +39,75 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     })();
 
     return refreshPromise.current;
-  }, [API_URL]);
+  }, []);
 
-  // =========================
-  // Fetch protegido inteligente
-  // =========================
   const fetchWithAuth = useCallback(
-    async (input: RequestInfo, init?: RequestInit) => {
-      let response = await fetch(input, {
-        ...init,
-        credentials: 'include',
-      });
+    async (input: RequestInfo, init?: RequestInit): Promise<Response> => {
+      const doFetch = () => fetch(input, { ...init, credentials: 'include' });
 
-      if (response.status === 401) {
-        const refreshed = await refreshToken();
+      for (let attempt = 0; attempt <= 2; attempt++) {
+        try {
+          let response = await doFetch();
 
-        if (refreshed) {
-          response = await fetch(input, {
-            ...init,
-            credentials: 'include',
-          });
-        } else {
-          setUser(null);
+          if (response.status === 401) {
+            const refreshed = await refreshToken();
+
+            if (refreshed) {
+              response = await doFetch();
+            } else {
+              setUser(null);
+            }
+          }
+
+          return response;
+        } catch (err) {
+          if (attempt === 2) throw err;
+          await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
         }
       }
 
-      return response;
+      throw new Error('fetchWithAuth falló después de reintentos');
     },
     [refreshToken]
   );
 
-  // =========================
-  // Login manual
-  // =========================
   const login = useCallback((user: UsuarioLogueado) => {
     setUser(user);
-     // Limpiar variables de recuperación de contraseña
-    //  O cualquier otra variable que deba desaparecer una vez autenticado
     localStorage.removeItem('lastPasswordRequest');
     localStorage.removeItem('bloqueoReenvioCorreo');
     sessionStorage.removeItem('passForgetToken');
     sessionStorage.removeItem('registroToken');
   }, []);
 
-  // =========================
-  // Actualización parcial de usuario
-  // =========================
   const updateUser = useCallback((newData: Partial<UsuarioLogueado>) => {
     setUser((prev) => (prev ? { ...prev, ...newData } : prev));
   }, []);
 
-  // =========================
-  // Logout
-  // =========================
   const logout = useCallback(async () => {
     try {
-      await fetch(`${API_URL}/api/auth/logout`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      await apiPost(fetch, '/api/auth/logout');
+    } catch {
     } finally {
       setUser(null);
     }
-  }, [API_URL]);
+  }, []);
 
-  // =========================
-  // Inicialización de sesión
-  // =========================
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        let res = await fetch(`${API_URL}/api/auth/me`, {
-          credentials: 'include',
-        });
-
-        // Si token expiró, intentamos refresh
-        if (res.status === 401) {
+        const data = await apiGet<{ usuario: UsuarioLogueado }>(fetch, '/api/auth/me');
+        setUser(data.usuario);
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 401) {
           const refreshed = await refreshToken();
-
           if (refreshed) {
-            res = await fetch(`${API_URL}/api/auth/me`, {
-              credentials: 'include',
-            });
+            try {
+              const data = await apiGet<{ usuario: UsuarioLogueado }>(fetch, '/api/auth/me');
+              setUser(data.usuario);
+              return;
+            } catch {}
           }
         }
-
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data.usuario);
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.error('Error recuperando sesión:', error);
         setUser(null);
       } finally {
         setLoading(false);
@@ -158,7 +115,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     initializeAuth();
-  }, [API_URL, refreshToken]);
+  }, [refreshToken]);
 
   return (
     <AuthContext.Provider
@@ -176,9 +133,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-// =========================
-// Hook personalizado
-// =========================
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

@@ -9,10 +9,10 @@ import {
   ReactNode,
 } from "react";
 import { useAuth } from "./AuthContext";
+import { apiGet } from "@/lib/apiClient";
 
 interface NotificacionesContextType {
     totalNoLeidas: number;
-    // setTotalNoLeidas: (valor: number) => void;
     setTotalNoLeidas: React.Dispatch<React.SetStateAction<number>>;
     refrescarNotificaciones: () => Promise<void>;
 }
@@ -24,36 +24,23 @@ export function NotificacionesProvider({ children }: { children: ReactNode }) {
 
   const [totalNoLeidas, setTotalNoLeidas] = useState<number>(0);
 
-  /**
-   * 🔄 Función para obtener el total de notificaciones no leídas
-   */
   const refrescarNotificaciones = useCallback(async () => {
-    if (!user) return; // Si no hay usuario logueado, no hacemos nada
+    if (!user) return;
     try {
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/notificaciones/nuevas-notificaciones`
+      const data = await apiGet<{ totalNoLeidas: number }>(
+        fetchWithAuth,
+        "/api/notificaciones/nuevas-notificaciones"
       );
-
-      if (!res.ok) throw new Error("Error al obtener notificaciones");
-
-      const data = await res.json();
       setTotalNoLeidas(data.totalNoLeidas || 0);
     } catch (error) {
       console.error("Error al refrescar notificaciones:", error);
     }
   }, [fetchWithAuth, user]);
 
-  /**
-   * 🧠 Efecto: al iniciar sesión o recargar la página, obtener notificaciones
-   */
   useEffect(() => {
     if (user) refrescarNotificaciones();
   }, [user, refrescarNotificaciones]);
 
-  /**
-   * ⏱️ Efecto opcional: actualiza automáticamente cada 60 segundos
-   * (puedes aumentar o reducir este tiempo según tus necesidades)
-   */
   useEffect(() => {
     if (!user) return;
     const interval = setInterval(refrescarNotificaciones, 60000);

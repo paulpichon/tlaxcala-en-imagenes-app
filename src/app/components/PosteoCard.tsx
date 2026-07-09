@@ -9,9 +9,10 @@ import { useRouter } from "next/navigation";
 import LikeButton from "./LikeButton";
 import ModalOpcionesPublicacion from "./ModalOpcionesPublicacion";
 import ModalLikesUsuarios from "./ModalLikesUsuarios";
-import { Posteo, LikeUsuario, PosteoCardProps } from "@/types/types";
+import { Posteo, LikeUsuario, PosteoCardProps, LikesUsuariosResponse } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
+import { apiGet } from "@/lib/apiClient";
 import posteoCard from "../ui/posteos/PosteoCard.module.css";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 import { useComentarios } from "@/app/hooks/useComentarios";
@@ -36,11 +37,10 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
 
   const openLikesModal = async () => {
     try {
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/likes/${posteoActual._id}/likes/usuarios`
+      const data = await apiGet<LikesUsuariosResponse>(
+        fetchWithAuth,
+        `/api/likes/${posteoActual._id}/likes/usuarios`
       );
-      if (!res.ok) return;
-      const data = await res.json();
       setLikesUsuarios(data.likes_usuarios_posteo ?? []);
       setIsLikesOpen(true);
     } catch (err) {

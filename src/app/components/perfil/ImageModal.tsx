@@ -11,6 +11,7 @@ import ModalLikesUsuarios from "../ModalLikesUsuarios";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { apiGet } from "@/lib/apiClient";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 import { useComentarios } from "@/app/hooks/useComentarios";
@@ -72,12 +73,10 @@ const ImageModal: React.FC<PropsImageModal> = ({
   const openLikesModal = async () => {
     if (!posteoActual) return;
     try {
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/likes/${posteoActual._id}/likes/usuarios`
+      const data = await apiGet<LikesUsuariosResponse>(
+        fetchWithAuth,
+        `/api/likes/${posteoActual._id}/likes/usuarios`
       );
-      if (!res.ok) throw new Error("Error al obtener usuarios que dieron like");
-
-      const data: LikesUsuariosResponse = await res.json();
       setUsuariosLikes(data.likes_usuarios_posteo || []);
       setIsLikesModalOpen(true);
     } catch (err) {

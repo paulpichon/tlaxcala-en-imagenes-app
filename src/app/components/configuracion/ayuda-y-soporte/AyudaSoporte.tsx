@@ -19,23 +19,13 @@ import { useState } from 'react';
 // Icono de flecha para regresar
 import { FiArrowLeft } from "react-icons/fi";
 
-// Contexto de autenticación (para fetch con token)
 import { useAuth } from '@/context/AuthContext';
-
-// Componente global de notificaciones (toast)
 import ToastGlobal from '@/app/components/ToastGlobal';
-
-// Zod para validaciones
 import { z } from 'zod';
-
-// Estilos CSS Module
 import ayudaSoporte from "@/app/ui/configuracion/AyudaSoporte.module.css";
-
-// Esquema de validación externo
 import { schemaAyudaSoporte } from '@/lib/validaciones';
-
-// Link de Next.js para navegación interna
 import Link from 'next/link';
+import { apiPost, ApiError } from '@/lib/apiClient';
 
 export default function AyudaSoporte() {
 
@@ -88,51 +78,38 @@ export default function AyudaSoporte() {
       setFormErrors({});
       setLoading(true);
 
-      // Petición autenticada al backend
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/ayuda-soporte/envio-correo`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(parsed),
-        }
+      const data = await apiPost<{ msg: string; ticketId: string }>(
+        fetchWithAuth,
+        '/api/ayuda-soporte/envio-correo',
+        parsed
       );
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        if (res.status === 429) {
-          throw new Error(data?.msg || "Demasiados tickets de soporte, intenta de nuevo más tarde");
-        }
-        throw new Error(data?.msg || "Error al enviar solicitud");
-      }
-
-      // Mostrar ticket de soporte
       setToastType('success');
       setToastMessage(
         `Solicitud enviada correctamente 🎟 Ticket: ${data.ticketId}`
       );
 
-      // Limpiar formulario
       setTipoAyuda('');
       setMensaje('');
 
     } catch (error: any) {
 
-      // Si el error viene de Zod
       if (error instanceof z.ZodError) {
-
         const errors: any = {};
-
         error.issues.forEach((err) => {
           errors[err.path[0]] = err.message;
         });
-
         setFormErrors(errors);
-
+      } else if (error instanceof ApiError) {
+        setToastType('danger');
+        setToastMessage(
+          error.status === 429
+            ? String(error.data.msg ?? "Demasiados tickets de soporte, intenta de nuevo más tarde")
+            : String(error.data.msg ?? "Error al enviar solicitud")
+        );
       } else {
         setToastType('danger');
-        setToastMessage(error.message || "Error inesperado.");
+        setToastMessage("Error inesperado.");
       }
 
     } finally {

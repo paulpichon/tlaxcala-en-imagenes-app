@@ -4,12 +4,11 @@
 
 // Meta datos NEXTJS
 import { Metadata } from "next";
-// Estilos de la página
 import cuentaVerificada from "../../../../ui/cuentas/crear-cuenta/cuenta-verificada/CuentaVerificada.module.css";
-// Componentes
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 import FooterPrincipal from "@/app/components/FooterMain";
 import Link from "next/link";
+import { apiUrl } from "@/lib/apiClient";
 
 // ✅ Metadata optimizada para SEO
 // ⚠️ IMPORTANTE: Esta página NO debe ser indexada por seguridad
@@ -96,10 +95,8 @@ export default async function CuentaVerificadaPage({
     // Esta petición verifica si el token es válido y no ha expirado
     // Si es válido, también marca la cuenta como verificada en la base de datos
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/auth/verificar-correo/${token}`, 
-      { 
-        cache: "no-store" // No cachear para obtener siempre el estado más reciente
-      }
+      apiUrl(`/api/auth/verificar-correo/${token}`),
+      { cache: "no-store" }
     );
 
     // Procesar la respuesta de la API

@@ -1,11 +1,11 @@
-// components/perfil/EditarPerfil/useEditarPerfil.ts
 'use client';
 
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
 import { useAuth } from '@/context/AuthContext';
 import { obtenerImagenPerfilUsuario } from '@/lib/cloudinary/obtenerImagenPerfilUsuario';
-import { Municipio } from '@/types/types';
+import { Municipio, UsuarioLogueado } from '@/types/types';
+import { apiGet, apiPut } from '@/lib/apiClient';
 
 export const perfilSchema = z
   .object({
@@ -60,9 +60,10 @@ export function useEditarPerfil() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/municipios/`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.msg || 'Error al obtener municipios');
+        const data = await apiGet<{ municipios: Municipio[] }>(
+          fetchWithAuth,
+          '/api/municipios/'
+        );
         setMunicipios(data.municipios || []);
       } catch (error) {
         console.error('Error al cargar municipios:', error);
@@ -131,15 +132,11 @@ export function useEditarPerfil() {
         fecha_nacimiento: formData.fecha_nacimiento || null,
       };
 
-      const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/update`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.msg || 'Error al actualizar perfil');
-
+      const data = await apiPut<{ usuario: UsuarioLogueado }>(
+        fetchWithAuth,
+        '/api/usuarios/update',
+        body
+      );
       updateUser(data.usuario);
       setToast({ message: 'Perfil actualizado correctamente', type: 'success' });
       setFormData((prev) => ({ ...prev, password: '', confirmPassword: '' }));

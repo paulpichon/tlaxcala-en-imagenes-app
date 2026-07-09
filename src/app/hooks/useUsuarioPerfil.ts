@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { UsuarioPerfil } from "@/types/types";
+import { apiGet } from "@/lib/apiClient";
 
 export function useUsuarioPerfil(url: string | undefined) {
   const { fetchWithAuth } = useAuth();
@@ -16,11 +17,10 @@ export function useUsuarioPerfil(url: string | undefined) {
     const fetchUsuario = async () => {
       setLoading(true);
       try {
-        const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/${url}`
+        const data = await apiGet<{ usuario: UsuarioPerfil }>(
+          fetchWithAuth,
+          `/api/usuarios/${url}`
         );
-        if (!res.ok) throw new Error("Error al obtener usuario");
-        const data = await res.json();
         setUsuario(data.usuario);
         setError(null);
       } catch (err) {

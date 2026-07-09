@@ -1,6 +1,6 @@
-// hooks/useLikes.ts
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { apiPost } from "@/lib/apiClient";
 
 type LikeState = {
   count: number;
@@ -20,14 +20,10 @@ export function useLikes(
 
   const toggleLike = async () => {
     try {
-      // Endpoint: api/likes/${postId}/like --> Dar/Quitar LIKE a un posteo
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/likes/${postId}/like`,
-        { method: "POST" }
+      const data = await apiPost<{ msg: string }>(
+        fetchWithAuth,
+        `/api/likes/${postId}/like`
       );
-      if (!res.ok) return;
-
-      const data = await res.json();
       setLikeState((prev) => {
         if (data.msg === "Like añadido") {
           return { count: prev.count + 1, hasLiked: true };

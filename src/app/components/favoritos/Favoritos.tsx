@@ -10,6 +10,7 @@ import Spinner from "../spinner";
 import FavoritoButton from "../FavoritoButton";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import { useFavorito } from "@/context/FavoritoContext";
+import { apiGet } from "@/lib/apiClient";
 
 export default function Favoritos() {
   const { fetchWithAuth } = useAuth();
@@ -23,13 +24,9 @@ export default function Favoritos() {
       try {
         setLoading(true);
         const endpoint =
-          url ||
-          `${process.env.NEXT_PUBLIC_API_URL}/api/favoritos`;
+          url || '/api/favoritos';
 
-        const res = await fetchWithAuth(endpoint);
-        if (!res.ok) throw new Error("Error al obtener favoritos");
-
-        const data: ApiResponseFavoritos = await res.json();
+        const data = await apiGet<ApiResponseFavoritos>(fetchWithAuth, endpoint);
 
         setFavoritos((prev) => {
           const nuevos = data.favoritos.filter(
@@ -58,7 +55,7 @@ export default function Favoritos() {
   };
 
   const cargarMas = () => {
-    if (next) obtenerFavoritos(`${process.env.NEXT_PUBLIC_API_URL}${next}`);
+    if (next) obtenerFavoritos(next);
   };
 
   if (loading && favoritos.length === 0)

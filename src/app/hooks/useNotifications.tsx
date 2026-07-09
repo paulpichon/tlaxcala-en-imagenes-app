@@ -3,6 +3,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNotificaciones } from "@/context/NotificacionesContext";
 import { Notificacion } from "@/types/types";
+import { apiGet, apiPatch, apiDelete } from "@/lib/apiClient";
 
 export function useNotifications() {
   const { fetchWithAuth } = useAuth();
@@ -18,11 +19,10 @@ export function useNotifications() {
   const cargarNotificaciones = useCallback(
     async (pagina = 1) => {
       try {
-        const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/notificaciones?page=${pagina}&limit=15`
-        );
-        if (!res.ok) throw new Error("Error al obtener notificaciones");
-        const data = await res.json();
+        const data = await apiGet<{
+          notificaciones: Notificacion[];
+          totalPages: number;
+        }>(fetchWithAuth, '/api/notificaciones', { page: pagina, limit: 15 });
 
         if (pagina === 1) setNotificaciones(data.notificaciones);
         else setNotificaciones((prev) => [...prev, ...data.notificaciones]);
@@ -46,11 +46,7 @@ export function useNotifications() {
         const notificacionActual = notificaciones.find((n) => n._id === id);
         if (!notificacionActual || notificacionActual.notificacion_leida) return;
 
-        const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/notificaciones/marcar-notificacion-leida/${id}`,
-          { method: "PATCH" }
-        );
-        if (!res.ok) throw new Error("Error al marcar notificación");
+        await apiPatch(fetchWithAuth, `/api/notificaciones/marcar-notificacion-leida/${id}`);
 
         setNotificaciones((prev) =>
           prev.map((n) => (n._id === id ? { ...n, notificacion_leida: true } : n))
@@ -68,16 +64,10 @@ export function useNotifications() {
   const eliminarNotificacion = useCallback(
     async (id: string) => {
       try {
-        const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/notificaciones/eliminar-notificacion/${id}`,
-          { method: "DELETE" }
-        );
-        if (!res.ok) throw new Error("Error al eliminar notificación");
+        await apiDelete(fetchWithAuth, `/api/notificaciones/eliminar-notificacion/${id}`);
 
-        // ✅ Quitarla del estado local
         setNotificaciones((prev) => prev.filter((n) => n._id !== id));
 
-        // ✅ Refrescar el contador global
         await refrescarNotificaciones();
       } catch (err) {
         console.error("Error eliminando notificación:", err);

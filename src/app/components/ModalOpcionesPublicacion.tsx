@@ -11,6 +11,7 @@ import { useFavorito } from "@/context/FavoritoContext";
 import { useState } from "react";
 import ToastGlobal from "./ToastGlobal";
 import EditarPosteoModal from "./posteo/EditarPosteoModal";
+import { apiDelete, apiPut } from "@/lib/apiClient";
 
 interface ModalOpcionesPublicacionProps extends PropsModalOpcionesPublicacion {
   onPostDeleted?: (postId: string) => void;
@@ -69,20 +70,15 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
     if (!selectedImage?._id) return;
     setIsDeleting(true);
     try {
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/posteos/${selectedImage._id}`,
-        { method: "DELETE" }
+      const data = await apiDelete<{ msg: string }>(
+        fetchWithAuth,
+        `/api/posteos/${selectedImage._id}`
       );
 
-      const data = await res.json();
-      if (res.ok) {
-        setToast({ message: data.msg || "Publicación eliminada correctamente", type: "success" });
-        setShowConfirmDelete(false);
-        onClose?.();
-        onPostDeleted?.(selectedImage._id);
-      } else {
-        setToast({ message: data.msg || "Error al eliminar la publicación", type: "danger" });
-      }
+      setToast({ message: data.msg || "Publicación eliminada correctamente", type: "success" });
+      setShowConfirmDelete(false);
+      onClose?.();
+      onPostDeleted?.(selectedImage._id);
     } catch (err) {
       console.error("Error al eliminar posteo:", err);
       setToast({ message: "Error interno al eliminar la publicación", type: "danger" });
@@ -97,29 +93,21 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
     const activar = selectedImage.comentariosActivos === false;
 
     try {
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/comentarios/${selectedImage._id}/comentarios/toggle`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ activar }),
-        }
+      const data = await apiPut<{ comentariosActivos: boolean; msg: string }>(
+        fetchWithAuth,
+        `/api/comentarios/${selectedImage._id}/comentarios/toggle`,
+        { activar }
       );
 
-      const data = await res.json();
-      if (res.ok) {
-        const posteoActualizado: Posteo = {
-          ...selectedImage,
-          comentariosActivos: data.comentariosActivos,
-        };
-        onPostUpdated?.(posteoActualizado);
-        setToast({
-          message: data.msg || "Comentarios actualizados",
-          type: "success",
-        });
-      } else {
-        setToast({ message: data.msg || "Error al actualizar comentarios", type: "danger" });
-      }
+      const posteoActualizado: Posteo = {
+        ...selectedImage,
+        comentariosActivos: data.comentariosActivos,
+      };
+      onPostUpdated?.(posteoActualizado);
+      setToast({
+        message: data.msg || "Comentarios actualizados",
+        type: "success",
+      });
     } catch (err) {
       console.error("Error al toggle comentarios:", err);
       setToast({ message: "Error interno", type: "danger" });

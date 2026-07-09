@@ -10,6 +10,7 @@ import { Posteo } from "@/types/types";
 import { FiMapPin } from "react-icons/fi";
 import { useObtenerUbicacion } from "@/app/hooks/useObtenerUbicacion";
 import ManualMunicipioSelector from "../ManualMunicipioSelector";
+import { apiPut } from "@/lib/apiClient";
 
 // ✅ Actualizar la interfaz del callback
 interface EditarPosteoModalProps {
@@ -134,20 +135,14 @@ export default function EditarPosteoModal({
         body.lat = null;
       }
 
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/posteos/${posteo._id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        }
+      const data = await apiPut<{ msg: string }>(
+        fetchWithAuth,
+        `/api/posteos/${posteo._id}`,
+        body
       );
 
-      const data = await res.json();
-
-      if (res.ok) {
-        setToastMessage("Publicación actualizada correctamente 🎉");
-        setToastType("success");
+      setToastMessage("Publicación actualizada correctamente 🎉");
+      setToastType("success");
 
         // ✅ Crear objeto posteo actualizado
         const posteoActualizado: Posteo = {
@@ -164,12 +159,8 @@ export default function EditarPosteoModal({
         };
 
         setTimeout(() => {
-          onClose(true, posteoActualizado); // ✅ Devolver posteo completo
+          onClose(true, posteoActualizado);
         }, 600);
-      } else {
-        setToastMessage(data.msg || "No se pudo actualizar ❌");
-        setToastType("danger");
-      }
     } catch (err) {
       console.error("Error al actualizar:", err);
       setToastMessage("Error interno ❌");

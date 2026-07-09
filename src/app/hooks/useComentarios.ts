@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Comentario, ComentariosResponse, ComentariosCountResponse } from "@/types/types";
+import { apiGet, apiPost, apiDelete } from "@/lib/apiClient";
 
 export function useComentarios(postId: string) {
   const { fetchWithAuth, user } = useAuth();
@@ -13,37 +14,34 @@ export function useComentarios(postId: string) {
   const [nextUrl, setNextUrl] = useState<string | null>(null);
 
   const fetchTotal = useCallback(async () => {
+    if (!postId) return;
     try {
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/comentarios/${postId}/comentarios/count`
+      const data = await apiGet<ComentariosCountResponse>(
+        fetchWithAuth,
+        `/api/comentarios/${postId}/comentarios/count`
       );
-      if (res.ok) {
-        const data: ComentariosCountResponse = await res.json();
-        setTotal(data.count);
-      }
-    } catch (err) {
-      console.error("Error al obtener total de comentarios:", err);
+      setTotal(data.count);
+    } catch {
     }
   }, [postId, fetchWithAuth]);
 
   useEffect(() => {
-    fetchTotal();
-  }, [fetchTotal]);
+    if (postId) fetchTotal();
+  }, [fetchTotal, postId]);
 
   const fetchComentarios = useCallback(async () => {
+    if (!postId) return;
     setLoadingList(true);
     setComentarios([]);
     setNextUrl(null);
     try {
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/comentarios/${postId}/comentarios`
+      const data = await apiGet<ComentariosResponse>(
+        fetchWithAuth,
+        `/api/comentarios/${postId}/comentarios`
       );
-      if (res.ok) {
-        const data: ComentariosResponse = await res.json();
-        setComentarios(data.comentarios);
-        setTotal(data.total);
-        setNextUrl(data.next);
-      }
+      setComentarios(data.comentarios);
+      setTotal(data.total);
+      setNextUrl(data.next);
     } catch (err) {
       console.error("Error al cargar comentarios:", err);
     } finally {
@@ -55,15 +53,9 @@ export function useComentarios(postId: string) {
     if (!nextUrl || loadingMore) return;
     setLoadingMore(true);
     try {
-      const url = nextUrl.startsWith("http")
-        ? nextUrl
-        : `${process.env.NEXT_PUBLIC_API_URL}${nextUrl}`;
-      const res = await fetchWithAuth(url);
-      if (res.ok) {
-        const data: ComentariosResponse = await res.json();
-        setComentarios((prev) => [...prev, ...data.comentarios]);
-        setNextUrl(data.next);
-      }
+      const data = await apiGet<ComentariosResponse>(fetchWithAuth, nextUrl);
+      setComentarios((prev) => [...prev, ...data.comentarios]);
+      setNextUrl(data.next);
     } catch (err) {
       console.error("Error al cargar más comentarios:", err);
     } finally {
@@ -96,18 +88,11 @@ export function useComentarios(postId: string) {
     setTotal((prev) => prev + 1);
 
     try {
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/comentarios/${postId}/comentarios`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ texto: trimmedTexto }),
-        }
+      const data = await apiPost<{ comentario: { _id: string; createdAt: string } }>(
+        fetchWithAuth,
+        `/api/comentarios/${postId}/comentarios`,
+        { texto: trimmedTexto }
       );
-
-      if (!res.ok) throw new Error("Error al crear comentario");
-
-      const data = await res.json();
 
       setComentarios((prev) =>
         prev.map((c) =>
@@ -127,13 +112,7 @@ export function useComentarios(postId: string) {
 
   const eliminarComentario = useCallback(async (commentId: string): Promise<boolean> => {
     try {
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/comentarios/${commentId}`,
-        { method: "DELETE" }
-      );
-
-      if (!res.ok) throw new Error("Error al eliminar comentario");
-
+      await apiDelete(fetchWithAuth, `/api/comentarios/${commentId}`);
       setComentarios((prev) => prev.filter((c) => c._id !== commentId));
       setTotal((prev) => Math.max(0, prev - 1));
       return true;

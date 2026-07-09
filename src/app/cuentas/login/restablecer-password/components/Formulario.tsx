@@ -2,11 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-// import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { resetPasswordSchema, ResetPasswordSchema } from "@/lib/validaciones";
 import styles from "@/app/ui/cuentas/login/restablecer-password/RestablecerPassword.module.css";
+import { apiPost, ApiError } from "@/lib/apiClient";
 
 export default function FormularioNuevaPassword({ token }: { token: string }) {
 	const {
@@ -22,35 +22,21 @@ export default function FormularioNuevaPassword({ token }: { token: string }) {
 	const [loading, setLoading] = useState(false);
 
 	const onSubmit = async (data: ResetPasswordSchema) => {
-		setServerError(""); //limpia errores anteriores.
-		setLoading(true); //activa un spinner o desactiva el formulario.
-	
+		setServerError("");
+		setLoading(true);
+
 		try {
-			// hace una petición POST a tu API, enviando el nuevo password y el token (ya recibido en la URL).
-			const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/cuentas/reestablecer-password/${token}`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					password: data.password, // es el valor del campo password del formulario
-				}),
+			await apiPost(fetch, `/api/auth/cuentas/reestablecer-password/${token}`, {
+				password: data.password,
 			});
-      // Si la respuesta del servidor no es 200 OK, extrae el mensaje de error de la API y lanza una excepción.
-      if (!res.ok) {
-        const result = await res.json();
-        if (res.status === 429) {
-          throw new Error(result.msg || "Demasiados intentos de recuperación de contraseña, intenta de nuevo en 15 minutos");
-        }
-        throw new Error(result.message || result.msg || "Error al restablecer contraseña, favor de reiniciar el proceso.");
-      }
-			// Después de restablecer la contraseña exitosamente, creamos un sessionStorage para indicar que la contraseña fue restablecida.
-			// Esto puede ser útil para mostrar un mensaje de éxito en la página de confirmación.
+
 			sessionStorage.setItem('passwordResetSuccess', 'true');
-			// Si todo sale bien: redirige a una página de confirmación.
 			router.push("/cuentas/confirmacion/password-restablecido");
 		} catch (err) {
-			// Si hay errores (de red, validación, token inválido), los muestra con setServerError(...).
-			if (err instanceof Error) {
-				setServerError(err.message);
+			if (err instanceof ApiError && err.status === 429) {
+				setServerError(String(err.data.msg ?? "Demasiados intentos de recuperación de contraseña, intenta de nuevo en 15 minutos"));
+			} else if (err instanceof ApiError) {
+				setServerError(String(err.data.msg ?? "Error al restablecer contraseña, favor de reiniciar el proceso."));
 			} else {
 				setServerError("Ocurrió un error desconocido");
 			}

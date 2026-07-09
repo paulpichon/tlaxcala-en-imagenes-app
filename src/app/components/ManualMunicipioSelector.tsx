@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Municipio, DatosUbicacion } from "@/types/types";
+import { apiGet } from "@/lib/apiClient";
 
 // Componente para seleccionar municipio manualmente
 // Props:
@@ -23,14 +24,11 @@ export default function ManualMunicipioSelector({
   useEffect(() => {
     const cargarMunicipios = async () => {
         try {
-        // Obtener lista de municipios desde el backend
-        const res = await fetchWithAuth(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/municipios`
+        const data = await apiGet<Municipio[] | { municipios: Municipio[] }>(
+          fetchWithAuth,
+          '/api/municipios'
         );
-        // respuesta del backend
-        const data = await res.json();
 
-        // Asegurar que siempre usamos un array
         const lista = Array.isArray(data)
             ? data
             : Array.isArray(data?.municipios)
@@ -40,10 +38,9 @@ export default function ManualMunicipioSelector({
         setMunicipios(lista);
         } catch (err) {
         console.error("Error cargando municipios:", err);
-        setMunicipios([]); // Evita que crashee el componente
+        setMunicipios([]);
         }
     };
-    // Cargar municipios al montar el componente
     cargarMunicipios();
   }, [fetchWithAuth]);
 

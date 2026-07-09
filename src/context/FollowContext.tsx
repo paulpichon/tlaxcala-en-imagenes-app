@@ -2,9 +2,10 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { apiPost, apiDelete } from "@/lib/apiClient";
 
 interface FollowContextType {
-  isFollowingMap: Record<string, boolean>; // clave = userId
+  isFollowingMap: Record<string, boolean>;
   loadingMap: Record<string, boolean>;
   toggleFollow: (userId: string, initialFollowing?: boolean) => Promise<void>;
 }
@@ -23,20 +24,14 @@ export function FollowProvider({ children }: { children: ReactNode }) {
     setLoadingMap((prev) => ({ ...prev, [userId]: true }));
 
     try {
-      // Usa el estado local si existe, si no, cae en el initialFollowing que viene del prop
       const current = isFollowingMap[userId] ?? initialFollowing ?? false;
 
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/followers/${current ? "unfollow" : "follow"}/${userId}`;
-      const method = current ? "DELETE" : "POST";
-
-      const res = await fetchWithAuth(url, { method });
-
-      if (!res.ok) {
-        const errorText = await res.text().catch(() => "");
-        throw new Error(`Error al actualizar follow (${res.status}): ${errorText}`);
+      if (current) {
+        await apiDelete(fetchWithAuth, `/api/followers/unfollow/${userId}`);
+      } else {
+        await apiPost(fetchWithAuth, `/api/followers/follow/${userId}`);
       }
 
-      // Si todo salió bien, actualizamos el estado global
       setIsFollowingMap((prev) => ({
         ...prev,
         [userId]: !current,

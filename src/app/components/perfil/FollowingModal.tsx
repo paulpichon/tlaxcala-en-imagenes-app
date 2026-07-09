@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { FollowingUserItemProps } from "@/types/types";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import Link from "next/link";
+import { apiGet } from "@/lib/apiClient";
 
 interface Props {
   userId: string;        // usuario del perfil visitado
@@ -27,11 +28,11 @@ export default function FollowingModal({ userId, loggedUserId, show, onClose }: 
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/followers/usuario/lista-followings/${userId}`
+        const data = await apiGet<{ siguiendo: FollowingUserItemProps[] }>(
+          fetchWithAuth,
+          `/api/followers/usuario/lista-followings/${userId}`
         );
 
-        const data = await res.json();
         setFollowing(data.siguiendo);
       } catch (error) {
         console.error("Error obteniendo seguidos", error);

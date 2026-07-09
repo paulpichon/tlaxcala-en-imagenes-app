@@ -2,9 +2,10 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { apiPost, apiDelete } from "@/lib/apiClient";
 
 interface FavoritoContextType {
-  favoritosMap: Record<string, boolean>; // clave = posteoId
+  favoritosMap: Record<string, boolean>;
   loadingMap: Record<string, boolean>;
   toggleFavorito: (
     posteoId: string,
@@ -35,31 +36,19 @@ export function FavoritoProvider({ children }: { children: ReactNode }) {
     try {
       const current = favoritosMap[posteoId] ?? initialFavorito ?? false;
 
-      let res;
+      let data: { msg: string };
       if (current) {
-        res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/favoritos/${posteoId}`,
-          { method: "DELETE" }
+        data = await apiDelete<{ msg: string }>(
+          fetchWithAuth,
+          `/api/favoritos/${posteoId}`
         );
       } else {
-        res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/favoritos/${posteoId}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ autorId }),
-          }
+        data = await apiPost<{ msg: string }>(
+          fetchWithAuth,
+          `/api/favoritos/${posteoId}`,
+          { autorId }
         );
       }
-
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(
-          `Error al actualizar favorito (${res.status}): ${text}`
-        );
-      }
-
-      const data = await res.json();
 
       if (data.msg === "Agregado en Favoritos") {
         setFavoritosMap((prev) => ({ ...prev, [posteoId]: true }));

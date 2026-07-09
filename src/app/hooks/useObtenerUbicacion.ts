@@ -1,8 +1,8 @@
-// fUNCION PARA OBTENER LA UBICACIÓN DEL USUARIO
 "use client";
 
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { apiPost } from "@/lib/apiClient";
 
 export function useObtenerUbicacion() {
   const { fetchWithAuth } = useAuth();
@@ -43,20 +43,12 @@ export function useObtenerUbicacion() {
       setLng(coords.longitude);
 
       // 2️⃣ Consultar tu backend para convertir coords → municipio
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/ubicacion/reverse`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            lat: coords.latitude,
-            lng: coords.longitude,
-          }),
-        }
-      );
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || data.msg || "Error al obtener ubicación");
+      const data = await apiPost<{
+        municipio?: { _id: string; nombreMunicipio: string; nombreEntidad: string };
+      }>(fetchWithAuth, "/api/ubicacion/reverse", {
+        lat: coords.latitude,
+        lng: coords.longitude,
+      });
 
       // 3️⃣ Guardar valores
       setMunicipioId(data.municipio?._id || null);

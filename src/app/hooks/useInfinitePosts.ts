@@ -1,6 +1,7 @@
 import { ApiResponsePosteos, Posteo } from "@/types/types";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { apiGet } from "@/lib/apiClient";
 
 export function useInfinitePosts(initialUrl: string) {
   const { fetchWithAuth } = useAuth();
@@ -11,22 +12,13 @@ export function useInfinitePosts(initialUrl: string) {
 
   const observerRef = useRef<HTMLDivElement | null>(null);
 
-  // Función para cargar más posts (scroll infinito)
   const fetchPosts = useCallback(async () => {
     if (!nextUrl || loading || finished) return;
 
     setLoading(true);
 
     try {
-      const res = await fetchWithAuth(
-        nextUrl.startsWith("http")
-          ? nextUrl
-          : `${process.env.NEXT_PUBLIC_API_URL}${nextUrl}`
-      );
-
-      if (!res.ok) throw new Error("Error al cargar los posteos");
-
-      const data: ApiResponsePosteos = await res.json();
+      const data = await apiGet<ApiResponsePosteos>(fetchWithAuth, nextUrl);
 
       if (!data.posteosConEstado || data.posteosConEstado.length === 0) {
         setFinished(true);

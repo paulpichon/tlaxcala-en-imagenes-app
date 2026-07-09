@@ -4,10 +4,11 @@ import { useState } from "react";
 import { FiArrowLeft, FiAlertTriangle } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { apiDelete, ApiError } from "@/lib/apiClient";
 
 export default function EliminarCuenta() {
   const router = useRouter();
-  const { fetchWithAuth, logout } = useAuth(); // 👈 usamos logout también
+  const { fetchWithAuth, logout } = useAuth();
   const [confirmacion, setConfirmacion] = useState("");
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState("");
@@ -19,18 +20,11 @@ export default function EliminarCuenta() {
     setMensaje("");
 
     try {
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/delete`,
-        { method: "DELETE" }
+      const data = await apiDelete<{ msg: string }>(
+        fetchWithAuth,
+        '/api/usuarios/delete'
       );
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data?.msg || "Error al eliminar cuenta");
-      }
-
-      // Mostrar mensaje del backend
       setMensaje(data.msg);
 
       // Esperar un momento y cerrar sesión
@@ -41,8 +35,8 @@ export default function EliminarCuenta() {
 
     } catch (error) {
       const mensajeError =
-        error instanceof Error
-          ? error.message
+        error instanceof ApiError
+          ? String(error.data.msg ?? "Ocurrió un error al eliminar tu cuenta.")
           : "Ocurrió un error al eliminar tu cuenta.";
     
       setMensaje(mensajeError);

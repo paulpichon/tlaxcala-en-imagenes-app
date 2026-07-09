@@ -1,10 +1,10 @@
-// hooks/useCrearPosteo.ts
 import { useState, useEffect } from "react";
 import { posteoSchema, posteoBaseSchema } from "@/lib/validaciones";
 import { ZodError } from "zod";
 import { useAuth } from "@/context/AuthContext";
 import { Posteo } from "@/types/types";
 import { useObtenerUbicacion } from "./useObtenerUbicacion";
+import { apiPost, ApiError } from "@/lib/apiClient";
 
 export function useCrearPosteo(
   onPostCreated?: (newPost?: Posteo) => void,
@@ -147,23 +147,7 @@ export function useCrearPosteo(
       if (lat) formData.append("lat", String(lat));
       if (lng) formData.append("lng", String(lng));
 
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/posteos`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (!res.ok) {
-        if (res.status === 429) {
-          const body = await res.json().catch(() => ({}));
-          throw new Error(body.msg || "Demasiadas publicaciones, intenta de nuevo más tarde");
-        }
-        throw new Error("Error al crear posteo");
-      }
-
-      const newPost = await res.json();
+      const newPost = await apiPost<Posteo>(fetchWithAuth, "/api/posteos", formData);
       onPostCreated?.(newPost);
 
       resetForm();
@@ -171,6 +155,8 @@ export function useCrearPosteo(
     } catch (err) {
       if (err instanceof ZodError) {
         setErrors(err.issues.map((e) => e.message));
+      } else if (err instanceof ApiError && err.status === 429) {
+        setErrors([String(err.data.msg ?? "Demasiadas publicaciones, intenta de nuevo más tarde")]);
       } else {
         setErrors(["Ocurrió un error al crear la publicación"]);
       }

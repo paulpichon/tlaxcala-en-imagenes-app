@@ -7,9 +7,9 @@ import { obtenerImagenPerfilUsuario } from '@/lib/cloudinary/obtenerImagenPerfil
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiCamera } from 'react-icons/fi';
-import { UsuarioLogueado } from '@/types/types';
-// Validacion de la extencion de la imagen a subir
 import { imageFileSchema } from '@/lib/validaciones';
+import { UsuarioLogueado } from '@/types/types';
+import { apiPut } from '@/lib/apiClient';
 
 interface CambiarImagenModalProps {
   currentImage: string; // 👈 nueva
@@ -91,16 +91,11 @@ export default function CambiarImagenModal({
       const formData = new FormData();
       formData.append('img', file);
 
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/uploads/usuarios`,
-        {
-          method: 'PUT',
-          body: formData,
-        }
+      const data = await apiPut<{ usuario: UsuarioLogueado }>(
+        fetchWithAuth,
+        '/api/uploads/usuarios',
+        formData
       );
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.msg || 'Error al subir la imagen');
 
       // ✅ Obtener versión optimizada
       const optimizedUrl = obtenerImagenPerfilUsuario(data.usuario, 'perfil');

@@ -8,7 +8,8 @@ import { PosteoDetalleResponse, Posteo } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 import Spinner from "./spinner";
 import PosteoCard from "./PosteoCard";
-import { notFound } from "next/navigation"; // 👈 importamos para usar la página not-found.tsx
+import { notFound } from "next/navigation";
+import { apiGet } from "@/lib/apiClient";
 export default function PosteoDetalle() {
   const params = useParams() as { idposteo?: string } | null;
   const id = params?.idposteo ?? "";
@@ -29,18 +30,10 @@ export default function PosteoDetalle() {
     setError(null);
 
     try {
-      const res = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/posteos/post/${id}`
+      const data = await apiGet<PosteoDetalleResponse>(
+        fetchWithAuth,
+        `/api/posteos/post/${id}`
       );
-      if (!res.ok) {
-        const text = await res.text().catch(() => null);
-        setError(`Error al cargar el posteo. ${res.status} ${text ?? ""}`);
-        setLoading(false);
-        return;
-      }
-
-      const data: PosteoDetalleResponse = await res.json();
-      // El endpoint devuelve "posteo" y estados; unificamos (según tu types.ts)
       const posteo = data.posteo;
       
       // Asegurar que los flags estén en el objeto posteo (por si el backend devolvió por separado)
