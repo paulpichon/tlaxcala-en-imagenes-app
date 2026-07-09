@@ -112,7 +112,7 @@ export default function Favoritos() {
                         >
                           <FavoritoButton
                             posteoId={fav.posteoId._id}
-                            autorId={fav.autorId.uid}
+                            autorId={fav.autorId._id}
                             initialFavorito={esFavorito}
                             iconOnly
                             className="btn p-1"
