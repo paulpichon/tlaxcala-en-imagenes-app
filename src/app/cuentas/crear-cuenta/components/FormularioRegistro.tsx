@@ -5,6 +5,7 @@ import crearCuenta from "../../../ui/cuentas/crear-cuenta/CrearCuenta.module.css
 import { useRouter } from "next/navigation";
 // Funcion para Crear usuario
 import { createUsuario } from '@/lib/actions';
+import { ApiError } from "@/lib/apiClient";
 // UseState, formEvent
 import { SubmitEvent, useState } from 'react';
 // interfaces, types
@@ -104,41 +105,45 @@ export function FormularioRegistro() {
     try {
       const resultado = await createUsuario(formData);
 
-      if (resultado.status === 200) {
-        sessionStorage.setItem('registroToken', resultado.token);
-        router.push('/cuentas/confirmacion/correo-enviado');
-      } else if (resultado.status === 429) {
-        setError(resultado.msg || "Demasiadas cuentas creadas desde esta conexión, intenta de nuevo más tarde");
-      } else if (resultado.status === 409) {
-        handleAPIError({
-          status: 409,
-          message: "Este correo electrónico ya existe en nuestra base de datos",
-          field: "correo",
-        });
-      } else if (resultado.status === 400) {
-        if (Array.isArray(resultado.errores)) {
-          resultado.errores.forEach((err: { path: string; msg: string }) => {
-            if (err.path && err.msg) {
-              setValidationErrors(prev => ({ ...prev, [err.path]: err.msg }));
-            } else {
-              setError(err.msg || "Los datos enviados son inválidos.");
-            }
-          });
-        } else if (resultado.data?.field) {
+      sessionStorage.setItem('registroToken', resultado.token);
+      router.push('/cuentas/confirmacion/correo-enviado');
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 429) {
+          setError(String(err.data.msg ?? "Demasiadas cuentas creadas desde esta conexión, intenta de nuevo más tarde"));
+        } else if (err.status === 409) {
           handleAPIError({
-            status: 400,
-            message: resultado.data.message || "Datos inválidos",
-            field: resultado.data.field,
+            status: 409,
+            message: "Este correo electrónico ya existe en nuestra base de datos",
+            field: "correo",
           });
+        } else if (err.status === 400) {
+          const errores = err.data.errores as Array<{ path: string; msg: string }> | undefined;
+          const data = err.data.data as { field?: keyof UsuarioSchema; message?: string } | undefined;
+          if (Array.isArray(errores)) {
+            errores.forEach((e) => {
+              if (e.path && e.msg) {
+                setValidationErrors(prev => ({ ...prev, [e.path]: e.msg }));
+              } else {
+                setError(e.msg || "Los datos enviados son inválidos.");
+              }
+            });
+          } else if (data?.field) {
+            handleAPIError({
+              status: 400,
+              message: data.message || "Datos inválidos",
+              field: data.field,
+            });
+          } else {
+            setError("Los datos enviados son inválidos.");
+          }
         } else {
-          setError("Los datos enviados son inválidos.");
+          setError(String(err.data.msg ?? "Error en el servidor"));
         }
       } else {
-        setError(resultado.data?.message || "Error en el servidor");
+        console.error(err);
+        setError(err instanceof Error ? err.message : "Error desconocido");
       }
-    } catch (err) {
-      console.error(err);
-      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setIsLoading(false);
     }

@@ -8,7 +8,7 @@ import cuentaVerificada from "../../../../ui/cuentas/crear-cuenta/cuenta-verific
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 import FooterPrincipal from "@/app/components/FooterMain";
 import Link from "next/link";
-import { apiUrl } from "@/lib/apiClient";
+import { handleApiResponse, apiUrl } from "@/lib/apiClient";
 
 // ✅ Metadata optimizada para SEO
 // ⚠️ IMPORTANTE: Esta página NO debe ser indexada por seguridad
@@ -100,7 +100,7 @@ export default async function CuentaVerificadaPage({
     );
 
     // Procesar la respuesta de la API
-    const data = await response.json();
+    const data = await handleApiResponse<{ ok: boolean }>(response);
 
     return (
       <div className="container-fluid container-xl">

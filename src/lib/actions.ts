@@ -1,15 +1,13 @@
 import { IUsuarioData, ReenviarCorreoResponse } from "@/types/types";
-import { apiPost, apiUrl } from "@/lib/apiClient";
+import { apiPost, handleApiResponse, apiUrl } from "@/lib/apiClient";
 
-export async function createUsuario(formData: IUsuarioData) {
+export function createUsuario(formData: IUsuarioData) {
   const { nombre, apellido, correo, password } = formData;
-  const response = await fetch(apiUrl('/api/usuarios'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ nombre_completo: { nombre, apellido }, correo, password }),
-    credentials: 'include',
-  });
-  return response.json() as Promise<{ status: number; token: string; msg?: string; errores?: Array<{ path: string; msg: string }>; data?: { field?: keyof import("@/lib/validaciones").UsuarioSchema; message?: string } }>;
+  return apiPost<{ status: number; token: string; msg?: string; errores?: Array<{ path: string; msg: string }>; data?: { field?: keyof import("@/lib/validaciones").UsuarioSchema; message?: string } }>(
+    fetch,
+    '/api/usuarios',
+    { nombre_completo: { nombre, apellido }, correo, password }
+  );
 }
 
 export async function reenviarCorreo(token: string): Promise<ReenviarCorreoResponse> {
@@ -68,13 +66,11 @@ export async function reenviarCorreoRestablecerPassword(token: string): Promise<
 }
 
 export async function envioCorreoRestablecerPassword(correo: string) {
-  const response = await fetch(apiUrl('/api/auth/cuentas/password-olvidado'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ correo }),
-    credentials: 'include',
-  });
-  return response.json() as Promise<{ status: number; token: string; msg?: string }>;
+  return apiPost<{ status: number; token: string; msg?: string }>(
+    fetch,
+    '/api/auth/cuentas/password-olvidado',
+    { correo }
+  );
 }
 
 export async function validarTokenRestablecerPassword(token: string) {
@@ -83,9 +79,9 @@ export async function validarTokenRestablecerPassword(token: string) {
       apiUrl(`/api/auth/cuentas/restablecer-password/validar-token-reset-password/${token}`),
       { cache: "no-store" }
     );
-    return respuesta;
+    return handleApiResponse<{ valid: boolean }>(respuesta);
   } catch (error) {
     console.error("Error al validar el token:", error);
-    throw new Error("Error al validar el token");
+    return { valid: false };
   }
 }

@@ -84,16 +84,10 @@ export default async function RestablecerPassword({
   // La función validarTokenRestablecerPassword hace petición a la API
   // para validar si el token que está en la URL es válido o no
   // Verifica: token existe, no ha expirado, no ha sido usado
-  const res = await validarTokenRestablecerPassword(token);
-  
-  // Respuesta de la API con información del token
-  const data = await res.json();
-  
-  // Verificar si la respuesta es exitosa y si el data.valid es válido
-  // tokenValido será true solo si:
-  // - La petición HTTP fue exitosa (res.ok = true)
-  // - El token es válido según la API (data.valid = true)
-  const tokenValido = res.ok && data.valid;
+  const data = await validarTokenRestablecerPassword(token);
+
+  // tokenValido será true solo si el token es válido según la API (data.valid = true)
+  const tokenValido = data.valid;
 
   return (
     <div className="container-fluid container-xl">

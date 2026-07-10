@@ -13,6 +13,7 @@ import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 import FooterMain from "../../../components/FooterMain";
 // Función API para enviar el correo de restablecer password
 import { envioCorreoRestablecerPassword } from "@/lib/actions";
+import { ApiError } from "@/lib/apiClient";
 // Validación de correo electrónico desde usuarioSchema usando un .pick()
 import { correoSchema } from "@/lib/validaciones";
 import Link from "next/link";
@@ -133,49 +134,34 @@ export default function PasswordOlvidadaClient() {
 		}
 	  
 		try {
-			// Paso 2: Consulta a la API para enviar el correo de restablecer password
 			const data = await envioCorreoRestablecerPassword(correo);
-			
-			// Paso 3: Procesar respuesta exitosa
-			if (data.status === 200) {
-				// Crear token de sesión temporal para la página de confirmación
-				sessionStorage.setItem('passForgetToken', data.token);
-				
-				// Guardar la fecha de la solicitud en localStorage (inicia rate limiting)
-				localStorage.setItem("lastPasswordRequest", Date.now().toString());
-				
-				// Redireccionar a página de confirmación
-				router.push(`/cuentas/confirmacion/correo-enviado-restablecer-password`);
-			} else {
-				// Paso 4: Manejar diferentes tipos de errores de la API
-				if (
-					(data.status === 401 && data.msg === "Correo no existe") ||
-					(data.status === 403 && data.msg === "Cuenta no verificada") ||
-					(data.status === 403 && data.msg === "Cuenta no activada") ||
-					(data.status === 429)
-				) {
-					// Mostrar mensaje de error apropiado según el código
-					setError(
-						data.msg === "Correo no existe"
-							? "La cuenta asociada a ese correo no existe."
-							: data.msg === "Cuenta no verificada"
-							? "La cuenta no ha sido verificada. Revisa tu email."
-							: data.msg === "Cuenta no activada" 
-							? "La cuenta está desactivada. Contacta a soporte."
-							: "Espera 5 minutos antes de poder reenviar el correo."
-					);
-					
-					// ⚠️ IMPORTANTE: Incluso si hubo error, inicia el contador
-					// Esto previene ataques de fuerza bruta para enumerar emails válidos
-					localStorage.setItem("lastPasswordRequest", Date.now().toString());
-					iniciarContador(FIVE_MINUTES_MS / 1000);
-					return;
-				}
-			}
+
+			sessionStorage.setItem('passForgetToken', data.token);
+
+			localStorage.setItem("lastPasswordRequest", Date.now().toString());
+
+			router.push(`/cuentas/confirmacion/correo-enviado-restablecer-password`);
 		} catch (err) {
-			console.log(err);
-			// Error de conexión con el servidor
-			setError("Error al conectar con el servidor. Intenta más tarde.");
+			if (err instanceof ApiError) {
+				const msg = String(err.data.msg ?? "");
+				setError(
+					err.status === 401 && msg === "Correo no existe"
+						? "La cuenta asociada a ese correo no existe."
+						: err.status === 403 && msg === "Cuenta no verificada"
+						? "La cuenta no ha sido verificada. Revisa tu email."
+						: err.status === 403 && msg === "Cuenta no activada" 
+						? "La cuenta está desactivada. Contacta a soporte."
+						: err.status === 429
+						? "Espera 5 minutos antes de poder reenviar el correo."
+						: "Error al conectar con el servidor. Intenta más tarde."
+				);
+
+				localStorage.setItem("lastPasswordRequest", Date.now().toString());
+				iniciarContador(FIVE_MINUTES_MS / 1000);
+			} else {
+				console.log(err);
+				setError("Error al conectar con el servidor. Intenta más tarde.");
+			}
 		} finally {
 			setCargando(false);
 		}
