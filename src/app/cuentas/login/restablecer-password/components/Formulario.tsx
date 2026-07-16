@@ -33,10 +33,13 @@ export default function FormularioNuevaPassword({ token }: { token: string }) {
 			sessionStorage.setItem('passwordResetSuccess', 'true');
 			router.push("/cuentas/confirmacion/password-restablecido");
 		} catch (err) {
-			if (err instanceof ApiError && err.status === 429) {
-				setServerError(String(err.data.msg ?? "Demasiados intentos de recuperación de contraseña, intenta de nuevo en 15 minutos"));
-			} else if (err instanceof ApiError) {
-				setServerError(String(err.data.msg ?? "Error al restablecer contraseña, favor de reiniciar el proceso."));
+			if (err instanceof ApiError) {
+				const code = err.data?.code;
+				if (code === 'RATE_LIMIT_EXCEEDED' || code === 'RECOVERY_BLOCKED') {
+					setServerError(String(err.data.detail ?? "Demasiados intentos de recuperación de contraseña, intenta de nuevo en 15 minutos"));
+				} else {
+					setServerError(String(err.data.detail ?? "Error al restablecer contraseña, favor de reiniciar el proceso."));
+				}
 			} else {
 				setServerError("Ocurrió un error desconocido");
 			}

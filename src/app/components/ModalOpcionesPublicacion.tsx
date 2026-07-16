@@ -11,7 +11,7 @@ import { useFavorito } from "@/context/FavoritoContext";
 import { useState } from "react";
 import ToastGlobal from "./ToastGlobal";
 import EditarPosteoModal from "./posteo/EditarPosteoModal";
-import { apiDelete, apiPut } from "@/lib/apiClient";
+import { apiDelete, apiPut, ApiError } from "@/lib/apiClient";
 
 interface ModalOpcionesPublicacionProps extends PropsModalOpcionesPublicacion {
   onPostDeleted?: (postId: string) => void;
@@ -81,7 +81,11 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
       onPostDeleted?.(selectedImage._id);
     } catch (err) {
       console.error("Error al eliminar posteo:", err);
-      setToast({ message: "Error interno al eliminar la publicación", type: "danger" });
+      if (err instanceof ApiError && err.data?.code === 'NOT_FOUND') {
+        setToast({ message: "La publicación ya no existe", type: "danger" });
+      } else {
+        setToast({ message: "Error interno al eliminar la publicación", type: "danger" });
+      }
     } finally {
       setIsDeleting(false);
     }
@@ -110,7 +114,11 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
       });
     } catch (err) {
       console.error("Error al toggle comentarios:", err);
-      setToast({ message: "Error interno", type: "danger" });
+      if (err instanceof ApiError && err.data?.code === 'NOT_FOUND') {
+        setToast({ message: "La publicación no fue encontrada", type: "danger" });
+      } else {
+        setToast({ message: "Error interno", type: "danger" });
+      }
     }
   };
 

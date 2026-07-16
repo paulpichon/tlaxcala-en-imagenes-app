@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Comentario, ComentariosResponse, ComentariosCountResponse } from "@/types/types";
-import { apiGet, apiPost, apiDelete } from "@/lib/apiClient";
+import { apiGet, apiPost, apiDelete, ApiError } from "@/lib/apiClient";
 
 export function useComentarios(postId: string) {
   const { fetchWithAuth, user } = useAuth();
@@ -21,7 +21,10 @@ export function useComentarios(postId: string) {
         `/api/comentarios/${postId}/comentarios/count`
       );
       setTotal(data.count);
-    } catch {
+    } catch (err) {
+      if (err instanceof ApiError && err.data?.code === 'NOT_FOUND') {
+        console.warn("El posteo no existe al contar comentarios:", postId);
+      }
     }
   }, [postId, fetchWithAuth]);
 
@@ -43,7 +46,11 @@ export function useComentarios(postId: string) {
       setTotal(data.total);
       setNextUrl(data.next);
     } catch (err) {
-      console.error("Error al cargar comentarios:", err);
+      if (err instanceof ApiError && err.data?.code === 'NOT_FOUND') {
+        console.warn("El posteo no existe al cargar comentarios:", postId);
+      } else {
+        console.error("Error al cargar comentarios:", err);
+      }
     } finally {
       setLoadingList(false);
     }
@@ -57,7 +64,11 @@ export function useComentarios(postId: string) {
       setComentarios((prev) => [...prev, ...data.comentarios]);
       setNextUrl(data.next);
     } catch (err) {
-      console.error("Error al cargar más comentarios:", err);
+      if (err instanceof ApiError && err.data?.code === 'NOT_FOUND') {
+        console.warn("El posteo no existe al cargar más comentarios:", postId);
+      } else {
+        console.error("Error al cargar más comentarios:", err);
+      }
     } finally {
       setLoadingMore(false);
     }

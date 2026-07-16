@@ -155,9 +155,9 @@ export function useCrearPosteo(
     } catch (err) {
       if (err instanceof ZodError) {
         setErrors(err.issues.map((e) => e.message));
-      } else if (err instanceof ApiError && err.status === 429) {
-        setErrors([String(err.data.msg ?? "Demasiadas publicaciones, intenta de nuevo más tarde")]);
-      } else {
+    } else if (err instanceof ApiError && (err.data?.code === 'RATE_LIMIT_EXCEEDED' || err.data?.code === 'POSTEO_BLOCKED')) {
+      setErrors([String(err.data.detail ?? "Demasiadas publicaciones, intenta de nuevo más tarde")]);
+    } else {
         setErrors(["Ocurrió un error al crear la publicación"]);
       }
     } finally {

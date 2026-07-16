@@ -9,7 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import Spinner from "./spinner";
 import PosteoCard from "./PosteoCard";
 import { notFound } from "next/navigation";
-import { apiGet } from "@/lib/apiClient";
+import { apiGet, ApiError } from "@/lib/apiClient";
 export default function PosteoDetalle() {
   const params = useParams() as { idposteo?: string } | null;
   const id = params?.idposteo ?? "";
@@ -43,7 +43,11 @@ export default function PosteoDetalle() {
       setPost(posteo);
     } catch (err) {
       console.error("fetchPost error:", err);
-      setError("Ocurrió un error cargando el posteo.");
+      if (err instanceof ApiError && err.data?.code === 'NOT_FOUND') {
+        setError("La publicación no fue encontrada.");
+      } else {
+        setError("Ocurrió un error cargando el posteo.");
+      }
     } finally {
       setLoading(false);
     }

@@ -20,17 +20,18 @@ export async function reenviarCorreo(token: string): Promise<ReenviarCorreoRespo
       cuentaVerificada: false,
     };
   } catch (error: any) {
-    if (error?.status === 401 && error?.data?.msg === 'Correo no existe') {
+    const code = error?.data?.code;
+    if (code === 'UNAUTHORIZED' && error?.data?.detail === 'Correo no existe') {
       return { mensaje: "El correo no esta asociado a ninguna cuenta.", esExito: false, cuentaVerificada: true };
     }
-    if (error?.status === 403 && error?.data?.msg === 'Cuenta ya verificada') {
+    if (code === 'FORBIDDEN' && error?.data?.detail === 'Cuenta ya verificada') {
       return { mensaje: "Esta cuenta ya ha sido verificada.", esExito: false, cuentaVerificada: true };
     }
-    if (error?.status === 500 && error?.data?.error === 'jwt expired') {
+    if (code === 'INTERNAL_ERROR' && error?.data?.error === 'jwt expired') {
       return { mensaje: "El token ha expirado. Si no te llego el correo, contacta a soporte.", esExito: false, cuentaVerificada: true };
     }
-    if (error?.status === 429) {
-      return { mensaje: error?.data?.msg, esExito: false, cuentaVerificada: false };
+    if (code === 'RATE_LIMIT_EXCEEDED' || code === 'EMAIL_BLOCKED') {
+      return { mensaje: error?.data?.detail, esExito: false, cuentaVerificada: false };
     }
     return { esExito: false, cuentaVerificada: false };
   }
@@ -46,20 +47,21 @@ export async function reenviarCorreoRestablecerPassword(token: string): Promise<
       cuentaVerificada: false,
     };
   } catch (error: any) {
-    if (error?.status === 401 && error?.data?.msg === 'Correo no existe') {
+    const code = error?.data?.code;
+    if (code === 'UNAUTHORIZED' && error?.data?.detail === 'Correo no existe') {
       return { mensaje: "El correo no esta asociado a ninguna cuenta.", esExito: false, cuentaVerificada: true };
     }
-    if (error?.status === 403 && error?.data?.msg === 'Cuenta no verificada') {
+    if (code === 'FORBIDDEN' && error?.data?.detail === 'Cuenta no verificada') {
       return { mensaje: "Esta cuenta no ha sido verificada.", esExito: false, cuentaVerificada: true };
     }
-    if (error?.status === 403 && error?.data?.msg === 'Cuenta no activada') {
+    if (code === 'FORBIDDEN' && error?.data?.detail === 'Cuenta no activada') {
       return { mensaje: "Esta cuenta esta desactivada, contactar a soporte.", esExito: false, cuentaVerificada: true };
     }
-    if (error?.status === 500 && error?.data?.error === 'jwt expired') {
+    if (code === 'INTERNAL_ERROR' && error?.data?.error === 'jwt expired') {
       return { mensaje: "Reinicia el proceso para restablecer contraseña.", esExito: false, cuentaVerificada: true };
     }
-    if (error?.status === 429) {
-      return { mensaje: error?.data?.msg, esExito: false, cuentaVerificada: false };
+    if (code === 'RATE_LIMIT_EXCEEDED' || code === 'RECOVERY_BLOCKED') {
+      return { mensaje: error?.data?.detail, esExito: false, cuentaVerificada: false };
     }
     return { esExito: false, cuentaVerificada: false };
   }

@@ -143,15 +143,16 @@ export default function PasswordOlvidadaClient() {
 			router.push(`/cuentas/confirmacion/correo-enviado-restablecer-password`);
 		} catch (err) {
 			if (err instanceof ApiError) {
-				const msg = String(err.data.msg ?? "");
+				const msg = String(err.data.detail ?? "");
+				const code = err.data?.code;
 				setError(
-					err.status === 401 && msg === "Correo no existe"
+					code === 'UNAUTHORIZED' && msg === "Correo no existe"
 						? "La cuenta asociada a ese correo no existe."
-						: err.status === 403 && msg === "Cuenta no verificada"
+						: code === 'FORBIDDEN' && msg === "Cuenta no verificada"
 						? "La cuenta no ha sido verificada. Revisa tu email."
-						: err.status === 403 && msg === "Cuenta no activada" 
+						: code === 'FORBIDDEN' && msg === "Cuenta no activada" 
 						? "La cuenta está desactivada. Contacta a soporte."
-						: err.status === 429
+						: code === 'RATE_LIMIT_EXCEEDED' || code === 'RECOVERY_BLOCKED'
 						? "Espera 5 minutos antes de poder reenviar el correo."
 						: "Error al conectar con el servidor. Intenta más tarde."
 				);

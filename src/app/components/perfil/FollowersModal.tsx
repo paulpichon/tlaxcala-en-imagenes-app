@@ -9,7 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { FollowerUserItemProps } from "@/types/types";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import Link from "next/link";
-import { apiGet } from "@/lib/apiClient";
+import { apiGet, ApiError } from "@/lib/apiClient";
 
 interface Props {
   userId: string;
@@ -37,7 +37,11 @@ export default function FollowersModal({ userId, loggedUserId, show, onClose }: 
 
         setFollowers(data.seguidores);
       } catch (error) {
-        console.error("Error obteniendo seguidores", error);
+        if (error instanceof ApiError && error.data?.code === 'NOT_FOUND') {
+          console.warn("El usuario no existe:", userId);
+        } else {
+          console.error("Error obteniendo seguidores", error);
+        }
       } finally {
         setLoading(false);
       }

@@ -9,12 +9,28 @@ export type FetchFunction = (
   init?: RequestInit
 ) => Promise<Response>;
 
+export interface ApiErrorData {
+  code?: string;
+  msg?: string;
+  detail?: string;
+  error?: string;
+  message?: string;
+  status?: number;
+  title?: string;
+  type?: string;
+  instance?: string;
+  trace_id?: string;
+  retry_after?: number;
+  errors?: Array<{ field: string; code: string; message: string }>;
+  [key: string]: unknown;
+}
+
 export class ApiError extends Error {
   status: number;
-  data: Record<string, unknown>;
+  data: ApiErrorData;
 
-  constructor(status: number, data: Record<string, unknown>) {
-    super(String(data.msg ?? data.error ?? data.message ?? 'Error desconocido'));
+  constructor(status: number, data: ApiErrorData) {
+    super(String(data.detail ?? data.error ?? data.message ?? 'Error desconocido'));
     this.name = 'ApiError';
     this.status = status;
     this.data = data;

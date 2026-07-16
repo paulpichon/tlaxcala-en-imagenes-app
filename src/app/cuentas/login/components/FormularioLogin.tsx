@@ -55,13 +55,14 @@ export default function FormularioLogin() {
         router.push('/inicio');
       } catch (error) {
         if (error instanceof ApiError) {
-          if (error.status === 429) {
-            setServerError(error.data.msg as string);
-          } else if (error.status === 401) {
+          const code = error.data?.code;
+          if (code === 'LOGIN_BLOCKED' || code === 'RATE_LIMIT_EXCEEDED') {
+            setServerError(error.data.detail as string);
+          } else if (code === 'UNAUTHORIZED') {
             setServerError('Correo o contraseña incorrectos.');
-          } else if (error.status === 403 && error.data.msg === 'Cuenta no verificada') {
+          } else if (code === 'FORBIDDEN' && error.data.detail === 'Cuenta no verificada') {
             setServerError('La cuenta no ha sido verificada, revisa tu correo.');
-          } else if (error.status === 403 && error.data.msg === 'Cuenta no activada') {
+          } else if (code === 'FORBIDDEN' && error.data.detail === 'Cuenta no activada') {
             setServerError('Esta cuenta no está disponible. Contacta a soporte para más información.');
           } else {
             setServerError('Error en el servidor');

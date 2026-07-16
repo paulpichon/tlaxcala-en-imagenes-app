@@ -109,15 +109,16 @@ export function FormularioRegistro() {
       router.push('/cuentas/confirmacion/correo-enviado');
     } catch (err) {
       if (err instanceof ApiError) {
-        if (err.status === 429) {
-          setError(String(err.data.msg ?? "Demasiadas cuentas creadas desde esta conexión, intenta de nuevo más tarde"));
-        } else if (err.status === 409) {
+        const code = err.data?.code;
+        if (code === 'REGISTER_BLOCKED' || code === 'RATE_LIMIT_EXCEEDED') {
+          setError(String(err.data.detail ?? "Demasiadas cuentas creadas desde esta conexión, intenta de nuevo más tarde"));
+        } else if (code === 'CONFLICT') {
           handleAPIError({
             status: 409,
             message: "Este correo electrónico ya existe en nuestra base de datos",
             field: "correo",
           });
-        } else if (err.status === 400) {
+        } else if (code === 'VALIDATION_FAILED' || code === 'BAD_REQUEST') {
           const errores = err.data.errores as Array<{ path: string; msg: string }> | undefined;
           const data = err.data.data as { field?: keyof UsuarioSchema; message?: string } | undefined;
           if (Array.isArray(errores)) {
@@ -138,7 +139,7 @@ export function FormularioRegistro() {
             setError("Los datos enviados son inválidos.");
           }
         } else {
-          setError(String(err.data.msg ?? "Error en el servidor"));
+          setError(String(err.data.detail ?? "Error en el servidor"));
         }
       } else {
         console.error(err);

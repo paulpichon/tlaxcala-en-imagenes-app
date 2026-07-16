@@ -14,7 +14,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import ToastGlobal from "../ToastGlobal";
-import { apiGet } from "@/lib/apiClient";
+import { apiGet, ApiError } from "@/lib/apiClient";
 
 type NextResponse = string | { url?: string } | null | undefined;
 
@@ -104,7 +104,11 @@ export default function PublicacionesUsuarioGrid({
         if (isFirstLoad.current) isFirstLoad.current = false;
       } catch (error) {
         console.error("Error al cargar posteos:", error);
-        setToast({ message: "Error al cargar publicaciones", type: "danger" });
+        if (error instanceof ApiError && error.data?.code === 'NOT_FOUND') {
+          setToast({ message: "El usuario no fue encontrado", type: "danger" });
+        } else {
+          setToast({ message: "Error al cargar publicaciones", type: "danger" });
+        }
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -163,7 +167,11 @@ export default function PublicacionesUsuarioGrid({
       setIsFirstModalOpen(true);
     } catch (err) {
       console.error("Error al cargar detalle del posteo:", err);
-      setToast({ message: "Error al abrir la publicación", type: "danger" });
+      if (err instanceof ApiError && err.data?.code === 'NOT_FOUND') {
+        setToast({ message: "La publicación ya no está disponible", type: "danger" });
+      } else {
+        setToast({ message: "Error al abrir la publicación", type: "danger" });
+      }
     }
   };
 

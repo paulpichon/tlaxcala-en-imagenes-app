@@ -103,9 +103,9 @@ export default function AyudaSoporte() {
       } else if (error instanceof ApiError) {
         setToastType('danger');
         setToastMessage(
-          error.status === 429
-            ? String(error.data.msg ?? "Demasiados tickets de soporte, intenta de nuevo más tarde")
-            : String(error.data.msg ?? "Error al enviar solicitud")
+          error.data?.code === 'SOPORTE_BLOCKED' || error.data?.code === 'RATE_LIMIT_EXCEEDED'
+            ? String(error.data.detail ?? "Demasiados tickets de soporte, intenta de nuevo más tarde")
+            : String(error.data.detail ?? "Error al enviar solicitud")
         );
       } else {
         setToastType('danger');

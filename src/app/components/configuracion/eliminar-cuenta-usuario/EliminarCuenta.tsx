@@ -36,7 +36,7 @@ export default function EliminarCuenta() {
     } catch (error) {
       const mensajeError =
         error instanceof ApiError
-          ? String(error.data.msg ?? "Ocurrió un error al eliminar tu cuenta.")
+          ? String(error.data.detail ?? "Ocurrió un error al eliminar tu cuenta.")
           : "Ocurrió un error al eliminar tu cuenta.";
     
       setMensaje(mensajeError);
