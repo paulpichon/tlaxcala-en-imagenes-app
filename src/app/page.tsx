@@ -1,18 +1,39 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import styles from "./ui/Home.module.css";
 import FooterMain from "./components/FooterMain";
 import iconoTlaxapp from "@/../public/assets/icono-tlaxapp-blanco.png";
+import { registerEarlyAccess } from "@/lib/early-access";
 
 export default function Home() {
   const [input, setInput] = useState("");
   const [message, setMessage] = useState("");
   const [inputError, setInputError] = useState("");
   const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error" | "duplicate"
+    "idle" | "loading" | "success" | "error" | "duplicate" | "blocked"
   >("idle");
+
+  const BLOCKED_KEY = "earlyAccessBlockedUntil";
+  const blockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(BLOCKED_KEY);
+    if (stored) {
+      const until = parseInt(stored, 10);
+      if (Date.now() < until) {
+        setStatus("blocked");
+        setMessage("Demasiados intentos. Intenta más tarde.");
+      } else {
+        localStorage.removeItem(BLOCKED_KEY);
+      }
+    }
+
+    return () => {
+      if (blockTimeoutRef.current) clearTimeout(blockTimeoutRef.current);
+    };
+  }, []);
 
   const handleChange = (value: string) => {
     setInput(value);
@@ -30,51 +51,58 @@ export default function Home() {
 
   const handleSubmit = async () => {
     if (!input) return;
-  
-    // 🧠 detectar si parece email
+
     const looksLikeEmail = input.includes("@");
-  
+
     if (looksLikeEmail && !isValidEmail(input)) {
       setStatus("error");
       setMessage("Por favor ingresa un correo válido");
       return;
     }
-  
-    try {
-      setStatus("loading");
-      setMessage("");
-  
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/early-access`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ contacto: input }),
+
+    setStatus("loading");
+    setMessage("");
+
+    const result = await registerEarlyAccess(input);
+
+    if (!result.ok) {
+      const { error } = result;
+
+      switch (error.code) {
+        case "VALIDATION_FAILED": {
+          const fieldMsg = error.errors[0]?.message;
+          setInputError(fieldMsg ?? error.detail);
+          setStatus("error");
+          break;
         }
-      );
-  
-      const data = await res.json();
-  
-      if (res.status === 409) {
-        setStatus("duplicate");
-        setMessage(data.msg);
-        return;
+        case "CONFLICT":
+          setStatus("duplicate");
+          setMessage(error.detail);
+          setInput("");
+          break;
+        case "EARLY_ACCESS_BLOCKED": {
+          const until = Date.now() + 10 * 60 * 1000;
+          localStorage.setItem(BLOCKED_KEY, String(until));
+          blockTimeoutRef.current = setTimeout(() => {
+            localStorage.removeItem(BLOCKED_KEY);
+            blockTimeoutRef.current = null;
+            setStatus("idle");
+            setMessage("");
+          }, 10 * 60 * 1000);
+          setStatus("blocked");
+          setMessage(error.detail);
+          break;
+        }
+        default:
+          setStatus("error");
+          setMessage("Ocurrió un error inesperado. Intenta más tarde.");
       }
-  
-      if (!res.ok) {
-        throw new Error(data.msg || "Error");
-      }
-  
-      setStatus("success");
-      setMessage(data.msg);
-      setInput("");
-    } catch (error: any) {
-      console.error(error);
-      setStatus("error");
-      setMessage(error.message || "Ocurrió un error");
+      return;
     }
+
+    setStatus("success");
+    setMessage(result.data.msg);
+    setInput("");
   };
 
   return (
@@ -107,13 +135,22 @@ export default function Home() {
               placeholder="Tu correo o usuario de Instagram"
               value={input}
               onChange={(e) => handleChange(e.target.value)}
+              readOnly={status === "blocked"}
               className={styles.input}
             />
 
-              {inputError && <span className={styles.error}>{inputError}</span>}
+              {inputError && <span className={styles.inputError}>{inputError}</span>}
 
-            <button onClick={handleSubmit} className={styles.button}>
-              {status === "loading" ? "Enviando..." : "Quiero acceso anticipado"}
+            <button
+              onClick={handleSubmit}
+              disabled={status === "loading" || status === "blocked"}
+              className={styles.button}
+            >
+              {status === "loading"
+                ? "Enviando..."
+                : status === "blocked"
+                  ? "Bloqueado temporalmente"
+                  : "Quiero acceso anticipado"}
             </button>
           </div>
 
@@ -127,6 +164,12 @@ export default function Home() {
           {status === "duplicate" && (
             <p className={`${styles.feedback} ${styles.warning}`}>
               ⚠️ {message}
+            </p>
+          )}
+
+          {status === "blocked" && (
+            <p className={`${styles.feedback} ${styles.error}`}>
+              ⏳ {message}
             </p>
           )}
 

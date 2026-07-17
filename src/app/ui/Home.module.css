@@ -160,6 +160,15 @@
   color: #ffcc00;
   border-left: 4px solid #ffcc00;
 }
+
+.inputError {
+  background: rgba(255, 77, 77, 0.12);
+  color: #ff4d4d;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: center;
+}
 /* Desktop */
 @media (min-width: 768px) {
   .actions {
