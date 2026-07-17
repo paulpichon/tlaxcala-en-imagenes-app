@@ -153,7 +153,7 @@ export default function Home() {
                   : "Quiero acceso anticipado"}
             </button>
           </div>
-
+                {/* Agregados ahora */}
           {/* MENSAJES */}
           {status === "success" && (
             <p className={`${styles.feedback} ${styles.success}`}>
