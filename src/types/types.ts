@@ -12,25 +12,11 @@ export interface IUsuarioData {
 	correo: string;
 	password: string;
 }
-// Interfaz para errores de la API
-export interface APIError {
-  status: number;
+// Interfaz para errores de campo devueltos por la API y mostrados en formularios
+export interface FormFieldError {
   message: string;
   field?: keyof UsuarioSchema; // Campo opcional que indica qué campo específico tiene el error
 }
-// Tipo para datos adicionales en la respuesta de la API
-export interface APIResponseData {
-    message?: string;
-    field?: string;
-    // Utiliza un índice de firma con tipos más específicos
-    [key: string]: string | number | boolean | object | undefined;
-  }
-// Respuesta de la API (ajusta según la estructura real de tu API)
-export interface APIResponse {
-    status: number;
-    data?: APIResponseData;
-    token?: string;
-  }
 // Interface para el posteo 
 export interface Posteo {
   _idUsuario: UsuarioLogueado;
@@ -257,7 +243,6 @@ export interface Comentario {
 
 export interface ComentariosResponse {
   ok: boolean;
-  status: number;
   page: number;
   limit: number;
   next: string | null;
@@ -269,7 +254,6 @@ export interface ComentariosResponse {
 
 export interface ComentariosCountResponse {
   ok: boolean;
-  status: number;
   count: number;
 }
 
