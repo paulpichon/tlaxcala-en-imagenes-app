@@ -1,193 +1,113 @@
-# Documentación de la API — TlaxApp
+# Documentación de Endpoints API — TlaxApp
 
-**Versión:** 1.0.0  
-**Última actualización:** 2026-07-08  
-**Base URL (desarrollo):** `http://localhost:3000`  
-**Base URL (producción):** Determinada por `FRONTEND_URL` en variables de entorno
-
----
-
-## Índice
-
-1. [Introducción](#introducción)
-2. [Autenticación](#autenticación)
-3. [Formato de respuestas](#formato-de-respuestas)
-4. [Rate Limiting](#rate-limiting)
-5. [Endpoints por recurso](#endpoints-por-recurso)
-   - [Bienvenida y Salud](#bienvenida-y-salud)
-   - [Auth (Autenticación)](#auth-autenticación)
-   - [Usuarios](#usuarios)
-   - [Posteos (Publicaciones)](#posteos-publicaciones)
-   - [Likes](#likes)
-   - [Comentarios](#comentarios)
-   - [Followers (Seguidores)](#followers-seguidores)
-   - [Favoritos](#favoritos)
-   - [Uploads (Imágenes de Perfil)](#uploads-imágenes-de-perfil)
-   - [Notificaciones Web Push](#notificaciones-web-push)
-   - [Municipios](#municipios)
-   - [Ubicación (Geolocalización)](#ubicación-geolocalización)
-   - [Soporte / Ayuda](#soporte--ayuda)
-6. [Middlewares](#middlewares)
-7. [Modelos de datos (esquemas)](#modelos-de-datos-esquemas)
+**Generado:** 2026-07-20 19:08:39
+**Total de endpoints documentados:** 51
+**Archivos de rutas explorados:** `routes/auth.js`, `routes/bienvenida.js`, `routes/comentarios.js`, `routes/favoritos.js`, `routes/followers.js`, `routes/likes.js`, `routes/municipios.js`, `routes/notificaciones.js`, `routes/posteos.js`, `routes/soporte.js`, `routes/ubicacion.js`, `routes/uploads.js`, `routes/usuarios.js`
+**Endpoints no verificables completamente:** Ninguno detectado; todos los endpoints registrados en `routes/` tienen controlador asignado. Las respuestas de éxito de ejemplos están construidas a partir del esquema y del código fuente (`[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`).
 
 ---
 
-## Introducción
+## Formato global de errores (RFC 9457)
 
-TlaxApp API es un backend Node.js/Express v5 con MongoDB (Mongoose v9) que proporciona servicios para una red social local enfocada en el estado de Tlaxcala, México.
-
-**Características principales:**
-- Autenticación dual JWT (access token + refresh token) con cookies httpOnly
-- Subida de imágenes a Cloudinary
-- Notificaciones Web Push (VAPID)
-- Rate limiting por endpoint
-- Soft delete con eliminación física diferida (cron jobs)
-- Geolocalización con datos geoespaciales de municipios
-
----
-
-## Autenticación
-
-### Esquema de Tokens
-
-| Token | Duración | Almacenamiento | Propósito |
-|-------|----------|----------------|-----------|
-| `accessToken` | 1 hora | Cookie httpOnly (`accessToken`) | Autenticar peticiones |
-| `refreshToken` | 7 días | Cookie httpOnly (`refreshToken`) + BD (hasheado SHA-256) | Renovar access token |
-
-### Cookies de Sesión
-
-```http
-Set-Cookie: accessToken=<jwt>; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=3600
-Set-Cookie: refreshToken=<jwt>; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=604800
-```
-
-- `Secure: true` → Solo se envían por HTTPS (no en localhost sin SSL)
-- `SameSite: 'none'` → Permitir cross-origin (frontend separado)
-- `httpOnly: true` → No accesible desde JavaScript del navegador
-
-### Flujo de Autenticación
-
-1. **Registro** → `POST /api/usuarios` → Se envía correo de verificación
-2. **Verificar correo** → `GET /api/auth/verificar-correo/:token`
-3. **Login** → `POST /api/auth/login` → Se establecen cookies `accessToken` y `refreshToken`
-4. **Peticiones autenticadas** → La cookie `accessToken` se envía automáticamente
-5. **Renovar token** → `POST /api/auth/refresh` (usa `refreshToken` de cookie)
-6. **Logout** → `POST /api/auth/logout` → Elimina cookies y refresh token de BD
-
-### Seguridad Adicional
-
-- **tokenVersion**: Almacenada en el usuario. Si se detecta reuso de refresh token (posible robo), se incrementa `tokenVersion` invalidando TODAS las sesiones.
-- **Refresh token hasheado**: El refresh token se almacena hasheado (SHA-256) en la colección `UserToken`.
-- **TTL automático**: Los documentos en `UserToken` expiran a los 30 días automáticamente (TTL index).
-
----
-
-## Formato de Respuestas
-
-### Respuesta Exitosa (Genérica)
+Todos los errores de la API siguen el estándar **RFC 9457 (Problem Details)** (`middlewares/error-handler.js`), con esta estructura:
 
 ```json
 {
-  "status": 200,
-  "msg": "Mensaje descriptivo",
-  ...datos específicos del endpoint
+  "type": "about:blank",
+  "title": "Authentication Required",
+  "status": 401,
+  "detail": "No hay token en la petición",
+  "instance": "/api/usuarios/123",
+  "code": "UNAUTHORIZED",
+  "trace_id": "req_829a8f1b-be1",
+  "errors": []
 }
 ```
 
-### Respuesta de Error (Genérica)
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `type` | string | URI de referencia (actualmente `"about:blank"`) |
+| `title` | string | Título legible del error |
+| `status` | number | Código HTTP |
+| `detail` | string | Descripción específica del error |
+| `instance` | string | Ruta que causó el error (`req.originalUrl`) |
+| `code` | string | Código de error machine-readable |
+| `trace_id` | string | ID único de correlación para logging (`req.traceId`) |
+| `errors` | array | Detalles de validación (opcional): `[{ field, code, message }]` |
 
-```json
-{
-  "status": 4XX o 5XX,
-  "msg": "Descripción del error"
-}
-```
+### Clases de error del dominio
 
-### Errores de Validación (express-validator)
+Definidas en `errors/error-classes.js` (heredan de `AppError` en `errors/app-error.js`):
 
-```json
-{
-  "status": 400,
-  "errores": [
-    {
-      "value": "...",
-      "msg": "El correo es obligatorio",
-      "param": "correo",
-      "location": "body"
-    }
-  ]
-}
-```
+| HTTP | Clase | `code` | title | Archivo |
+|---|---|---|---|---|
+| 400 | `BadRequestError` | `BAD_REQUEST` | `Bad Request` | `errors/error-classes.js:14` |
+| 401 | `AuthenticationError` | `UNAUTHORIZED` | `Authentication Required` | `errors/error-classes.js:21` |
+| 403 | `ForbiddenError` | `FORBIDDEN` | `Forbidden` | `errors/error-classes.js:28` |
+| 404 | `NotFoundError` | `NOT_FOUND` | `Resource Not Found` | `errors/error-classes.js:35` |
+| 409 | `ConflictError` | `CONFLICT` | `Conflict` | `errors/error-classes.js:42` |
+| 422 | `ValidationError` | `VALIDATION_FAILED` | `Validation Failed` | `errors/error-classes.js:49` |
+| 429 | `RateLimitError` | `RATE_LIMIT_EXCEEDED` | `Rate Limit Exceeded` | `errors/error-classes.js:60` |
+| 500 | `InternalError` | `INTERNAL_ERROR` | `Internal Server Error` | `errors/error-classes.js:73` |
 
-### Error de Rate Limiting
+### Errores adicionales manejados por el error handler
 
-```json
-{
-  "ok": false,
-  "status": 429,
-  "msg": "Demasiados intentos de inicio de sesión, tu cuenta está temporalmente bloqueada por 15 minutos",
-  "code": "LOGIN_BLOCKED"
-}
-```
+| Origen | `code` | HTTP | Dónde se captura |
+|---|---|---|---|
+| Multer (subida de archivos, `LIMIT_*`) | `FILE_ERROR` | 400 | `middlewares/error-handler.js:43-58` |
+| express-validator (`err.array()`) | `VALIDATION_FAILED` | 422 | `middlewares/error-handler.js:61-77` |
+| JSON parse malformado (`entity.parse.failed`) | `INVALID_JSON` | 400 | `middlewares/error-handler.js:80-90` |
+| Error no contemplado (catch-all) | `INTERNAL_ERROR` | 500 | `middlewares/error-handler.js:93-104` |
 
-### Error de Autenticación
+> **Nota:** Los códigos de error machine-readable (`code`) están en **MAYÚSCULAS**. El frontend debe comparar contra `UNAUTHORIZED`, `VALIDATION_FAILED`, etc.
 
-```json
-{
-  "msg": "No hay token en la peticion"
-}
-```
+### Rate limiting
 
-### Error de Servidor (desarrollo)
+Los rate limiters están definidos en `middlewares/rate-limiter.js`. Cada uno produce una respuesta RFC 9457 con un `code` propio y **no incluye** `retry_after`.
 
-```json
-{
-  "status": 500,
-  "msg": "Error interno del servidor",
-  "error": "mensaje de error detallado (solo en desarrollo)"
-}
-```
+| Limiter | Ventana | Máximo | `code` | Archivo |
+|---|---|---|---|---|
+| `loginLimiter` | 15 minutos | 5 intentos | `LOGIN_BLOCKED` | `middlewares/rate-limiter.js:19-38` |
+| `recoveryLimiter` | 15 minutos | 3 intentos | `RECOVERY_BLOCKED` | `middlewares/rate-limiter.js:41-53` |
+| `reenvioCorreoLimiter` | 5 minutos | 3 intentos | `EMAIL_BLOCKED` | `middlewares/rate-limiter.js:56-68` |
+| `registroLimiter` | 1 hora | 3 registros | `REGISTER_BLOCKED` | `middlewares/rate-limiter.js:71-83` |
+| `posteoLimiter` | 15 minutos | 20 posteos | `POSTEO_BLOCKED` | `middlewares/rate-limiter.js:86-98` |
+| `soporteLimiter` | 15 minutos | 5 tickets | `SOPORTE_BLOCKED` | `middlewares/rate-limiter.js:101-113` |
+| `lecturaLimiter` | 15 minutos | 100 lecturas | `READ_BLOCKED` | `middlewares/rate-limiter.js:116-128` |
+| `comentarioLimiter` | 1 minuto | 10 comentarios | `COMENTARIO_BLOCKED` | `middlewares/rate-limiter.js:131-143` |
+| `refreshLimiter` | 15 minutos | 10 renovaciones | `REFRESH_BLOCKED` | `middlewares/rate-limiter.js:146-158` |
+
+Además, los controladores pueden lanzar `RateLimitError` (`code: RATE_LIMIT_EXCEEDED`) con `retry_after` en segundos (por ejemplo, cooldown de 5 minutos entre reenvíos de correo o bloqueo por 10 intentos fallidos de login).
+
+### Autenticación dual JWT
+
+La API usa cookies httpOnly para el access token y el refresh token (`models/server.js:80`, `controllers/auth.js:176-191`):
+
+- `accessToken`: JWT de acceso. `httpOnly: true`, `secure: true`, `sameSite: 'none'`, `path: '/'`, `maxAge: 60 * 60 * 1000` (1 hora por defecto).
+- `refreshToken`: JWT de refresco. `httpOnly: true`, `secure: true`, `sameSite: 'none'`, `path: '/'`, `maxAge: 7 * 24 * 60 * 60 * 1000` (7 días por defecto).
+
+El refresh token se almacena hasheado (SHA-256) en la colección `UserToken` con TTL de 30 días (`models/UserToken.js:38`).
+
+El middleware `validarOrigen` (`middlewares/validar-origen.js`) protege contra CSRF en métodos mutantes (POST, PUT, PATCH, DELETE). Requiere que el header `Origin` o `Referer` coincida con `FRONTEND_URL` o los orígenes listados en `CSRF_ALLOWED_ORIGINS`.
 
 ---
 
-## Rate Limiting
+## 1. Bienvenida y salud
 
-La API implementa 9 rate limiters distintos, definidos en `middlewares/rate-limiter.js`:
+### 1.1 GET /
 
-| Limiter | Ventana | Máximo | Código de error | Endpoints protegidos |
-|---------|---------|--------|-----------------|----------------------|
-| `loginLimiter` | 15 min | 5 | `LOGIN_BLOCKED` | `POST /api/auth/login` |
-| `recoveryLimiter` | 15 min | 3 | `RECOVERY_BLOCKED` | `POST /api/auth/cuentas/password-olvidado`, `POST /api/auth/reenviar-correo-restablecer-password` |
-| `reenvioCorreoLimiter` | 5 min | 3 | `EMAIL_BLOCKED` | `POST /api/auth/reenviar-correo` |
-| `registroLimiter` | 1 hora | 3 | `REGISTER_BLOCKED` | `POST /api/usuarios` |
-| `posteoLimiter` | 15 min | 20 | `POSTEO_BLOCKED` | `POST /api/posteos` |
-| `soporteLimiter` | 15 min | 5 | `SOPORTE_BLOCKED` | `POST /api/ayuda-soporte/envio-correo` |
-| `lecturaLimiter` | 15 min | 100 | `READ_BLOCKED` | `GET /api/usuarios`, `GET /api/posteos` |
-| `comentarioLimiter` | 1 min | 10 | `COMENTARIO_BLOCKED` | `POST /api/comentarios/:posteoId/comentarios` |
-| `refreshLimiter` | 15 min | 10 | `REFRESH_BLOCKED` | `POST /api/auth/refresh` |
+**Descripción:** Mensaje de bienvenida de la API y aviso de que la autenticación es requerida.
+**Archivo de ruta:** `routes/bienvenida.js:6`
+**Controlador:** `controllers/bienvenida.js` — `getBienvenida` (línea 6)
 
-**Nota:** El `loginLimiter` usa clave compuesta `IP + correo` para evitar que un atacante bloquee la cuenta de otro usuario desde una IP diferente.
+**Autenticación:** No requiere token.
+**Rate limiter:** No aplica.
+**Headers requeridos:** Ninguno.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
----
-
-## Endpoints por recurso
-
----
-
-## Bienvenida y Salud
-
-### `GET /`
-
-**Descripción:** Mensaje de bienvenida a la API. No requiere autenticación.  
-**Archivo de ruta:** `routes/bienvenida.js:6`  
-**Controlador:** `controllers/bienvenida.js:6` — `getBienvenida`
-
-#### Autenticación y permisos
-- Requiere token: **No**
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "name": "TlaxApp API",
@@ -197,73 +117,68 @@ La API implementa 9 rate limiters distintos, definidos en `middlewares/rate-limi
 }
 ```
 
+**Respuestas de error:** Ninguna error de dominio esperada; solo 500 por fallos internos.
+
 ---
 
-### `GET /api/health`
+### 1.2 GET /api/health
 
-**Descripción:** Health check de la API. Muestra estado del servidor, memoria, uptime y conexión a MongoDB.  
-**Archivo de ruta:** `routes/bienvenida.js:7`  
-**Controlador:** `controllers/bienvenida.js:16` — `getHealth`
+**Descripción:** Devuelve información de salud del servidor: uptime, memoria, estado de MongoDB y entorno.
+**Archivo de ruta:** `routes/bienvenida.js:7`
+**Controlador:** `controllers/bienvenida.js` — `getHealth` (línea 16)
 
-#### Autenticación y permisos
-- Requiere token: **No**
+**Autenticación:** No requiere token.
+**Rate limiter:** No aplica.
+**Headers requeridos:** Ninguno.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "status": "ok",
-  "uptime": 12345.67,
-  "timestamp": "2026-07-08T12:00:00.000Z",
+  "uptime": 1234.56,
+  "timestamp": "2026-07-20T19:08:39.000Z",
   "service": "TlaxApp API",
   "version": "1.0.0",
   "environment": "development",
   "memory": {
-    "rss": 12345678,
-    "heapTotal": 9876543,
-    "heapUsed": 4567890,
-    "external": 123456
+    "rss": 123456789,
+    "heapTotal": 98765432,
+    "heapUsed": 87654321,
+    "external": 1234567
   },
-  "heapUsedPercentage": "46.23%",
+  "heapUsedPercentage": "88.75%",
   "pid": 12345,
-  "db": {
-    "status": "connected"
-  }
+  "db": { "status": "connected" }
 }
 ```
 
----
-
-## Auth (Autenticación)
-
-Base path: **`/api/auth`**  
-Archivo de ruta: `routes/auth.js`  
-Controlador: `controllers/auth.js`
+**Respuestas de error:** Solo 500 `INTERNAL_ERROR` por fallos internos.
 
 ---
 
-### `GET /api/auth/verificar-correo{/:token}`
+## 2. Autenticación
 
-**Descripción:** Verifica la cuenta de usuario mediante el token enviado por correo electrónico. El `:token` es opcional en la ruta (Express 5: `{/:token}`).  
-**Archivo de ruta:** `routes/auth.js:26`  
-**Controlador:** `controllers/auth.js:21` — `verificarCorreo`
+### 2.1 GET /api/auth/verificar-correo/{:token}
 
-#### Autenticación y permisos
-- Requiere token: **No** (el token va en la URL)
+**Descripción:** Verifica el correo electrónico de un usuario recién registrado usando el token enviado por email.
+**Archivo de ruta:** `routes/auth.js:26`
+**Controlador:** `controllers/auth.js` — `verificarCorreo` (línea 28)
 
-#### Parámetros de entrada
+**Autenticación:** No requiere token.
+**Rate limiter:** No aplica.
+**Headers requeridos:** Ninguno.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `token` | string JWT | Sí (en ruta, opcional por sintaxis `{:token}`) | Token de verificación de correo. El middleware `validarTokenEnURL` valida que exista (`middlewares/validar-token-en-url.js:5`). |
 
-| Ubicación | Campo | Tipo | Requerido | Validación |
-|-----------|-------|------|-----------|------------|
-| `params` | `token` | `string` (JWT) | Sí | `isJWT` con `EMAIL_VERIFICATION_SECRET` y algoritmo `HS256` |
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-#### Middlewares en orden
-1. `validarTokenEnURL` — Verifica que `token` exista en `req.params`
-2. `check('token').isJWT(...)` — Valida que sea un JWT válido firmado con `EMAIL_VERIFICATION_SECRET`
-3. `validarCampos` — Procesa errores de validación
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "ok": true,
@@ -271,207 +186,206 @@ Controlador: `controllers/auth.js`
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `400` | Token no proporcionado en la URL |
-| `401` | Token inválido o expirado |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 400 | `BAD_REQUEST` | `Bad Request` | `"El token es obligatorio en la URL"` | `middlewares/validar-token-en-url.js:7` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"Token invalido"` | `routes/auth.js:28` (express-validator) |
+| 401/403/404/500 | Varios | — | Errores propagados por `verificarCorreoEnviado` | `controllers/auth.js:33-41` |
+
+**Notas especiales:**
+- Sintaxis `path-to-regexp` v8 (Express 5): el token es opcional en la ruta (`/verificar-correo{/:token}`). Si no se proporciona, el middleware `validarTokenEnURL` devuelve 400.
+- El token se valida como JWT con `check('token').isJWT()`.
 
 ---
 
-### `POST /api/auth/reenviar-correo`
+### 2.2 POST /api/auth/reenviar-correo
 
-**Descripción:** Reenvía el correo de verificación de cuenta al usuario registrado.  
-**Archivo de ruta:** `routes/auth.js:32`  
-**Controlador:** `controllers/auth.js:40` — `reenviarCorreoVerificacion`
+**Descripción:** Reenvía el correo de verificación a un usuario que aún no ha activado su cuenta.
+**Archivo de ruta:** `routes/auth.js:32`
+**Controlador:** `controllers/auth.js` — `reenviarCorreoVerificacion` (línea 45)
 
-#### Autenticación y permisos
-- Requiere token: **No** (pero requiere un token de verificación previo en el body)
-- Rate limit: `reenvioCorreoLimiter` — 3 intentos cada 5 minutos
+**Autenticación:** No requiere token.
+**Rate limiter:** `reenvioCorreoLimiter` (5 min, 3 intentos) → `EMAIL_BLOCKED`.
+**Headers requeridos:** `Content-Type: application/json`.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body JSON:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `token` | string JWT | Sí | `check('token').isJWT()` (`routes/auth.js:33`) |
 
-#### Parámetros de entrada
-
-| Ubicación | Campo | Tipo | Requerido | Validación |
-|-----------|-------|------|-----------|------------|
-| `body` | `token` | `string` (JWT) | Sí | `isJWT` con `EMAIL_VERIFICATION_SECRET` y algoritmo `HS256` |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "status": 200,
-  "msg": "Correo reenviado a usuario@correo.com"
+  "msg": "Correo reenviado a usuario@ejemplo.com"
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `401` | Correo no existe en BD |
-| `403` | Cuenta ya verificada |
-| `429` | Espera 5 minutos antes de reenviar (cooldown activo) |
-
-#### Notas
-- Tiene un cooldown de 5 minutos por usuario (`ultimo_correo_enviado`).
-- Genera un nuevo token de verificación y lo guarda en la BD.
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401 | `UNAUTHORIZED` | `Authentication Required` | `"Correo no existe"` | `controllers/auth.js:58` |
+| 403 | `FORBIDDEN` | `Forbidden` | `"Cuenta ya verificada"` | `controllers/auth.js:64` |
+| 429 | `RATE_LIMIT_EXCEEDED` | `Rate Limit Exceeded` | `"Espera N minutos antes de reenviar el correo"` | `controllers/auth.js:77` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"Token invalido"` | `routes/auth.js:33` |
+| 429 | `EMAIL_BLOCKED` | `Rate Limit Exceeded` | `"Demasiados correos enviados, intenta de nuevo en 5 minutos"` | `middlewares/rate-limiter.js:64` |
 
 ---
 
-### `POST /api/auth/login`
+### 2.3 POST /api/auth/login
 
-**Descripción:** Inicio de sesión de usuarios. Valida credenciales y establece cookies de sesión.  
-**Archivo de ruta:** `routes/auth.js:37`  
-**Controlador:** `controllers/auth.js:107` — `login`
+**Descripción:** Inicia sesión con correo y contraseña. Crea cookies httpOnly con access token y refresh token.
+**Archivo de ruta:** `routes/auth.js:37`
+**Controlador:** `controllers/auth.js` — `login` (línea 103)
 
-#### Autenticación y permisos
-- Requiere token: **No**
-- Rate limit: `loginLimiter` — 5 intentos cada 15 minutos (clave: IP + correo)
+**Autenticación:** No requiere token (endpoint de login).
+**Rate limiter:** `loginLimiter` (15 min, 5 intentos) → `LOGIN_BLOCKED`. `keyGenerator` usa `IP + correo` si el correo está presente (`middlewares/rate-limiter.js:30-35`).
+**Headers requeridos:** `Content-Type: application/json`, `Origin`/`Referer` permitido para métodos mutantes.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body JSON:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `correo` | string | Sí | `check('correo').isEmail()` (`routes/auth.js:39`) |
+| `password` | string | Sí | `check('password').trim().notEmpty()` (`routes/auth.js:41`) |
 
-#### Parámetros de entrada
-
-| Ubicación | Campo | Tipo | Requerido | Validación |
-|-----------|-------|------|-----------|------------|
-| `body` | `correo` | `string` (email) | Sí | `isEmail()` |
-| `body` | `password` | `string` | Sí | `trim().notEmpty()` |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "status": 200,
   "usuario": {
     "nombre_completo": { "nombre": "Juan", "apellido": "Pérez" },
-    "lugar_radicacion": {
-      "claveEntidad": 29,
-      "nombreEntidad": "Tlaxcala"
-    },
-    "correo": "usuario@correo.com",
+    "lugar_radicacion": { "claveEntidad": 29, "nombreEntidad": "Tlaxcala" },
+    "correo": "usuario@ejemplo.com",
     "imagen_perfil": {
-      "secure_url": "https://res.cloudinary.com/...",
-      "public_id": "tlx-imagenes/..."
+      "secure_url": "https://res.cloudinary.com/.../no-imagen-usuario_koriq0.webp",
+      "public_id": null
     },
     "genero": "MASCULINO",
-    "fecha_nacimiento": "1990-01-15T00:00:00.000Z",
+    "fecha_nacimiento": "1990-01-01T00:00:00.000Z",
     "fecha_actualizacion": null,
     "url": "juan-perez",
-    "uid": "60d5f484f8a2c8a1d4e8e4a1",
-    "_id": "60d5f484f8a2c8a1d4e8e4a1"
+    "uid": "507f1f77bcf86cd799439011",
+    "_id": "507f1f77bcf86cd799439011"
   },
   "msg": "Login exitoso"
 }
 ```
+También setea las cookies `accessToken` y `refreshToken` (httpOnly, secure, sameSite: none).
 
-#### Cookies establecidas
+**Respuestas de error:**
 
-| Cookie | Valor | Duración |
-|--------|-------|----------|
-| `accessToken` | JWT | 1 hora |
-| `refreshToken` | JWT | 7 días |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401 | `UNAUTHORIZED` | `Authentication Required` | `"Credenciales inválidas"` | `controllers/auth.js:110` o `controllers/auth.js:152` |
+| 403 | `FORBIDDEN` | `Forbidden` | `"Cuenta no verificada"` | `controllers/auth.js:113` |
+| 403 | `FORBIDDEN` | `Forbidden` | `"Cuenta no activada"` | `controllers/auth.js:116` |
+| 429 | `RATE_LIMIT_EXCEEDED` | `Rate Limit Exceeded` | `"Cuenta bloqueada temporalmente por actividad inusual..."` | `controllers/auth.js:123` o `controllers/auth.js:148` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | Errores de `correo` y `password` | `routes/auth.js:39-43` |
+| 429 | `LOGIN_BLOCKED` | `Rate Limit Exceeded` | `"Demasiados intentos de inicio de sesión..."` | `middlewares/rate-limiter.js:27` |
 
-#### Códigos de error
-
-| Código | Causa |
-|--------|-------|
-| `401` | Credenciales inválidas (correo no existe o contraseña incorrecta) |
-| `403` | Cuenta no verificada (email_validated: false) |
-| `403` | Cuenta no activada (estatus !== 1) |
-| `429` | Cuenta bloqueada temporalmente (10+ intentos fallidos, 30 min de bloqueo) |
-
-#### Notas
-- Si hay 10 intentos fallidos, la cuenta se bloquea por 30 minutos y se envía un correo de notificación.
-- Al hacer login exitoso, se reinicia `intentos_login` a 0.
-- Se elimina `reset_password_token` si existía.
-- Se guarda información del dispositivo (IP, userAgent, deviceName) asociada al refresh token.
-- El refresh token se guarda hasheado (SHA-256) en la colección `UserToken`.
+**Notas especiales:**
+- Tras un login exitoso se reinicia `intentos_login` a 0 y se elimina `bloqueo_login_hasta` (`controllers/auth.js:195-200`).
+- Si hay `reset_password_token` activo, se elimina (`controllers/auth.js:197`).
+- Si se alcanzan 10 intentos fallidos, la cuenta se bloquea por 30 minutos y se envía un email de notificación (si `SEND_EMAIL` lo permite).
 
 ---
 
-### `POST /api/auth/cuentas/password-olvidado`
+### 2.4 POST /api/auth/cuentas/password-olvidado
 
-**Descripción:** Envía un correo con un enlace para restablecer la contraseña.  
-**Archivo de ruta:** `routes/auth.js:46`  
-**Controlador:** `controllers/auth.js:327` — `envioCorreoReestablecerPassword`
+**Descripción:** Solicita el envío de un enlace para restablecer la contraseña. **Intencionalmente devuelve siempre 200 con el mismo mensaje genérico** para evitar enumeración de correos.
+**Archivo de ruta:** `routes/auth.js:46`
+**Controlador:** `controllers/auth.js` — `envioCorreoReestablecerPassword` (línea 316), delega a `procesarEnvioReestablecerPassword` (línea 271)
 
-#### Autenticación y permisos
-- Requiere token: **No**
-- Rate limit: `recoveryLimiter` — 3 intentos cada 15 minutos
+**Autenticación:** No requiere token.
+**Rate limiter:** `recoveryLimiter` (15 min, 3 intentos) → `RECOVERY_BLOCKED`.
+**Headers requeridos:** `Content-Type: application/json`.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body JSON:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `correo` | string | Sí | `check('correo').isEmail()` (`routes/auth.js:48`) |
 
-#### Parámetros de entrada
-
-| Ubicación | Campo | Tipo | Requerido | Validación |
-|-----------|-------|------|-----------|------------|
-| `body` | `correo` | `string` (email) | Sí | `isEmail()` |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** Siempre devuelve:
 ```json
 {
   "status": 200,
-  "token": "jwt_de_sesion_temporal",
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "msg": "Si el correo está registrado, recibirás un enlace para restablecer tu contraseña"
+}
+```
+El `token` es un session token temporal para el frontend.
+
+**Respuestas de error:**
+
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El correo no es valido"` | `routes/auth.js:48` |
+| 429 | `RECOVERY_BLOCKED` | `Rate Limit Exceeded` | `"Demasiados intentos de recuperación de contraseña..."` | `middlewares/rate-limiter.js:49` |
+
+**Notas especiales:**
+- Aunque el correo no exista, la cuenta no esté verificada o esté en cooldown de 5 min, la respuesta es siempre 200 con el mismo mensaje (`controllers/auth.js:258-285`).
+- El cooldown de 5 minutos se valida por `ultimo_correo_enviado` (`controllers/auth.js:275-285`).
+
+---
+
+### 2.5 POST /api/auth/reenviar-correo-restablecer-password
+
+**Descripción:** Reenvía el correo de restablecimiento de contraseña usando el token temporal del frontend. Comportamiento anti-enumeración idéntico al endpoint anterior.
+**Archivo de ruta:** `routes/auth.js:53`
+**Controlador:** `controllers/auth.js` — `reenvioCorreoRestablecerPassword` (línea 326)
+
+**Autenticación:** No requiere token.
+**Rate limiter:** `recoveryLimiter` (15 min, 3 intentos) → `RECOVERY_BLOCKED`.
+**Headers requeridos:** `Content-Type: application/json`.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body JSON:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `token` | string JWT | Sí | `check('token').isJWT()` (`routes/auth.js:54`) |
+
+**Respuesta de éxito (200):**
+```json
+{
+  "status": 200,
+  "token": "eyJhbGciOiJIUzI1NiIs...",
   "msg": "Si el correo está registrado, recibirás un enlace para restablecer tu contraseña"
 }
 ```
 
-#### Notas
-- Por seguridad, **siempre** devuelve el mismo mensaje sin confirmar si el correo existe o no.
-- El `token` en la respuesta es un JWT para sessionStorage del frontend (no para restablecer contraseña).
-- Cooldown de 5 minutos entre reenvíos del mismo correo.
-- Si `SEND_EMAIL=false` en entorno de desarrollo, no se envía el correo realmente.
+**Respuestas de error:**
+
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"Token invalido"` | `routes/auth.js:54` |
+| 429 | `RECOVERY_BLOCKED` | `Rate Limit Exceeded` | `"Demasiados intentos de recuperación de contraseña..."` | `middlewares/rate-limiter.js:49` |
 
 ---
 
-### `POST /api/auth/reenviar-correo-restablecer-password`
+### 2.6 GET /api/auth/cuentas/restablecer-password/validar-token-reset-password/{:token}
 
-**Descripción:** Reenvía el correo de restablecimiento de contraseña usando un token previo.  
-**Archivo de ruta:** `routes/auth.js:53`  
-**Controlador:** `controllers/auth.js:336` — `reenvioCorreoRestablecerPassword`
+**Descripción:** Valida el token del enlace de restablecimiento de contraseña. Si es válido, el frontend puede mostrar el formulario para cambiar la contraseña.
+**Archivo de ruta:** `routes/auth.js:58`
+**Controlador:** `controllers/auth.js` — `validarTokenRestablecerPassword` (línea 339)
 
-#### Autenticación y permisos
-- Requiere token: **No**
-- Rate limit: `recoveryLimiter` — 3 intentos cada 15 minutos
+**Autenticación:** No requiere token.
+**Rate limiter:** No aplica.
+**Headers requeridos:** Ninguno.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `token` | string JWT | Sí | Token de restablecimiento de contraseña. |
 
-#### Parámetros de entrada
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-| Ubicación | Campo | Tipo | Requerido | Validación |
-|-----------|-------|------|-----------|------------|
-| `body` | `token` | `string` (JWT) | Sí | `isJWT` con `RESET_PASSWORD_SECRET` y algoritmo `HS256` |
-
-#### Respuesta exitosa — `200 OK`
-
-```json
-{
-  "status": 200,
-  "token": "nuevo_jwt_de_sesion_temporal",
-  "msg": "Si el correo está registrado, recibirás un enlace para restablecer tu contraseña"
-}
-```
-
----
-
-### `GET /api/auth/cuentas/restablecer-password/validar-token-reset-password{/:token}`
-
-**Descripción:** Valida que el token de restablecimiento de contraseña sea válido (no expirado, existente en BD).  
-**Archivo de ruta:** `routes/auth.js:58`  
-**Controlador:** `controllers/auth.js:348` — `validarTokenRestablecerPassword`
-
-#### Autenticación y permisos
-- Requiere token: **No** (el token va en la URL)
-
-#### Parámetros de entrada
-
-| Ubicación | Campo | Tipo | Requerido | Validación |
-|-----------|-------|------|-----------|------------|
-| `params` | `token` | `string` (JWT) | Sí | `isJWT` con `RESET_PASSWORD_SECRET` y algoritmo `HS256` |
-
-#### Middlewares en orden
-1. `validarTokenEnURL`
-2. `check('token').isJWT(...)`
-3. `validarCampos`
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "status": 200,
@@ -480,34 +394,38 @@ Controlador: `controllers/auth.js`
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `401` | Token inválido, expirado, o no coincide con el almacenado en BD |
-| `403` | Cuenta no verificada o no activada |
-| `500` | Error interno al validar el token (development: incluye detalle) |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 400 | `BAD_REQUEST` | `Bad Request` | `"El token es obligatorio en la URL"` | `middlewares/validar-token-en-url.js:7` |
+| 401 | `UNAUTHORIZED` | `Authentication Required` | `"Token inválido o expirado"` (prod) / `"El usuario no existe o la cuenta fue eliminada (estatus 4)"` (dev) | `controllers/auth.js:350-356` |
+| 403 | `FORBIDDEN` | `Forbidden` | `"Token inválido o expirado"` (prod) / detalles de verificación/estatus (dev) | `controllers/auth.js:358-364` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"Token invalido"` | `routes/auth.js:60` |
 
 ---
 
-### `POST /api/auth/cuentas/reestablecer-password{/:token}`
+### 2.7 POST /api/auth/cuentas/reestablecer-password/{:token}
 
-**Descripción:** Establece una nueva contraseña usando el token de restablecimiento.  
-**Archivo de ruta:** `routes/auth.js:64`  
-**Controlador:** `controllers/auth.js:398` — `reestablecerPassword`
+**Descripción:** Restablece la contraseña del usuario usando el token de restablecimiento.
+**Archivo de ruta:** `routes/auth.js:64`
+**Controlador:** `controllers/auth.js` — `reestablecerPassword` (línea 378)
 
-#### Autenticación y permisos
-- Requiere token: **No** (el token va en la URL)
+**Autenticación:** No requiere token.
+**Rate limiter:** No aplica.
+**Headers requeridos:** `Content-Type: application/json`.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `token` | string JWT | Sí | Token de restablecimiento. |
 
-#### Parámetros de entrada
+**Query params:** Ninguno.
+**Body JSON:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `password` | string | Sí | `check('password').trim().isLength({ min: 8 })` (`routes/auth.js:66`) |
 
-| Ubicación | Campo | Tipo | Requerido | Validación |
-|-----------|-------|------|-----------|------------|
-| `params` | `token` | `string` (JWT) | Sí | — |
-| `body` | `password` | `string` | Sí | `trim().isLength({ min: 8 })` |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "status": 200,
@@ -515,29 +433,29 @@ Controlador: `controllers/auth.js`
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `500` | Error al procesar el restablecimiento |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El password es obligatorio: debe tener al menos 8 caracteres"` | `routes/auth.js:66` |
+| 401/404/500 | Varios | — | Errores propagados por `reestablecerPasswordUsuario` | `controllers/auth.js:382-389` |
 
 ---
 
-### `POST /api/auth/refresh`
+### 2.8 POST /api/auth/refresh
 
-**Descripción:** Renueva el access token y refresh token usando el refresh token almacenado en cookies.  
-**Archivo de ruta:** `routes/auth.js:71`  
-**Controlador:** `controllers/auth.js:418` — `refreshToken`
+**Descripción:** Renueva el access token usando el refresh token de las cookies. Rota el refresh token almacenado.
+**Archivo de ruta:** `routes/auth.js:71`
+**Controlador:** `controllers/auth.js` — `refreshToken` (línea 393)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (refresh token en cookie)
-- Rate limit: `refreshLimiter` — 10 renovaciones cada 15 minutos
+**Autenticación:** Requiere cookie `refreshToken` (no access token).
+**Rate limiter:** `refreshLimiter` (15 min, 10 intentos) → `REFRESH_BLOCKED`.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-#### Parámetros de entrada
-- No tiene parámetros en body. El `refreshToken` se obtiene de `req.cookies`.
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** Setea nuevas cookies `accessToken` y `refreshToken`.
 ```json
 {
   "status": 200,
@@ -545,44 +463,32 @@ Controlador: `controllers/auth.js`
 }
 ```
 
-#### Cookies actualizadas
+**Respuestas de error:**
 
-| Cookie | Nuevo valor |
-|--------|-------------|
-| `accessToken` | Nuevo JWT (1 hora) |
-| `refreshToken` | Nuevo JWT (7 días) |
-
-#### Códigos de error
-
-| Código | Causa |
-|--------|-------|
-| `401` | No hay refresh token en cookies |
-| `401` | Token no registrado en BD (o sesión comprometida, se invalida todo) |
-| `403` | Token no registrado (firma inválida) |
-| `403` | Token expirado (se elimina de BD) |
-| `429` | Demasiadas renovaciones (rate limit) |
-
-#### Notas
-- Si se detecta reuso de un refresh token (posible robo), se invalida **TODAS** las sesiones del usuario incrementando `tokenVersion`.
-- Se elimina el refresh token anterior de la BD y se guarda el nuevo.
-- Se actualiza IP, userAgent y deviceName.
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401 | `UNAUTHORIZED` | `Authentication Required` | `"No hay cookies de sesion para hacer refresh token"` | `controllers/auth.js:400` |
+| 401 | `UNAUTHORIZED` | `Authentication Required` | `"Sesión comprometida. Inicia sesión nuevamente."` | `controllers/auth.js:418` (posible reuso detectado) |
+| 403 | `FORBIDDEN` | `Forbidden` | `"Token no registrado"` | `controllers/auth.js:421` |
+| 401 | `UNAUTHORIZED` | `Authentication Required` | `"Token no válido o expirado"` | `controllers/auth.js:481` |
+| 429 | `REFRESH_BLOCKED` | `Rate Limit Exceeded` | `"Demasiadas solicitudes de renovación de token..."` | `middlewares/rate-limiter.js:154` |
 
 ---
 
-### `POST /api/auth/logout`
+### 2.9 POST /api/auth/logout
 
-**Descripción:** Cierra la sesión del usuario. Elimina las cookies y el refresh token de la base de datos.  
-**Archivo de ruta:** `routes/auth.js:73`  
-**Controlador:** `controllers/auth.js:520` — `logout`
+**Descripción:** Cierra la sesión del usuario, elimina el refresh token de la base de datos y limpia las cookies.
+**Archivo de ruta:** `routes/auth.js:73`
+**Controlador:** `controllers/auth.js` — `logout` (línea 485)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (refresh token en cookie para identificar la sesión)
+**Autenticación:** Requiere cookie `refreshToken` (middleware `validarRefreshToken`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-#### Middlewares en orden
-1. `validarRefreshToken` — Verifica que exista un refreshToken en cookies
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "status": 200,
@@ -590,278 +496,247 @@ Controlador: `controllers/auth.js`
 }
 ```
 
+**Respuestas de error:**
+
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401 | `UNAUTHORIZED` | `Authentication Required` | `"No hay refresh token en la petición"` | `middlewares/validar-jwt-cookies-sesion.js:55` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al eliminar las cookies..."` (catch de `cerrarSesionCookies`) | `helpers/cerrar-sesion-cookies.js:24` |
+
 ---
 
-### `GET /api/auth/me`
+### 2.10 GET /api/auth/me
 
-**Descripción:** Obtiene los datos del usuario autenticado (sesión activa).  
-**Archivo de ruta:** `routes/auth.js:78`  
-**Controlador:** `controllers/auth.js:251` — `getMe`
+**Descripción:** Devuelve los datos del usuario actualmente autenticado.
+**Archivo de ruta:** `routes/auth.js:78`
+**Controlador:** `controllers/auth.js` — `getMe` (línea 229)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middleware de auth: `verificarTokenSesion`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "status": 200,
   "msg": "Usuario obtenido",
   "ok": true,
   "usuario": {
-    "_id": "60d5f484f8a2c8a1d4e8e4a1",
     "nombre_completo": { "nombre": "Juan", "apellido": "Pérez" },
     "lugar_radicacion": { "claveEntidad": 29, "nombreEntidad": "Tlaxcala" },
-    "imagen_perfil": {
-      "secure_url": "https://res.cloudinary.com/...",
-      "public_id": "..."
-    },
-    "correo": "usuario@correo.com",
+    "imagen_perfil": { "secure_url": "...", "public_id": null },
+    "correo": "usuario@ejemplo.com",
     "url": "juan-perez",
     "genero": "MASCULINO",
-    "fecha_nacimiento": "1990-01-15T00:00:00.000Z"
+    "fecha_nacimiento": "1990-01-01T00:00:00.000Z"
   }
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `401` | Token no válido, no existe o cuenta no activada |
-| `404` | Usuario no encontrado o cuenta eliminada (estatus 4) |
-
----
-
-## Usuarios
-
-Base path: **`/api/usuarios`**  
-Archivo de ruta: `routes/usuarios.js`  
-Controlador: `controllers/usuarios.js`
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401 | `UNAUTHORIZED` | `Authentication Required` | `"No hay token en la petición"` | `middlewares/validar-jwt-cookies-sesion.js:14` |
+| 401 | `UNAUTHORIZED` | `Authentication Required` | `"Token no válido"` | `middlewares/validar-jwt-cookies-sesion.js:45` |
+| 401 | `UNAUTHORIZED` | `Authentication Required` | `"Token no válido - usuario no existe"` | `middlewares/validar-jwt-cookies-sesion.js:27` |
+| 403 | `FORBIDDEN` | `Forbidden` | `"Cuenta no activada. El usuario debe verificar su cuenta"` | `middlewares/validar-jwt-cookies-sesion.js:31` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"Usuario no existe"` | `controllers/auth.js:238` |
 
 ---
 
-### `GET /api/usuarios`
+## 3. Usuarios
 
-**Descripción:** Endpoint placeholder. Actualmente no implementado.  
-**Archivo de ruta:** `routes/usuarios.js:19`  
-**Controlador:** `controllers/usuarios.js:30` — `usuariosGet`
+### 3.1 GET /api/usuarios
 
-#### Autenticación y permisos
-- Requiere token: **No**
-- Rate limit: `lecturaLimiter` — 100 solicitudes cada 15 minutos
+**Descripción:** Endpoint de control interno; actualmente no devuelve lista de usuarios.
+**Archivo de ruta:** `routes/usuarios.js:19`
+**Controlador:** `controllers/usuarios.js` — `usuariosGet` (línea 30)
 
-#### Respuesta — `200 OK`
+**Autenticación:** No requiere token (solo `lecturaLimiter`).
+**Rate limiter:** `lecturaLimiter` (15 min, 100) → `READ_BLOCKED`.
+**Headers requeridos:** Ninguno.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
+**Respuesta de éxito (200):**
 ```json
 {
   "msg": "DE MOMENTO ESTA API PARA MOSTRAR A LOS USUARIOS NO SE VA A OCUPAR"
 }
 ```
 
+**Respuestas de error:**
+
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 429 | `READ_BLOCKED` | `Rate Limit Exceeded` | `"Demasiadas solicitudes, intenta de nuevo más tarde"` | `middlewares/rate-limiter.js:124` |
+
 ---
 
-### `GET /api/usuarios/:url`
+### 3.2 GET /api/usuarios/:url
 
-**Descripción:** Obtiene la información de un perfil de usuario mediante su URL única. Incluye total de posteos, seguidores, seguidos y si el usuario autenticado sigue al dueño del perfil.  
-**Archivo de ruta:** `routes/usuarios.js:21`  
-**Controlador:** `controllers/usuarios.js:38` — `usuarioGet`
+**Descripción:** Obtiene el perfil de un usuario por su URL única (slug), incluyendo contadores de posteos, seguidores y seguidos.
+**Archivo de ruta:** `routes/usuarios.js:21`
+**Controlador:** `controllers/usuarios.js` — `usuarioGet` (línea 38)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('url').trim()`
-  3. `validarUrlUsuario` — Verifica que la URL exista en BD y que el usuario tenga cuenta activa
-  4. `validarCampos`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `url` | string | Sí | `check('url').trim()` + `validarUrlUsuario` (`routes/usuarios.js:25-29`) |
 
-#### Parámetros de entrada
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-| Ubicación | Campo | Tipo | Requerido | Validación |
-|-----------|-------|------|-----------|------------|
-| `params` | `url` | `string` | Sí | `trim()` — debe existir en BD |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "usuario": {
-    "_id": "60d5f484f8a2c8a1d4e8e4a1",
     "nombre_completo": { "nombre": "Juan", "apellido": "Pérez" },
     "lugar_radicacion": { "claveEntidad": 29, "nombreEntidad": "Tlaxcala" },
-    "imagen_perfil": {
-      "secure_url": "https://res.cloudinary.com/...",
-      "public_id": "..."
-    },
+    "imagen_perfil": { "secure_url": "...", "public_id": null },
+    "_id": "507f1f77bcf86cd799439011",
     "url": "juan-perez",
-    "totalPosteos": 15,
-    "totalSeguidores": 42,
-    "totalSeguidos": 18,
+    "totalPosteos": 12,
+    "totalSeguidores": 5,
+    "totalSeguidos": 8,
     "isFollowing": true
   }
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `401` | Token inválido |
-| `404` | URL de usuario no existe en BD |
-| `401` | Cuenta no verificada o suspendida (validado por `validarUrlUsuario`) |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401 | `UNAUTHORIZED` | `Authentication Required` | Varios mensajes de autenticación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 403 | `FORBIDDEN` | `Forbidden` | `"El usuario con URL \"...\" tiene la cuenta suspendida"` | `middlewares/validar-url-usuario.js:26` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"El usuario con URL \"...\" no existe"` | `middlewares/validar-url-usuario.js:14` |
+| 401 | `UNAUTHORIZED` | `Authentication Required` | `"El usuario con URL \"...\" no ha verificado/activado su cuenta"` | `middlewares/validar-url-usuario.js:18` o `22` |
 
 ---
 
-### `POST /api/usuarios`
+### 3.3 POST /api/usuarios
 
-**Descripción:** Registra un nuevo usuario. Envía correo de verificación.  
-**Archivo de ruta:** `routes/usuarios.js:33`  
-**Controlador:** `controllers/usuarios.js:83` — `usuariosPost`
+**Descripción:** Registra una nueva cuenta de usuario, envía correo de verificación y devuelve un token temporal para sessionStorage del frontend.
+**Archivo de ruta:** `routes/usuarios.js:33`
+**Controlador:** `controllers/usuarios.js` — `usuariosPost` (línea 83)
 
-#### Autenticación y permisos
-- Requiere token: **No**
-- Rate limit: `registroLimiter` — 3 registros por hora
+**Autenticación:** No requiere token.
+**Rate limiter:** `registroLimiter` (1 hora, 3 registros) → `REGISTER_BLOCKED`.
+**Headers requeridos:** `Content-Type: application/json`.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body JSON:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `nombre_completo.nombre` | string | Sí | `trim().notEmpty()` (`routes/usuarios.js:35`) |
+| `nombre_completo.apellido` | string | Sí | `trim().notEmpty()` (`routes/usuarios.js:37`) |
+| `correo` | string | Sí | `isEmail()` + `validarCorreoUsuario` (único en BD) (`routes/usuarios.js:39-41`) |
+| `password` | string | Sí | `min: 8` + regex con mayúscula, minúscula, número y carácter especial (`routes/usuarios.js:43-47`) |
+| `estatus` | string/number | No | `optional().trim().isNumeric()` (`routes/usuarios.js:49`) |
+| `intentos_login` | string/number | No | `optional().trim().isNumeric()` (`routes/usuarios.js:51`) |
 
-#### Parámetros de entrada
-
-| Ubicación | Campo | Tipo | Requerido | Validación |
-|-----------|-------|------|-----------|------------|
-| `body` | `nombre_completo.nombre` | `string` | Sí | `trim().notEmpty()` |
-| `body` | `nombre_completo.apellido` | `string` | Sí | `trim().notEmpty()` |
-| `body` | `correo` | `string` (email) | Sí | `isEmail()` + validación personalizada: no repetido en BD |
-| `body` | `password` | `string` | Sí | `min 8` + mayúscula + minúscula + número + carácter especial |
-| `body` | `estatus` | `number` | No | `isNumeric()` (opcional) |
-| `body` | `intentos_login` | `number` | No | `isNumeric()` (opcional) |
-
-#### Validación de password (regex)
-
-```
-/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>_\-+=\[\]])/
-```
-
-Debe contener: al menos una mayúscula, una minúscula, un número y un carácter especial.
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "status": 200,
-  "token": "jwt_para_sessionstorage_frontend"
+  "token": "eyJhbGciOiJIUzI1NiIs..."
 }
 ```
 
-> **Nota:** El `token` en la respuesta es para que el frontend lo almacene en sessionStorage y pueda acceder a la página de "correo enviado".
+**Respuestas de error:**
 
-#### Códigos de error
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 409 | `CONFLICT` | `Conflict` | `"El correo ya está registrado en la base de datos"` | `middlewares/validar-campos.js:18` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | Errores de validación de campos | `routes/usuarios.js:35-52` |
+| 429 | `REGISTER_BLOCKED` | `Rate Limit Exceeded` | `"Demasiadas cuentas creadas desde esta conexión..."` | `middlewares/rate-limiter.js:79` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Hubo un problema al procesar la solicitud"` | `controllers/usuarios.js:134` |
 
-| Código | Causa |
-|--------|-------|
-| `400` | Error de validación en campos |
-| `409` | El correo ya está registrado |
-| `429` | Demasiados registros desde esta conexión |
-| `500` | Error interno al procesar el registro |
-
-#### Notas
-- Genera automáticamente una `url` de perfil única basada en el nombre completo.
-- Encripta el password con `bcryptjs` (salt rounds: 10).
-- Crea un token de verificación y lo guarda hasheado en la BD.
-- Envía correo de verificación con enlace al frontend (`FRONTEND_URL`).
-- El usuario se guarda solo si el correo se envía exitosamente.
+**Notas especiales:**
+- El email solo se envía si `envioCorreoVerificacion` retorna `true` (en dev, `SEND_EMAIL=false` lo anula). Si el correo falla, el usuario **no se guarda** en la BD (`controllers/usuarios.js:123-125`).
+- Se genera automáticamente un `url` único basado en el nombre completo (`helpers/crear-url-usuario.js`).
+- La contraseña se hashea con bcrypt antes de guardar.
 
 ---
 
-### `PUT /api/usuarios/update`
+### 3.4 PUT /api/usuarios/update
 
-**Descripción:** Actualiza los datos del perfil del usuario autenticado. No permite actualizar imagen de perfil (hay endpoint separado).  
-**Archivo de ruta:** `routes/usuarios.js:60`  
-**Controlador:** `controllers/usuarios.js:144` — `usuariosPut`
+**Descripción:** Actualiza los datos del usuario autenticado. No permite actualizar correo ni imagen de perfil.
+**Archivo de ruta:** `routes/usuarios.js:60`
+**Controlador:** `controllers/usuarios.js` — `usuariosPut` (línea 142)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. Validaciones de campos con `check()`
-  3. `validarCampos`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** `Content-Type: application/json`, cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body JSON:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `nombre_completo.nombre` | string | No | `optional().trim().notEmpty()` (`routes/usuarios.js:64`) |
+| `nombre_completo.apellido` | string | No | `optional().trim().notEmpty()` (`routes/usuarios.js:66`) |
+| `password` | string | No | `optional().trim().isLength({ min: 8 })` (`routes/usuarios.js:68`) |
+| `lugar_radicacion.nombreEntidad` | string | No | `optional().notEmpty()` (`routes/usuarios.js:70`) |
+| `lugar_radicacion.claveMunicipio` | string | No | `optional().notEmpty()` (`routes/usuarios.js:72`) |
+| `lugar_radicacion.nombreMunicipio` | string | No | `optional().notEmpty()` (`routes/usuarios.js:74`) |
+| `genero` | string | No | `optional().isIn(['MASCULINO', 'FEMENINO', 'PREFIERO NO DECIR'])` (`routes/usuarios.js:76`) |
+| `fecha_nacimiento` | string | No | `optional().isDate()` (`routes/usuarios.js:78`) |
 
-#### Parámetros de entrada (todos opcionales)
-
-| Ubicación | Campo | Tipo | Requerido | Validación |
-|-----------|-------|------|-----------|------------|
-| `body` | `nombre_completo.nombre` | `string` | No | `optional().trim().notEmpty()` |
-| `body` | `nombre_completo.apellido` | `string` | No | `optional().trim().notEmpty()` |
-| `body` | `password` | `string` | No | `optional().trim().isLength({ min: 8 })` |
-| `body` | `lugar_radicacion.nombreEntidad` | `string` | No | `optional().notEmpty()` |
-| `body` | `lugar_radicacion.claveMunicipio` | `string` | No | `optional().notEmpty()` |
-| `body` | `lugar_radicacion.nombreMunicipio` | `string` | No | `optional().notEmpty()` |
-| `body` | `genero` | `string` | No | `optional().isIn(['MASCULINO', 'FEMENINO', 'PREFIERO NO DECIR'])` |
-| `body` | `fecha_nacimiento` | `date` | No | `optional().isDate()` |
-
-#### Campos permitidos (whitelist en controlador)
-
-```javascript
-const ALLOWED_FIELDS = new Set([
-    'nombre_completo',
-    'lugar_radicacion',
-    'genero',
-    'fecha_nacimiento'
-]);
-```
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "status": 200,
   "msg": "Usuario actualizado",
   "usuario": {
-    "_id": "60d5f484f8a2c8a1d4e8e4a1",
+    "_id": "507f1f77bcf86cd799439011",
     "nombre_completo": { "nombre": "Juan", "apellido": "Pérez" },
-    "lugar_radicacion": {
-      "nombreEntidad": "Tlaxcala",
-      "claveMunicipio": "29",
-      "nombreMunicipio": "Zacatelco"
-    },
-    "correo": "usuario@correo.com",
+    "lugar_radicacion": { "claveEntidad": 29, "nombreEntidad": "Tlaxcala", "nombreMunicipio": "Tlaxcala" },
+    "correo": "usuario@ejemplo.com",
     "url": "juan-perez",
     "genero": "MASCULINO",
-    "fecha_nacimiento": "1990-01-15T00:00:00.000Z"
+    "fecha_nacimiento": "1990-01-01T00:00:00.000Z"
   }
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `400` | Error de validación en campos |
-| `401` | Token no válido |
-| `500` | Error interno |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Errores de autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | Errores de validación | `routes/usuarios.js:64-79` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Hubo un problema al procesar la solicitud"` | `controllers/usuarios.js:173` |
 
-#### Notas
-- Se ignora el campo `_id` y `correo` si vienen en el body (no se actualizan).
-- Solo se actualizan los campos en la whitelist.
-- Si se envía `password`, se encripta antes de guardar.
+**Notas especiales:**
+- El controlador filtra por `ALLOWED_FIELDS` (`controllers/usuarios.js:22-27`): solo se actualizan `nombre_completo`, `lugar_radicacion`, `genero`, `fecha_nacimiento`.
+- Se ignora `_id`, `correo` y `password` si vienen en el body (la contraseña se procesa aparte si se envía).
+- La contraseña se hashea con bcrypt antes de guardar.
 
 ---
 
-### `DELETE /api/usuarios/delete`
+### 3.5 DELETE /api/usuarios/delete
 
-**Descripción:** Elimina la cuenta del usuario autenticado (soft delete). Utiliza transacciones de MongoDB para garantizar atomicidad.  
-**Archivo de ruta:** `routes/usuarios.js:82`  
-**Controlador:** `controllers/usuarios.js:186` — `usuariosDelete`
+**Descripción:** Elimina la cuenta del usuario autenticado (soft delete) y marca como eliminados sus posteos, follows, likes, notificaciones, favoritos y comentarios. Usa una transacción de MongoDB.
+**Archivo de ruta:** `routes/usuarios.js:82`
+**Controlador:** `controllers/usuarios.js` — `usuariosDelete` (línea 181)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token + refresh token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`) y cookie `refreshToken`.
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-#### Parámetros de entrada
-- No tiene parámetros adicionales. La identificación del usuario viene del token.
-- Requiere que exista `refreshToken` en cookies.
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "status": 200,
@@ -869,248 +744,107 @@ const ALLOWED_FIELDS = new Set([
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `400` | La cuenta ya fue eliminada previamente |
-| `403` | No hay refresh token en cookies |
-| `404` | Usuario no encontrado |
-| `500` | Error interno (se hace rollback de la transacción) |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 403 | `FORBIDDEN` | `Forbidden` | `"No hay refresh token"` | `controllers/usuarios.js:197` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"Usuario no encontrado"` | `controllers/usuarios.js:209` |
+| 400 | `BAD_REQUEST` | `Bad Request` | `"La cuenta ya fue eliminada previamente"` | `controllers/usuarios.js:216` |
+| 401/403 | Varios | — | Errores de autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Hubo un problema al eliminar la cuenta de usuario..."` | `controllers/usuarios.js:365` |
 
-#### Efectos secundarios (soft delete en cascada)
-- Usuario: `estatus = 4`, `isDeleted = true`, `deletedAt = now`
-- Posteos del usuario: `isDeleted = true`
-- Follows (follower/following): `isDeleted = true`
-- Likes (dados y recibidos): `isDeleted = true`
-- Notificaciones (enviadas y recibidas): `isDeleted = true`
-- Favoritos (del usuario y de sus posteos): `isDeleted = true`
-- Comentarios del usuario: `isDeleted = true`
-- Se decrementa `comentariosCount` en los posteos afectados
-- Se cierra la sesión (elimina cookies y refresh token de BD)
-
-**Tecnología:** MongoDB transactions (sesión con `startTransaction()` / `commitTransaction()` / `abortTransaction()`)
+**Notas especiales:**
+- Soft delete: el usuario pasa a `estatus: 4` e `isDeleted: true`. Los datos relacionados se marcan con `isDeleted: true` y `deleteReason: "accountDeletion"`.
+- Se limpian las cookies de sesión tras la eliminación.
+- El cron job `eliminar-cuentas-de-usuarios.js` se encarga de la eliminación física posterior.
 
 ---
 
-### `GET /api/usuarios/registrados/nuevos-usuarios-registrados`
+### 3.6 GET /api/usuarios/registrados/nuevos-usuarios-registrados
 
-**Descripción:** Obtiene los últimos 3 usuarios registrados (excluyendo al usuario autenticado). Incluye indicador de si el usuario autenticado los sigue.  
-**Archivo de ruta:** `routes/usuarios.js:87`  
-**Controlador:** `controllers/usuarios.js:395` — `nuevosUsuariosRegistrados`
+**Descripción:** Devuelve los últimos 3 usuarios registrados, activos y verificados, excluyendo al usuario logueado, con indicador de si ya se siguen.
+**Archivo de ruta:** `routes/usuarios.js:87`
+**Controlador:** `controllers/usuarios.js` — `nuevosUsuariosRegistrados` (línea 375)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "status": 200,
   "msg": "Nuevos Usuarios Registrados",
   "nuevosUsuariosRegistrados": [
     {
-      "_id": "60d5f484f8a2c8a1d4e8e4a1",
-      "nombre_completo": { "nombre": "María", "apellido": "López" },
-      "url": "maria-lopez",
-      "imagen_perfil": { "secure_url": "...", "public_id": "..." },
+      "_id": "507f1f77bcf86cd799439011",
+      "nombre_completo": { "nombre": "Ana", "apellido": "García" },
+      "url": "ana-garcia",
+      "imagen_perfil": { "secure_url": "...", "public_id": null },
       "isFollowing": false
     }
   ]
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `401` | Token no válido |
-| `500` | Error interno |
-
----
-
-## Posteos (Publicaciones)
-
-Base path: **`/api/posteos`**  
-Archivo de ruta: `routes/posteos.js`  
-Controlador: `controllers/posteos.js`
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Errores de autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al obtener los nuevos usuarios"` | `controllers/usuarios.js:443` |
 
 ---
 
-### `GET /api/posteos`
+## 4. Posteos
 
-**Descripción:** Obtiene los últimos 15 posteos públicos de otros usuarios (excluye los del usuario autenticado). Con paginación, estado de like, follow y favorito.  
-**Archivo de ruta:** `routes/posteos.js:30`  
-**Controlador:** `controllers/posteos.js:14` — `posteosGet`
+### 4.1 GET /api/posteos
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Rate limit: `lecturaLimiter` — 100 solicitudes cada 15 minutos
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('page').optional().isNumeric()`
-  3. `check('limite').optional().isNumeric()`
-  4. `validarCampos`
+**Descripción:** Obtiene los últimos posteos públicos de todos los usuarios excepto los del usuario logueado, con paginación y estados de follow, favorito y like.
+**Archivo de ruta:** `routes/posteos.js:30`
+**Controlador:** `controllers/posteos.js` — `posteosGet` (línea 14)
 
-#### Parámetros de entrada (query)
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** `lecturaLimiter` (15 min, 100) → `READ_BLOCKED`.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `page` | number | No | `optional().isNumeric()` (`routes/posteos.js:34`) |
+| `limite` | number | No | `optional().isNumeric()` (`routes/posteos.js:35`) |
 
-| Ubicación | Campo | Tipo | Requerido | Valor por defecto |
-|-----------|-------|------|-----------|-------------------|
-| `query` | `page` | `number` | No | `1` |
-| `query` | `limite` | `number` | No | `15` |
+**Body:** Ninguno.
 
-#### Filtros aplicados
-- `posteo_publico: true` — Solo posteos públicos
-- `_idUsuario: { $ne: req.usuario }` — Excluye los del usuario autenticado
-- `isDeleted: false` — Excluye eliminados
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
-  "page": 1,
+  "page": "1",
   "next": "/api/posteos?page=2&limite=15",
   "prev": null,
-  "limite": 15,
-  "total_registros": 50,
+  "limite": "15",
+  "total_registros": 100,
   "mostrando": 15,
   "posteosConEstado": [
     {
-      "ubicacion": {
-        "ciudad": "Zacatelco",
-        "municipio": "60d5f484f8a2c8a1d4e8e4b2",
-        "estado": "Tlaxcala",
-        "pais": "México",
-        "esExacta": false,
-        "coordinates": null
-      },
-      "public_id": "tlx-imagenes/post/abc123",
-      "texto": "Hermoso día en Tlaxcala!",
-      "fecha_creacion": "2026-07-08T10:00:00.000Z",
-      "comentariosActivos": true,
+      "_id": "507f1f77bcf86cd799439012",
       "_idUsuario": {
-        "_id": "60d5f484f8a2c8a1d4e8e4a1",
-        "nombre_completo": { "nombre": "Juan", "apellido": "Pérez" },
-        "url": "juan-perez",
-        "imagen_perfil": { "public_id": "..." }
+        "_id": "507f1f77bcf86cd799439011",
+        "nombre_completo": { "nombre": "Ana", "apellido": "García" },
+        "url": "ana-garcia",
+        "imagen_perfil": { "public_id": "img_123" }
       },
-      "isFollowing": true,
-      "isFavorito": false,
-      "likesCount": 10,
-      "hasLiked": true
-    }
-  ]
-}
-```
-
-#### Códigos de error
-
-| Código | Causa |
-|--------|-------|
-| `400` | Error al obtener posteos |
-| `401` | Token no válido |
-| `429` | Demasiadas solicitudes (rate limit) |
-
----
-
-### `GET /api/posteos/post/:id`
-
-**Descripción:** Obtiene un posteo específico por su ID. Incluye datos del autor, estado de follow, favorito y likes.  
-**Archivo de ruta:** `routes/posteos.js:40`  
-**Controlador:** `controllers/posteos.js:113` — `posteoGet`
-
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('id').isMongoId()`
-  3. `check('id').custom(validarIdPosteo)` — Verifica que el posteo exista
-  4. `validarCampos`
-
-#### Parámetros de entrada
-
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `params` | `id` | `string` (MongoId) | Sí |
-
-#### Respuesta exitosa — `200 OK`
-
-```json
-{
-  "posteo": {
-    "_id": "60d5f484f8a2c8a1d4e8e4b2",
-    "_idUsuario": {
-      "_id": "60d5f484f8a2c8a1d4e8e4a1",
-      "nombre_completo": { "nombre": "Juan", "apellido": "Pérez" },
-      "imagen_perfil": { "public_id": "..." },
-      "url": "juan-perez"
-    },
-    "public_id": "tlx-imagenes/post/abc123",
-    "secure_url": "https://res.cloudinary.com/...",
-    "texto": "Hermoso día en Tlaxcala!",
-    "fecha_creacion": "2026-07-08T10:00:00.000Z",
-    "fecha_actualizacion": null,
-    "ubicacion": { ... },
-    "comentariosActivos": true,
-    "comentariosCount": 5,
-    "likesCount": 10,
-    "hasLiked": true,
-    "isDeleted": false
-  },
-  "isFollowing": true,
-  "isFavorito": false
-}
-```
-
-#### Códigos de error
-
-| Código | Causa |
-|--------|-------|
-| `400` | ID no válido o error al obtener posteo |
-| `401` | Token no válido |
-
----
-
-### `GET /api/posteos/usuario/:idUsuario`
-
-**Descripción:** Obtiene todos los posteos (públicos y privados) de un usuario específico por su ID. Con paginación e información de likes.  
-**Archivo de ruta:** `routes/posteos.js:52`  
-**Controlador:** `controllers/posteos.js:170` — `posteosUsuarioGet`
-
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('idUsuario').isMongoId()`
-  3. `check('idUsuario').custom(validarIdUsuario)`
-  4. `check('page').optional().isNumeric()`
-  5. `check('limite').optional().isNumeric()`
-  6. `validarCampos`
-
-#### Parámetros de entrada
-
-| Ubicación | Campo | Tipo | Requerido | Valor por defecto |
-|-----------|-------|------|-----------|-------------------|
-| `params` | `idUsuario` | `string` (MongoId) | Sí | — |
-| `query` | `page` | `number` | No | `1` |
-| `query` | `limite` | `number` | No | `15` |
-
-#### Respuesta exitosa — `200 OK`
-
-```json
-{
-  "page": 1,
-  "next": "/api/posteos/usuario/60d5f...?page=2&limite=15",
-  "prev": null,
-  "limite": 15,
-  "total_registros": 10,
-  "mostrando": 10,
-  "posteos": [
-    {
-      "public_id": "tlx-imagenes/post/abc123",
-      "secure_url": "https://res.cloudinary.com/...",
+      "ubicacion": null,
+      "public_id": "img_123",
+      "texto": "Hola Tlaxcala",
+      "fecha_creacion": "2026-07-20T18:00:00.000Z",
+      "comentariosActivos": true,
+      "isFollowing": false,
+      "isFavorito": true,
       "likesCount": 5,
       "hasLiked": false
     }
@@ -1118,51 +852,148 @@ Controlador: `controllers/posteos.js`
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `400` | ID no válido o error al obtener posteos |
-| `401` | Token no válido |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | Errores de `page` y `limite` | `routes/posteos.js:34-37` |
+| 429 | `READ_BLOCKED` | `Rate Limit Exceeded` | `"Demasiadas solicitudes, intenta de nuevo más tarde"` | `middlewares/rate-limiter.js:124` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Hubo un error al obtener los posteos de usuarios..."` | `controllers/posteos.js:109` |
 
 ---
 
-### `POST /api/posteos`
+### 4.2 GET /api/posteos/post/:id
 
-**Descripción:** Crea un nuevo posteo con imagen. La imagen se sube a Cloudinary. El texto es opcional.  
-**Archivo de ruta:** `routes/posteos.js:66`  
-**Controlador:** `controllers/posteos.js:246` — `posteosPost`
+**Descripción:** Obtiene un posteo individual por ID, incluyendo información del autor y estados de follow, favorito y like.
+**Archivo de ruta:** `routes/posteos.js:40`
+**Controlador:** `controllers/posteos.js` — `posteoGet` (línea 113)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Rate limit: `posteoLimiter` — 20 posteos cada 15 minutos
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `upload.single('img')` — Multer, campo esperado: `img`
-  3. `validarCampoImg` — Verifica que `req.file` exista
-  4. `validarImagenesMulter` — Captura errores de Multer (tamaño, tipo, etc.)
-  5. `validarTexto` — Valida el texto opcional con regex
-  6. `check('posteo_publico').optional().isBoolean()`
-  7. `check('lat').optional().isFloat()`
-  8. `check('lng').optional().isFloat()`
-  9. `validarCampos`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `id` | MongoId | Sí | `check('id').isMongoId()` + `validarIdPosteo` (`routes/posteos.js:44-47`) |
 
-#### Parámetros de entrada (FormData)
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-| Campo | Tipo | Requerido | Descripción |
-|-------|------|-----------|-------------|
-| `img` | `file` (imagen) | Sí | jpg, jpeg, png, webp. Máximo 5MB |
-| `texto` | `string` | No | Regex: `^[a-zA-Z0-9áéíóúñÁÉÍÓÚÑ.,!?¡¿()\s-]*$` |
-| `posteo_publico` | `boolean` | No | Por defecto `true` |
-| `lat` | `number` | No | Latitud (GPS) |
-| `lng` | `number` | No | Longitud (GPS) |
-| `municipio` | `string` | No | ID del municipio (selección manual) |
-| `ciudad` | `string` | No | Ciudad |
-| `estado` | `string` | No | Estado |
-| `pais` | `string` | No | País (por defecto "México") |
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
+```json
+{
+  "posteo": {
+    "_id": "507f1f77bcf86cd799439012",
+    "_idUsuario": {
+      "_id": "507f1f77bcf86cd799439011",
+      "nombre_completo": { "nombre": "Ana", "apellido": "García" },
+      "imagen_perfil": { "public_id": "img_123" },
+      "url": "ana-garcia"
+    },
+    "public_id": "img_123",
+    "secure_url": "https://...",
+    "texto": "Hola",
+    "fecha_creacion": "2026-07-20T18:00:00.000Z",
+    "ubicacion": null,
+    "comentariosActivos": true,
+    "comentariosCount": 2,
+    "likesCount": 5,
+    "hasLiked": false
+  },
+  "isFollowing": true,
+  "isFavorito": false
+}
+```
 
-#### Respuesta exitosa — `201 Created`
+**Respuestas de error:**
 
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El ID no es valido"` | `routes/posteos.js:44` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"El posteo con ID: ... no existe"` / `"ha sido eliminado"` | `helpers/validar-id-posteo.js:13` o `9` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Hubo un error al obtener el posteo por ID..."` | `controllers/posteos.js:166` |
+
+---
+
+### 4.3 GET /api/posteos/usuario/:idUsuario
+
+**Descripción:** Obtiene los posteos de un usuario específico por su ID, con paginación y contadores de like.
+**Archivo de ruta:** `routes/posteos.js:51`
+**Controlador:** `controllers/posteos.js` — `posteosUsuarioGet` (línea 170)
+
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `idUsuario` | MongoId | Sí | `check('idUsuario').isMongoId()` + `validarIdUsuario` (`routes/posteos.js:55-61`) |
+
+**Query params:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `page` | number | No | `optional().isNumeric()` (`routes/posteos.js:57`) |
+| `limite` | number | No | `optional().isNumeric()` (`routes/posteos.js:58`) |
+
+**Body:** Ninguno.
+
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
+```json
+{
+  "page": "1",
+  "next": "/api/posteos/usuario/507f1f77bcf86cd799439011?page=2&limite=15",
+  "prev": null,
+  "limite": "15",
+  "total_registros": 20,
+  "mostrando": 15,
+  "posteos": [
+    {
+      "_id": "507f1f77bcf86cd799439012",
+      "public_id": "img_123",
+      "secure_url": "https://...",
+      "likesCount": 5,
+      "hasLiked": false
+    }
+  ]
+}
+```
+
+**Respuestas de error:**
+
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El ID no es valido"` / errores de page/limite | `routes/posteos.js:55-60` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"El ID ... no existe en la BD"` / `"no está activo"` | `helpers/validar-id-usuario.js:10` o `14` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Hubo un error al obtener los Posteos..."` | `controllers/posteos.js:239` |
+
+---
+
+### 4.4 POST /api/posteos
+
+**Descripción:** Crea un nuevo posteo con una imagen, texto opcional, visibilidad pública/privada y ubicación opcional.
+**Archivo de ruta:** `routes/posteos.js:64`
+**Controlador:** `controllers/posteos.js` — `posteosPost` (línea 246)
+
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** `posteoLimiter` (15 min, 20) → `POSTEO_BLOCKED`.
+**Headers requeridos:** `Content-Type: multipart/form-data`, cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body (multipart/form-data):**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `img` | archivo | Sí | Multer: `upload.single('img')`, máximo 5 MB, jpg/jpeg/png/webp (`helpers/multer.js:7-32`). `validarCampoImg` valida que exista. |
+| `texto` | string | No | Regex `^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ.,!?¡¿()\s-]*$` (`middlewares/validar-texto.js:6`). |
+| `posteo_publico` | boolean/string | No | `optional().isBoolean()` (`routes/posteos.js:78`). Se normaliza a booleano en el controlador. |
+| `lat` | number/string | No | `optional().isFloat()` (`routes/posteos.js:80`) |
+| `lng` | number/string | No | `optional().isFloat()` (`routes/posteos.js:81`) |
+| `municipio` | MongoId | No | No se valida directamente en la ruta; se usa en `ubicacion.municipio` del schema. |
+| `ciudad`, `estado`, `pais` | string | No | Sin validación en ruta; valores por defecto en el controlador. |
+
+**Respuesta de éxito (201):**
 ```json
 {
   "status": 201,
@@ -1170,95 +1001,92 @@ Controlador: `controllers/posteos.js`
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `400` | Error de validación (imagen no válida, texto inválido, etc.) |
-| `401` | Token no válido |
-| `404` | No hay imagen para subir |
-| `429` | Demasiados posteos (rate limit) |
-| `500` | Error interno (Cloudinary, BD) |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"No hay ninguna imagen para subir"` | `middlewares/validar-imagen-posteo.js:19` |
+| 400 | `BAD_REQUEST` | `Bad Request` | `"La imagen excede el tamaño máximo permitido (5 MB)"` / `"Campo de archivo no esperado: \"img\""` / etc. | `middlewares/validar-imagen-posteo.js:6-14` y `27` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El campo de texto contiene caracteres no permitidos"` / errores de `posteo_publico`, `lat`, `lng` | `middlewares/validar-texto.js` / `routes/posteos.js:78-83` |
+| 429 | `POSTEO_BLOCKED` | `Rate Limit Exceeded` | `"Demasiadas publicaciones, intenta de nuevo más tarde"` | `middlewares/rate-limiter.js:94` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error interno al procesar la publicación"` | `controllers/posteos.js:324` |
 
-#### Notas
-- Solo se acepta el campo `img` en el FormData (upload single).
-- La imagen se redimensiona a 1080px width (crop scale) por defecto.
-- La ubicación puede ser exacta (GPS: lat+lng) o manual (municipio seleccionado).
-- Si se proporciona `lat` y `lng`, se guarda como un objeto GeoJSON `Point` con formato `[longitud, latitud]`.
+**Notas especiales:**
+- El archivo se sube a Cloudinary desde memoria (`helpers/multer.js:5`).
+- Si se envían `lat` y `lng`, se guardan como GeoJSON `Point` con coordenadas `[lng, lat]` (`controllers/posteos.js:290-295`).
+- Si se envía un municipio sin coordenadas, `esExacta` es `false` y `coordinates` es `null`.
 
 ---
 
-### `PUT /api/posteos/:id`
+### 4.5 PUT /api/posteos/:id
 
-**Descripción:** Actualiza un posteo existente. Solo el dueño del posteo puede modificarlo. No permite cambiar la imagen.  
-**Archivo de ruta:** `routes/posteos.js:88`  
-**Controlador:** `controllers/posteos.js:328` — `posteosPut`
+**Descripción:** Actualiza un posteo existente (texto, visibilidad, ubicación). Solo el dueño del posteo puede actualizarlo.
+**Archivo de ruta:** `routes/posteos.js:86`
+**Controlador:** `controllers/posteos.js` — `posteosPut` (línea 328)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('id').isMongoId()`
-  3. `check('id').custom(validarIdPosteo)`
-  4. `validarTexto`
-  5. `validarCampos`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** `Content-Type: application/json` (o multipart si se envía FormData), cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `id` | MongoId | Sí | `check('id').isMongoId()` + `validarIdPosteo` (`routes/posteos.js:90-95`) |
 
-#### Parámetros de entrada
+**Query params:** Ninguno.
+**Body JSON (o FormData):**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `texto` | string | No | Regex `validarTexto` (`middlewares/validar-texto.js:6`). |
+| `posteo_publico` | boolean/string | No | `optional().isBoolean()` (`routes/posteos.js:78`). Se normaliza en el controlador. |
+| `lat`, `lng` | number | No | Sin validación directa en ruta; se convierten en el controlador. |
+| `municipio`, `ciudad`, `estado`, `pais` | varios | No | Sin validación en ruta. |
 
-| Ubicación | Campo | Tipo | Requerido | Descripción |
-|-----------|-------|------|-----------|-------------|
-| `params` | `id` | `string` (MongoId) | Sí | ID del posteo |
-| `body` | `texto` | `string` | No | Nuevo texto |
-| `body` | `posteo_publico` | `boolean` | No | Visibilidad |
-| `body` | `municipio` | `string` | No | ID de municipio |
-| `body` | `ciudad` | `string` | No | Ciudad |
-| `body` | `estado` | `string` | No | Estado |
-| `body` | `pais` | `string` | No | País |
-| `body` | `lat` | `number` | No | Latitud |
-| `body` | `lng` | `number` | No | Longitud |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "status": 200,
   "msg": "Posteo actualizado correctamente",
-  "posteo": { ... }
+  "posteo": {
+    "_id": "507f1f77bcf86cd799439012",
+    "texto": "Texto actualizado",
+    "posteo_publico": true,
+    "ubicacion": null,
+    "fecha_actualizacion": "2026-07-20T19:08:39.000Z"
+  }
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `400` | Error de validación |
-| `401` | Token no válido |
-| `403` | No tienes permiso para modificar este posteo |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El ID no es valido"` / errores de texto | `routes/posteos.js:90` / `validarTexto` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | Posteo no existe o eliminado | `helpers/validar-id-posteo.js` |
+| 403 | `FORBIDDEN` | `Forbidden` | `"No tienes permiso para modificar este posteo."` | `controllers/posteos.js:399` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Hubo un error al actualizar el posteo..."` | `controllers/posteos.js:411` |
 
 ---
 
-### `DELETE /api/posteos/:id`
+### 4.6 DELETE /api/posteos/:id
 
-**Descripción:** Elimina un posteo (soft delete). Solo el dueño puede eliminarlo.  
-**Archivo de ruta:** `routes/posteos.js:101`  
-**Controlador:** `controllers/posteos.js:421` — `posteosDelete`
+**Descripción:** Elimina un posteo (soft delete) del usuario autenticado.
+**Archivo de ruta:** `routes/posteos.js:98`
+**Controlador:** `controllers/posteos.js` — `posteosDelete` (línea 415)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('id').isMongoId()`
-  3. `check('id').custom(validarIdPosteo)`
-  4. `validarCampos`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `id` | MongoId | Sí | `check('id').isMongoId()` + `validarIdPosteo` (`routes/posteos.js:102-105`) |
 
-#### Parámetros de entrada
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `params` | `id` | `string` (MongoId) | Sí |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "status": 200,
@@ -1266,312 +1094,151 @@ Controlador: `controllers/posteos.js`
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `400` | ID no válido |
-| `401` | Token no válido |
-| `403` | No tienes permiso para eliminar este posteo |
-
----
-
-## Likes
-
-Base path: **`/api/likes`**  
-Archivo de ruta: `routes/likes.js`  
-Controlador: `controllers/likes.js`
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El ID no es valido"` | `routes/posteos.js:102` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | Posteo no existe o eliminado | `helpers/validar-id-posteo.js` |
+| 403 | `FORBIDDEN` | `Forbidden` | `"No tienes permiso para eliminar este posteo."` | `controllers/posteos.js:428` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Hubo un error al eliminar el Posteo..."` | `controllers/posteos.js:437` |
 
 ---
 
-### `POST /api/likes/:id/like`
+## 5. Comentarios
 
-**Descripción:** Da like o quita like (toggle) a un posteo.  
-**Archivo de ruta:** `routes/likes.js:11`  
-**Controlador:** `controllers/likes.js:10` — `likeDislikePosteo`
+### 5.1 POST /api/comentarios/:posteoId/comentarios
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('id').isMongoId()`
-  3. `check('id').custom(validarIdPosteo)`
-  4. `validarCampos`
+**Descripción:** Agrega un comentario a un posteo.
+**Archivo de ruta:** `routes/comentarios.js:16`
+**Controlador:** `controllers/comentarios.js` — `agregarComentario` (línea 10)
 
-#### Parámetros de entrada
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** `comentarioLimiter` (1 min, 10) → `COMENTARIO_BLOCKED`.
+**Headers requeridos:** `Content-Type: application/json`, cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `posteoId` | MongoId | Sí | `check('posteoId').isMongoId()` + `validarIdPosteo` (`routes/comentarios.js:18-22`) |
 
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `params` | `id` | `string` (MongoId) | Sí (ID del posteo) |
+**Query params:** Ninguno.
+**Body JSON:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `texto` | string | Sí (si se envía, no vacío) | `optional().notEmpty()` + `max: 250` (`routes/comentarios.js:19-20`). El schema también requiere `maxlength: 250`. |
 
-#### Respuesta exitosa — `200 OK` (like añadido)
-
-```json
-{
-  "status": 200,
-  "msg": "Like añadido"
-}
-```
-
-#### Respuesta exitosa — `200 OK` (like eliminado)
-
-```json
-{
-  "status": 200,
-  "msg": "Like eliminado"
-}
-```
-
-#### Códigos de error
-
-| Código | Causa |
-|--------|-------|
-| `400` | Error al procesar el like |
-| `401` | Token no válido |
-| `404` | Posteo no encontrado |
-
-#### Notas
-- Usa el ID del usuario autenticado (`req.usuario`) y el ID del posteo.
-- Si ya existe un like, lo elimina. Si no existe, lo crea.
-- Guarda también el ID del creador del posteo (`_idCreadorPosteo`) para futuras notificaciones.
-
----
-
-### `GET /api/likes/posteo/:id`
-
-**Descripción:** Obtiene el número total de likes de una publicación.  
-**Archivo de ruta:** `routes/likes.js:22`  
-**Controlador:** `controllers/likes.js:52` — `getLikesPosteos`
-
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('id').isMongoId()`
-  3. `check('id').custom(validarIdPosteo)`
-  4. `validarCampos`
-
-#### Parámetros de entrada
-
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `params` | `id` | `string` (MongoId) | Sí (ID del posteo) |
-
-#### Respuesta exitosa — `200 OK`
-
-```json
-{
-  "likes": 10,
-  "posteo": "60d5f484f8a2c8a1d4e8e4b2"
-}
-```
-
-#### Códigos de error
-
-| Código | Causa |
-|--------|-------|
-| `400` | Error al obtener likes |
-| `401` | Token no válido |
-
----
-
-### `GET /api/likes/:id/likes/usuarios`
-
-**Descripción:** Obtiene los usuarios que dieron like a una publicación, con información del perfil.  
-**Archivo de ruta:** `routes/likes.js:34`  
-**Controlador:** `controllers/likes.js:68` — `getLikesUsuariosPosteos`
-
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('id').isMongoId()`
-  3. `check('id').custom(validarIdPosteo)`
-  4. `validarCampos`
-
-#### Parámetros de entrada
-
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `params` | `id` | `string` (MongoId) | Sí (ID del posteo) |
-
-#### Respuesta exitosa — `200 OK`
-
-```json
-{
-  "status": 200,
-  "msg": "Likes de usuarios a posteo obtenidos correctamente",
-  "likes_usuarios_posteo": [
-    {
-      "_idUsuario": {
-        "_id": "60d5f484f8a2c8a1d4e8e4a1",
-        "nombre_completo": { "nombre": "Juan", "apellido": "Pérez" },
-        "imagen_perfil": { "secure_url": "...", "public_id": "..." },
-        "url": "juan-perez"
-      }
-    }
-  ]
-}
-```
-
-#### Códigos de error
-
-| Código | Causa |
-|--------|-------|
-| `400` | Error al obtener usuarios |
-| `401` | Token no válido |
-
----
-
-## Comentarios
-
-Base path: **`/api/comentarios`**  
-Archivo de ruta: `routes/comentarios.js`  
-Controlador: `controllers/comentarios.js`
-
----
-
-### `POST /api/comentarios/:posteoId/comentarios`
-
-**Descripción:** Agrega un comentario a un posteo. Envía notificación push al autor del posteo (si tiene activadas).  
-**Archivo de ruta:** `routes/comentarios.js:16`  
-**Controlador:** `controllers/comentarios.js:10` — `agregarComentario`
-
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Rate limit: `comentarioLimiter` — 10 comentarios por minuto
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('posteoId').isMongoId()`
-  3. `check('posteoId').custom(validarIdPosteo)`
-  4. `check('texto').optional().notEmpty()`
-  5. `check('texto').isLength({ max: 250 })`
-  6. `validarCampos`
-
-#### Parámetros de entrada
-
-| Ubicación | Campo | Tipo | Requerido | Validación |
-|-----------|-------|------|-----------|------------|
-| `params` | `posteoId` | `string` (MongoId) | Sí | — |
-| `body` | `texto` | `string` | No (pero se recomienda) | Máximo 250 caracteres |
-
-#### Respuesta exitosa — `201 Created`
-
+**Respuesta de éxito (201):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "ok": true,
   "status": 201,
   "msg": "Comentario agregado",
   "comentario": {
-    "_id": "60d5f484f8a2c8a1d4e8e4c1",
-    "texto": "¡Qué bonita foto!",
-    "posteoId": "60d5f484f8a2c8a1d4e8e4b2",
-    "autorId": "60d5f484f8a2c8a1d4e8e4a1",
-    "createdAt": "2026-07-08T12:00:00.000Z",
-    "updatedAt": "2026-07-08T12:00:00.000Z"
+    "_id": "507f1f77bcf86cd799439013",
+    "texto": "Bonita foto",
+    "posteoId": "507f1f77bcf86cd799439012",
+    "autorId": "507f1f77bcf86cd799439011",
+    "isDeleted": false,
+    "createdAt": "2026-07-20T19:08:39.000Z",
+    "updatedAt": "2026-07-20T19:08:39.000Z"
   }
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `400` | Error de validación (texto > 250 caracteres) |
-| `403` | Los comentarios están desactivados en este posteo |
-| `404` | El posteo no existe o ha sido eliminado |
-| `429` | Demasiados comentarios (rate limit) |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El ID del posteo no es válido"` / `"El texto es obligatorio"` / `"El comentario no puede exceder 250 caracteres"` | `routes/comentarios.js:18-20` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"El posteo no existe"` / `"ha sido eliminado"` | `helpers/validar-id-posteo.js` |
+| 403 | `FORBIDDEN` | `Forbidden` | `"Los comentarios están desactivados en este posteo"` | `controllers/comentarios.js:29` |
+| 429 | `COMENTARIO_BLOCKED` | `Rate Limit Exceeded` | `"Demasiados comentarios, intenta de nuevo más tarde"` | `middlewares/rate-limiter.js:139` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al agregar comentario"` | `controllers/comentarios.js:115` |
 
-#### Notas
-- Incrementa `comentariosCount` del posteo.
-- Si es el primer comentario del posteo y el comentarista no es el autor, envía un correo de notificación al autor.
-- Envía notificación push Web Push al autor si tiene notificaciones activadas.
-- Las suscripciones push inválidas (410/404) se eliminan automáticamente.
+**Notas especiales:**
+- Si es el primer comentario y el autor del posteo no es el mismo que comenta, se envía una notificación push y un email de notificación al autor del posteo (si `SEND_EMAIL` lo permite).
+- Se incrementa `comentariosCount` del posteo.
 
 ---
 
-### `GET /api/comentarios/:posteoId/comentarios`
+### 5.2 GET /api/comentarios/:posteoId/comentarios
 
-**Descripción:** Obtiene los comentarios de un posteo con paginación, ordenados por fecha descendente.  
-**Archivo de ruta:** `routes/comentarios.js:25`  
-**Controlador:** `controllers/comentarios.js:131` — `obtenerComentarios`
+**Descripción:** Obtiene los comentarios de un posteo, paginados y ordenados por más recientes.
+**Archivo de ruta:** `routes/comentarios.js:25`
+**Controlador:** `controllers/comentarios.js` — `obtenerComentarios` (línea 119)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('posteoId').isMongoId()`
-  3. `check('posteoId').custom(validarIdPosteo)`
-  4. `check('page').optional().isNumeric()`
-  5. `check('limite').optional().isNumeric()`
-  6. `validarCampos`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `posteoId` | MongoId | Sí | `check('posteoId').isMongoId()` + `validarIdPosteo` (`routes/comentarios.js:27-31`) |
 
-#### Parámetros de entrada
+**Query params:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `page` | number | No | `optional().isNumeric()` (`routes/comentarios.js:28`) |
+| `limite` | number | No | `optional().isNumeric()` (`routes/comentarios.js:29`) |
 
-| Ubicación | Campo | Tipo | Requerido | Valor por defecto |
-|-----------|-------|------|-----------|-------------------|
-| `params` | `posteoId` | `string` (MongoId) | Sí | — |
-| `query` | `page` | `number` | No | `1` |
-| `query` | `limit` | `number` | No | `10` (máximo 100) |
+**Body:** Ninguno.
 
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "ok": true,
   "status": 200,
   "page": 1,
   "limit": 10,
-  "next": "/api/comentarios/60d5f.../comentarios/?page=2&limit=10",
+  "next": "/api/comentarios/507f1f77bcf86cd799439012/comentarios/?page=2&limit=10",
   "prev": null,
   "total": 25,
   "totalPages": 3,
   "comentarios": [
     {
-      "_id": "60d5f484f8a2c8a1d4e8e4c1",
-      "texto": "¡Qué bonita foto!",
-      "createdAt": "2026-07-08T12:00:00.000Z",
+      "texto": "Bonita foto",
+      "createdAt": "2026-07-20T19:08:39.000Z",
       "autorId": {
-        "_id": "60d5f484f8a2c8a1d4e8e4a1",
-        "nombre_completo": { "nombre": "Juan", "apellido": "Pérez" },
-        "imagen_perfil": { "secure_url": "...", "public_id": "..." },
-        "url": "juan-perez"
+        "nombre_completo": { "nombre": "Ana", "apellido": "García" },
+        "imagen_perfil": { "secure_url": "...", "public_id": null },
+        "url": "ana-garcia"
       }
     }
   ]
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `500` | Error al obtener comentarios |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El ID del posteo no es válido"` / errores de page/limite | `routes/comentarios.js:27-30` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | Posteo no existe o eliminado | `helpers/validar-id-posteo.js` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al obtener comentarios"` | `controllers/comentarios.js:185` |
 
 ---
 
-### `GET /api/comentarios/:posteoId/comentarios/count`
+### 5.3 GET /api/comentarios/:posteoId/comentarios/count
 
-**Descripción:** Obtiene el número total de comentarios de un posteo.  
-**Archivo de ruta:** `routes/comentarios.js:34`  
-**Controlador:** `controllers/comentarios.js:205` — `obtenerCountComentarios`
+**Descripción:** Devuelve el contador de comentarios de un posteo.
+**Archivo de ruta:** `routes/comentarios.js:34`
+**Controlador:** `controllers/comentarios.js` — `obtenerCountComentarios` (línea 189)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('posteoId').isMongoId()`
-  3. `check('posteoId').custom(validarIdPosteo)`
-  4. `validarCampos`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `posteoId` | MongoId | Sí | `check('posteoId').isMongoId()` + `validarIdPosteo` (`routes/comentarios.js:36-38`) |
 
-#### Parámetros de entrada
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `params` | `posteoId` | `string` (MongoId) | Sí |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "ok": true,
@@ -1580,36 +1247,35 @@ Controlador: `controllers/comentarios.js`
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `404` | El posteo no existe |
-| `500` | Error al obtener contador |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El ID del posteo no es válido"` | `routes/comentarios.js:36` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"El posteo no existe"` | `controllers/comentarios.js:200` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al obtener contador"` | `controllers/comentarios.js:210` |
 
 ---
 
-### `DELETE /api/comentarios/:comentarioId`
+### 5.4 DELETE /api/comentarios/:comentarioId
 
-**Descripción:** Elimina un comentario (soft delete). Puede eliminarlo el autor del comentario o el dueño del posteo.  
-**Archivo de ruta:** `routes/comentarios.js:41`  
-**Controlador:** `controllers/comentarios.js:238` — `eliminarComentario`
+**Descripción:** Elimina un comentario (soft delete). Puede ser eliminado por su autor o por el dueño del posteo.
+**Archivo de ruta:** `routes/comentarios.js:41`
+**Controlador:** `controllers/comentarios.js` — `eliminarComentario` (línea 214)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('comentarioId').isMongoId()`
-  3. `validarCampos`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `comentarioId` | MongoId | Sí | `check('comentarioId').isMongoId()` (`routes/comentarios.js:43`) |
 
-#### Parámetros de entrada
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `params` | `comentarioId` | `string` (MongoId) | Sí |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "ok": true,
@@ -1618,92 +1284,203 @@ Controlador: `controllers/comentarios.js`
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `400` | El comentario ya fue eliminado |
-| `403` | No tienes permisos para eliminar este comentario |
-| `404` | El comentario no existe |
-
-#### Notas
-- Decrementa `comentariosCount` del posteo (protege contra contador negativo).
-- Guarda `eliminadoPor` (ID del usuario que eliminó) y `deleteReason: "manual"`.
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El ID del comentario no es válido"` | `routes/comentarios.js:43` |
+| 400 | `BAD_REQUEST` | `Bad Request` | `"El comentario ya fue eliminado"` | `controllers/comentarios.js:230` o `272` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"El comentario no existe"` | `controllers/comentarios.js:231` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"El posteo asociado no existe"` | `controllers/comentarios.js:239` |
+| 403 | `FORBIDDEN` | `Forbidden` | `"No tienes permisos para eliminar este comentario"` | `controllers/comentarios.js:247` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al eliminar comentario"` | `controllers/comentarios.js:283` |
 
 ---
 
-### `PUT /api/comentarios/:posteoId/comentarios/toggle`
+### 5.5 PUT /api/comentarios/:posteoId/comentarios/toggle
 
-**Descripción:** Activa o desactiva los comentarios de un posteo. Solo el dueño del posteo puede hacer esta acción.  
-**Archivo de ruta:** `routes/comentarios.js:47`  
-**Controlador:** `controllers/comentarios.js:328` — `toggleComentariosPosteo`
+**Descripción:** Activa o desactiva los comentarios de un posteo. Solo el dueño del posteo puede hacerlo.
+**Archivo de ruta:** `routes/comentarios.js:47`
+**Controlador:** `controllers/comentarios.js` — `toggleComentariosPosteo` (línea 287)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('posteoId').isMongoId()`
-  3. `check('posteoId').custom(validarIdPosteo)`
-  4. `check('activar').isBoolean({ strict: true })`
-  5. `validarCampos`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** `Content-Type: application/json`, cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `posteoId` | MongoId | Sí | `check('posteoId').isMongoId()` + `validarIdPosteo` (`routes/comentarios.js:49-52`) |
 
-#### Parámetros de entrada
+**Query params:** Ninguno.
+**Body JSON:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `activar` | boolean | Sí | `check('activar').isBoolean({ strict: true })` (`routes/comentarios.js:50`) |
 
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `params` | `posteoId` | `string` (MongoId) | Sí |
-| `body` | `activar` | `boolean` | Sí |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "ok": true,
   "status": 200,
-  "msg": "Comentarios activados",
-  "comentariosActivos": true
+  "msg": "Comentarios desactivados",
+  "comentariosActivos": false
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `403` | Solo el dueño del posteo puede modificar los comentarios |
-| `404` | El posteo no existe |
-
----
-
-## Followers (Seguidores)
-
-Base path: **`/api/followers`**  
-Archivo de ruta: `routes/followers.js`  
-Controlador: `controllers/followers.js`
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El ID del posteo no es válido"` / `"El campo activar debe ser un booleano"` | `routes/comentarios.js:49-50` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | Posteo no existe o eliminado | `helpers/validar-id-posteo.js` |
+| 403 | `FORBIDDEN` | `Forbidden` | `"Solo el dueño del posteo puede modificar los comentarios"` | `controllers/comentarios.js:302` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al modificar comentarios"` | `controllers/comentarios.js:315` |
 
 ---
 
-### `POST /api/followers/follow/:id`
+## 6. Likes
 
-**Descripción:** Sigue a un usuario. Crea notificación y envía notificación push al usuario seguido.  
-**Archivo de ruta:** `routes/followers.js:14`  
-**Controlador:** `controllers/followers.js:8` — `followUsuario`
+### 6.1 POST /api/likes/:id/like
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('id').isMongoId()`
-  3. `check('id').custom(validarIdUsuario)`
-  4. `validarCampos`
+**Descripción:** Da like a un posteo si aún no tiene like del usuario; si ya tiene, lo quita (toggle).
+**Archivo de ruta:** `routes/likes.js:11`
+**Controlador:** `controllers/likes.js` — `likeDislikePosteo` (línea 11)
 
-#### Parámetros de entrada
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `id` | MongoId | Sí | `check('id').isMongoId()` + `validarIdPosteo` (`routes/likes.js:15-18`) |
 
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `params` | `id` | `string` (MongoId) | Sí (ID del usuario a seguir) |
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-#### Respuesta exitosa — `200 OK`
+**Respuesta de éxito (200):**
+```json
+{ "status": 200, "msg": "Like añadido" }
+```
+o
+```json
+{ "status": 200, "msg": "Like eliminado" }
+```
 
+**Respuestas de error:**
+
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El ID no es valido"` | `routes/likes.js:15` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"Publicación no encontrada"` | `controllers/likes.js:22` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al procesar el like"` | `controllers/likes.js:48` |
+
+---
+
+### 6.2 GET /api/likes/posteo/:id
+
+**Descripción:** Devuelve el número total de likes de un posteo.
+**Archivo de ruta:** `routes/likes.js:21`
+**Controlador:** `controllers/likes.js` — `getLikesPosteos` (línea 52)
+
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `id` | MongoId | Sí | `check('id').isMongoId()` + `validarIdPosteo` (`routes/likes.js:25-28`) |
+
+**Query params:** Ninguno.
+**Body:** Ninguno.
+
+**Respuesta de éxito (200):**
+```json
+{
+  "likes": 42,
+  "posteo": "507f1f77bcf86cd799439012"
+}
+```
+
+**Respuestas de error:**
+
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El ID no es valido"` | `routes/likes.js:25` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | Posteo no existe o eliminado | `helpers/validar-id-posteo.js` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al obtener el número de likes"` | `controllers/likes.js:62` |
+
+---
+
+### 6.3 GET /api/likes/:id/likes/usuarios
+
+**Descripción:** Devuelve la lista de usuarios que dieron like a un posteo.
+**Archivo de ruta:** `routes/likes.js:32`
+**Controlador:** `controllers/likes.js` — `getLikesUsuariosPosteos` (línea 66)
+
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `id` | MongoId | Sí | `check('id').isMongoId()` + `validarIdPosteo` (`routes/likes.js:36-39`) |
+
+**Query params:** Ninguno.
+**Body:** Ninguno.
+
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
+```json
+{
+  "status": 200,
+  "msg": "Likes de usuarios a posteo obtenidos correctamente",
+  "likes_usuarios_posteo": [
+    {
+      "_id": "507f1f77bcf86cd799439014",
+      "_idUsuario": {
+        "nombre_completo": { "nombre": "Ana", "apellido": "García" },
+        "imagen_perfil": { "secure_url": "...", "public_id": null },
+        "url": "ana-garcia"
+      }
+    }
+  ]
+}
+```
+
+**Respuestas de error:**
+
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El ID no es valido"` | `routes/likes.js:36` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | Posteo no existe o eliminado | `helpers/validar-id-posteo.js` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al obtener los likes de usuarios"` | `controllers/likes.js:82` |
+
+---
+
+## 7. Followers
+
+### 7.1 POST /api/followers/follow/:id
+
+**Descripción:** Sigue a un usuario.
+**Archivo de ruta:** `routes/followers.js:14`
+**Controlador:** `controllers/followers.js` — `followUsuario` (línea 9)
+
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `id` | MongoId | Sí | `check('id').isMongoId()` + `validarIdUsuario` (`routes/followers.js:18-21`) |
+
+**Query params:** Ninguno.
+**Body:** Ninguno.
+
+**Respuesta de éxito (200):**
 ```json
 {
   "status": 200,
@@ -1712,43 +1489,42 @@ Controlador: `controllers/followers.js`
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `400` | No puedes seguirte a ti mismo |
-| `400` | Ya sigues a este usuario |
-| `404` | El usuario que intentas seguir no existe |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El ID no es valido"` | `routes/followers.js:18` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"El ID ... no existe en la BD"` / `"no está activo"` | `helpers/validar-id-usuario.js:10` o `14` |
+| 400 | `BAD_REQUEST` | `Bad Request` | `"No puedes seguirte a ti mismo"` | `controllers/followers.js:19` |
+| 400 | `BAD_REQUEST` | `Bad Request` | `"Ya sigues a este usuario"` | `controllers/followers.js:36` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"El usuario que intentas seguir no existe"` | `controllers/followers.js:40` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Hubo un error al seguir a un usuario"` | `controllers/followers.js:112` |
 
-#### Notas
-- Crea una notificación persistente en la BD (tipo: "follow").
-- Envía notificación push Web Push si el usuario seguido tiene notificaciones activadas.
-- Las suscripciones push inválidas se eliminan automáticamente.
+**Notas especiales:**
+- Se crea una notificación persistente de tipo `follow` para el usuario seguido.
+- Se intenta enviar notificación push si el usuario objetivo tiene activadas las notificaciones.
 
 ---
 
-### `DELETE /api/followers/unfollow/:id`
+### 7.2 DELETE /api/followers/unfollow/:id
 
-**Descripción:** Deja de seguir a un usuario.  
-**Archivo de ruta:** `routes/followers.js:27`  
-**Controlador:** `controllers/followers.js:126` — `unfollowUsuario`
+**Descripción:** Deja de seguir a un usuario.
+**Archivo de ruta:** `routes/followers.js:25`
+**Controlador:** `controllers/followers.js` — `unfollowUsuario` (línea 116)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('id').isMongoId()`
-  3. `check('id').custom(validarIdUsuario)`
-  4. `validarCampos`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `id` | MongoId | Sí | `check('id').isMongoId()` + `validarIdUsuario` (`routes/followers.js:29-32`) |
 
-#### Parámetros de entrada
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `params` | `id` | `string` (MongoId) | Sí (ID del usuario a dejar de seguir) |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "status": 200,
@@ -1756,48 +1532,48 @@ Controlador: `controllers/followers.js`
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `400` | No sigues a este usuario |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El ID no es valido"` | `routes/followers.js:29` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"El ID ... no existe en la BD"` / `"no está activo"` | `helpers/validar-id-usuario.js:10` o `14` |
+| 400 | `BAD_REQUEST` | `Bad Request` | `"No sigues a este usuario"` | `controllers/followers.js:131` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Hubo un error al dejar de seguir a un usuario"` | `controllers/followers.js:139` |
 
 ---
 
-### `GET /api/followers/usuario/lista-followers/:id`
+### 7.3 GET /api/followers/usuario/lista-followers/:id
 
-**Descripción:** Obtiene la lista de seguidores de un perfil de usuario. Incluye indicador de si el usuario autenticado sigue a cada seguidor.  
-**Archivo de ruta:** `routes/followers.js:39`  
-**Controlador:** `controllers/followers.js:157` — `obtenerFollowers`
+**Descripción:** Obtiene la lista de seguidores de un usuario, indicando si el usuario logueado sigue a cada seguidor.
+**Archivo de ruta:** `routes/followers.js:35`
+**Controlador:** `controllers/followers.js` — `obtenerFollowers` (línea 143)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('id').isMongoId()`
-  3. `check('id').custom(validarIdUsuario)`
-  4. `validarCampos`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `id` | MongoId | Sí | `check('id').isMongoId()` + `validarIdUsuario` (`routes/followers.js:39-42`) |
 
-#### Parámetros de entrada
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `params` | `id` | `string` (MongoId) | Sí (ID del perfil visitado) |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "status": 200,
   "msg": "Seguidores obtenidos correctamente",
-  "totalSeguidores": 42,
+  "totalSeguidores": 2,
   "seguidores": [
     {
       "follower": {
-        "_id": "60d5f484f8a2c8a1d4e8e4a1",
-        "nombre_completo": { "nombre": "Juan", "apellido": "Pérez" },
-        "imagen_perfil": { "secure_url": "...", "public_id": "..." },
-        "url": "juan-perez"
+        "_id": "507f1f77bcf86cd799439011",
+        "nombre_completo": { "nombre": "Ana", "apellido": "García" },
+        "imagen_perfil": { "secure_url": "...", "public_id": null },
+        "url": "ana-garcia"
       },
       "isFollowing": true
     }
@@ -1805,49 +1581,48 @@ Controlador: `controllers/followers.js`
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `500` | Error al obtener seguidores |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El ID no es valido"` | `routes/followers.js:39` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"El ID ... no existe en la BD"` / `"no está activo"` | `helpers/validar-id-usuario.js:10` o `14` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al obtener seguidores"` | `controllers/followers.js:182` |
 
 ---
 
-### `GET /api/followers/usuario/lista-followings/:id`
+### 7.4 GET /api/followers/usuario/lista-followings/:id
 
-**Descripción:** Obtiene la lista de usuarios que sigue un perfil. Incluye indicador de si el usuario autenticado también los sigue.  
-**Archivo de ruta:** `routes/followers.js:51`  
-**Controlador:** `controllers/followers.js:202` — `obtenerFollowings`
+**Descripción:** Obtiene la lista de usuarios que sigue un perfil (followings), indicando si el usuario logueado sigue a cada uno.
+**Archivo de ruta:** `routes/followers.js:45`
+**Controlador:** `controllers/followers.js` — `obtenerFollowings` (línea 186)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('id').isMongoId()`
-  3. `check('id').custom(validarIdUsuario)`
-  4. `validarCampos`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `id` | MongoId | Sí | `check('id').isMongoId()` + `validarIdUsuario` (`routes/followers.js:49-52`) |
 
-#### Parámetros de entrada
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `params` | `id` | `string` (MongoId) | Sí (ID del perfil visitado) |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "status": 200,
   "msg": "Usuarios seguidos, obtenidos correctamente",
-  "totalSeguidos": 18,
+  "totalSeguidos": 3,
   "siguiendo": [
     {
-      "_id": "60d5f484f8a2c8a1d4e8e4a1",
+      "_id": "507f1f77bcf86cd799439015",
       "following": {
-        "_id": "60d5f484f8a2c8a1d4e8e4b1",
-        "nombre_completo": { "nombre": "María", "apellido": "López" },
-        "imagen_perfil": { "secure_url": "...", "public_id": "..." },
-        "url": "maria-lopez"
+        "_id": "507f1f77bcf86cd799439011",
+        "nombre_completo": { "nombre": "Ana", "apellido": "García" },
+        "imagen_perfil": { "secure_url": "...", "public_id": null },
+        "url": "ana-garcia"
       },
       "isFollowing": true
     }
@@ -1855,105 +1630,94 @@ Controlador: `controllers/followers.js`
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `500` | Error al obtener followings |
-
----
-
-## Favoritos
-
-Base path: **`/api/favoritos`**  
-Archivo de ruta: `routes/favoritos.js`  
-Controlador: `controllers/favoritos.js`
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El ID no es valido"` | `routes/followers.js:49` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"El ID ... no existe en la BD"` / `"no está activo"` | `helpers/validar-id-usuario.js:10` o `14` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error en obtener followings"` | `controllers/followers.js:262` |
 
 ---
 
-### `GET /api/favoritos`
+## 8. Favoritos
 
-**Descripción:** Obtiene los posteos favoritos del usuario autenticado, con paginación.  
-**Archivo de ruta:** `routes/favoritos.js:13`  
-**Controlador:** `controllers/favoritos.js:8` — `obtenerFavoritosUsuario`
+### 8.1 GET /api/favoritos
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('page').optional().isNumeric()`
-  3. `check('limite').optional().isNumeric()`
-  4. `validarCampos`
+**Descripción:** Obtiene los posteos favoritos del usuario autenticado, con paginación.
+**Archivo de ruta:** `routes/favoritos.js:13`
+**Controlador:** `controllers/favoritos.js` — `obtenerFavoritosUsuario` (línea 9)
 
-#### Parámetros de entrada (query)
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `page` | number | No | `optional().isNumeric()` (`routes/favoritos.js:17`) |
+| `limite` | number | No | `optional().isNumeric()` (`routes/favoritos.js:18`) |
 
-| Ubicación | Campo | Tipo | Requerido | Valor por defecto |
-|-----------|-------|------|-----------|-------------------|
-| `query` | `page` | `number` | No | `1` |
-| `query` | `limite` | `number` | No | `15` |
+**Body:** Ninguno.
 
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "page": 1,
   "next": "/api/favoritos?page=2&limite=15",
   "prev": null,
   "limite": 15,
-  "total_registros": 5,
-  "mostrando": 5,
+  "total_registros": 10,
+  "mostrando": 10,
   "favoritos": [
     {
-      "_id": "60d5f484f8a2c8a1d4e8e4d1",
-      "createdAt": "2026-07-08T12:00:00.000Z",
+      "_id": "507f1f77bcf86cd799439016",
+      "createdAt": "2026-07-20T18:00:00.000Z",
       "posteoId": {
-        "public_id": "tlx-imagenes/post/abc123",
+        "public_id": "img_123",
         "posteo_publico": true
       },
       "autorId": {
-        "_id": "60d5f484f8a2c8a1d4e8e4a1",
-        "nombre_completo": { "nombre": "Juan", "apellido": "Pérez" },
-        "url": "juan-perez"
+        "nombre_completo": { "nombre": "Ana", "apellido": "García" },
+        "url": "ana-garcia"
       }
     }
   ]
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `401` | Token no válido |
-| `500` | Error interno |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | Errores de `page` y `limite` | `routes/favoritos.js:17-20` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Hubo un problema al realizar la peticion..."` | `controllers/favoritos.js:85` |
 
 ---
 
-### `POST /api/favoritos/:posteoId`
+### 8.2 POST /api/favoritos/:posteoId
 
-**Descripción:** Agrega un posteo a favoritos. No puedes agregar tus propios posteos.  
-**Archivo de ruta:** `routes/favoritos.js:24`  
-**Controlador:** `controllers/favoritos.js:88` — `agregarPosteoFavorito`
+**Descripción:** Agrega un posteo a favoritos del usuario autenticado.
+**Archivo de ruta:** `routes/favoritos.js:24`
+**Controlador:** `controllers/favoritos.js` — `agregarPosteoFavorito` (línea 89)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('posteoId').isMongoId()`
-  3. `check('posteoId').custom(validarIdPosteo)`
-  4. `check('autorId').isMongoId()`
-  5. `check('autorId').custom(validarIdUsuario)`
-  6. `validarCampos`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** `Content-Type: application/json`, cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `posteoId` | MongoId | Sí | `check('posteoId').isMongoId()` + `validarIdPosteo` (`routes/favoritos.js:28-33`) |
 
-#### Parámetros de entrada
+**Query params:** Ninguno.
+**Body JSON:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `autorId` | MongoId | Sí | `check('autorId').isMongoId()` + `validarIdUsuario` (`routes/favoritos.js:30-34`) |
 
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `params` | `posteoId` | `string` (MongoId) | Sí (ID del posteo) |
-| `body` | `autorId` | `string` (MongoId) | Sí (ID del autor del posteo) |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "status": 200,
@@ -1961,40 +1725,37 @@ Controlador: `controllers/favoritos.js`
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `400` | No puedes agregar a favoritos tus propios posteos |
-| `400` | Este posteo ya está en tus favoritos |
-
-#### Notas
-- Usa `upsert` de MongoDB para evitar duplicados en una sola operación atómica.
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El posteoId debe ser valido"` / `"El autorId es obligatorio"` | `routes/favoritos.js:28-30` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | Posteo no existe o eliminado / Usuario no existe o inactivo | `helpers/validar-id-posteo.js` / `helpers/validar-id-usuario.js` |
+| 400 | `BAD_REQUEST` | `Bad Request` | `"No puedes agregar a favoritos tus propios posteos"` | `controllers/favoritos.js:104` |
+| 409 | `CONFLICT` | `Conflict` | `"Este posteo ya está en tus favoritos"` | `controllers/favoritos.js:121` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Hubo un problema al realizar la peticion..."` | `controllers/favoritos.js:130` |
 
 ---
 
-### `DELETE /api/favoritos/:posteoId`
+### 8.3 DELETE /api/favoritos/:posteoId
 
-**Descripción:** Elimina un posteo de favoritos.  
-**Archivo de ruta:** `routes/favoritos.js:40`  
-**Controlador:** `controllers/favoritos.js:140` — `eliminarPosteoFavorito`
+**Descripción:** Elimina un posteo de favoritos del usuario autenticado.
+**Archivo de ruta:** `routes/favoritos.js:38`
+**Controlador:** `controllers/favoritos.js` — `eliminarPosteoFavorito` (línea 135)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('posteoId').isMongoId()`
-  3. `check('posteoId').custom(validarIdPosteo)`
-  4. `validarCampos`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `posteoId` | MongoId | Sí | `check('posteoId').isMongoId()` + `validarIdPosteo` (`routes/favoritos.js:42-45`) |
 
-#### Parámetros de entrada
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `params` | `posteoId` | `string` (MongoId) | Sí |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "status": 200,
@@ -2002,143 +1763,75 @@ Controlador: `controllers/favoritos.js`
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `404` | El posteo no existe en favoritos |
-
----
-
-## Uploads (Imágenes de Perfil)
-
-Base path: **`/api/uploads`**  
-Archivo de ruta: `routes/uploads.js`  
-Controlador: `controllers/uploads.js`
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El posteoId debe ser valido"` | `routes/favoritos.js:42` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | Posteo no existe o eliminado | `helpers/validar-id-posteo.js` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"El posteo con id ... no existe en favoritos"` | `controllers/favoritos.js:145` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Hubo un problema al realizar la peticion..."` | `controllers/favoritos.js:153` |
 
 ---
 
-### `PUT /api/uploads/:coleccion`
+## 9. Notificaciones
 
-**Descripción:** Actualiza la imagen de perfil del usuario autenticado. La imagen se sube a Cloudinary y se reemplaza la anterior.  
-**Archivo de ruta:** `routes/uploads.js:16`  
-**Controlador:** `controllers/uploads.js:9` — `actualizarImagen`
+### 9.1 POST /api/notificaciones/subscribe
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `upload.single('img')` — Multer, campo esperado: `img`
-  3. `validarCampoImg` — Verifica que `req.file` exista
-  4. `validarImagenesMulter` — Captura errores de Multer
-  5. `check('coleccion').custom(c => coleccionesPermitidas(c, ['usuarios']))` — Solo colección "usuarios"
-  6. `validarCampos`
+**Descripción:** Registra una suscripción Web Push para el usuario autenticado.
+**Archivo de ruta:** `routes/notificaciones.js:16`
+**Controlador:** `controllers/notificaciones.js` — `subscribirNotificacionesWebPush` (línea 7)
 
-#### Parámetros de entrada
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** `Content-Type: application/json`, cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body JSON:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `subscription` | object | Sí | Debe contener `endpoint`, `keys.p256dh` y `keys.auth` (`controllers/notificaciones.js:12-16`). |
+| `subscription.endpoint` | string | Sí | — |
+| `subscription.keys.p256dh` | string | Sí | — |
+| `subscription.keys.auth` | string | Sí | — |
+| `userAgent` | string | No | Opcional; si no se envía se usa el header `User-Agent`. |
 
-| Ubicación | Campo | Tipo | Requerido | Descripción |
-|-----------|-------|------|-----------|-------------|
-| `params` | `coleccion` | `string` | Sí | Solo `"usuarios"` |
-| `body` (FormData) | `img` | `file` | Sí | jpg, jpeg, png, webp. Máximo 5MB |
-
-#### Respuesta exitosa — `200 OK`
-
-```json
-{
-  "status": 200,
-  "msg": "Imagen de perfil actualizada correctamente",
-  "usuario": {
-    "imagen_perfil": {
-      "secure_url": "https://res.cloudinary.com/...",
-      "public_id": "tlx-imagenes/..."
-    }
-  }
-}
-```
-
-#### Códigos de error
-
-| Código | Causa |
-|--------|-------|
-| `400` | Colección no permitida, imagen no válida, etc. |
-| `401` | Token no válido |
-| `404` | No hay ninguna imagen para subir |
-
-#### Notas
-- La imagen se redimensiona a 500px width con `fill` antes de subir a Cloudinary.
-- Si el usuario ya tenía una imagen (no es la default), se elimina la anterior de Cloudinary.
-- El buffer se libera inmediatamente después de subir a Cloudinary por seguridad.
-
----
-
-## Notificaciones Web Push
-
-Base path: **`/api/notificaciones`**  
-Archivo de ruta: `routes/notificaciones.js`  
-Controlador: `controllers/notificaciones.js`
-
----
-
-### `POST /api/notificaciones/subscribe`
-
-**Descripción:** Registra una suscripción de Web Push para el usuario autenticado.  
-**Archivo de ruta:** `routes/notificaciones.js:16`  
-**Controlador:** `controllers/notificaciones.js:7` — `subscribirNotificacionesWebPush`
-
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares: `verificarTokenSesion`
-
-#### Parámetros de entrada
-
-| Ubicación | Campo | Tipo | Requerido | Descripción |
-|-----------|-------|------|-----------|-------------|
-| `body` | `subscription` | `object` | Sí | Objeto de suscripción Push API |
-| `body` | `subscription.endpoint` | `string` | Sí | Endpoint del push service |
-| `body` | `subscription.keys.p256dh` | `string` | Sí | Clave pública |
-| `body` | `subscription.keys.auth` | `string` | Sí | Clave de autenticación |
-| `body` | `userAgent` | `string` | No | Identificador del dispositivo |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "message": "Suscripción registrada correctamente"
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `400` | Suscripción inválida (faltan campos) |
-| `404` | Usuario no encontrado |
-
-#### Notas
-- Máximo 10 suscripciones por usuario. Si se excede, elimina la más antigua.
-- Evita suscripciones duplicadas (mismo endpoint + p256dh).
-- Activa `notificaciones_activadas = true` automáticamente.
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 400 | `BAD_REQUEST` | `Bad Request` | `"Suscripción inválida"` | `controllers/notificaciones.js:18` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"Usuario no encontrado"` | `controllers/notificaciones.js:24` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al guardar suscripción"` | `controllers/notificaciones.js:62` |
 
 ---
 
-### `POST /api/notificaciones/unsubscribe`
+### 9.2 POST /api/notificaciones/unsubscribe
 
-**Descripción:** Elimina una suscripción de Web Push específica.  
-**Archivo de ruta:** `routes/notificaciones.js:21`  
-**Controlador:** `controllers/notificaciones.js:66` — `unsubscribeNotificacionesWebPush`
+**Descripción:** Elimina una suscripción Web Push por endpoint.
+**Archivo de ruta:** `routes/notificaciones.js:21`
+**Controlador:** `controllers/notificaciones.js` — `unsubscribeNotificacionesWebPush` (línea 66)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares: `verificarTokenSesion`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** `Content-Type: application/json`, cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body JSON:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `endpoint` | string | Sí | Debe estar presente (`controllers/notificaciones.js:71`). |
 
-#### Parámetros de entrada
-
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `body` | `endpoint` | `string` | Sí |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "success": true,
@@ -2146,116 +1839,119 @@ Controlador: `controllers/notificaciones.js`
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `400` | Falta el endpoint de la suscripción |
-
-#### Notas
-- Si el array de suscripciones queda vacío, desactiva `notificaciones_activadas = false`.
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 400 | `BAD_REQUEST` | `Bad Request` | `"Falta el endpoint de la suscripción"` | `controllers/notificaciones.js:72` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"Usuario no encontrado"` | `controllers/notificaciones.js:84` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al desactivar notificaciones"` | `controllers/notificaciones.js:98` |
 
 ---
 
-### `GET /api/notificaciones/vapidPublicKey`
+### 9.3 GET /api/notificaciones/vapidPublicKey
 
-**Descripción:** Obtiene la clave pública VAPID para Web Push.  
-**Archivo de ruta:** `routes/notificaciones.js:27`  
-**Controlador:** `controllers/notificaciones.js:107` — `getVapidPublicKey`
+**Descripción:** Devuelve la clave pública VAPID para configurar Web Push en el frontend.
+**Archivo de ruta:** `routes/notificaciones.js:27`
+**Controlador:** `controllers/notificaciones.js` — `getVapidPublicKey` (línea 102)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares: `verificarTokenSesion`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
-  "key": "BK... (clave pública VAPID)"
+  "key": "BD..."
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `500` | Falta la clave pública VAPID en variables de entorno |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Falta la clave pública VAPID"` / `"Error al obtener la clave VAPID"` | `controllers/notificaciones.js:106` / `110` |
 
 ---
 
-### `GET /api/notificaciones`
+### 9.4 GET /api/notificaciones
 
-**Descripción:** Obtiene las notificaciones del usuario autenticado con paginación.  
-**Archivo de ruta:** `routes/notificaciones.js:32`  
-**Controlador:** `controllers/notificaciones.js:120` — `obtenerNotificaciones`
+**Descripción:** Obtiene las notificaciones del usuario autenticado, paginadas.
+**Archivo de ruta:** `routes/notificaciones.js:32`
+**Controlador:** `controllers/notificaciones.js` — `obtenerNotificaciones` (línea 115)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares: `verificarTokenSesion`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `page` | number | No | `parseInt(req.query.page) || 1` |
+| `limit` | number | No | `parseInt(req.query.limit) || 20` |
 
-#### Parámetros de entrada (query)
+**Body:** Ninguno.
 
-| Ubicación | Campo | Tipo | Requerido | Valor por defecto |
-|-----------|-------|------|-----------|-------------------|
-| `query` | `page` | `number` | No | `1` |
-| `query` | `limit` | `number` | No | `20` |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "page": 1,
   "limit": 20,
   "next": "/api/notificaciones?page=2&limit=20",
   "prev": null,
-  "total": 15,
+  "total": 5,
   "totalPages": 1,
   "notificaciones": [
     {
-      "_id": "60d5f484f8a2c8a1d4e8e4e1",
+      "_id": "507f1f77bcf86cd799439017",
       "tipo": "follow",
       "mensaje": "comenzó a seguirte",
       "leida": false,
       "notificacion_leida": false,
-      "createdAt": "2026-07-08T12:00:00.000Z",
+      "createdAt": "2026-07-20T18:00:00.000Z",
       "emisor": {
-        "_id": "60d5f484f8a2c8a1d4e8e4a1",
-        "nombre_completo": { "nombre": "Juan", "apellido": "Pérez" },
-        "imagen_perfil": { "secure_url": "...", "public_id": "..." },
-        "url": "juan-perez"
+        "nombre_completo": { "nombre": "Ana", "apellido": "García" },
+        "imagen_perfil": { "secure_url": "...", "public_id": null },
+        "url": "ana-garcia"
       },
-      "referencia": {
-        "public_id": "tlx-imagenes/post/abc123",
-        "texto": "Hermoso día!"
-      }
+      "referencia": null
     }
   ]
 }
 ```
 
+**Respuestas de error:**
+
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al obtener notificaciones"` | `controllers/notificaciones.js:193` |
+
 ---
 
-### `PATCH /api/notificaciones/marcar-notificacion-leida/:id`
+### 9.5 PATCH /api/notificaciones/marcar-notificacion-leida/:id
 
-**Descripción:** Marca una notificación como leída.  
-**Archivo de ruta:** `routes/notificaciones.js:37`  
-**Controlador:** `controllers/notificaciones.js:202` — `marcarNotificacionLeida`
+**Descripción:** Marca una notificación como leída.
+**Archivo de ruta:** `routes/notificaciones.js:37`
+**Controlador:** `controllers/notificaciones.js` — `marcarNotificacionLeida` (línea 197)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('id').isMongoId()`
-  3. `validarCampos`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `id` | MongoId | Sí | `check('id').isMongoId()` (`routes/notificaciones.js:41`) |
 
-#### Parámetros de entrada
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `params` | `id` | `string` (MongoId) | Sí |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "status": 200,
@@ -2263,26 +1959,31 @@ Controlador: `controllers/notificaciones.js`
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `404` | Notificación no encontrada o no autorizada |
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El id de la notificación es obligatorio"` / `"El id debe ser un MongoId valido"` | `routes/notificaciones.js:41-57` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"Notificación no encontrada"` | `controllers/notificaciones.js:220` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al marcar notificación como leída"` | `controllers/notificaciones.js:229` |
 
 ---
 
-### `GET /api/notificaciones/nuevas-notificaciones`
+### 9.6 GET /api/notificaciones/nuevas-notificaciones
 
-**Descripción:** Obtiene el número total de notificaciones no leídas del usuario autenticado.  
-**Archivo de ruta:** `routes/notificaciones.js:46`  
-**Controlador:** `controllers/notificaciones.js:243` — `obtenerTotalNotificacionesNoLeidas`
+**Descripción:** Devuelve el total de notificaciones no leídas del usuario autenticado.
+**Archivo de ruta:** `routes/notificaciones.js:46`
+**Controlador:** `controllers/notificaciones.js` — `obtenerTotalNotificacionesNoLeidas` (línea 235)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares: `verificarTokenSesion`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "status": 200,
@@ -2290,29 +1991,33 @@ Controlador: `controllers/notificaciones.js`
 }
 ```
 
+**Respuestas de error:**
+
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al obtener notificaciones no leídas"` | `controllers/notificaciones.js:254` |
+
 ---
 
-### `DELETE /api/notificaciones/eliminar-notificacion/:id`
+### 9.7 DELETE /api/notificaciones/eliminar-notificacion/:id
 
-**Descripción:** Elimina permanentemente una notificación.  
-**Archivo de ruta:** `routes/notificaciones.js:51`  
-**Controlador:** `controllers/notificaciones.js:266` — `eliminarNotificacion`
+**Descripción:** Elimina físicamente una notificación del usuario autenticado.
+**Archivo de ruta:** `routes/notificaciones.js:51`
+**Controlador:** `controllers/notificaciones.js` — `eliminarNotificacion` (línea 258)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('id').notEmpty().isMongoId()`
-  3. `validarCampos`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `id` | MongoId | Sí | `check('id').notEmpty().isMongoId()` (`routes/notificaciones.js:55-57`) |
 
-#### Parámetros de entrada
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `params` | `id` | `string` (MongoId) | Sí |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):**
 ```json
 {
   "status": 200,
@@ -2320,415 +2025,300 @@ Controlador: `controllers/notificaciones.js`
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `404` | Notificación no encontrada |
-
-#### Notas
-- Usa `findOneAndDelete` con filtro de `receptor` para evitar que un usuario malintencionado elimine notificaciones ajenas.
-
----
-
-## Municipios
-
-Base path: **`/api/municipios`**  
-Archivo de ruta: `routes/municipios.js`  
-Controlador: `controllers/municipios.js`
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El id de la notificación es obligatorio"` / `"El id debe ser un MongoId valido"` | `routes/notificaciones.js:55-57` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"Notificación no encontrada"` | `controllers/notificaciones.js:272` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al eliminar la notificación"` | `controllers/notificaciones.js:281` |
 
 ---
 
-### `GET /api/municipios`
+## 10. Municipios y ubicación
 
-**Descripción:** Obtiene la lista de municipios del estado de Tlaxcala desde la BD.  
-**Archivo de ruta:** `routes/municipios.js:7`  
-**Controlador:** `controllers/municipios.js:6` — `obtenerMunicipios`
+### 10.1 GET /api/municipios
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares: `verificarTokenSesion`
+**Descripción:** Devuelve la lista de municipios de Tlaxcala ordenados alfabéticamente (sin geometría).
+**Archivo de ruta:** `routes/municipios.js:7`
+**Controlador:** `controllers/municipios.js` — `obtenerMunicipios` (línea 6)
 
-#### Respuesta exitosa — `200 OK`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body:** Ninguno.
 
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "status": 200,
   "msg": "Municipios obtenidos correctamente",
   "municipios": [
     {
-      "_id": "60d5f484f8a2c8a1d4e8e4f1",
+      "_id": "507f1f77bcf86cd799439018",
       "claveEntidad": 29,
       "nombreEntidad": "Tlaxcala",
       "claveMunicipio": 1,
-      "nombreMunicipio": "Amaxac de Guerrero",
-      "codigoPostal": "90500"
+      "nombreMunicipio": "Tlaxcala",
+      "codigoPostal": "90000"
     }
   ]
 }
 ```
 
-> **Nota:** El campo `geometry` se excluye de la respuesta para reducir el tamaño.
+**Respuestas de error:**
 
-#### Códigos de error
-
-| Código | Causa |
-|--------|-------|
-| `500` | Error al obtener municipios |
-
----
-
-## Ubicación (Geolocalización)
-
-Base path: **`/api/ubicacion`**  
-Archivo de ruta: `routes/ubicacion.js`  
-Controlador: `controllers/ubicacion.js`
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al obtener los municipios"` | `controllers/municipios.js:21` |
 
 ---
 
-### `POST /api/ubicacion/reverse`
+### 10.2 POST /api/ubicacion/reverse
 
-**Descripción:** Obtiene el municipio correspondiente a unas coordenadas GPS mediante reverse geocoding. Utiliza datos geoespaciales de la BD de municipios.  
-**Archivo de ruta:** `routes/ubicacion.js:10`  
-**Controlador:** `controllers/ubicacion.js:4` — `obtenerMunicipioPorCoords`
+**Descripción:** Realiza geocodificación inversa: dado un par de coordenadas lat/lng, devuelve el municipio de Tlaxcala correspondiente.
+**Archivo de ruta:** `routes/ubicacion.js:10`
+**Controlador:** `controllers/ubicacion.js` — `obtenerMunicipioPorCoords` (línea 5)
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('lat').isFloat().notEmpty()`
-  3. `check('lng').isFloat().notEmpty()`
-  4. `validarCampos`
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** `Content-Type: application/json`, cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body JSON:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `lat` | number | Sí | `isFloat().notEmpty()` (`routes/ubicacion.js:14`) |
+| `lng` | number | Sí | `isFloat().notEmpty()` (`routes/ubicacion.js:15`) |
 
-#### Parámetros de entrada
-
-| Ubicación | Campo | Tipo | Requerido |
-|-----------|-------|------|-----------|
-| `body` | `lat` | `number` | Sí (latitud) |
-| `body` | `lng` | `number` | Sí (longitud) |
-
-#### Algoritmo de búsqueda
-1. **Intento 1:** Intersección exacta (`$geoIntersects`) — busca el municipio que contiene el punto exacto.
-2. **Intento 2:** Fallback por cercanía (`$near` con `$maxDistance: 100m`) — busca el municipio más cercano si el punto está cerca del borde.
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "status": 200,
   "municipio": {
-    "_id": "60d5f484f8a2c8a1d4e8e4f1",
+    "_id": "507f1f77bcf86cd799439018",
     "claveEntidad": 29,
     "nombreEntidad": "Tlaxcala",
-    "claveMunicipio": 33,
-    "nombreMunicipio": "Zacatelco",
-    "codigoPostal": "90750"
+    "claveMunicipio": 1,
+    "nombreMunicipio": "Tlaxcala",
+    "codigoPostal": "90000"
   },
   "metodo": "database_geo_intersect",
   "precision": "exacta"
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `400` | Validación de coordenadas fallida |
-| `404` | Ubicación fuera de la zona de cobertura (Tlaxcala) |
-| `500` | Error interno |
-
----
-
-### `GET /api/ubicacion`
-
-**Descripción:** Misma funcionalidad que `GET /api/municipios`. Obtiene la lista de municipios.  
-**Archivo de ruta:** `routes/ubicacion.js:20`  
-**Controlador:** `controllers/municipios.js:6` — `obtenerMunicipios`
-
-> Mismo comportamiento que el endpoint de Municipios.
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"La latitud es obligatoria y debe ser un número"` / `"La longitud es obligatoria y debe ser un número"` | `routes/ubicacion.js:14-15` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"Ubicación fuera de la zona de cobertura (Tlaxcala)"` | `controllers/ubicacion.js:48` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error interno al obtener la ubicación"` | `controllers/ubicacion.js:60` |
 
 ---
 
-## Soporte / Ayuda
+### 10.3 GET /api/ubicacion
 
-Base path: **`/api/ayuda-soporte`**  
-Archivo de ruta: `routes/soporte.js`  
-Controlador: `controllers/soporte.js`
+**Descripción:** Devuelve la lista de municipios de Tlaxcala (mismo controlador que `GET /api/municipios`).
+**Archivo de ruta:** `routes/ubicacion.js:20`
+**Controlador:** `controllers/municipios.js` — `obtenerMunicipios` (línea 6)
+
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** Cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body:** Ninguno.
+
+**Respuesta de éxito (200):** Igual que `GET /api/municipios`.
+
+**Respuestas de error:** Igual que `GET /api/municipios`.
 
 ---
 
-### `POST /api/ayuda-soporte/envio-correo`
+## 11. Subida de imágenes (perfil)
 
-**Descripción:** Envía un ticket de soporte técnico. Se envía un correo al equipo de soporte y una confirmación al usuario.  
-**Archivo de ruta:** `routes/soporte.js:9`  
-**Controlador:** `controllers/soporte.js:22` — `ayudaSoporteEnvioCorrreo`
+### 11.1 PUT /api/uploads/:coleccion
 
-#### Autenticación y permisos
-- Requiere token: **Sí** (access token en cookie)
-- Rate limit: `soporteLimiter` — 5 tickets cada 15 minutos
-- Middlewares en orden:
-  1. `verificarTokenSesion`
-  2. `check('tipo_problema').notEmpty().isIn(["cuenta", "publicacion", "seguridad", "reporte", "otro"])`
-  3. `check('descripcion_problema_usuario').notEmpty().isString().trim().isLength({ min: 15, max: 1000 })`
-  4. `validarCampos`
+**Descripción:** Actualiza la imagen de perfil del usuario autenticado en la colección especificada (actualmente solo `usuarios`).
+**Archivo de ruta:** `routes/uploads.js:16`
+**Controlador:** `controllers/uploads.js` — `actualizarImagen` (línea 8)
 
-#### Parámetros de entrada
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** No aplica.
+**Headers requeridos:** `Content-Type: multipart/form-data`, cookies.
+**Parámetros de ruta:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `coleccion` | string | Sí | `check('coleccion').custom(c => coleccionesPermitidas(c, ['usuarios']))` (`routes/uploads.js:31`) |
 
-| Ubicación | Campo | Tipo | Requerido | Validación |
-|-----------|-------|------|-----------|------------|
-| `body` | `tipo_problema` | `string` | Sí | Debe ser uno de: `cuenta`, `publicacion`, `seguridad`, `reporte`, `otro` |
-| `body` | `descripcion_problema_usuario` | `string` | Sí | Mínimo 15 caracteres, máximo 1000 |
+**Query params:** Ninguno.
+**Body (multipart/form-data):**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `img` | archivo | Sí | Multer: `upload.single('img')`, máximo 5 MB, jpg/jpeg/png/webp (`helpers/multer.js`). |
 
-#### Tipos de problema
-
-| Valor | Descripción |
-|-------|-------------|
-| `cuenta` | Problemas relacionados con la cuenta (inicio de sesión, contraseña, etc.) |
-| `publicacion` | Problemas con la creación, edición o eliminación de publicaciones |
-| `seguridad` | Problemas de seguridad o reportes de hackeo |
-| `reporte` | Reporte de contenido inapropiado o usuarios |
-| `otro` | Cualquier otro problema, sugerencias o dudas generales |
-
-#### Respuesta exitosa — `200 OK`
-
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
 ```json
 {
   "status": 200,
-  "ticketId": "TLX-1719945600000",
+  "msg": "Imagen de perfil actualizada correctamente",
+  "usuario": {
+    "imagen_perfil": {
+      "secure_url": "https://res.cloudinary.com/.../nueva-imagen.webp",
+      "public_id": "nuevo_public_id"
+    }
+  }
+}
+```
+
+**Respuestas de error:**
+
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"No hay ninguna imagen para subir"` | `middlewares/validar-imagen-posteo.js:19` |
+| 400 | `BAD_REQUEST` | `Bad Request` | Errores de Multer (tamaño, campo inesperado, etc.) | `middlewares/validar-imagen-posteo.js:6-14` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"La coleccion: ... no esta permitida, se permiten: usuarios"` | `helpers/colecciones-permitidas.js:8` |
+| 400 | `BAD_REQUEST` | `Bad Request` | `"No existe un usuario con el ID: ..."` | `controllers/uploads.js:23` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error al actualizar la imagen"` | `controllers/uploads.js:93` |
+
+**Notas especiales:**
+- Si el usuario ya tenía una imagen de perfil distinta a la default, se intenta eliminar la anterior de Cloudinary (`controllers/uploads.js:36-53`).
+- La imagen se redimensiona a 500px de ancho con `fill` en Cloudinary (`controllers/uploads.js:65-67`).
+
+---
+
+## 12. Soporte / Contacto
+
+### 12.1 POST /api/ayuda-soporte/envio-correo
+
+**Descripción:** Envía un ticket de soporte/ayuda por correo. También envía un correo de confirmación al usuario.
+**Archivo de ruta:** `routes/soporte.js:9`
+**Controlador:** `controllers/soporte.js` — `ayudaSoporteEnvioCorrreo` (línea 22)
+
+**Autenticación:** Requiere cookie `accessToken` (middleware `verificarTokenSesion`).
+**Rate limiter:** `soporteLimiter` (15 min, 5) → `SOPORTE_BLOCKED`.
+**Headers requeridos:** `Content-Type: application/json`, cookies.
+**Parámetros de ruta:** Ninguno.
+**Query params:** Ninguno.
+**Body JSON:**
+| Campo | Tipo | Requerido | Validación |
+|---|---|---|---|
+| `tipo_problema` | string | Sí | `notEmpty().isIn(["cuenta", "publicacion", "seguridad", "reporte", "otro"])` (`routes/soporte.js:13`) |
+| `descripcion_problema_usuario` | string | Sí | `notEmpty().isString().trim().isLength({ min: 15, max: 1000 })` (`routes/soporte.js:15`) |
+
+**Respuesta de éxito (200):** `[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]`
+```json
+{
+  "status": 200,
+  "ticketId": "TLX-1691234567890",
   "msg": "Solicitud de soporte recibida correctamente"
 }
 ```
 
-#### Códigos de error
+**Respuestas de error:**
 
-| Código | Causa |
-|--------|-------|
-| `400` | Tipo de problema no válido o descripción inválida |
-| `404` | Usuario no encontrado |
-| `429` | Demasiados tickets de soporte (rate limit) |
-| `500` | Error interno |
-
-#### Notas
-- El ticket se genera con formato `TLX-{timestamp}`.
-- Se envía correo de confirmación al usuario (no bloqueante).
-- Si `SEND_EMAIL=false` no se envían correos realmente.
+| Status | `code` | title | detail | Origen |
+|---|---|---|---|---|
+| 401/403 | Varios | — | Autenticación/activación | `middlewares/validar-jwt-cookies-sesion.js` |
+| 422 | `VALIDATION_FAILED` | `Validation Failed` | `"El tipo_problema es obligatorio: [cuenta, publicacion, seguridad, reporte, otro]"` / `"La descripcion_problema_usuario es obligatoria: minimo 10 caracteres, maximo 1000"` | `routes/soporte.js:13-15` |
+| 400 | `BAD_REQUEST` | `Bad Request` | `"Tipo de problema no válido"` | `controllers/soporte.js:29` |
+| 404 | `NOT_FOUND` | `Resource Not Found` | `"Usuario no encontrado"` | `controllers/soporte.js:35` |
+| 429 | `SOPORTE_BLOCKED` | `Rate Limit Exceeded` | `"Demasiados tickets de soporte, intenta de nuevo más tarde"` | `middlewares/rate-limiter.js:109` |
+| 500 | `INTERNAL_ERROR` | `Internal Server Error` | `"Error en el servidor"` | `controllers/soporte.js:66` |
 
 ---
 
-## Middlewares
+## Códigos de error comunes
 
-### `validarCampos` (`middlewares/validar-campos.js`)
-Procesa los errores de `express-validator`. Si hay errores:
-- Si es error de correo repetido → `409 Conflict`
-- Si son otros errores de validación → `400 Bad Request`
+### Errores de autenticación (401/403)
 
-### `verificarTokenSesion` (`middlewares/validar-jwt-cookies-sesion.js`)
-Verifica el access token JWT de la cookie `accessToken`:
-1. Verifica que exista la cookie
-2. Verifica la firma con `ACCESS_TOKEN_SECRET`
-3. Busca el usuario en BD
-4. Verifica que el usuario no esté eliminado (estatus ≠ 4)
-5. Verifica que la cuenta esté activada (email_validated y estatus)
-6. Verifica `tokenVersion` (para invalidar sesiones comprometidas)
-7. Asigna `req.usuario = id` para uso en controladores
+| Status | `code` | Escenario típico |
+|---|---|---|
+| 401 | `UNAUTHORIZED` | No hay cookie `accessToken` (`validar-jwt-cookies-sesion.js:14`). |
+| 401 | `UNAUTHORIZED` | Access token inválido o expirado (`validar-jwt-cookies-sesion.js:45`). |
+| 401 | `UNAUTHORIZED` | Token no válido — usuario no existe o fue eliminado (`validar-jwt-cookies-sesion.js:27`). |
+| 401 | `UNAUTHORIZED` | Sesión expirada por cambio de `tokenVersion` (`validar-jwt-cookies-sesion.js:35`). |
+| 403 | `FORBIDDEN` | Cuenta no verificada o no activada (`validar-jwt-cookies-sesion.js:31`). |
+| 403 | `FORBIDDEN` | Origen no permitido por CSRF (`validar-origen.js:39`, `46`, `49`). |
 
-### `validarRefreshToken` (`middlewares/validar-jwt-cookies-sesion.js`)
-Verifica que exista la cookie `refreshToken`. Usado en logout.
+### Errores de validación (400/422)
 
-### `validarTokenEnURL` (`middlewares/validar-token-en-url.js`)
-Verifica que el parámetro `:token` exista en la URL. Usado en rutas de verificación de correo y restablecimiento de contraseña.
+| Status | `code` | Escenario típico |
+|---|---|---|
+| 400 | `BAD_REQUEST` | Body JSON malformado, falta campo obligatorio, error de Multer. |
+| 422 | `VALIDATION_FAILED` | Error de express-validator (correo, MongoId, longitud, etc.). |
+| 422 | `VALIDATION_FAILED` | Texto de posteo/comentario con caracteres no permitidos (`validar-texto.js:6`). |
 
-### `validarTexto` (`middlewares/validar-texto.js`)
-Valida el campo `texto` de los posteos con el regex:
-```
-/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ.,!?¡¿()\s-]*$/
-```
+### Errores de rate limit (429)
 
-### `validarCampoImg` (`middlewares/validar-imagen-posteo.js`)
-Verifica que exista un archivo en `req.file`. Si no existe, responde con `404`.
+| Status | `code` | Escenario típico |
+|---|---|---|
+| 429 | `LOGIN_BLOCKED` | Demasiados intentos de login (`middlewares/rate-limiter.js:27`). |
+| 429 | `REGISTER_BLOCKED` | Demasiados registros desde la misma conexión (`middlewares/rate-limiter.js:79`). |
+| 429 | `POSTEO_BLOCKED` | Demasiados posteos en 15 min (`middlewares/rate-limiter.js:94`). |
+| 429 | `COMENTARIO_BLOCKED` | Demasiados comentarios en 1 min (`middlewares/rate-limiter.js:139`). |
+| 429 | `READ_BLOCKED` | Demasiadas lecturas en 15 min (`middlewares/rate-limiter.js:124`). |
+| 429 | `RECOVERY_BLOCKED` | Demasiados intentos de recuperación de contraseña (`middlewares/rate-limiter.js:49`). |
+| 429 | `EMAIL_BLOCKED` | Demasiados reenvíos de correo (`middlewares/rate-limiter.js:64`). |
+| 429 | `SOPORTE_BLOCKED` | Demasiados tickets de soporte (`middlewares/rate-limiter.js:109`). |
+| 429 | `REFRESH_BLOCKED` | Demasiadas renovaciones de token (`middlewares/rate-limiter.js:154`). |
+| 429 | `RATE_LIMIT_EXCEEDED` | Cooldown de controlador (ej. 5 min entre correos, bloqueo por intentos fallidos) con `retry_after`. |
 
-### `validarImagenesMulter` (`middlewares/validar-imagen-posteo.js`)
-Middleware de error de Multer. Captura errores predefinidos de Multer (tamaño, tipo, etc.) y responde con `400`.
+### Errores de recurso no encontrado (404)
 
-### `validarUrlUsuario` (`middlewares/validar-url-usuario.js`)
-Verifica que la URL de usuario exista en BD, que el usuario tenga cuenta activa (email_validated, estatus), y que no esté suspendido.
+| Status | `code` | Escenario típico |
+|---|---|---|
+| 404 | `NOT_FOUND` | Usuario/posteo/comentario no existe. |
+| 404 | `NOT_FOUND` | Ruta no existe (catch-all en `models/server.js:108`). |
 
-### `validarOrigen` (`middlewares/validar-origen.js`)
-Middleware CSRF. En métodos mutantes (POST, PUT, DELETE, PATCH), verifica que el header `Origin` o `Referer` coincida con `FRONTEND_URL` o `CSRF_ALLOWED_ORIGINS`. En desarrollo, si no hay origen, permite el paso.
+### Errores internos (500)
 
-### Rate Limiters (`middlewares/rate-limiter.js`)
-9 limiters con `express-rate-limit`. Todos tienen `validate: false` para no interferir con express-validator.
-
----
-
-## Modelos de datos (esquemas)
-
-### Usuario (`models/Usuario.js`)
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `nombre_completo.nombre` | `String` | Nombre del usuario (requerido) |
-| `nombre_completo.apellido` | `String` | Apellido del usuario |
-| `correo` | `String` (unique) | Correo electrónico |
-| `password` | `String` | Contraseña (bcrypt hashed) |
-| `lugar_radicacion` | `Object` | Ubicación de residencia |
-| `url` | `String` (unique) | URL del perfil (slug) |
-| `genero` | `String` (enum) | MASCULINO, FEMENINO, PREFIERO NO DECIR |
-| `fecha_nacimiento` | `Date` | Fecha de nacimiento |
-| `imagen_perfil` | `Object` | `{ secure_url, public_id }` |
-| `estatus` | `Number` (0-4) | 0=no activada, 1=activa, 2=infringió normas, 3=suspendida, 4=eliminada |
-| `email_validated` | `Boolean` | Indica si el correo fue verificado |
-| `intentos_login` | `Number` | Contador de intentos fallidos |
-| `bloqueo_login_hasta` | `Date` | Bloqueo temporal por intentos fallidos |
-| `tokenVersion` | `Number` | Versión del token para invalidación de sesiones |
-| `notificaciones_activadas` | `Boolean` | Notificaciones push activadas |
-| `pushSubscriptions` | `Array` | Suscripciones Web Push (máx. 10) |
-
-### Posteo (`models/Posteo.js`)
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `_idUsuario` | `ObjectId` (ref: Usuario) | Autor del posteo |
-| `public_id` | `String` | ID de Cloudinary |
-| `secure_url` | `String` | URL de la imagen en Cloudinary |
-| `texto` | `String` | Texto opcional |
-| `ubicacion` | `Object` | Datos de ubicación (ciudad, municipio, estado, pais, coordinates, esExacta) |
-| `posteo_publico` | `Boolean` | Visibilidad del posteo |
-| `comentariosActivos` | `Boolean` | Comentarios habilitados |
-| `comentariosCount` | `Number` | Contador de comentarios |
-| `isDeleted` | `Boolean` | Soft delete |
-| `deleteReason` | `String` | "manual", "accountDeletion", null |
-
-### Comentario (`models/Comentario.js`)
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `texto` | `String` (max 250) | Contenido del comentario |
-| `posteoId` | `ObjectId` (ref: Posteo) | Posteo al que pertenece |
-| `autorId` | `ObjectId` (ref: Usuario) | Autor del comentario |
-| `isDeleted` | `Boolean` | Soft delete |
-| `eliminadoPor` | `ObjectId` | Quién eliminó el comentario |
-
-### Like (`models/Like.js`)
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `_idUsuario` | `ObjectId` (ref: Usuario) | Usuario que dio like |
-| `_idCreadorPosteo` | `ObjectId` (ref: Usuario) | Dueño del posteo |
-| `posteoId` | `ObjectId` (ref: Posteo) | Posteo likeado |
-| `isDeleted` | `Boolean` | Soft delete |
-
-**Índice único:** `{ _idUsuario, posteoId }` — evita likes duplicados.
-
-### Follow (`models/Follow.js`)
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `follower` | `ObjectId` (ref: Usuario) | El que sigue |
-| `following` | `ObjectId` (ref: Usuario) | El seguido |
-| `isDeleted` | `Boolean` | Soft delete |
-
-**Índice único:** `{ follower, following }` — evita follows duplicados.
-
-### Favorito (`models/Favorito.js`)
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `usuarioId` | `ObjectId` (ref: Usuario) | Usuario que guarda |
-| `posteoId` | `ObjectId` (ref: Posteo) | Posteo guardado |
-| `autorId` | `ObjectId` (ref: Usuario) | Autor del posteo |
-
-### Notificación (`models/Notificacion.js`)
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `receptor` | `ObjectId` (ref: Usuario) | Quién recibe la notificación |
-| `emisor` | `ObjectId` (ref: Usuario) | Quién genera la notificación |
-| `tipo` | `String` (enum) | follow, like, comentario, nueva_publicacion |
-| `referencia` | `ObjectId` | ID del posteo u otro recurso relacionado |
-| `mensaje` | `String` | Texto breve de la notificación |
-| `notificacion_leida` | `Boolean` | Estado de lectura |
-
-### UserToken (`models/UserToken.js`)
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `userId` | `ObjectId` (ref: Usuario) | Usuario propietario |
-| `token` | `String` | Refresh token hasheado (SHA-256) |
-| `ip` | `String` | IP del dispositivo |
-| `userAgent` | `String` | User-Agent del dispositivo |
-| `deviceName` | `String` | Nombre del dispositivo |
-| `lastUsed` | `Date` | Último uso |
-
-**TTL Index:** Documentos expiran a los 30 días automáticamente.
-
-### Municipio (`models/Municipio.js`)
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `claveEntidad` | `Number` | Clave del estado (29 = Tlaxcala) |
-| `nombreEntidad` | `String` | Nombre del estado |
-| `claveMunicipio` | `Number` | Clave del municipio |
-| `nombreMunicipio` | `String` | Nombre del municipio |
-| `codigoPostal` | `String` | Código postal |
-| `geometry` | `GeoJSON` | Datos geoespaciales (Polygon/MultiPolygon) |
-
-**Índices:** `2dsphere` para búsquedas geoespaciales, texto para búsqueda por nombre.
+| Status | `code` | Escenario típico |
+|---|---|---|
+| 500 | `INTERNAL_ERROR` | Cualquier error no manejado; en dev puede incluir `stack`. |
+| 500 | `INTERNAL_ERROR` | Error crudo no `AppError` propagado al error handler (`middlewares/error-handler.js:93-104`). |
 
 ---
 
-## Resumen de Endpoints
+## Notas de implementación
 
-| # | Método | Ruta | Auth | Rate Limit |
-|---|--------|------|------|------------|
-| 1 | GET | `/` | No | — |
-| 2 | GET | `/api/health` | No | — |
-| 3 | GET | `/api/auth/verificar-correo/:token` | No | — |
-| 4 | POST | `/api/auth/reenviar-correo` | No | EMAIL_BLOCKED |
-| 5 | POST | `/api/auth/login` | No | LOGIN_BLOCKED |
-| 6 | POST | `/api/auth/cuentas/password-olvidado` | No | RECOVERY_BLOCKED |
-| 7 | POST | `/api/auth/reenviar-correo-restablecer-password` | No | RECOVERY_BLOCKED |
-| 8 | GET | `/api/auth/cuentas/restablecer-password/validar-token-reset-password/:token` | No | — |
-| 9 | POST | `/api/auth/cuentas/reestablecer-password/:token` | No | — |
-| 10 | POST | `/api/auth/refresh` | Sí | REFRESH_BLOCKED |
-| 11 | POST | `/api/auth/logout` | Sí | — |
-| 12 | GET | `/api/auth/me` | Sí | — |
-| 13 | GET | `/api/usuarios` | No | READ_BLOCKED |
-| 14 | GET | `/api/usuarios/:url` | Sí | — |
-| 15 | POST | `/api/usuarios` | No | REGISTER_BLOCKED |
-| 16 | PUT | `/api/usuarios/update` | Sí | — |
-| 17 | DELETE | `/api/usuarios/delete` | Sí | — |
-| 18 | GET | `/api/usuarios/registrados/nuevos-usuarios-registrados` | Sí | — |
-| 19 | GET | `/api/posteos` | Sí | READ_BLOCKED |
-| 20 | GET | `/api/posteos/post/:id` | Sí | — |
-| 21 | GET | `/api/posteos/usuario/:idUsuario` | Sí | — |
-| 22 | POST | `/api/posteos` | Sí | POSTEO_BLOCKED |
-| 23 | PUT | `/api/posteos/:id` | Sí | — |
-| 24 | DELETE | `/api/posteos/:id` | Sí | — |
-| 25 | POST | `/api/likes/:id/like` | Sí | — |
-| 26 | GET | `/api/likes/posteo/:id` | Sí | — |
-| 27 | GET | `/api/likes/:id/likes/usuarios` | Sí | — |
-| 28 | POST | `/api/comentarios/:posteoId/comentarios` | Sí | COMENTARIO_BLOCKED |
-| 29 | GET | `/api/comentarios/:posteoId/comentarios` | Sí | — |
-| 30 | GET | `/api/comentarios/:posteoId/comentarios/count` | Sí | — |
-| 31 | DELETE | `/api/comentarios/:comentarioId` | Sí | — |
-| 32 | PUT | `/api/comentarios/:posteoId/comentarios/toggle` | Sí | — |
-| 33 | POST | `/api/followers/follow/:id` | Sí | — |
-| 34 | DELETE | `/api/followers/unfollow/:id` | Sí | — |
-| 35 | GET | `/api/followers/usuario/lista-followers/:id` | Sí | — |
-| 36 | GET | `/api/followers/usuario/lista-followings/:id` | Sí | — |
-| 37 | GET | `/api/favoritos` | Sí | — |
-| 38 | POST | `/api/favoritos/:posteoId` | Sí | — |
-| 39 | DELETE | `/api/favoritos/:posteoId` | Sí | — |
-| 40 | PUT | `/api/uploads/:coleccion` | Sí | — |
-| 41 | POST | `/api/notificaciones/subscribe` | Sí | — |
-| 42 | POST | `/api/notificaciones/unsubscribe` | Sí | — |
-| 43 | GET | `/api/notificaciones/vapidPublicKey` | Sí | — |
-| 44 | GET | `/api/notificaciones` | Sí | — |
-| 45 | PATCH | `/api/notificaciones/marcar-notificacion-leida/:id` | Sí | — |
-| 46 | GET | `/api/notificaciones/nuevas-notificaciones` | Sí | — |
-| 47 | DELETE | `/api/notificaciones/eliminar-notificacion/:id` | Sí | — |
-| 48 | GET | `/api/municipios` | Sí | — |
-| 49 | POST | `/api/ubicacion/reverse` | Sí | — |
-| 50 | GET | `/api/ubicacion` | Sí | — |
-| 51 | POST | `/api/ayuda-soporte/envio-correo` | Sí | SOPORTE_BLOCKED |
+1. **Cookies y CORS:** El frontend debe enviar `credentials: 'include'` (o `withCredentials: true`) en todas las peticiones autenticadas, ya que los tokens viajan en cookies `httpOnly` con `sameSite: 'none'` y `secure: true` (`models/server.js:74-80`).
+
+2. **CSRF:** Los métodos mutantes (POST, PUT, PATCH, DELETE) requieren un header `Origin` o `Referer` que coincida con `FRONTEND_URL` o `CSRF_ALLOWED_ORIGINS` (`middlewares/validar-origen.js`).
+
+3. **path-to-regexp v8 (Express 5):** Los parámetros opcionales usan `{/:param}` en lugar de `/:param?`. Ejemplos en la API: `GET /api/auth/verificar-correo{/:token}`, `GET /api/auth/cuentas/restablecer-password/validar-token-reset-password{/:token}`, `POST /api/auth/cuentas/reestablecer-password{/:token}`.
+
+4. **Subida de archivos:** Todos los endpoints que reciben imágenes usan Multer en memoria, con límite de 5 MB y formatos jpg/jpeg/png/webp (`helpers/multer.js`). El campo debe llamarse exactamente `img`.
+
+5. **Soft delete:** Usuarios, posteos, comentarios, likes, follows, favoritos y notificaciones usan `isDeleted: true` con `deletedAt`. Los cron jobs en `jobs/` se encargan de la eliminación física posterior.
+
+6. **Estados de cuenta:** `estatus: 0` (no verificado), `1` (activo), `2` (violó reglas), `3` (suspendido), `4` (eliminado). Muchos endpoints requieren `estatus === 1` y `email_validated === true`.
+
+7. **Verificación de correo:** En desarrollo, `SEND_EMAIL=false` anula el envío real de correos. El registro solo guarda el usuario si `envioCorreoVerificacion` retorna `true`, lo que en dev depende de la implementación del servicio de email.
+
+8. **Refresh tokens:** Se almacenan hasheados (SHA-256) en `UserToken`. Si se detecta reuso de un refresh token robado, se invalidan todas las sesiones del usuario (`controllers/auth.js:408-418`).
+
+9. **Notificaciones push:** Las suscripciones Web Push se limitan a 10 por usuario; si se excede, se elimina la más antigua (`controllers/notificaciones.js:36-43`).
+
+10. **Helpers `validarIdPosteo` y `validarIdUsuario`:** En la versión actual del código estos helpers lanzan `NotFoundError` correctamente (`helpers/validar-id-posteo.js:9-14`, `helpers/validar-id-usuario.js:9-15`), por lo que posteos/usuarios inexistentes devuelven 404. El contexto del proyecto mencionaba un bug histórico de `Error` crudo, pero el código actual parece corregido. **[REQUIERE VERIFICACIÓN MANUAL]** si el frontend observa 500 inesperados en estas rutas.
+
+11. **Endpoint `GET /api/usuarios`:** Actualmente es un stub que no devuelve datos reales; está protegido por `lecturaLimiter` pero no requiere autenticación.
+
+12. **Anti-enumeración:** Los endpoints de recuperación de contraseña (`POST /api/auth/cuentas/password-olvidado` y `POST /api/auth/reenviar-correo-restablecer-password`) devuelven siempre 200 con el mismo mensaje, independientemente de si el correo existe o está en cooldown.
+
+---
+
+
+
+
+
+
+
