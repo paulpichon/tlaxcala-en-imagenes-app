@@ -195,7 +195,7 @@ const fetchWithAuth = useCallback(
 
 ---
 
-## 🟢 Prioridad 6 — Manejo inconsistente de errores
+## ✅ ~~🟢 Prioridad 6~~ — Manejo inconsistente de errores — **Completado**
 
 **Problema:** Cada archivo maneja errores distinto: unos verifican `res.ok`, otros `res.status`, otros `data.status` del body.
 
@@ -218,7 +218,7 @@ const fetchWithAuth = useCallback(
 
 ---
 
-## 🟢 Prioridad 7 — `PosteoDetalle.tsx` usa `notFound()` agresivamente
+## ✅ ~~🟢 Prioridad 7~~ — `PosteoDetalle.tsx` usa `notFound()` agresivamente — **Completado**
 
 **Problema:** Si hay error de red (no solo 404), redirige a la página 404. El usuario no sabe qué pasó realmente.
 
@@ -237,7 +237,7 @@ if (error) {
 
 ---
 
-## 🟢 Prioridad 8 — Límite de notificaciones divergente
+## ✅ ~~🟢 Prioridad 8~~ — Límite de notificaciones divergente — **Completado**
 
 **Problema:** Frontend forza `limit=15` pero el default documentado de la API es 20.
 
