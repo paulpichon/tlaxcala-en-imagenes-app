@@ -9,7 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import Spinner from "./spinner";
 import PosteoCard from "./PosteoCard";
 import { notFound } from "next/navigation";
-import { apiGet, isNotFound, getUserMessage } from "@/lib/apiClient";
+import { apiGet, isNotFound, isValidationFailed, getUserMessage } from "@/lib/apiClient";
 export default function PosteoDetalle() {
   const params = useParams() as { idposteo?: string } | null;
   const id = params?.idposteo ?? "";
@@ -18,6 +18,7 @@ export default function PosteoDetalle() {
   const [post, setPost] = useState<Posteo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isNotFoundError, setIsNotFoundError] = useState<boolean>(false);
 
   const fetchPost = useCallback(async () => {
     if (!id) {
@@ -28,6 +29,7 @@ export default function PosteoDetalle() {
 
     setLoading(true);
     setError(null);
+    setIsNotFoundError(false);
 
     try {
       const data = await apiGet<PosteoDetalleResponse>(
@@ -42,9 +44,12 @@ export default function PosteoDetalle() {
 
       setPost(posteo);
     } catch (err) {
-      if (isNotFound(err)) {
+      // Un ID mal formado (VALIDATION_FAILED) es semánticamente equivalente a
+      // "no encontrado" desde la perspectiva del usuario: el recurso no existe
+      // o no es accesible, por lo que mostramos la página 404 en ambos casos.
+      if (isNotFound(err) || isValidationFailed(err)) {
         console.warn("Posteo no encontrado:", id);
-        setError("La publicación no fue encontrada.");
+        setIsNotFoundError(true);
       } else {
         const msg = getUserMessage(err, 'cargar_publicaciones');
         console.error(msg, err);
@@ -62,10 +67,9 @@ export default function PosteoDetalle() {
   }, [fetchPost, fetchWithAuth]);
 
   if (loading) return <div className="d-flex justify-content-center align-items-center vh-100"><Spinner /></div>
-  // 👇 Solo mostramos not-found cuando el posteo no existe (404)
-  if (error === "La publicación no fue encontrada.") return notFound();
+  if (isNotFoundError) return notFound();
   if (error) return <p className="text-center mt-5 text-danger">{error}</p>;
-  if (!post) return <p className="text-center mt-5">Publicación no encontrada.</p>;
+  if (!post) return <p className="text-center mt-5">No se pudo cargar la publicación.</p>;
 
   return (
     <>

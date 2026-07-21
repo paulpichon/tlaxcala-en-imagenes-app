@@ -19,7 +19,7 @@ interface UrlProps {
 }
 
 export default function PerfilUsuarioContainer({ url }: UrlProps) {
-  const { usuario, loading, error } = useUsuarioPerfil(url);
+  const { usuario, loading, error, isNotFoundError } = useUsuarioPerfil(url);
   const [refreshPosteos, setRefreshPosteos] = useState(0);
 
   // 1️⃣ Inicializa con el valor del usuario si ya existe (lazy init)
@@ -38,8 +38,9 @@ export default function PerfilUsuarioContainer({ url }: UrlProps) {
 
   if (loading) return <div className="d-flex justify-content-center align-items-center vh-100"><Spinner /></div>;
 
-  // 👇 Si hubo error de fetch o no existe usuario, mostramos la página not-found
-  if (error || !usuario) return notFound();
+  if (isNotFoundError) return notFound();
+  if (error) return <p className="text-center mt-5 text-danger">{error}</p>;
+  if (!usuario) return <p className="text-center mt-5">No se pudo cargar el perfil.</p>;
 
   return (
     <div className="contenedor_principal">

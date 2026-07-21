@@ -3,13 +3,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { UsuarioPerfil } from "@/types/types";
-import { apiGet, getUserMessage } from "@/lib/apiClient";
+import { apiGet, isNotFound, isValidationFailed, getUserMessage } from "@/lib/apiClient";
 
 export function useUsuarioPerfil(url: string | undefined) {
   const { fetchWithAuth } = useAuth();
   const [usuario, setUsuario] = useState<UsuarioPerfil | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isNotFoundError, setIsNotFoundError] = useState(false);
 
   const clearError = useCallback(() => setError(null), []);
 
@@ -18,6 +19,7 @@ export function useUsuarioPerfil(url: string | undefined) {
 
     const fetchUsuario = async () => {
       setLoading(true);
+      setIsNotFoundError(false);
       try {
         const data = await apiGet<{ usuario: UsuarioPerfil }>(
           fetchWithAuth,
@@ -26,7 +28,14 @@ export function useUsuarioPerfil(url: string | undefined) {
         setUsuario(data.usuario);
         setError(null);
       } catch (err) {
-        const msg = getUserMessage(err, 'cargar_perfil');
+        // Un ID/URL mal formado (VALIDATION_FAILED) es semánticamente equivalente
+        // a "no encontrado" desde la perspectiva del usuario: el perfil no existe
+        // o no es accesible, por lo que mostramos la página 404 en ambos casos.
+        const notFound = isNotFound(err) || isValidationFailed(err);
+        setIsNotFoundError(notFound);
+        const msg = notFound
+          ? "El perfil de usuario no fue encontrado."
+          : getUserMessage(err, 'cargar_perfil');
         console.error(msg, err);
         setError(msg);
         setUsuario(null);
@@ -38,5 +47,5 @@ export function useUsuarioPerfil(url: string | undefined) {
     fetchUsuario();
   }, [url, fetchWithAuth]);
 
-  return { usuario, loading, error, clearError, setUsuario };
+  return { usuario, loading, error, isNotFoundError, clearError, setUsuario };
 }
