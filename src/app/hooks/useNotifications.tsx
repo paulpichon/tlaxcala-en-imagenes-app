@@ -25,7 +25,7 @@ export function useNotifications() {
         const data = await apiGet<{
           notificaciones: Notificacion[];
           totalPages: number;
-        }>(fetchWithAuth, '/api/notificaciones', { page: pagina, limit: 15 });
+        }>(fetchWithAuth, '/api/notificaciones', { page: pagina });
 
         if (pagina === 1) setNotificaciones(data.notificaciones);
         else setNotificaciones((prev) => [...prev, ...data.notificaciones]);
