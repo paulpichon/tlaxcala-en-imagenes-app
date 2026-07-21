@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { LikeUsuario, LikesUsuariosResponse } from "@/types/types";
-import { apiGet, ApiError } from "@/lib/apiClient";
+import { apiGet, isNotFound, getUserMessage } from "@/lib/apiClient";
 
 export function useLikesModal() {
   const { fetchWithAuth } = useAuth();
@@ -22,10 +22,11 @@ export function useLikesModal() {
       setLikesUsuarios(data.likes_usuarios_posteo ?? []);
       setIsLikesOpen(true);
     } catch (err) {
-      if (err instanceof ApiError && err.data?.code === 'NOT_FOUND') {
+      if (isNotFound(err)) {
         console.warn("El posteo no existe al cargar usuarios de likes");
       } else {
-        console.error("Error cargando usuarios de likes:", err);
+        const msg = getUserMessage(err, 'like');
+        console.error(msg, err);
       }
     } finally {
       setLoading(false);

@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import loginEstilos from "../../../ui/cuentas/login/login.module.css";
 import { useState } from 'react';
 import { z } from 'zod';
-import { apiPost, ApiError } from '@/lib/apiClient';
+import { apiPost, isApiError, isRateLimit, ApiErrorCode, getUserMessage } from '@/lib/apiClient';
 import { UsuarioLogueado } from '@/types/types';
 
 const schema = z.object({
@@ -54,18 +54,18 @@ export default function FormularioLogin() {
         login(data.usuario);
         router.push('/inicio');
       } catch (error) {
-        if (error instanceof ApiError) {
+        if (isApiError(error)) {
           const code = error.data?.code;
-          if (code === 'LOGIN_BLOCKED' || code === 'RATE_LIMIT_EXCEEDED') {
-            setServerError(error.data.detail as string);
-          } else if (code === 'UNAUTHORIZED') {
+          if (isRateLimit(error)) {
+            setServerError(getUserMessage(error, 'registro'));
+          } else if (code === ApiErrorCode.UNAUTHORIZED) {
             setServerError('Correo o contraseña incorrectos.');
-          } else if (code === 'FORBIDDEN' && error.data.detail === 'Cuenta no verificada') {
+          } else if (code === ApiErrorCode.FORBIDDEN && error.data.detail === 'Cuenta no verificada') {
             setServerError('La cuenta no ha sido verificada, revisa tu correo.');
-          } else if (code === 'FORBIDDEN' && error.data.detail === 'Cuenta no activada') {
+          } else if (code === ApiErrorCode.FORBIDDEN && error.data.detail === 'Cuenta no activada') {
             setServerError('Esta cuenta no está disponible. Contacta a soporte para más información.');
           } else {
-            setServerError('Error en el servidor');
+            setServerError(getUserMessage(error, 'registro'));
           }
         } else {
           setServerError('Error en el servidor');

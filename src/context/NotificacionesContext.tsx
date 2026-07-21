@@ -9,11 +9,13 @@ import {
   ReactNode,
 } from "react";
 import { useAuth } from "./AuthContext";
-import { apiGet } from "@/lib/apiClient";
+import { apiGet, getUserMessage } from "@/lib/apiClient";
 
 interface NotificacionesContextType {
     totalNoLeidas: number;
     setTotalNoLeidas: React.Dispatch<React.SetStateAction<number>>;
+    error: string | null;
+    clearError: () => void;
     refrescarNotificaciones: () => Promise<void>;
 }
 
@@ -23,6 +25,8 @@ export function NotificacionesProvider({ children }: { children: ReactNode }) {
   const { fetchWithAuth, user } = useAuth();
 
   const [totalNoLeidas, setTotalNoLeidas] = useState<number>(0);
+  const [error, setError] = useState<string | null>(null);
+  const clearError = useCallback(() => setError(null), []);
 
   const refrescarNotificaciones = useCallback(async () => {
     if (!user) return;
@@ -32,8 +36,10 @@ export function NotificacionesProvider({ children }: { children: ReactNode }) {
         "/api/notificaciones/nuevas-notificaciones"
       );
       setTotalNoLeidas(data.totalNoLeidas || 0);
-    } catch (error) {
-      console.error("Error al refrescar notificaciones:", error);
+    } catch (err) {
+      const msg = getUserMessage(err, 'cargar_notificaciones');
+      console.error(msg, err);
+      setError(msg);
     }
   }, [fetchWithAuth, user]);
 
@@ -49,7 +55,7 @@ export function NotificacionesProvider({ children }: { children: ReactNode }) {
 
   return (
     <NotificacionesContext.Provider
-      value={{ totalNoLeidas, setTotalNoLeidas, refrescarNotificaciones }}
+      value={{ totalNoLeidas, setTotalNoLeidas, error, clearError, refrescarNotificaciones }}
     >
       {children}
     </NotificacionesContext.Provider>

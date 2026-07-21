@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { apiPost } from "@/lib/apiClient";
+import { apiPost, getUserMessage } from "@/lib/apiClient";
 
 export function useObtenerUbicacion() {
   const { fetchWithAuth } = useAuth();
@@ -64,9 +64,10 @@ export function useObtenerUbicacion() {
         estado: data.municipio?.nombreEntidad || null,
         pais: "México", // Asumimos que siempre sera Mexico, ya que el servicio solo devuelve municipios mexicanos
       };
-    } catch (error) {
-      console.error(error);
-      setUbicacionError("No se pudo obtener ubicación automáticamente");
+    } catch (err) {
+      const msg = getUserMessage(err, 'obtener_ubicacion');
+      console.error(msg, err);
+      setUbicacionError(msg);
       return null;
     } finally {
       setLoadingUbicacion(false);

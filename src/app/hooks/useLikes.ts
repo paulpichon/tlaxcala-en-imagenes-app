@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { apiPost } from "@/lib/apiClient";
+import { apiPost, getUserMessage } from "@/lib/apiClient";
 
 type LikeState = {
   count: number;
@@ -33,7 +33,8 @@ export function useLikes(
         return prev;
       });
     } catch (err) {
-      console.error("Error al dar like:", err);
+      const msg = getUserMessage(err, 'like');
+      console.error(msg, err);
     }
   };
 

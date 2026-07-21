@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { FollowingUserItemProps } from "@/types/types";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import Link from "next/link";
-import { apiGet, ApiError } from "@/lib/apiClient";
+import { apiGet, isNotFound, getUserMessage } from "@/lib/apiClient";
 
 interface Props {
   userId: string;        // usuario del perfil visitado
@@ -34,11 +34,12 @@ export default function FollowingModal({ userId, loggedUserId, show, onClose }: 
         );
 
         setFollowing(data.siguiendo);
-      } catch (error) {
-        if (error instanceof ApiError && error.data?.code === 'NOT_FOUND') {
+      } catch (err) {
+        if (isNotFound(err)) {
           console.warn("El usuario no existe:", userId);
         } else {
-          console.error("Error obteniendo seguidos", error);
+          const msg = getUserMessage(err, 'cargar_seguidos');
+          console.error(msg, err);
         }
       } finally {
         setLoading(false);

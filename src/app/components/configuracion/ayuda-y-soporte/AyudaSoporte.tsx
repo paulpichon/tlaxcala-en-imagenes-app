@@ -25,7 +25,7 @@ import { z } from 'zod';
 import ayudaSoporte from "@/app/ui/configuracion/AyudaSoporte.module.css";
 import { schemaAyudaSoporte } from '@/lib/validaciones';
 import Link from 'next/link';
-import { apiPost, ApiError } from '@/lib/apiClient';
+import { apiPost, isApiError, isRateLimit, getUserMessage } from '@/lib/apiClient';
 
 export default function AyudaSoporte() {
 
@@ -100,12 +100,12 @@ export default function AyudaSoporte() {
           errors[err.path[0]] = err.message;
         });
         setFormErrors(errors);
-      } else if (error instanceof ApiError) {
+      } else if (isApiError(error)) {
         setToastType('danger');
         setToastMessage(
-          error.data?.code === 'SOPORTE_BLOCKED' || error.data?.code === 'RATE_LIMIT_EXCEEDED'
-            ? String(error.data.detail ?? "Demasiados tickets de soporte, intenta de nuevo más tarde")
-            : String(error.data.detail ?? "Error al enviar solicitud")
+          isRateLimit(error)
+            ? getUserMessage(error, 'soporte')
+            : getUserMessage(error, 'soporte')
         );
       } else {
         setToastType('danger');

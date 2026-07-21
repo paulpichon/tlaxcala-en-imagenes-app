@@ -11,7 +11,7 @@ import { useFavorito } from "@/context/FavoritoContext";
 import { useState } from "react";
 import ToastGlobal from "./ToastGlobal";
 import EditarPosteoModal from "./posteo/EditarPosteoModal";
-import { apiDelete, apiPut, ApiError } from "@/lib/apiClient";
+import { apiDelete, apiPut, isNotFound, getUserMessage } from "@/lib/apiClient";
 
 interface ModalOpcionesPublicacionProps extends PropsModalOpcionesPublicacion {
   onPostDeleted?: (postId: string) => void;
@@ -80,11 +80,12 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
       onClose?.();
       onPostDeleted?.(selectedImage._id);
     } catch (err) {
-      console.error("Error al eliminar posteo:", err);
-      if (err instanceof ApiError && err.data?.code === 'NOT_FOUND') {
+      const msg = getUserMessage(err, 'eliminar_posteo');
+      console.error(msg, err);
+      if (isNotFound(err)) {
         setToast({ message: "La publicación ya no existe", type: "danger" });
       } else {
-        setToast({ message: "Error interno al eliminar la publicación", type: "danger" });
+        setToast({ message: msg, type: "danger" });
       }
     } finally {
       setIsDeleting(false);
@@ -113,11 +114,12 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
         type: "success",
       });
     } catch (err) {
-      console.error("Error al toggle comentarios:", err);
-      if (err instanceof ApiError && err.data?.code === 'NOT_FOUND') {
+      const msg = getUserMessage(err, 'editar_posteo');
+      console.error(msg, err);
+      if (isNotFound(err)) {
         setToast({ message: "La publicación no fue encontrada", type: "danger" });
       } else {
-        setToast({ message: "Error interno", type: "danger" });
+        setToast({ message: msg, type: "danger" });
       }
     }
   };

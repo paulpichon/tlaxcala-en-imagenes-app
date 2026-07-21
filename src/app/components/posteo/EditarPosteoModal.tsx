@@ -10,7 +10,7 @@ import { Posteo } from "@/types/types";
 import { FiMapPin } from "react-icons/fi";
 import { useObtenerUbicacion } from "@/app/hooks/useObtenerUbicacion";
 import ManualMunicipioSelector from "../ManualMunicipioSelector";
-import { apiPut, ApiError } from "@/lib/apiClient";
+import { apiPut, isNotFound, getUserMessage } from "@/lib/apiClient";
 
 // ✅ Actualizar la interfaz del callback
 interface EditarPosteoModalProps {
@@ -162,11 +162,12 @@ export default function EditarPosteoModal({
           onClose(true, posteoActualizado);
         }, 600);
     } catch (err) {
-      console.error("Error al actualizar:", err);
-      if (err instanceof ApiError && err.data?.code === 'NOT_FOUND') {
+      const msg = getUserMessage(err, 'editar_posteo');
+      console.error(msg, err);
+      if (isNotFound(err)) {
         setToastMessage("La publicación ya no existe ❌");
       } else {
-        setToastMessage("Error interno ❌");
+        setToastMessage(msg);
       }
     } finally {
       setLoading(false);

@@ -1,15 +1,17 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { UsuarioPerfil } from "@/types/types";
-import { apiGet } from "@/lib/apiClient";
+import { apiGet, getUserMessage } from "@/lib/apiClient";
 
 export function useUsuarioPerfil(url: string | undefined) {
   const { fetchWithAuth } = useAuth();
   const [usuario, setUsuario] = useState<UsuarioPerfil | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const clearError = useCallback(() => setError(null), []);
 
   useEffect(() => {
     if (!url) return;
@@ -24,8 +26,9 @@ export function useUsuarioPerfil(url: string | undefined) {
         setUsuario(data.usuario);
         setError(null);
       } catch (err) {
-        console.error("Error al cargar usuario:", err);
-        setError("Error al cargar usuario");
+        const msg = getUserMessage(err, 'cargar_perfil');
+        console.error(msg, err);
+        setError(msg);
         setUsuario(null);
       } finally {
         setLoading(false);
@@ -35,5 +38,5 @@ export function useUsuarioPerfil(url: string | undefined) {
     fetchUsuario();
   }, [url, fetchWithAuth]);
 
-  return { usuario, loading, error, setUsuario };
+  return { usuario, loading, error, clearError, setUsuario };
 }

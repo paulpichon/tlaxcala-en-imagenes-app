@@ -13,7 +13,7 @@ import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 import FooterMain from "../../../components/FooterMain";
 // Función API para enviar el correo de restablecer password
 import { envioCorreoRestablecerPassword } from "@/lib/actions";
-import { ApiError } from "@/lib/apiClient";
+import { isApiError, isRateLimit, ApiErrorCode, getUserMessage } from "@/lib/apiClient";
 // Validación de correo electrónico desde usuarioSchema usando un .pick()
 import { correoSchema } from "@/lib/validaciones";
 import Link from "next/link";
@@ -142,26 +142,20 @@ export default function PasswordOlvidadaClient() {
 
 			router.push(`/cuentas/confirmacion/correo-enviado-restablecer-password`);
 		} catch (err) {
-			if (err instanceof ApiError) {
-				const msg = String(err.data.detail ?? "");
+			if (isApiError(err)) {
 				const code = err.data?.code;
-				setError(
-					code === 'UNAUTHORIZED' && msg === "Correo no existe"
-						? "La cuenta asociada a ese correo no existe."
-						: code === 'FORBIDDEN' && msg === "Cuenta no verificada"
-						? "La cuenta no ha sido verificada. Revisa tu email."
-						: code === 'FORBIDDEN' && msg === "Cuenta no activada" 
-						? "La cuenta está desactivada. Contacta a soporte."
-						: code === 'RATE_LIMIT_EXCEEDED' || code === 'RECOVERY_BLOCKED'
-						? "Espera 5 minutos antes de poder reenviar el correo."
-						: "Error al conectar con el servidor. Intenta más tarde."
-				);
-
-				localStorage.setItem("lastPasswordRequest", Date.now().toString());
-				iniciarContador(FIVE_MINUTES_MS / 1000);
+				if (isRateLimit(err)) {
+					setError("Espera 5 minutos antes de poder reenviar el correo.");
+					localStorage.setItem("lastPasswordRequest", Date.now().toString());
+					iniciarContador(FIVE_MINUTES_MS / 1000);
+				} else if (code === ApiErrorCode.VALIDATION_FAILED) {
+					setError(getUserMessage(err, 'recuperar_password'));
+				} else {
+					setError(getUserMessage(err, 'recuperar_password'));
+				}
 			} else {
-				console.log(err);
-				setError("Error al conectar con el servidor. Intenta más tarde.");
+				console.error(err);
+				setError(getUserMessage(err, 'recuperar_password'));
 			}
 		} finally {
 			setCargando(false);

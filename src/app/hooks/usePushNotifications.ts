@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { apiGet, apiPost } from "@/lib/apiClient";
+import { apiGet, apiPost, getUserMessage } from "@/lib/apiClient";
 
 type EstadoNotificacion = "idle" | "pending" | "enabled" | "disabled" | "error";
 
@@ -95,7 +95,8 @@ export function usePushNotifications() {
 
       setEstado("enabled");
     } catch (err) {
-      console.error("❌ Error activando notificaciones:", err);
+      const msg = getUserMessage(err, 'notificaciones_push');
+      console.error(msg, err);
       setEstado("error");
     } finally {
       isRegistering.current = false;
@@ -123,7 +124,8 @@ export function usePushNotifications() {
         setEstado("disabled");
       }
     } catch (err) {
-      console.error("Error al desactivar notificaciones:", err);
+      const msg = getUserMessage(err, 'notificaciones_push');
+      console.error(msg, err);
       setEstado("error");
     }
   }, [fetchWithAuth]);

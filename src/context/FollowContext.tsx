@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { apiPost, apiDelete, ApiError } from "@/lib/apiClient";
+import { apiPost, apiDelete, isNotFound, getUserMessage } from "@/lib/apiClient";
 
 interface FollowContextType {
   isFollowingMap: Record<string, boolean>;
@@ -36,11 +36,12 @@ export function FollowProvider({ children }: { children: ReactNode }) {
         ...prev,
         [userId]: !current,
       }));
-    } catch (error) {
-      if (error instanceof ApiError && error.data?.code === 'NOT_FOUND') {
+    } catch (err) {
+      if (isNotFound(err)) {
         console.warn("El usuario no existe:", userId);
       } else {
-        console.error("Error en toggleFollow:", error);
+        const msg = getUserMessage(err, 'follow');
+        console.error(msg, err);
       }
     } finally {
       setLoadingMap((prev) => ({ ...prev, [userId]: false }));

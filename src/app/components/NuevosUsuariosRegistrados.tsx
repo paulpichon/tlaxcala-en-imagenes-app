@@ -6,7 +6,7 @@ import { useNuevosUsuarios } from "@/context/NuevosUsuariosContext";
 import FollowButton from "./FollowButton";
 
 export default function NuevosUsuariosRegistrados() {
-  const { usuarios, loading } = useNuevosUsuarios();
+  const { usuarios, loading, error, clearError } = useNuevosUsuarios();
 
   return (
     <>
@@ -15,6 +15,19 @@ export default function NuevosUsuariosRegistrados() {
       </h5>
 
       {loading && <p className="text-center">Cargando...</p>}
+
+      {error && (
+        <div className="alert alert-danger alert-sm mx-2" role="alert">
+          {error}
+          <button
+            type="button"
+            className="btn btn-sm btn-outline-dark ms-2"
+            onClick={clearError}
+          >
+            Cerrar
+          </button>
+        </div>
+      )}
 
       <div className="d-flex flex-column gap-3">
         {usuarios.map((u) => (

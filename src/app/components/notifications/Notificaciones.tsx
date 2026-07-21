@@ -14,9 +14,11 @@ export default function ListaNotificaciones() {
     totalPages,
     loading,
     loadingMore,
+    error,
+    clearError,
     cargarNotificaciones,
     marcarComoLeida,
-    eliminarNotificacion, // 👈 Importante
+    eliminarNotificacion,
     setLoadingMore,
   } = useNotifications();
 
@@ -57,7 +59,20 @@ export default function ListaNotificaciones() {
             </div>
           </div>
         </header>
-        
+
+        {error && (
+          <div className="alert alert-danger mx-3 mt-3" role="alert">
+            {error}
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-dark ms-3"
+              onClick={clearError}
+            >
+              Cerrar
+            </button>
+          </div>
+        )}
+
         <div className="container-fluid py-4">
           <div className="d-flex flex-column gap-3">
           {notificaciones.length === 0 ? (

@@ -9,7 +9,7 @@ import {
   useRef,
 } from 'react';
 import { UsuarioLogueado, IAuthContext } from '@/types/types';
-import { apiPost, apiGet, ApiError } from '@/lib/apiClient';
+import { apiPost, apiGet, isApiError } from '@/lib/apiClient';
 
 const AuthContext = createContext<IAuthContext | undefined>(undefined);
 
@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const data = await apiGet<{ usuario: UsuarioLogueado }>(fetch, '/api/auth/me');
         setUser(data.usuario);
       } catch (err) {
-        if (err instanceof ApiError && err.status === 401) {
+        if (isApiError(err) && err.status === 401) {
           const refreshed = await refreshToken();
           if (refreshed) {
             try {

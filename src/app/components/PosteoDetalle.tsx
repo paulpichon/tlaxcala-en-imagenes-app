@@ -9,7 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import Spinner from "./spinner";
 import PosteoCard from "./PosteoCard";
 import { notFound } from "next/navigation";
-import { apiGet, ApiError } from "@/lib/apiClient";
+import { apiGet, isNotFound, getUserMessage } from "@/lib/apiClient";
 export default function PosteoDetalle() {
   const params = useParams() as { idposteo?: string } | null;
   const id = params?.idposteo ?? "";
@@ -42,11 +42,13 @@ export default function PosteoDetalle() {
 
       setPost(posteo);
     } catch (err) {
-      console.error("fetchPost error:", err);
-      if (err instanceof ApiError && err.data?.code === 'NOT_FOUND') {
+      if (isNotFound(err)) {
+        console.warn("Posteo no encontrado:", id);
         setError("La publicación no fue encontrada.");
       } else {
-        setError("Ocurrió un error cargando el posteo.");
+        const msg = getUserMessage(err, 'cargar_publicaciones');
+        console.error(msg, err);
+        setError(msg);
       }
     } finally {
       setLoading(false);
@@ -60,8 +62,9 @@ export default function PosteoDetalle() {
   }, [fetchPost, fetchWithAuth]);
 
   if (loading) return <div className="d-flex justify-content-center align-items-center vh-100"><Spinner /></div>
-  // 👇 Si hubo error de fetch o no existe usuario, mostramos la página not-found
-  if (error) return notFound();
+  // 👇 Solo mostramos not-found cuando el posteo no existe (404)
+  if (error === "La publicación no fue encontrada.") return notFound();
+  if (error) return <p className="text-center mt-5 text-danger">{error}</p>;
   if (!post) return <p className="text-center mt-5">Publicación no encontrada.</p>;
 
   return (

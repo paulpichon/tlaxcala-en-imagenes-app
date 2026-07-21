@@ -12,7 +12,7 @@ import ModalLikesUsuarios from "./ModalLikesUsuarios";
 import { Posteo, LikeUsuario, PosteoCardProps, LikesUsuariosResponse } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
-import { apiGet, ApiError } from "@/lib/apiClient";
+import { apiGet, isNotFound, getUserMessage } from "@/lib/apiClient";
 import posteoCard from "../ui/posteos/PosteoCard.module.css";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 import { useComentarios } from "@/app/hooks/useComentarios";
@@ -44,10 +44,11 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
       setLikesUsuarios(data.likes_usuarios_posteo ?? []);
       setIsLikesOpen(true);
     } catch (err) {
-      if (err instanceof ApiError && err.data?.code === 'NOT_FOUND') {
+      if (isNotFound(err)) {
         console.warn("El posteo no existe al cargar usuarios de likes");
       } else {
-        console.error("Error cargando usuarios de likes:", err);
+        const msg = getUserMessage(err, 'like');
+        console.error(msg, err);
       }
     }
   };

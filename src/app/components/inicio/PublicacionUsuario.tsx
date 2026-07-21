@@ -9,7 +9,9 @@ export default function PublicacionUsuario() {
     posts,
     loading,
     observerRef,
-    finished
+    finished,
+    error,
+    clearError,
   } = useInfinitePosts(
     `${process.env.NEXT_PUBLIC_API_URL}/api/posteos`,
   );
@@ -38,6 +40,18 @@ export default function PublicacionUsuario() {
 
   return (
     <>
+      {error && (
+        <div className="alert alert-danger mx-3 mt-3" role="alert">
+          {error}
+          <button
+            type="button"
+            className="btn btn-sm btn-outline-dark ms-3"
+            onClick={clearError}
+          >
+            Cerrar
+          </button>
+        </div>
+      )}
       {posts.map((post) => (
         <PosteoCard
           key={post._id}

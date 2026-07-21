@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { useAuth } from '@/context/AuthContext';
 import { obtenerImagenPerfilUsuario } from '@/lib/cloudinary/obtenerImagenPerfilUsuario';
 import { Municipio, UsuarioLogueado } from '@/types/types';
-import { apiGet, apiPut } from '@/lib/apiClient';
+import { apiGet, apiPut, getUserMessage } from '@/lib/apiClient';
 
 export const perfilSchema = z
   .object({
@@ -65,9 +65,10 @@ export function useEditarPerfil() {
           '/api/municipios/'
         );
         setMunicipios(data.municipios || []);
-      } catch (error) {
-        console.error('Error al cargar municipios:', error);
-        setToast({ message: 'No se pudieron cargar los municipios', type: 'danger' });
+      } catch (err) {
+        const msg = getUserMessage(err, 'actualizar_perfil');
+        console.error(msg, err);
+        setToast({ message: msg, type: 'danger' });
       }
     })();
   }, [fetchWithAuth]);
@@ -147,8 +148,9 @@ export function useEditarPerfil() {
         setErrors(fieldErrors);
         setToast({ message: 'Por favor corrige los campos en rojo', type: 'danger' });
       } else {
-        console.error(error);
-        setToast({ message: 'No se pudo actualizar el perfil', type: 'danger' });
+        const msg = getUserMessage(error, 'actualizar_perfil');
+        console.error(msg, error);
+        setToast({ message: msg, type: 'danger' });
       }
     } finally {
       setLoading(false);

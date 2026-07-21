@@ -5,12 +5,12 @@ import crearCuenta from "../../../ui/cuentas/crear-cuenta/CrearCuenta.module.css
 import { useRouter } from "next/navigation";
 // Funcion para Crear usuario
 import { createUsuario } from '@/lib/actions';
-import { ApiError } from "@/lib/apiClient";
+import { isApiError, isRateLimit, ApiErrorCode, getUserMessage } from "@/lib/apiClient";
 // UseState, formEvent
 import { SubmitEvent, useState } from 'react';
 // interfaces, types
 import { 
-  APIError, 
+  FormFieldError, 
   FormErrors, 
   IUsuarioData 
 } from "@/types/types";
@@ -71,7 +71,7 @@ export function FormularioRegistro() {
   };
 
   // Manejar errores de la API
-  const handleAPIError = (apiError: APIError) => {
+  const handleAPIError = (apiError: FormFieldError) => {
     if (apiError.field) {
       setValidationErrors(prev => ({
         ...prev,
@@ -108,17 +108,16 @@ export function FormularioRegistro() {
       sessionStorage.setItem('registroToken', resultado.token);
       router.push('/cuentas/confirmacion/correo-enviado');
     } catch (err) {
-      if (err instanceof ApiError) {
+      if (isApiError(err)) {
         const code = err.data?.code;
-        if (code === 'REGISTER_BLOCKED' || code === 'RATE_LIMIT_EXCEEDED') {
-          setError(String(err.data.detail ?? "Demasiadas cuentas creadas desde esta conexión, intenta de nuevo más tarde"));
-        } else if (code === 'CONFLICT') {
+        if (isRateLimit(err)) {
+          setError(getUserMessage(err, 'registro'));
+        } else if (code === ApiErrorCode.CONFLICT) {
           handleAPIError({
-            status: 409,
             message: "Este correo electrónico ya existe en nuestra base de datos",
             field: "correo",
           });
-        } else if (code === 'VALIDATION_FAILED' || code === 'BAD_REQUEST') {
+        } else if (code === ApiErrorCode.VALIDATION_FAILED || code === ApiErrorCode.BAD_REQUEST) {
           const errores = err.data.errores as Array<{ path: string; msg: string }> | undefined;
           const data = err.data.data as { field?: keyof UsuarioSchema; message?: string } | undefined;
           if (Array.isArray(errores)) {
@@ -131,7 +130,6 @@ export function FormularioRegistro() {
             });
           } else if (data?.field) {
             handleAPIError({
-              status: 400,
               message: data.message || "Datos inválidos",
               field: data.field,
             });
@@ -139,7 +137,7 @@ export function FormularioRegistro() {
             setError("Los datos enviados son inválidos.");
           }
         } else {
-          setError(String(err.data.detail ?? "Error en el servidor"));
+          setError(getUserMessage(err, 'registro'));
         }
       } else {
         console.error(err);

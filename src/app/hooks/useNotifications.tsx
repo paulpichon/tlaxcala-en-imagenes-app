@@ -3,7 +3,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNotificaciones } from "@/context/NotificacionesContext";
 import { Notificacion } from "@/types/types";
-import { apiGet, apiPatch, apiDelete } from "@/lib/apiClient";
+import { apiGet, apiPatch, apiDelete, getUserMessage } from "@/lib/apiClient";
 
 export function useNotifications() {
   const { fetchWithAuth } = useAuth();
@@ -14,6 +14,9 @@ export function useNotifications() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const clearError = useCallback(() => setError(null), []);
 
   // 🔹 Cargar notificaciones con paginación
   const cargarNotificaciones = useCallback(
@@ -30,7 +33,9 @@ export function useNotifications() {
         setPage(pagina);
         setTotalPages(data.totalPages);
       } catch (err) {
-        console.error("Error cargando notificaciones:", err);
+        const msg = getUserMessage(err, 'cargar_notificaciones');
+        console.error(msg, err);
+        setError(msg);
       } finally {
         setLoading(false);
         setLoadingMore(false);
@@ -54,7 +59,9 @@ export function useNotifications() {
 
         setTotalNoLeidas((prev: number) => Math.max(prev - 1, 0));
       } catch (err) {
-        console.error("Error marcando como leída:", err);
+        const msg = getUserMessage(err, 'cargar_notificaciones');
+        console.error(msg, err);
+        setError(msg);
       }
     },
     [fetchWithAuth, notificaciones, setTotalNoLeidas]
@@ -70,7 +77,9 @@ export function useNotifications() {
 
         await refrescarNotificaciones();
       } catch (err) {
-        console.error("Error eliminando notificación:", err);
+        const msg = getUserMessage(err, 'cargar_notificaciones');
+        console.error(msg, err);
+        setError(msg);
       }
     },
     [fetchWithAuth, refrescarNotificaciones]
@@ -87,10 +96,12 @@ export function useNotifications() {
     totalPages,
     loading,
     loadingMore,
+    error,
+    clearError,
     cargarNotificaciones,
     marcarComoLeida,
-    eliminarNotificacion, // 👈 exportamos la nueva función
+    eliminarNotificacion,
     setLoadingMore,
-    setNotificaciones, // opcional, útil si algún día se necesita refrescar manualmente
+    setNotificaciones,
   };
 }

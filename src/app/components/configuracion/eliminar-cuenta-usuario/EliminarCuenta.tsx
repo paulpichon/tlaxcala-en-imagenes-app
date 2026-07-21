@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FiArrowLeft, FiAlertTriangle } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { apiDelete, ApiError } from "@/lib/apiClient";
+import { apiDelete, isApiError, getUserMessage } from "@/lib/apiClient";
 
 export default function EliminarCuenta() {
   const router = useRouter();
@@ -34,11 +34,10 @@ export default function EliminarCuenta() {
       }, 2000);
 
     } catch (error) {
-      const mensajeError =
-        error instanceof ApiError
-          ? String(error.data.detail ?? "Ocurrió un error al eliminar tu cuenta.")
-          : "Ocurrió un error al eliminar tu cuenta.";
-    
+      const mensajeError = isApiError(error)
+        ? getUserMessage(error, 'eliminar_cuenta')
+        : "Ocurrió un error al eliminar tu cuenta.";
+
       setMensaje(mensajeError);
     }
      finally {

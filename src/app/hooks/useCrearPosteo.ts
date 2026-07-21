@@ -4,7 +4,7 @@ import { ZodError } from "zod";
 import { useAuth } from "@/context/AuthContext";
 import { Posteo } from "@/types/types";
 import { useObtenerUbicacion } from "./useObtenerUbicacion";
-import { apiPost, ApiError } from "@/lib/apiClient";
+import { apiPost, isRateLimit, getUserMessage } from "@/lib/apiClient";
 
 export function useCrearPosteo(
   onPostCreated?: (newPost?: Posteo) => void,
@@ -155,10 +155,10 @@ export function useCrearPosteo(
     } catch (err) {
       if (err instanceof ZodError) {
         setErrors(err.issues.map((e) => e.message));
-    } else if (err instanceof ApiError && (err.data?.code === 'RATE_LIMIT_EXCEEDED' || err.data?.code === 'POSTEO_BLOCKED')) {
-      setErrors([String(err.data.detail ?? "Demasiadas publicaciones, intenta de nuevo más tarde")]);
-    } else {
-        setErrors(["Ocurrió un error al crear la publicación"]);
+      } else if (isRateLimit(err)) {
+        setErrors([getUserMessage(err, 'crear_posteo')]);
+      } else {
+        setErrors([getUserMessage(err, 'crear_posteo')]);
       }
     } finally {
       setLoading(false);

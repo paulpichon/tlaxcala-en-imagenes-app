@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { resetPasswordSchema, ResetPasswordSchema } from "@/lib/validaciones";
 import styles from "@/app/ui/cuentas/login/restablecer-password/RestablecerPassword.module.css";
-import { apiPost, ApiError } from "@/lib/apiClient";
+import { apiPost, isApiError, isRateLimit, getUserMessage } from "@/lib/apiClient";
 
 export default function FormularioNuevaPassword({ token }: { token: string }) {
 	const {
@@ -33,12 +33,11 @@ export default function FormularioNuevaPassword({ token }: { token: string }) {
 			sessionStorage.setItem('passwordResetSuccess', 'true');
 			router.push("/cuentas/confirmacion/password-restablecido");
 		} catch (err) {
-			if (err instanceof ApiError) {
-				const code = err.data?.code;
-				if (code === 'RATE_LIMIT_EXCEEDED' || code === 'RECOVERY_BLOCKED') {
-					setServerError(String(err.data.detail ?? "Demasiados intentos de recuperación de contraseña, intenta de nuevo en 15 minutos"));
+			if (isApiError(err)) {
+				if (isRateLimit(err)) {
+					setServerError(getUserMessage(err, 'restablecer_password'));
 				} else {
-					setServerError(String(err.data.detail ?? "Error al restablecer contraseña, favor de reiniciar el proceso."));
+					setServerError(getUserMessage(err, 'restablecer_password'));
 				}
 			} else {
 				setServerError("Ocurrió un error desconocido");

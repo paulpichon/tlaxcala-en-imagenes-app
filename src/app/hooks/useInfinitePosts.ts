@@ -1,7 +1,7 @@
 import { ApiResponsePosteos, Posteo } from "@/types/types";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { apiGet } from "@/lib/apiClient";
+import { apiGet, getUserMessage } from "@/lib/apiClient";
 
 export function useInfinitePosts(initialUrl: string) {
   const { fetchWithAuth } = useAuth();
@@ -9,6 +9,9 @@ export function useInfinitePosts(initialUrl: string) {
   const [nextUrl, setNextUrl] = useState<string | null>(initialUrl);
   const [loading, setLoading] = useState(false);
   const [finished, setFinished] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const clearError = useCallback(() => setError(null), []);
 
   const observerRef = useRef<HTMLDivElement | null>(null);
 
@@ -30,8 +33,10 @@ export function useInfinitePosts(initialUrl: string) {
       setNextUrl(data.next || null);
 
       if (!data.next) setFinished(true);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      const msg = getUserMessage(err, 'cargar_publicaciones');
+      console.error(msg, err);
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -89,6 +94,8 @@ export function useInfinitePosts(initialUrl: string) {
     loading,
     observerRef,
     finished,
+    error,
+    clearError,
     updateFollowState,
     updateFavoritoState,
   };

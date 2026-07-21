@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { apiPost, apiDelete, ApiError } from "@/lib/apiClient";
+import { apiPost, apiDelete, isNotFound, getUserMessage } from "@/lib/apiClient";
 
 interface FavoritoContextType {
   favoritosMap: Record<string, boolean>;
@@ -55,11 +55,12 @@ export function FavoritoProvider({ children }: { children: ReactNode }) {
       } else if (data.msg === "Eliminado de Favoritos") {
         setFavoritosMap((prev) => ({ ...prev, [posteoId]: false }));
       }
-    } catch (error) {
-      if (error instanceof ApiError && error.data?.code === 'NOT_FOUND') {
+    } catch (err) {
+      if (isNotFound(err)) {
         console.warn("El posteo no existe:", posteoId);
       } else {
-        console.error("Error en toggleFavorito:", error);
+        const msg = getUserMessage(err, 'favorito');
+        console.error(msg, err);
       }
     } finally {
       setLoadingMap((prev) => ({ ...prev, [posteoId]: false }));
