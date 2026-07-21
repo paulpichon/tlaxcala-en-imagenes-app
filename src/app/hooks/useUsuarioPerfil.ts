@@ -33,11 +33,16 @@ export function useUsuarioPerfil(url: string | undefined) {
         // o no es accesible, por lo que mostramos la página 404 en ambos casos.
         const notFound = isNotFound(err) || isValidationFailed(err);
         setIsNotFoundError(notFound);
-        const msg = notFound
-          ? "El perfil de usuario no fue encontrado."
-          : getUserMessage(err, 'cargar_perfil');
-        console.error(msg, err);
-        setError(msg);
+
+        if (notFound) {
+          console.warn("Perfil de usuario no encontrado:", url);
+          setError("El perfil de usuario no fue encontrado.");
+        } else {
+          const msg = getUserMessage(err, 'cargar_perfil');
+          console.error(msg, err);
+          setError(msg);
+        }
+
         setUsuario(null);
       } finally {
         setLoading(false);
