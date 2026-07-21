@@ -41,3 +41,13 @@ Copied from `.env.example`. Key vars: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_API_UR
 - No test infrastructure at all
 - Reports directory (`reports/`) is empty — used by OpenCode subagents
 - Existing OpenCode subagents: `documentador` (writes to `reports/documentador/`), `technical-analysis` (writes to `reports/technical-analysis/`)
+
+## Error Handling
+
+- **All API calls must go through `src/lib/apiClient.ts`** (`apiGet`, `apiPost`, `apiPut`, `apiPatch`, `apiDelete`). Raw `fetch` is only allowed inside `fetchWithAuth`.
+- The backend returns RFC 9457 error objects with `code`, `detail`, `status`, etc. Use the helpers exported by `apiClient.ts`:
+  - `isApiError(err)` / `getApiErrorCode(err)` / `getApiErrorMessage(err, fallback)`
+  - `isNotFound(err)`, `isUnauthorized(err)`, `isForbidden(err)`, `isValidationFailed(err)`, `isRateLimit(err)`
+- **Never use `data.status` from the response body to decide if a request failed.** The source of truth is `res.ok`, handled inside `handleApiResponse`.
+- Data-fetching hooks and contexts should expose `{ error: string | null; clearError: () => void }` so UI components can display failures consistently.
+- Anti-enumeration endpoints (e.g. password recovery) return a generic 200 message on purpose; do not add frontend checks that reveal whether an email/account exists.
