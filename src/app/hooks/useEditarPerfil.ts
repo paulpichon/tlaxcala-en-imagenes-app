@@ -22,12 +22,26 @@ export const perfilSchema = z
     password: z
       .string()
       .optional()
-      .refine((val) => !val || val.length >= 8, 'La contraseña debe tener al menos 8 caracteres'),
+      .refine((val) => !val || val.length >= 8, 'La contraseña debe tener al menos 8 caracteres')
+      .refine((val) => !val || /[A-Z]/.test(val), 'Debe contener al menos una mayúscula')
+      .refine((val) => !val || /[a-z]/.test(val), 'Debe contener al menos una minúscula')
+      .refine((val) => !val || /[0-9]/.test(val), 'Debe contener al menos un número')
+      .refine(
+        (val) => !val || /[!@#$%^&*(),.?":{}|<>\-+=\[\]_]/.test(val),
+        'Debe contener al menos un carácter especial (!@#$%^&*...)'
+      ),
     confirmPassword: z.string().optional(),
   })
   .refine(
-    (data) => !data.password || !data.confirmPassword || data.password === data.confirmPassword,
-    { message: 'Las contraseñas no coinciden', path: ['confirmPassword'] }
+    (data) => {
+      if (!data.password) return true;
+      if (!data.confirmPassword) return false;
+      return data.password === data.confirmPassword;
+    },
+    {
+      message: 'Debes confirmar la nueva contraseña',
+      path: ['confirmPassword'],
+    }
   );
 
 export function useEditarPerfil() {
@@ -93,13 +107,30 @@ export function useEditarPerfil() {
         password: value,
         confirmPassword: value ? prev.confirmPassword : '',
       }));
-      if (value === '') setErrors((prev) => ({ ...prev, password: '', confirmPassword: '' }));
+      if (value === '') {
+        setErrors((prev) => ({ ...prev, password: '', confirmPassword: '' }));
+        return;
+      }
+      // Validación en tiempo real de complejidad
+      const newErrors: Record<string, string> = {};
+      if (value.length < 8) {
+        newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
+      } else if (!/[A-Z]/.test(value)) {
+        newErrors.password = 'Debe contener al menos una mayúscula';
+      } else if (!/[a-z]/.test(value)) {
+        newErrors.password = 'Debe contener al menos una minúscula';
+      } else if (!/[0-9]/.test(value)) {
+        newErrors.password = 'Debe contener al menos un número';
+      } else if (!/[!@#$%^&*(),.?":{}|<>\-+=\[\]_]/.test(value)) {
+        newErrors.password = 'Debe contener al menos un carácter especial (!@#$%^&*...)';
+      }
+      setErrors((prev) => ({ ...prev, password: newErrors.password || '' }));
       return;
     }
 
     if (name === 'confirmPassword') {
       setFormData((prev) => ({ ...prev, confirmPassword: value }));
-      if (formData.password && value !== formData.password)
+      if (formData.password && value && value !== formData.password)
         setErrors((prev) => ({ ...prev, confirmPassword: 'Las contraseñas no coinciden' }));
       else setErrors((prev) => ({ ...prev, confirmPassword: '' }));
       return;
