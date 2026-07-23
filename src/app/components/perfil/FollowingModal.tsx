@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import FollowButton from "../FollowButton";
 import { useAuth } from "@/context/AuthContext";
-import { FollowingUserItemProps } from "@/types/types";
+import { FollowingUserItemProps, ApiResponse } from "@/types/types";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import Link from "next/link";
 import { apiGet, isNotFound, getUserMessage } from "@/lib/apiClient";
@@ -28,12 +28,12 @@ export default function FollowingModal({ userId, loggedUserId, show, onClose }: 
     const fetchData = async () => {
       setLoading(true);
       try {
-        const data = await apiGet<{ siguiendo: FollowingUserItemProps[] }>(
+        const data = await apiGet<ApiResponse<{ siguiendo: FollowingUserItemProps[] }>>(
           fetchWithAuth,
           `/api/followers/usuario/lista-followings/${userId}`
         );
 
-        setFollowing(data.siguiendo);
+        setFollowing(data.data.siguiendo);
       } catch (err) {
         if (isNotFound(err)) {
           console.warn("El usuario no existe:", userId);

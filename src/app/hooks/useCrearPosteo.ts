@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { posteoSchema, posteoBaseSchema } from "@/lib/validaciones";
 import { ZodError } from "zod";
 import { useAuth } from "@/context/AuthContext";
-import { Posteo } from "@/types/types";
+import { Posteo, ApiResponse } from "@/types/types";
 import { useObtenerUbicacion } from "./useObtenerUbicacion";
 import { apiPost, isRateLimit, getUserMessage } from "@/lib/apiClient";
 
@@ -147,8 +147,8 @@ export function useCrearPosteo(
       if (lat) formData.append("lat", String(lat));
       if (lng) formData.append("lng", String(lng));
 
-      const newPost = await apiPost<Posteo>(fetchWithAuth, "/api/posteos", formData);
-      onPostCreated?.(newPost);
+      const data = await apiPost<ApiResponse<{ posteo: Posteo }>>(fetchWithAuth, "/api/posteos", formData);
+      onPostCreated?.(data.data.posteo);
 
       resetForm();
       onSuccess?.();

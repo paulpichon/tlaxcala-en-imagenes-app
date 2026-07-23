@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNotificaciones } from "@/context/NotificacionesContext";
-import { Notificacion } from "@/types/types";
+import { Notificacion, ApiResponsePaginado } from "@/types/types";
 import { apiGet, apiPatch, apiDelete, getUserMessage } from "@/lib/apiClient";
 
 export function useNotifications() {
@@ -22,16 +22,17 @@ export function useNotifications() {
   const cargarNotificaciones = useCallback(
     async (pagina = 1) => {
       try {
-        const data = await apiGet<{
-          notificaciones: Notificacion[];
-          totalPages: number;
-        }>(fetchWithAuth, '/api/notificaciones', { page: pagina });
+        const data = await apiGet<ApiResponsePaginado<Notificacion>>(
+          fetchWithAuth,
+          '/api/notificaciones',
+          { page: pagina }
+        );
 
-        if (pagina === 1) setNotificaciones(data.notificaciones);
-        else setNotificaciones((prev) => [...prev, ...data.notificaciones]);
+        if (pagina === 1) setNotificaciones(data.data);
+        else setNotificaciones((prev) => [...prev, ...data.data]);
 
         setPage(pagina);
-        setTotalPages(data.totalPages);
+        setTotalPages(data.pagination.totalPages);
       } catch (err) {
         const msg = getUserMessage(err, 'cargar_notificaciones');
         console.error(msg, err);

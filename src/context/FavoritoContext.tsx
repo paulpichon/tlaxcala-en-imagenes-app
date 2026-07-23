@@ -36,24 +36,12 @@ export function FavoritoProvider({ children }: { children: ReactNode }) {
     try {
       const current = favoritosMap[posteoId] ?? initialFavorito ?? false;
 
-      let data: { msg: string };
       if (current) {
-        data = await apiDelete<{ msg: string }>(
-          fetchWithAuth,
-          `/api/favoritos/${posteoId}`
-        );
-      } else {
-        data = await apiPost<{ msg: string }>(
-          fetchWithAuth,
-          `/api/favoritos/${posteoId}`,
-          { autorId }
-        );
-      }
-
-      if (data.msg === "Agregado en Favoritos") {
-        setFavoritosMap((prev) => ({ ...prev, [posteoId]: true }));
-      } else if (data.msg === "Eliminado de Favoritos") {
+        await apiDelete(fetchWithAuth, `/api/favoritos/${posteoId}`);
         setFavoritosMap((prev) => ({ ...prev, [posteoId]: false }));
+      } else {
+        await apiPost(fetchWithAuth, `/api/favoritos/${posteoId}`, { autorId });
+        setFavoritosMap((prev) => ({ ...prev, [posteoId]: true }));
       }
     } catch (err) {
       if (isNotFound(err)) {

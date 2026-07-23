@@ -9,6 +9,7 @@ import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 import FooterPrincipal from "@/app/components/FooterMain";
 import Link from "next/link";
 import { apiGet } from "@/lib/apiClient";
+import { ApiResponse } from "@/types/types";
 
 // ✅ Metadata optimizada para SEO
 // ⚠️ IMPORTANTE: Esta página NO debe ser indexada por seguridad
@@ -94,7 +95,7 @@ export default async function CuentaVerificadaPage({
     // Validar el token con la API de autenticación
     // Esta petición verifica si el token es válido y no ha expirado
     // Si es válido, también marca la cuenta como verificada en la base de datos
-    const data = await apiGet<{ ok: boolean }>(
+    const data = await apiGet<ApiResponse<Record<string, never>>>(
       fetch,
       `/api/auth/verificar-correo/${token}`,
       undefined,
@@ -113,7 +114,7 @@ export default async function CuentaVerificadaPage({
             <div className={cuentaVerificada.contenedor_formulario}>
               
               {/* Renderizado condicional según resultado de la verificación */}
-              {data.ok ? (
+              {data.success ? (
                 // ✅ CASO EXITOSO: Token válido, cuenta verificada
                 <div className={cuentaVerificada.contenedor_titulos}>
                   <h1>¡Tu cuenta ha sido verificada!</h1>

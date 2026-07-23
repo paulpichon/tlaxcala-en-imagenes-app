@@ -4,7 +4,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 
-import { PosteoDetalleResponse, Posteo } from "@/types/types";
+import { ApiResponse, Posteo } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 import Spinner from "./spinner";
 import PosteoCard from "./PosteoCard";
@@ -32,15 +32,15 @@ export default function PosteoDetalle() {
     setIsNotFoundError(false);
 
     try {
-      const data = await apiGet<PosteoDetalleResponse>(
+      const data = await apiGet<ApiResponse<{ posteo: Posteo; isFollowing: boolean; isFavorito: boolean }>>(
         fetchWithAuth,
         `/api/posteos/post/${id}`
       );
-      const posteo = data.posteo;
-      
+      const posteo = data.data.posteo;
+
       // Asegurar que los flags estén en el objeto posteo (por si el backend devolvió por separado)
-      posteo.isFollowing = data.isFollowing ?? posteo.isFollowing ?? false;
-      posteo.isFavorito = data.isFavorito ?? posteo.isFavorito ?? false;
+      posteo.isFollowing = data.data.isFollowing ?? posteo.isFollowing ?? false;
+      posteo.isFavorito = data.data.isFavorito ?? posteo.isFavorito ?? false;
 
       setPost(posteo);
     } catch (err) {

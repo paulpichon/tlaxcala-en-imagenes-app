@@ -57,31 +57,39 @@ export interface PosteoCardProps {
   showUserUrl?: boolean;
 }
 
-// Response de la API para los posteos
-// Esta interface es la que se espera recibir de la API al hacer una petición para obtener los posteos
-// Contiene un array de posteos, y las URLs para paginación
-export interface ApiResponsePosteos {
+// ======================================
+// 📦 Wrappers genericos de respuesta API
+// ======================================
+// Estructura de paginacion unificada (HIGH-01)
+export interface Pagination {
   page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
   next: string | null;
   prev: string | null;
-  limite: number;
-  total_registros: number;
-  mostrando: number;
-  posteosConEstado: Posteo[];
 }
+
+// Patron B: respuesta con datos (un recurso o varios campos)
+export interface ApiResponse<T> {
+  success: boolean;
+  msg?: string;
+  data: T;
+}
+
+// Patron C: respuesta paginada (listas)
+export interface ApiResponsePaginado<T> {
+  success: boolean;
+  data: T[];
+  pagination: Pagination;
+}
+
 // Interface para ModalOpcionesPublicacion
 export interface PropsModalOpcionesPublicacion {
   isOpen: boolean;
   selectedImage: Posteo | null;
   onClose: () => void;
 };
-// 
-// 📌 Respuesta para un post en detalle
-export interface PosteoDetalleResponse {
-  posteo: Posteo;        // El post en sí
-  isFollowing: boolean;  // Si el usuario actual sigue al autor
-  isFavorito: boolean;   // Si el usuario actual tiene en favoritos este post
-}
 
 // Interface props para el reenvio de correo electronico
 export interface ModalReenviarCorreoProps {
@@ -166,12 +174,6 @@ export interface LikeButtonProps {
   hasLiked?: boolean;
   onOpenLikesModal?: () => void;
 }
-// Respuesta de la API para likes de un posteo
-// Esta interface representa la respuesta de la API al solicitar los likes de un posteo
-// Contiene un array de usuarios que han dado like al posteo
-export interface LikesUsuariosResponse {
-  likes_usuarios_posteo: LikeUsuario[];
-}
 // Interface para las props del componente FollowButton
 export interface FavoritoButtonProps {
   posteoId: string;
@@ -241,19 +243,7 @@ export interface Comentario {
   };
 }
 
-export interface ComentariosResponse {
-  ok: boolean;
-  page: number;
-  limit: number;
-  next: string | null;
-  prev: string | null;
-  total: number;
-  totalPages: number;
-  comentarios: Comentario[];
-}
-
 export interface ComentariosCountResponse {
-  ok: boolean;
   count: number;
 }
 
@@ -323,18 +313,6 @@ export interface Favorito {
   __v: number;
 }
 
-// ======================================
-// 📦 Tipo para la respuesta paginada de la API
-// ======================================
-export interface ApiResponseFavoritos {
-  page: number;
-  next: string | null;
-  prev: string | null;
-  limite: number;
-  total_registros: number;
-  mostrando: number;
-  favoritos: Favorito[];
-}
 // ======================================
 // 📦 Editar el posteo modal
 // ======================================

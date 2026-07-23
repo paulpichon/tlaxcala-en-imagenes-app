@@ -1,4 +1,4 @@
-import { IUsuarioData, ReenviarCorreoResponse } from "@/types/types";
+import { IUsuarioData, ReenviarCorreoResponse, ApiResponse } from "@/types/types";
 import {
   apiPost,
   apiGet,
@@ -10,10 +10,10 @@ import {
 export function createUsuario(formData: IUsuarioData) {
   const { nombre, apellido, correo, password } = formData;
   return apiPost<{
-    token: string;
+    success: boolean;
     msg?: string;
+    data?: { token: string };
     errores?: Array<{ path: string; msg: string }>;
-    data?: { field?: keyof import("@/lib/validaciones").UsuarioSchema; message?: string };
   }>(fetch, "/api/usuarios", {
     nombre_completo: { nombre, apellido },
     correo,
@@ -123,7 +123,7 @@ export async function reenviarCorreoRestablecerPassword(
 }
 
 export async function envioCorreoRestablecerPassword(correo: string) {
-  return apiPost<{ token: string; msg?: string }>(
+  return apiPost<ApiResponse<{ token: string }>>(
     fetch,
     "/api/auth/cuentas/password-olvidado",
     { correo }
@@ -132,7 +132,7 @@ export async function envioCorreoRestablecerPassword(correo: string) {
 
 export async function validarTokenRestablecerPassword(token: string) {
   try {
-    return await apiGet<{ valid: boolean }>(
+    return await apiGet<ApiResponse<{ valid: boolean }>>(
       fetch,
       `/api/auth/cuentas/restablecer-password/validar-token-reset-password/${token}`,
       undefined,
@@ -140,6 +140,6 @@ export async function validarTokenRestablecerPassword(token: string) {
     );
   } catch (error) {
     console.error("Error al validar el token:", error);
-    return { valid: false };
+    return { success: false, data: { valid: false } };
   }
 }

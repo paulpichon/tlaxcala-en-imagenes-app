@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import favoritoStyles from "../../ui/favoritos/Favorito.module.css";
-import { Favorito, ApiResponseFavoritos } from "@/types/types";
+import { Favorito, ApiResponsePaginado } from "@/types/types";
 import Spinner from "../spinner";
 import FavoritoButton from "../FavoritoButton";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
@@ -26,16 +26,16 @@ export default function Favoritos() {
         const endpoint =
           url || '/api/favoritos';
 
-        const data = await apiGet<ApiResponseFavoritos>(fetchWithAuth, endpoint);
+        const data = await apiGet<ApiResponsePaginado<Favorito>>(fetchWithAuth, endpoint);
 
         setFavoritos((prev) => {
-          const nuevos = data.favoritos.filter(
+          const nuevos = data.data.filter(
             (nuevo) => !prev.some((existente) => existente._id === nuevo._id)
           );
           return [...prev, ...nuevos];
         });
 
-        setNext(data.next);
+        setNext(data.pagination.next);
       } catch (error) {
         console.error("Error cargando favoritos:", error);
       } finally {

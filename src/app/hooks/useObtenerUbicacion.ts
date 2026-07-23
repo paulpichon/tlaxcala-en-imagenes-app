@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { apiPost, getUserMessage } from "@/lib/apiClient";
+import { ApiResponse } from "@/types/types";
 
 export function useObtenerUbicacion() {
   const { fetchWithAuth } = useAuth();
@@ -43,25 +44,27 @@ export function useObtenerUbicacion() {
       setLng(coords.longitude);
 
       // 2️⃣ Consultar tu backend para convertir coords → municipio
-      const data = await apiPost<{
+      const data = await apiPost<ApiResponse<{
         municipio?: { _id: string; nombreMunicipio: string; nombreEntidad: string };
-      }>(fetchWithAuth, "/api/ubicacion/reverse", {
+        metodo?: string;
+        precision?: string;
+      }>>(fetchWithAuth, "/api/ubicacion/reverse", {
         lat: coords.latitude,
         lng: coords.longitude,
       });
 
       // 3️⃣ Guardar valores
-      setMunicipioId(data.municipio?._id || null);
-      setCiudad(data.municipio?.nombreMunicipio || null);
-      setEstado(data.municipio?.nombreEntidad || null);
+      setMunicipioId(data.data.municipio?._id || null);
+      setCiudad(data.data.municipio?.nombreMunicipio || null);
+      setEstado(data.data.municipio?.nombreEntidad || null);
       setPais("México"); // Asumimos que siempre sera Mexico, ya que el servicio solo devuelve municipios mexicanos
 
       return {
-        lat: coords.latitude, 
+        lat: coords.latitude,
         lng: coords.longitude,
-        municipioId: data.municipio?._id || null,
-        ciudad: data.municipio?.nombreMunicipio || null,
-        estado: data.municipio?.nombreEntidad || null,
+        municipioId: data.data.municipio?._id || null,
+        ciudad: data.data.municipio?.nombreMunicipio || null,
+        estado: data.data.municipio?.nombreEntidad || null,
         pais: "México", // Asumimos que siempre sera Mexico, ya que el servicio solo devuelve municipios mexicanos
       };
     } catch (err) {

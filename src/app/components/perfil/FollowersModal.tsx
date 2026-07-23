@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import FollowButton from "../FollowButton";
 import { useAuth } from "@/context/AuthContext";
-import { FollowerUserItemProps } from "@/types/types";
+import { FollowerUserItemProps, ApiResponse } from "@/types/types";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import Link from "next/link";
 import { apiGet, isNotFound, getUserMessage } from "@/lib/apiClient";
@@ -30,12 +30,12 @@ export default function FollowersModal({ userId, loggedUserId, show, onClose }: 
     const fetchData = async () => {
       setLoading(true);
       try {
-        const data = await apiGet<{ seguidores: FollowerUserItemProps[] }>(
+        const data = await apiGet<ApiResponse<{ seguidores: FollowerUserItemProps[] }>>(
           fetchWithAuth,
           `/api/followers/usuario/lista-followers/${userId}`
         );
 
-        setFollowers(data.seguidores);
+        setFollowers(data.data.seguidores);
       } catch (err) {
         if (isNotFound(err)) {
           console.warn("El usuario no existe:", userId);

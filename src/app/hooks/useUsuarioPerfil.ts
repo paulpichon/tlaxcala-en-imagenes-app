@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { UsuarioPerfil } from "@/types/types";
+import { UsuarioPerfil, ApiResponse } from "@/types/types";
 import { apiGet, isNotFound, isValidationFailed, getUserMessage } from "@/lib/apiClient";
 
 export function useUsuarioPerfil(url: string | undefined) {
@@ -21,11 +21,11 @@ export function useUsuarioPerfil(url: string | undefined) {
       setLoading(true);
       setIsNotFoundError(false);
       try {
-        const data = await apiGet<{ usuario: UsuarioPerfil }>(
+        const data = await apiGet<ApiResponse<{ usuario: UsuarioPerfil }>>(
           fetchWithAuth,
           `/api/usuarios/${url}`
         );
-        setUsuario(data.usuario);
+        setUsuario(data.data.usuario);
         setError(null);
       } catch (err) {
         // Un ID/URL mal formado (VALIDATION_FAILED) es semánticamente equivalente

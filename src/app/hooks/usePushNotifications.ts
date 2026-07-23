@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { apiGet, apiPost, getUserMessage } from "@/lib/apiClient";
+import { ApiResponse } from "@/types/types";
 
 type EstadoNotificacion = "idle" | "pending" | "enabled" | "disabled" | "error";
 
@@ -73,7 +74,7 @@ export function usePushNotifications() {
       }
 
       // 3️⃣ Obtener clave pública VAPID
-      const { key } = await apiGet<{ key: string }>(
+      const { data: vapidData } = await apiGet<ApiResponse<{ key: string }>>(
         fetchWithAuth,
         "/api/notificaciones/vapidPublicKey"
       );
@@ -81,7 +82,7 @@ export function usePushNotifications() {
       // 4️⃣ Crear suscripción
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(key) as BufferSource,
+        applicationServerKey: urlBase64ToUint8Array(vapidData.key) as BufferSource,
       });
 
       // 5️⃣ Enviar suscripción al backend

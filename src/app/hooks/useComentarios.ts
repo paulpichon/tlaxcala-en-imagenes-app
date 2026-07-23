@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Comentario, ComentariosResponse, ComentariosCountResponse } from "@/types/types";
+import { Comentario, ApiResponse, ApiResponsePaginado, ComentariosCountResponse } from "@/types/types";
 import {
   apiGet,
   apiPost,
@@ -25,11 +25,11 @@ export function useComentarios(postId: string) {
   const fetchTotal = useCallback(async () => {
     if (!postId) return;
     try {
-      const data = await apiGet<ComentariosCountResponse>(
+      const data = await apiGet<ApiResponse<ComentariosCountResponse>>(
         fetchWithAuth,
         `/api/comentarios/${postId}/comentarios/count`
       );
-      setTotal(data.count);
+      setTotal(data.data.count);
     } catch (err) {
       if (isNotFound(err)) {
         console.warn("El posteo no existe al contar comentarios:", postId);
@@ -51,13 +51,13 @@ export function useComentarios(postId: string) {
     setComentarios([]);
     setNextUrl(null);
     try {
-      const data = await apiGet<ComentariosResponse>(
+      const data = await apiGet<ApiResponsePaginado<Comentario>>(
         fetchWithAuth,
         `/api/comentarios/${postId}/comentarios`
       );
-      setComentarios(data.comentarios);
-      setTotal(data.total);
-      setNextUrl(data.next);
+      setComentarios(data.data);
+      setTotal(data.pagination.total);
+      setNextUrl(data.pagination.next);
     } catch (err) {
       if (isNotFound(err)) {
         console.warn("El posteo no existe al cargar comentarios:", postId);
@@ -75,9 +75,9 @@ export function useComentarios(postId: string) {
     if (!nextUrl || loadingMore) return;
     setLoadingMore(true);
     try {
-      const data = await apiGet<ComentariosResponse>(fetchWithAuth, nextUrl);
-      setComentarios((prev) => [...prev, ...data.comentarios]);
-      setNextUrl(data.next);
+      const data = await apiGet<ApiResponsePaginado<Comentario>>(fetchWithAuth, nextUrl);
+      setComentarios((prev) => [...prev, ...data.data]);
+      setNextUrl(data.pagination.next);
     } catch (err) {
       if (isNotFound(err)) {
         console.warn("El posteo no existe al cargar más comentarios:", postId);
@@ -116,7 +116,7 @@ export function useComentarios(postId: string) {
     setTotal((prev) => prev + 1);
 
     try {
-      const data = await apiPost<{ comentario: { _id: string; createdAt: string } }>(
+      const data = await apiPost<ApiResponse<{ comentario: { _id: string; createdAt: string } }>>(
         fetchWithAuth,
         `/api/comentarios/${postId}/comentarios`,
         { texto: trimmedTexto }
@@ -125,7 +125,7 @@ export function useComentarios(postId: string) {
       setComentarios((prev) =>
         prev.map((c) =>
           c._id === tempId
-            ? { ...c, _id: data.comentario._id, createdAt: data.comentario.createdAt }
+            ? { ...c, _id: data.data.comentario._id, createdAt: data.data.comentario.createdAt }
             : c
         )
       );

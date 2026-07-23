@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Posteo, LikeUsuario, LikesUsuariosResponse } from "@/types/types";
+import { Posteo, LikeUsuario, ApiResponse } from "@/types/types";
 import perfil from "../../ui/perfil/perfil.module.css";
 import Image from "next/image";
 import { FiMoreHorizontal, FiX, FiSend } from "react-icons/fi";
@@ -73,11 +73,11 @@ const ImageModal: React.FC<PropsImageModal> = ({
   const openLikesModal = async () => {
     if (!posteoActual) return;
     try {
-      const data = await apiGet<LikesUsuariosResponse>(
+      const data = await apiGet<ApiResponse<{ likes_usuarios_posteo: LikeUsuario[] }>>(
         fetchWithAuth,
         `/api/likes/${posteoActual._id}/likes/usuarios`
       );
-      setUsuariosLikes(data.likes_usuarios_posteo || []);
+      setUsuariosLikes(data.data.likes_usuarios_posteo || []);
       setIsLikesModalOpen(true);
     } catch (err) {
       console.error("Error al cargar likes:", err);

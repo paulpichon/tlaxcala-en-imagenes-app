@@ -1,4 +1,4 @@
-import { ApiResponsePosteos, Posteo } from "@/types/types";
+import { ApiResponsePaginado, Posteo } from "@/types/types";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { apiGet, getUserMessage } from "@/lib/apiClient";
@@ -21,18 +21,18 @@ export function useInfinitePosts(initialUrl: string) {
     setLoading(true);
 
     try {
-      const data = await apiGet<ApiResponsePosteos>(fetchWithAuth, nextUrl);
+      const data = await apiGet<ApiResponsePaginado<Posteo>>(fetchWithAuth, nextUrl);
 
-      if (!data.posteosConEstado || data.posteosConEstado.length === 0) {
+      if (!data.data || data.data.length === 0) {
         setFinished(true);
         setNextUrl(null);
         return;
       }
 
-      setPosts((prev) => [...prev, ...data.posteosConEstado]);
-      setNextUrl(data.next || null);
+      setPosts((prev) => [...prev, ...data.data]);
+      setNextUrl(data.pagination.next);
 
-      if (!data.next) setFinished(true);
+      if (!data.pagination.next) setFinished(true);
     } catch (err) {
       const msg = getUserMessage(err, 'cargar_publicaciones');
       console.error(msg, err);

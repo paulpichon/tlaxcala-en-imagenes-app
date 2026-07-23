@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiCamera } from 'react-icons/fi';
 import { imageFileSchema } from '@/lib/validaciones';
-import { UsuarioLogueado } from '@/types/types';
+import { UsuarioLogueado, ApiResponse } from '@/types/types';
 import { apiPut } from '@/lib/apiClient';
 
 interface CambiarImagenModalProps {
@@ -24,7 +24,7 @@ export default function CambiarImagenModal({
   onClose,
   onSuccess,
 }: CambiarImagenModalProps) {
-  const { fetchWithAuth, updateUser } = useAuth();
+  const { fetchWithAuth, updateUser, user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(false);
@@ -91,18 +91,26 @@ export default function CambiarImagenModal({
       const formData = new FormData();
       formData.append('img', file);
 
-      const data = await apiPut<{ usuario: UsuarioLogueado }>(
+      const data = await apiPut<ApiResponse<{ imagen_perfil: UsuarioLogueado['imagen_perfil'] }>>(
         fetchWithAuth,
         '/api/uploads/usuarios',
         formData
       );
 
+      const imagenPerfil = data.data.imagen_perfil;
+
+      // ✅ Construir un UsuarioLogueado minimo para reutilizar el helper de Cloudinary
+      const usuarioParcial: UsuarioLogueado = {
+        ...(user ?? { uid: '', _id: '', correo: '', url: '', nombre_completo: { nombre: '', apellido: '' } }),
+        imagen_perfil: imagenPerfil,
+      };
+
       // ✅ Obtener versión optimizada
-      const optimizedUrl = obtenerImagenPerfilUsuario(data.usuario, 'perfil');
+      const optimizedUrl = obtenerImagenPerfilUsuario(usuarioParcial, 'perfil');
       onSuccess(optimizedUrl);
 
       // ✅ Actualizar usuario global
-      updateUser({ imagen_perfil: data.usuario.imagen_perfil });
+      updateUser({ imagen_perfil: imagenPerfil });
 
       setToast({ message: 'Imagen actualizada correctamente', type: 'success' });
 

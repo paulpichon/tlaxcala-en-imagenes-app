@@ -136,7 +136,7 @@ export default function PasswordOlvidadaClient() {
 		try {
 			const data = await envioCorreoRestablecerPassword(correo);
 
-			sessionStorage.setItem('passForgetToken', data.token);
+			sessionStorage.setItem('passForgetToken', data.data.token);
 
 			localStorage.setItem("lastPasswordRequest", Date.now().toString());
 

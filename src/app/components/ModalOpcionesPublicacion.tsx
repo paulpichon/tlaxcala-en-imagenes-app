@@ -5,7 +5,7 @@ import FollowButton from "./FollowButton";
 import FavoritoButton from "./FavoritoButton";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Posteo, PropsModalOpcionesPublicacion } from "@/types/types";
+import { Posteo, PropsModalOpcionesPublicacion, ApiResponse } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 import { useFavorito } from "@/context/FavoritoContext";
 import { useState } from "react";
@@ -98,7 +98,7 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
     const activar = selectedImage.comentariosActivos === false;
 
     try {
-      const data = await apiPut<{ comentariosActivos: boolean; msg: string }>(
+      const data = await apiPut<ApiResponse<{ comentariosActivos: boolean }>>(
         fetchWithAuth,
         `/api/comentarios/${selectedImage._id}/comentarios/toggle`,
         { activar }
@@ -106,7 +106,7 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
 
       const posteoActualizado: Posteo = {
         ...selectedImage,
-        comentariosActivos: data.comentariosActivos,
+        comentariosActivos: data.data.comentariosActivos,
       };
       onPostUpdated?.(posteoActualizado);
       setToast({

@@ -87,7 +87,7 @@ export default async function RestablecerPassword({
   const data = await validarTokenRestablecerPassword(token);
 
   // tokenValido será true solo si el token es válido según la API (data.valid = true)
-  const tokenValido = data.valid;
+  const tokenValido = data.data.valid;
 
   return (
     <div className="container-fluid container-xl">

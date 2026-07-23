@@ -8,7 +8,8 @@ import ImageModal from "./ImageModal";
 import ImagePreloader from "../ImagePreloader";
 import {
   Posteo,
-  PosteoDetalleResponse,
+  ApiResponse,
+  ApiResponsePaginado,
   PublicacionesUsuarioProps,
 } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
@@ -68,11 +69,11 @@ export default function PublicacionesUsuarioGrid({
         const endpoint =
           url || `/api/posteos/usuario/${usuarioId}`;
 
-        const data = await apiGet<{ posteos: Posteo[]; next: string | null; total_registros?: number }>(
+        const data = await apiGet<ApiResponsePaginado<Posteo>>(
           fetchWithAuth,
           endpoint
         );
-        const nuevosPosteos = data.posteos || [];
+        const nuevosPosteos = data.data || [];
 
         if (nuevosPosteos.length === 0) {
           setNextUrl(null);
@@ -88,7 +89,7 @@ export default function PublicacionesUsuarioGrid({
           return unicos;
         });
 
-        const siguiente = normalizarNext(data.next);
+        const siguiente = normalizarNext(data.pagination.next);
 
         if (!siguiente) {
           setNextUrl(null);
@@ -97,8 +98,8 @@ export default function PublicacionesUsuarioGrid({
           if (url) fetchedPages.current.add(url);
         }
 
-        if (!url && data.total_registros !== undefined) {
-          onPostCountChange?.(data.total_registros);
+        if (!url) {
+          onPostCountChange?.(data.pagination.total);
         }
 
         if (isFirstLoad.current) isFirstLoad.current = false;
@@ -156,14 +157,14 @@ export default function PublicacionesUsuarioGrid({
   // 🖼 Modal abrir detalle
   const openFirstModal = async (posteo: Posteo) => {
     try {
-      const data = await apiGet<PosteoDetalleResponse>(
+      const data = await apiGet<ApiResponse<{ posteo: Posteo; isFollowing: boolean; isFavorito: boolean }>>(
         fetchWithAuth,
         `/api/posteos/post/${posteo._id}`
       );
       setSelectedImage({
-        ...data.posteo,
-        isFollowing: data.isFollowing,
-        isFavorito: data.isFavorito,
+        ...data.data.posteo,
+        isFollowing: data.data.isFollowing,
+        isFavorito: data.data.isFavorito,
       });
       setIsFirstModalOpen(true);
     } catch (err) {

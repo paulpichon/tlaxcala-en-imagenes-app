@@ -8,7 +8,7 @@ import {
   useCallback,
   useRef,
 } from 'react';
-import { UsuarioLogueado, IAuthContext } from '@/types/types';
+import { UsuarioLogueado, IAuthContext, ApiResponse } from '@/types/types';
 import { apiPost, apiGet, isApiError } from '@/lib/apiClient';
 
 const AuthContext = createContext<IAuthContext | undefined>(undefined);
@@ -95,15 +95,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const data = await apiGet<{ usuario: UsuarioLogueado }>(fetch, '/api/auth/me');
-        setUser(data.usuario);
+        const data = await apiGet<ApiResponse<{ usuario: UsuarioLogueado }>>(fetch, '/api/auth/me');
+        setUser(data.data.usuario);
       } catch (err) {
         if (isApiError(err) && err.status === 401) {
           const refreshed = await refreshToken();
           if (refreshed) {
             try {
-              const data = await apiGet<{ usuario: UsuarioLogueado }>(fetch, '/api/auth/me');
-              setUser(data.usuario);
+              const data = await apiGet<ApiResponse<{ usuario: UsuarioLogueado }>>(fetch, '/api/auth/me');
+              setUser(data.data.usuario);
               return;
             } catch {}
           }

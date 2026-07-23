@@ -5,7 +5,7 @@ import loginEstilos from "../../../ui/cuentas/login/login.module.css";
 import { useState } from 'react';
 import { z } from 'zod';
 import { apiPost, isApiError, isRateLimit, ApiErrorCode, getUserMessage } from '@/lib/apiClient';
-import { UsuarioLogueado } from '@/types/types';
+import { UsuarioLogueado, ApiResponse } from '@/types/types';
 
 const schema = z.object({
     correo: z.string().email('Correo inválido'),
@@ -45,13 +45,13 @@ export default function FormularioLogin() {
   
       try {
         setLoading(true);
-        const data = await apiPost<{ usuario: UsuarioLogueado }>(
+        const data = await apiPost<ApiResponse<{ usuario: UsuarioLogueado }>>(
           fetch,
           '/api/auth/login',
           formData
         );
   
-        login(data.usuario);
+        login(data.data.usuario);
         router.push('/inicio');
       } catch (error) {
         if (isApiError(error)) {

@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useAuth } from "./AuthContext";
 import { apiGet, getUserMessage } from "@/lib/apiClient";
+import { ApiResponse } from "@/types/types";
 
 interface NotificacionesContextType {
     totalNoLeidas: number;
@@ -31,11 +32,11 @@ export function NotificacionesProvider({ children }: { children: ReactNode }) {
   const refrescarNotificaciones = useCallback(async () => {
     if (!user) return;
     try {
-      const data = await apiGet<{ totalNoLeidas: number }>(
+      const data = await apiGet<ApiResponse<{ totalNoLeidas: number }>>(
         fetchWithAuth,
         "/api/notificaciones/nuevas-notificaciones"
       );
-      setTotalNoLeidas(data.totalNoLeidas || 0);
+      setTotalNoLeidas(data.data.totalNoLeidas || 0);
     } catch (err) {
       const msg = getUserMessage(err, 'cargar_notificaciones');
       console.error(msg, err);

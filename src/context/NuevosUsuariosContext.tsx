@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { apiGet, getUserMessage } from "@/lib/apiClient";
+import { ApiResponse } from "@/types/types";
 
 type UsuarioNuevo = {
   nombre_completo: { nombre: string; apellido: string };
@@ -33,11 +34,11 @@ export function NuevosUsuariosProvider({ children }: { children: React.ReactNode
   const fetchUsuarios = useCallback(async (silent = false) => {
     try {
       if (!silent) setLoading(true);
-      const data = await apiGet<{ nuevosUsuariosRegistrados: UsuarioNuevo[] }>(
+      const data = await apiGet<ApiResponse<{ nuevosUsuariosRegistrados: UsuarioNuevo[] }>>(
         fetchWithAuth,
         "/api/usuarios/registrados/nuevos-usuarios-registrados"
       );
-      setUsuarios(data.nuevosUsuariosRegistrados || []);
+      setUsuarios(data.data.nuevosUsuariosRegistrados || []);
     } catch (err) {
       if (!silent) {
         const msg = getUserMessage(err, 'cargar_perfil');

@@ -26,6 +26,7 @@ import ayudaSoporte from "@/app/ui/configuracion/AyudaSoporte.module.css";
 import { schemaAyudaSoporte } from '@/lib/validaciones';
 import Link from 'next/link';
 import { apiPost, isApiError, isRateLimit, getUserMessage } from '@/lib/apiClient';
+import { ApiResponse } from '@/types/types';
 
 export default function AyudaSoporte() {
 
@@ -78,7 +79,7 @@ export default function AyudaSoporte() {
       setFormErrors({});
       setLoading(true);
 
-      const data = await apiPost<{ msg: string; ticketId: string }>(
+      const data = await apiPost<ApiResponse<{ ticketId: string }>>(
         fetchWithAuth,
         '/api/ayuda-soporte/envio-correo',
         parsed
@@ -86,7 +87,7 @@ export default function AyudaSoporte() {
 
       setToastType('success');
       setToastMessage(
-        `Solicitud enviada correctamente 🎟 Ticket: ${data.ticketId}`
+        `Solicitud enviada correctamente 🎟 Ticket: ${data.data.ticketId}`
       );
 
       setTipoAyuda('');

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { z } from 'zod';
 import { useAuth } from '@/context/AuthContext';
 import { obtenerImagenPerfilUsuario } from '@/lib/cloudinary/obtenerImagenPerfilUsuario';
-import { Municipio, UsuarioLogueado } from '@/types/types';
+import { Municipio, UsuarioLogueado, ApiResponse } from '@/types/types';
 import { apiGet, apiPut, getUserMessage } from '@/lib/apiClient';
 
 export const perfilSchema = z
@@ -74,11 +74,11 @@ export function useEditarPerfil() {
   useEffect(() => {
     (async () => {
       try {
-        const data = await apiGet<{ municipios: Municipio[] }>(
+        const data = await apiGet<ApiResponse<{ municipios: Municipio[] }>>(
           fetchWithAuth,
           '/api/municipios/'
         );
-        setMunicipios(data.municipios || []);
+        setMunicipios(data.data.municipios || []);
       } catch (err) {
         const msg = getUserMessage(err, 'actualizar_perfil');
         console.error(msg, err);
@@ -164,12 +164,12 @@ export function useEditarPerfil() {
         fecha_nacimiento: formData.fecha_nacimiento || null,
       };
 
-      const data = await apiPut<{ usuario: UsuarioLogueado }>(
+      const data = await apiPut<ApiResponse<{ usuario: UsuarioLogueado }>>(
         fetchWithAuth,
         '/api/usuarios/update',
         body
       );
-      updateUser(data.usuario);
+      updateUser(data.data.usuario);
       setToast({ message: 'Perfil actualizado correctamente', type: 'success' });
       setFormData((prev) => ({ ...prev, password: '', confirmPassword: '' }));
     } catch (error) {

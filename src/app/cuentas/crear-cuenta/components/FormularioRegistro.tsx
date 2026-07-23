@@ -105,7 +105,7 @@ export function FormularioRegistro() {
     try {
       const resultado = await createUsuario(formData);
 
-      sessionStorage.setItem('registroToken', resultado.token);
+      sessionStorage.setItem('registroToken', resultado.data?.token ?? '');
       router.push('/cuentas/confirmacion/correo-enviado');
     } catch (err) {
       if (isApiError(err)) {
