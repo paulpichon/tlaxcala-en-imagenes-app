@@ -7,9 +7,18 @@ type Props = {
   params: Promise<{ idposteo: string }>;
 };
 
+const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://tlaxapp.com";
+
+// Trunca respetando límites recomendados por FB/Twitter
+function truncate(text: string, max: number): string {
+  if (text.length <= max) return text;
+  return text.slice(0, max - 1).trimEnd() + "…";
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { idposteo } = await params;
   const CLOUDINARY_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_NAME;
+  const pageUrl = `${SITE_URL}/posteo/${idposteo}`;
 
   try {
     const res = await fetch(apiUrl(`/api/posteos/post/${idposteo}`), {
@@ -33,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       };
     }
 
-    const imageUrl = `https://res.cloudinary.com/${CLOUDINARY_NAME}/image/upload/c_pad,w_1080,h_1080/${posteo.public_id}`;
+    const imageUrl = `https://res.cloudinary.com/${CLOUDINARY_NAME}/image/upload/c_pad,w_1200,h_630,b_auto/${posteo.public_id}`;
     const nombreAutor = posteo._idUsuario?.nombre_completo
       ? `${posteo._idUsuario.nombre_completo.nombre} ${posteo._idUsuario.nombre_completo.apellido}`
       : "un usuario";
@@ -41,19 +50,34 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? `@${posteo._idUsuario.url}`
       : "";
 
-    const title = `Publicación de ${nombreAutor} ${urlAutor}`.trim();
-    const description = posteo.texto || `Mira esta publicación de ${nombreAutor} en TlaxApp`;
+    const rawTitle = `Publicación de ${nombreAutor} ${urlAutor}`.trim();
+    const rawDescription =
+      posteo.texto || `Mira esta publicación de ${nombreAutor} en TlaxApp`;
+
+    const title = truncate(rawTitle, 60);
+    const description = truncate(rawDescription, 155);
 
     return {
       title,
       description,
+      alternates: {
+        canonical: pageUrl,
+      },
       openGraph: {
+        type: "website",
         title,
         description,
-        images: [{ url: imageUrl, width: 1080, height: 1080 }],
-        type: "website",
-        locale: "es_MX",
+        url: pageUrl,
         siteName: "TlaxApp",
+        locale: "es_MX",
+        images: [
+          {
+            url: imageUrl,
+            width: 1200,
+            height: 630,
+            alt: title,
+          },
+        ],
       },
       twitter: {
         card: "summary_large_image",
