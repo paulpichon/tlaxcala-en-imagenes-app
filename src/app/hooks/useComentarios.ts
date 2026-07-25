@@ -42,8 +42,8 @@ export function useComentarios(postId: string) {
   }, [postId, fetchWithAuth]);
 
   useEffect(() => {
-    if (postId) fetchTotal();
-  }, [fetchTotal, postId]);
+    if (postId && user) fetchTotal();
+  }, [fetchTotal, postId, user]);
 
   const fetchComentarios = useCallback(async () => {
     if (!postId) return;

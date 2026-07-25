@@ -41,6 +41,7 @@ export interface Posteo {
   isFollowing: boolean;
   isFavorito: boolean;
   likesCount?: number;
+  comentariosCount?: number;
   hasLiked?: boolean;
   comentariosActivos?: boolean;
 }
@@ -173,6 +174,7 @@ export interface LikeButtonProps {
   likesCount?: number;
   hasLiked?: boolean;
   onOpenLikesModal?: () => void;
+  readOnly?: boolean;
 }
 // Interface para las props del componente FollowButton
 export interface FavoritoButtonProps {

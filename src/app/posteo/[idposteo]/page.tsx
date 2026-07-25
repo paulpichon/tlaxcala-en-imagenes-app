@@ -1,113 +1,79 @@
-// 📌 Página de Detalle de Posteo
-// Ruta: /posteo/[idposteo]
-// Esta página muestra el detalle completo de una publicación.
-
-// ❗ IMPORTANTE:
-// Todos los posteos son PRIVADOS.
-// Requieren autenticación obligatoria.
-// No deben indexarse en motores de búsqueda.
-
-// Componentes estructurales
-import HeaderSuperior from "@/app/components/HeaderSuperior";
-import MenuPrincipal from "@/app/components/MenuPrincipal";
-import NuevosUsuariosRegistrados from "@/app/components/NuevosUsuariosRegistrados";
-import Publicidad from "@/app/components/Publicidad";
-import FooterSugerencias from "@/app/components/FooterSugerencias";
-
-// 🎨 Estilos
-import "../../ui/inicio/Inicio.module.css";
-// Componente que obtiene y renderiza el posteo (Client Component)
-import PosteoDetalle from "@/app/components/PosteoDetalle";
 import { Metadata } from "next";
+import { apiUrl } from "@/lib/apiClient";
+import PosteoPageClient from "@/app/components/PosteoPageClient";
+import "../../ui/inicio/Inicio.module.css";
 
-/**
- * 🔐 SEO CONFIGURADO COMO PRIVADO
- *
- * Aunque la ruta esté protegida por ProtectedRoute,
- * también indicamos explícitamente a los motores de búsqueda
- * que NO deben indexar ni seguir esta página.
- *
- * Esto es una doble capa de protección SEO.
- */
-export const metadata: Metadata = {
-  title: "Publicación",
-  description: "Contenido privado disponible únicamente para usuarios autenticados.",
-
-  // 🆕 MEJORA SEO PRIVADO (agregado)
-  robots: {
-    index: false,     // ❌ No indexar
-    follow: false,    // ❌ No seguir enlaces
-    nocache: true,    // ❌ No guardar en caché
-  },
-
-  // 🆕 Canonical preventivo (no obligatorio pero recomendado)
-  alternates: {
-    canonical: "/",
-  },
+type Props = {
+  params: Promise<{ idposteo: string }>;
 };
 
-export default async function Posteo() {
-  return (
-    // 📦 Contenedor principal
-    <div className="contenedor_principal">
-      <div className="row g-0">
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { idposteo } = await params;
+  const CLOUDINARY_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_NAME;
 
-        {/* 📌 Menú lateral */}
-        <div className="col-md-2 col-lg-2 col-xl-2">
-          <div className="contenedor_menu_lateral_inferior fixed-bottom">
-            <MenuPrincipal />
-          </div>
-        </div>
+  try {
+    const res = await fetch(apiUrl(`/api/posteos/post/${idposteo}`), {
+      next: { revalidate: 60 },
+    });
 
-        {/* 📌 Contenido central */}
-        <div className="col-md-10 col-lg-10 col-xl-6 contenedor_central_contenido">
-          
-          {/* Header superior */}
-          <div className="contenedor_menu_superior sticky-top">
-            <HeaderSuperior />
-          </div>
+    if (!res.ok) {
+      return {
+        title: "Publicación",
+        robots: { index: false },
+      };
+    }
 
-          {/* 📌 Contenido del posteo */}
-          <div className="contenedor_contenido_principal">
-            {/* 
-              🔎 PosteoDetalle:
-              - Obtiene idposteo desde useParams()
-              - Hace fetch autenticado
-              - Maneja loading y errores
-              - Si hay error → notFound()
-            */}
-            <PosteoDetalle />
-          </div>
-        </div>
+    const json = await res.json();
+    const posteo = json.data?.posteo;
 
-        {/* 📌 Columna derecha (sugerencias y publicidad) */}
-        <div className="col-xl-4 sugerencias">
-          <div className="contenedor_sugerencias sticky-top p-3">
-            <div className="contenedor_sugerencias_seguir mt-4">
+    if (!posteo) {
+      return {
+        title: "Publicación",
+        robots: { index: false },
+      };
+    }
 
-              <div className="row d-flex justify-content-center contenedor_border_divs_sugerencias">
-                <NuevosUsuariosRegistrados />
-              </div>
+    const imageUrl = `https://res.cloudinary.com/${CLOUDINARY_NAME}/image/upload/c_pad,w_1080,h_1080/${posteo.public_id}`;
+    const nombreAutor = posteo._idUsuario?.nombre_completo
+      ? `${posteo._idUsuario.nombre_completo.nombre} ${posteo._idUsuario.nombre_completo.apellido}`
+      : "un usuario";
+    const urlAutor = posteo._idUsuario?.url
+      ? `@${posteo._idUsuario.url}`
+      : "";
 
-              <div className="row d-flex justify-content-center contenedor_border_divs_sugerencias">
-                <div className="col-8">
-                  <Publicidad />
-                </div>
-              </div>
+    const title = `Publicación de ${nombreAutor} ${urlAutor}`.trim();
+    const description = posteo.texto || `Mira esta publicación de ${nombreAutor} en TlaxApp`;
 
-              <div className="row d-flex justify-content-center mt-4">
-                <div className="col-12">
-                  <div className="text-center mt-3">
-                    <FooterSugerencias />
-                  </div>
-                </div>
-              </div>
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        images: [{ url: imageUrl, width: 1080, height: 1080 }],
+        type: "website",
+        locale: "es_MX",
+        siteName: "TlaxApp",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: [imageUrl],
+      },
+      robots: {
+        index: true,
+        follow: true,
+      },
+    };
+  } catch {
+    return {
+      title: "Publicación",
+      robots: { index: false },
+    };
+  }
+}
 
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  );
+export default function PosteoPage() {
+  return <PosteoPageClient />;
 }

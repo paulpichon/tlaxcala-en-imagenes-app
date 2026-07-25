@@ -1,24 +1,27 @@
-// Componentes de LikeButton
-// Archivo: components/LikeButton.tsx
 'use client';
-// Hook personalizado para manejar likes
+
 import { useLikes } from "@/app/hooks/useLikes";
 import { LikeButtonProps } from "@/types/types";
 import { FiHeart } from "react-icons/fi";
 
-export default function LikeButton({ postId, likesCount, hasLiked, onOpenLikesModal }: LikeButtonProps) {
+export default function LikeButton({ postId, likesCount, hasLiked, onOpenLikesModal, readOnly = false }: LikeButtonProps) {
   const { likeState, toggleLike, loading } = useLikes(postId, likesCount, hasLiked);
 
   const handleClick = () => {
+    if (readOnly) return;
     toggleLike();
+  };
+
+  const handleCountClick = () => {
+    if (readOnly) return;
+    onOpenLikesModal?.();
   };
 
   return (
     <div className="d-flex align-items-center gap-2">
-      {/* Botón corazón */}
       <button
         onClick={handleClick}
-        disabled={loading}
+        disabled={loading || readOnly}
         className={`like-button ${likeState.hasLiked ? "liked" : ""}`}
         aria-label="Boton like"
       >
@@ -29,14 +32,12 @@ export default function LikeButton({ postId, likesCount, hasLiked, onOpenLikesMo
         )}
       </button>
 
-      {/* Contador de likes */}
       <div
         className="d-inline"
-        onClick={onOpenLikesModal}
-        style={{ cursor: "pointer" }}
+        onClick={handleCountClick}
+        style={{ cursor: readOnly ? "default" : "pointer" }}
       >
         {loading ? (
-          // spinner pequeño de Bootstrap mientras carga
           <span className="spinner-border spinner-border-sm align-middle" role="status" />
         ) : (
           <>

@@ -18,6 +18,7 @@ import { PublicidadProvider } from '@/context/PublicidadContext';
 import { FollowProvider } from '@/context/FollowContext';
 // metadatos
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"),
   title: {
     default: "TlaxApp",
     template: "%s | TlaxApp",

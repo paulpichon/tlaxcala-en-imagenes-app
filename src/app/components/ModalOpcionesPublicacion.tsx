@@ -15,7 +15,7 @@ import { apiDelete, apiPut, isNotFound, getUserMessage } from "@/lib/apiClient";
 
 interface ModalOpcionesPublicacionProps extends PropsModalOpcionesPublicacion {
   onPostDeleted?: (postId: string) => void;
-  onPostUpdated?: (posteo: Posteo) => void; // ✅ Nueva prop
+  onPostUpdated?: (posteo: Posteo) => void;
 }
 
 const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
@@ -23,7 +23,7 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   selectedImage,
   onClose,
   onPostDeleted,
-  onPostUpdated, // ✅ Recibir callback
+  onPostUpdated,
 }) => {
   const { user, fetchWithAuth } = useAuth();
   const pathname = usePathname();
@@ -37,9 +37,9 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   if (!isOpen || !selectedImage) return null;
 
   const isDetallePage = pathname.startsWith(`/posteo/`);
-  const link = `${process.env.NEXT_PUBLIC_BASE_URL}/posteo/${selectedImage._id}/?fuente=tlx_web_link_copiado`;
   const isOwnPost = user?.uid === selectedImage._idUsuario._id;
   const esFavoritoGlobal = favoritosMap[selectedImage._id] ?? selectedImage.isFavorito;
+  const isPublicView = !user;
 
   const handleShare = async () => {
     if (!selectedImage) return;
@@ -53,7 +53,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
     };
   
     try {
-      // Verificar soporte real del navegador
       if (navigator.share && navigator.canShare?.(shareData)) {
         await navigator.share(shareData);
       } else {
@@ -126,7 +125,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
 
   return (
     <>
-      {/* Modal principal */}
       <div
         className="modal show d-block"
         tabIndex={-1}
@@ -136,7 +134,21 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
           <div className="modal-content">
             <div className="modal-body">
               <div className="row text-center">
-                {isOwnPost ? (
+                {isPublicView ? (
+                  <>
+                    <div className="col-md-12 mb-2">
+                      <button
+                        type="button"
+                        className={`${perfil.btn_opciones_publicaciones}`}
+                        onClick={handleShare}
+                      >
+                        {"share" in navigator
+                          ? "Compartir publicación"
+                          : "Copiar enlace de la publicación"}
+                      </button>
+                    </div>
+                  </>
+                ) : isOwnPost ? (
                   <>
                     <button
                       className={`${perfil.btn_opciones_publicaciones} text-danger`}
@@ -180,35 +192,28 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                   </>
                 )}
 
-                <div className="col-md-12 mb-2">
-                  {!isDetallePage ? (
-                    <Link
-                      href={`/posteo/${selectedImage._id}/`}
-                      className={`${perfil.btn_opciones_publicaciones}`}
-                    >
-                      Ir a la publicación
-                    </Link>
-                  ) : (
-                    <button
-                      type="button"
-                      className={`${perfil.btn_opciones_publicaciones}`}
-                      onClick={handleShare}
-                    >
-                      {"share" in navigator
-                        ? "Compartir publicación"
-                        : "Copiar enlace de la publicación"}
-                    </button>
-                  )}
-                </div>
-                {/* // TODO: Hacer a corto plazo esta pagina, para denunciar alguna publicacion */}
-                {/* <div className="col-md-12 mb-2">
-                  <button
-                    type="button"
-                    className={`${perfil.btn_opciones_publicaciones} ${perfil.btn_rojo}`}
-                  >
-                    Denunciar
-                  </button>
-                </div> */}
+                {!isPublicView && (
+                  <div className="col-md-12 mb-2">
+                    {!isDetallePage ? (
+                      <Link
+                        href={`/posteo/${selectedImage._id}/`}
+                        className={`${perfil.btn_opciones_publicaciones}`}
+                      >
+                        Ir a la publicación
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        className={`${perfil.btn_opciones_publicaciones}`}
+                        onClick={handleShare}
+                      >
+                        {"share" in navigator
+                          ? "Compartir publicación"
+                          : "Copiar enlace de la publicación"}
+                      </button>
+                    )}
+                  </div>
+                )}
 
                 <div className="col-md-12">
                   <button
@@ -225,7 +230,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
         </div>
       </div>
 
-      {/* Modal confirmación eliminar */}
       {showConfirmDelete && (
         <div
           className="modal fade show d-block"
@@ -272,7 +276,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
         />
       )}
 
-      {/* ✅ Modal de edición con callback actualizado */}
       {showEditModal && (
         <EditarPosteoModal
           isOpen={showEditModal}
@@ -281,7 +284,6 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
             setShowEditModal(false);
 
             if (updated && posteoActualizado) {
-              // ✅ Propagar al padre (ImageModal)
               onPostUpdated?.(posteoActualizado);
             }
           }}

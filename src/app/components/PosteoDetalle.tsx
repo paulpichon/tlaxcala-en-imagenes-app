@@ -1,4 +1,3 @@
-// app/components/PosteoDetalle.tsx
 'use client';
 
 import { useEffect, useState, useCallback } from "react";
@@ -10,10 +9,11 @@ import Spinner from "./spinner";
 import PosteoCard from "./PosteoCard";
 import { notFound } from "next/navigation";
 import { apiGet, isNotFound, isValidationFailed, getUserMessage } from "@/lib/apiClient";
+
 export default function PosteoDetalle() {
   const params = useParams() as { idposteo?: string } | null;
   const id = params?.idposteo ?? "";
-  const { fetchWithAuth } = useAuth();
+  const { fetchWithAuth, user } = useAuth();
   
   const [post, setPost] = useState<Posteo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -32,21 +32,18 @@ export default function PosteoDetalle() {
     setIsNotFoundError(false);
 
     try {
-      const data = await apiGet<ApiResponse<{ posteo: Posteo; isFollowing: boolean; isFavorito: boolean }>>(
-        fetchWithAuth,
+      const data = await apiGet<ApiResponse<{ posteo: Posteo; isFollowing?: boolean; isFavorito?: boolean }>>(
+        user ? fetchWithAuth : fetch,
         `/api/posteos/post/${id}`
       );
       const posteo = data.data.posteo;
 
-      // Asegurar que los flags estén en el objeto posteo (por si el backend devolvió por separado)
-      posteo.isFollowing = data.data.isFollowing ?? posteo.isFollowing ?? false;
-      posteo.isFavorito = data.data.isFavorito ?? posteo.isFavorito ?? false;
+      posteo.isFollowing = data.data.isFollowing ?? false;
+      posteo.isFavorito = data.data.isFavorito ?? false;
+      posteo.hasLiked = posteo.hasLiked ?? false;
 
       setPost(posteo);
     } catch (err) {
-      // Un ID mal formado (VALIDATION_FAILED) es semánticamente equivalente a
-      // "no encontrado" desde la perspectiva del usuario: el recurso no existe
-      // o no es accesible, por lo que mostramos la página 404 en ambos casos.
       if (isNotFound(err) || isValidationFailed(err)) {
         console.warn("Posteo no encontrado:", id);
         setIsNotFoundError(true);
@@ -58,13 +55,11 @@ export default function PosteoDetalle() {
     } finally {
       setLoading(false);
     }
-  }, [id, fetchWithAuth]);
+  }, [id, fetchWithAuth, user]);
 
   useEffect(() => {
-    // Esperar a que el context tenga user/ fetchWithAuth
-    if (!fetchWithAuth) return;
     fetchPost();
-  }, [fetchPost, fetchWithAuth]);
+  }, [fetchPost]);
 
   if (loading) return <div className="d-flex justify-content-center align-items-center vh-100"><Spinner /></div>
   if (isNotFoundError) return notFound();
@@ -72,14 +67,10 @@ export default function PosteoDetalle() {
   if (!post) return <p className="text-center mt-5">No se pudo cargar la publicación.</p>;
 
   return (
-    <>
-      {/* Componente Publicación/Posteo */}
-      {/* Se usa FollowContext para saber el estado de isFollowing y tambien de isFavorito*/}
-      <PosteoCard
-          post={post}
-          isDetail={true}
-          showUserUrl={true}
-      />
-    </>
+    <PosteoCard
+        post={post}
+        isDetail={true}
+        showUserUrl={true}
+    />
   );
 }

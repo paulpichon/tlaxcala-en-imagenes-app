@@ -1,4 +1,3 @@
-// app/components/PosteoCard.tsx
 "use client";
 
 import Image from "next/image";
@@ -29,13 +28,15 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
   const [likesUsuarios, setLikesUsuarios] = useState<LikeUsuario[]>([]);
   const [loaded, setLoaded] = useState(false);
 
-  // ✅ Estado local para el posteo (se actualiza cuando se edita)
   const [posteoActual, setPosteoActual] = useState<Posteo>(post);
 
   const { total: totalComentarios } = useComentarios(post._id);
   const [showComments, setShowComments] = useState(false);
 
+  const isPublicView = !user;
+
   const openLikesModal = async () => {
+    if (!user) return;
     try {
       const data = await apiGet<ApiResponse<{ likes_usuarios_posteo: LikeUsuario[] }>>(
         fetchWithAuth,
@@ -65,7 +66,6 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
     return [ciudad, estado, pais].filter(Boolean).join(", ");
   };
 
-  // 🚀 Callback cuando el post fue eliminado
   const handlePostDeleted = () => {
     closeOptions();
     if (isDetail && user) {
@@ -73,7 +73,6 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
     }
   };
 
-  // ✅ Callback cuando el post fue actualizado
   const handlePostUpdated = (posteoEditado: Posteo) => {
     setPosteoActual(posteoEditado);
   };
@@ -88,6 +87,12 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
     posteoActual.public_id,
     isDetail ? "detalle" : "feed"
   );
+
+  const displayedCommentsCount = isPublicView
+    ? (posteoActual.comentariosCount ?? 0)
+    : totalComentarios;
+
+  const displayedLikesCount = posteoActual.likesCount ?? 0;
 
   return (
     <>
@@ -112,7 +117,6 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
           </Link>
 
           <div className="d-flex flex-column">
-          {/* mostrar URL de usuario */}
           <Link
             className="text-dark text-decoration-none fw-bold"
             href={`/${posteoActual._idUsuario.url}`}
@@ -120,7 +124,6 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
           >
             {posteoActual._idUsuario.url}
           </Link>
-          {/* 👇 Mostrar Nombre del usuario solo si se indica */}
           {showUserUrl && (
             <Link  
                 className="text-dark text-decoration-none fw-bold"
@@ -134,10 +137,8 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
             </Link>
           )}
 
-          {/* Ubicación */}
           {obtenerTextoUbicacion() && (
             <span className="text-muted small d-flex align-items-center">
-              {/* <span className="me-1">📍</span> // No estoy seguro de poner esto */   } 
               {obtenerTextoUbicacion()}
             </span>
           )}
@@ -178,7 +179,7 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 600px"
             width={isDetail ? 1080 : undefined}
             height={isDetail ? 1080 : undefined}
-            loading="eager" //Carga inmediatamente
+            loading="eager"
             className={`${
               isDetail ? posteoCard.detalleImagen : "object-fit-cover"
             } ${loaded ? posteoCard.fadeIn : posteoCard.hidden}`}
@@ -190,27 +191,37 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
         {/* Body */}
         <div className="card-body bg-light">
           <div className="d-flex align-items-center gap-3 mb-2">
-            <LikeButton postId={posteoActual._id} likesCount={posteoActual.likesCount} hasLiked={posteoActual.hasLiked} onOpenLikesModal={openLikesModal} />
+            <LikeButton
+              postId={posteoActual._id}
+              likesCount={posteoActual.likesCount}
+              hasLiked={posteoActual.hasLiked}
+              onOpenLikesModal={isPublicView ? undefined : openLikesModal}
+              readOnly={isPublicView}
+            />
 
             <button
-              onClick={() => setShowComments(true)}
+              onClick={() => !isPublicView && setShowComments(true)}
               className="like-button"
               aria-label="Comentar"
-              disabled={posteoActual.comentariosActivos === false}
+              disabled={isPublicView || posteoActual.comentariosActivos === false}
             >
               <FiMessageCircle
                 size={24}
-                color={posteoActual.comentariosActivos === false ? "#ccc" : "black"}
+                color={
+                  isPublicView || posteoActual.comentariosActivos === false
+                    ? "#ccc"
+                    : "black"
+                }
               />
             </button>
             <span
               className={`small ${posteoActual.comentariosActivos === false ? "text-muted" : ""}`}
-              style={{ cursor: "pointer" }}
-              onClick={() => posteoActual.comentariosActivos !== false && setShowComments(true)}
+              style={{ cursor: isPublicView ? "default" : "pointer" }}
+              onClick={() => !isPublicView && posteoActual.comentariosActivos !== false && setShowComments(true)}
             >
               {posteoActual.comentariosActivos === false
                 ? "Comentarios desactivados"
-                : `${totalComentarios} ${totalComentarios === 1 ? "comentario" : "comentarios"}`}
+                : `${displayedCommentsCount} ${displayedCommentsCount === 1 ? "comentario" : "comentarios"}`}
             </span>
           </div>
 
@@ -220,7 +231,6 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
               href={`/${posteoActual._idUsuario.url}`}
               aria-label={`Perfil de ${posteoActual._idUsuario.url}`}
             >
-              {/* Mostramos el nombre del usuario(URL del usuario) en todos lados donde se muestre*/}
               <strong className="me-1">
                 { posteoActual._idUsuario.url }
               </strong>
@@ -237,16 +247,18 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
         selectedImage={posteoActual}
         onClose={closeOptions}
         onPostDeleted={handlePostDeleted}
-        onPostUpdated={handlePostUpdated} // ✅ Pasar callback
+        onPostUpdated={handlePostUpdated}
       />
 
-      <ModalLikesUsuarios
-        isOpen={isLikesOpen}
-        onClose={closeLikesModal}
-        usuarios={likesUsuarios}
-      />
+      {!isPublicView && (
+        <ModalLikesUsuarios
+          isOpen={isLikesOpen}
+          onClose={closeLikesModal}
+          usuarios={likesUsuarios}
+        />
+      )}
 
-      {!isDetail && (
+      {!isDetail && !isPublicView && (
         <ComentariosModal
           isOpen={showComments}
           onClose={() => setShowComments(false)}
@@ -256,7 +268,7 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
         />
       )}
 
-      {isDetail && (
+      {isDetail && !isPublicView && (
         <ComentariosSection
           postId={posteoActual._id}
           comentariosActivos={posteoActual.comentariosActivos}
