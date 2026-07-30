@@ -61,6 +61,10 @@
             "reports/technical-analysis/*": "allow"
         }
       }
+    },
+    "dependency-auditor": {
+      "mode": "subagent",
+      "prompt": "{file:./opencode/agents/dependency-auditor/dependency-auditor.md}"
     }
   }
 }
