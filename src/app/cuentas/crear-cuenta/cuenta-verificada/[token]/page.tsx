@@ -8,8 +8,7 @@ import cuentaVerificada from "../../../../ui/cuentas/crear-cuenta/cuenta-verific
 import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 import FooterPrincipal from "@/app/components/FooterMain";
 import Link from "next/link";
-import { apiGet } from "@/lib/apiClient";
-import { ApiResponse } from "@/types/types";
+import { apiGet, isUnauthorized } from "@/lib/apiClient";
 
 // ✅ Metadata optimizada para SEO
 // ⚠️ IMPORTANTE: Esta página NO debe ser indexada por seguridad
@@ -95,7 +94,7 @@ export default async function CuentaVerificadaPage({
     // Validar el token con la API de autenticación
     // Esta petición verifica si el token es válido y no ha expirado
     // Si es válido, también marca la cuenta como verificada en la base de datos
-    const data = await apiGet<ApiResponse<Record<string, never>>>(
+    await apiGet(
       fetch,
       `/api/auth/verificar-correo/${token}`,
       undefined,
@@ -113,89 +112,33 @@ export default async function CuentaVerificadaPage({
           <div className="col-sm-9 col-md-7 col-lg-6">
             <div className={cuentaVerificada.contenedor_formulario}>
               
-              {/* Renderizado condicional según resultado de la verificación */}
-              {data.success ? (
-                // ✅ CASO EXITOSO: Token válido, cuenta verificada
-                <div className={cuentaVerificada.contenedor_titulos}>
-                  <h1>¡Tu cuenta ha sido verificada!</h1>
-                  <p>
-                    Ya puedes iniciar sesión y comenzar a usar TlaxApp para 
-                    descubrir y compartir los mejores lugares de Tlaxcala.
-                  </p>
+              <div className={cuentaVerificada.contenedor_titulos}>
+                <h1>¡Tu cuenta ha sido verificada!</h1>
+                <p>
+                  Ya puedes iniciar sesión y comenzar a usar TlaxApp para 
+                  descubrir y compartir los mejores lugares de Tlaxcala.
+                </p>
 
-                  {/* Icono de éxito */}
-                  <div 
-                    className={cuentaVerificada.icono}
-                    role="img" 
-                    aria-label="Cuenta verificada exitosamente"
-                  >
-                    ✅
-                  </div>
-
-                  {/* Botón para iniciar sesión */}
-                  <Link
-                    href="/cuentas/login"
-                    className={cuentaVerificada.boton_login}
-                    aria-label="Ir a iniciar sesión"
-                  >
-                    Iniciar sesión
-                  </Link>
-
-                  {/* Mensaje adicional de bienvenida */}
-                  <p className="text-muted small mt-3">
-                    ¡Bienvenido a la comunidad de TlaxApp!
-                  </p>
+                <div 
+                  className={cuentaVerificada.icono}
+                  role="img" 
+                  aria-label="Cuenta verificada exitosamente"
+                >
+                  ✅
                 </div>
-              ) : (
-                // ❌ CASO ERROR: Token inválido, expirado o ya usado
-                <div className={cuentaVerificada.contenedor_titulos}>
-                  <h2>Este enlace ya no es válido</h2>
-                  
-                  {/* Explicación del error */}
-                  <p>
-                    Por seguridad, los enlaces de verificación tienen un tiempo 
-                    limitado y solo pueden usarse una vez.
-                  </p>
 
-                  {/* Posibles razones del error */}
-                  <div className="alert alert-warning mt-3" role="alert">
-                    <p className="mb-2"><strong>Posibles causas:</strong></p>
-                    <ul className="mb-0 text-start small">
-                      <li>El enlace ya fue usado anteriormente</li>
-                      <li>Han pasado más de 24 horas desde que se envió</li>
-                      <li>El enlace está incompleto o fue modificado</li>
-                    </ul>
-                  </div>
+                <Link
+                  href="/cuentas/login"
+                  className={cuentaVerificada.boton_login}
+                  aria-label="Ir a iniciar sesión"
+                >
+                  Iniciar sesión
+                </Link>
 
-                  {/* Opciones para el usuario */}
-                  <div className="mt-4">
-                    <p className="mb-3">¿Qué puedes hacer?</p>
-                    
-                    {/* Opción 1: Intentar iniciar sesión (si ya verificó antes) */}
-                    <p className={cuentaVerificada.texto}>
-                      <Link 
-                        className={cuentaVerificada.link_inciar_sesion} 
-                        href="/cuentas/login"
-                        aria-label="Intentar iniciar sesión"
-                      >
-                        Intentar iniciar sesión
-                      </Link>
-                    </p>
-
-                    {/* Opción 2: Solicitar nuevo enlace */}
-                    <p className="text-muted small">
-                      ¿Necesitas un nuevo enlace?{" "}
-                      <Link 
-                        href="/contacto" 
-                        className="text-primary"
-                        aria-label="Contactar a soporte"
-                      >
-                        Contacta a soporte
-                      </Link>
-                    </p>
-                  </div>
-                </div>
-              )}
+                <p className="text-muted small mt-3">
+                  ¡Bienvenido a la comunidad de TlaxApp!
+                </p>
+              </div>
 
             </div>
             {/* Fin contenedor_formulario */}
@@ -211,11 +154,67 @@ export default async function CuentaVerificadaPage({
       // Fin container
     );
   } catch (error) {
-    // Manejo de errores de conexión o errores inesperados
-    // Esto cubre casos como: API caída, red sin conexión, timeouts, etc.
     console.error("Error verificando cuenta:", error);
 
-    // Renderizar mensaje de error genérico
+    if (isUnauthorized(error)) {
+      return (
+        <div className="container-fluid container-xl">
+          <div className="row justify-content-center contenedor_principal">
+            <HeaderPrincipalTei />
+
+            <div className="col-sm-9 col-md-7 col-lg-6">
+              <div className={cuentaVerificada.contenedor_formulario}>
+                <div className={cuentaVerificada.contenedor_titulos}>
+                  <h2>Este enlace ya no es válido</h2>
+
+                  <p>
+                    Por seguridad, los enlaces de verificación tienen un tiempo 
+                    limitado y solo pueden usarse una vez.
+                  </p>
+
+                  <div className="alert alert-warning mt-3" role="alert">
+                    <p className="mb-2"><strong>Posibles causas:</strong></p>
+                    <ul className="mb-0 text-start small">
+                      <li>El enlace ya fue usado anteriormente</li>
+                      <li>Han pasado más de 24 horas desde que se envió</li>
+                      <li>El enlace está incompleto o fue modificado</li>
+                    </ul>
+                  </div>
+
+                  <div className="mt-4">
+                    <p className="mb-3">¿Qué puedes hacer?</p>
+
+                    <p className={cuentaVerificada.texto}>
+                      <Link 
+                        className={cuentaVerificada.link_inciar_sesion} 
+                        href="/cuentas/login"
+                        aria-label="Intentar iniciar sesión"
+                      >
+                        Intentar iniciar sesión
+                      </Link>
+                    </p>
+
+                    <p className="text-muted small">
+                      ¿Necesitas un nuevo enlace?{" "}
+                      <Link 
+                        href="/contacto" 
+                        className="text-primary"
+                        aria-label="Contactar a soporte"
+                      >
+                        Contacta a soporte
+                      </Link>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <FooterPrincipal />
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="container-fluid container-xl">
         <div className="row justify-content-center contenedor_principal">
@@ -230,12 +229,10 @@ export default async function CuentaVerificadaPage({
                   Por favor, intenta nuevamente más tarde.
                 </p>
 
-                {/* Icono de error */}
                 <div className="text-center my-4" style={{ fontSize: '4rem' }}>
                   ⚠️
                 </div>
 
-                {/* Opciones de ayuda */}
                 <div className="mt-4">
                   <Link 
                     href="/cuentas/login" 
