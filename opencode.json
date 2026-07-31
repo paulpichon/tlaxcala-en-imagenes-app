@@ -65,6 +65,10 @@
     "dependency-auditor": {
       "mode": "subagent",
       "prompt": "{file:./opencode/agents/dependency-auditor/dependency-auditor.md}"
+    },
+    "changelog-writer": {
+      "mode": "subagent",
+      "prompt": "{file:./opencode/agents/changelog-writer/changelog-writer.md}"
     }
   }
 }
