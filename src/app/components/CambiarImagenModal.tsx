@@ -101,8 +101,9 @@ export default function CambiarImagenModal({
 
       // ✅ Construir un UsuarioLogueado minimo para reutilizar el helper de Cloudinary
       const usuarioParcial: UsuarioLogueado = {
-        ...(user ?? { uid: '', _id: '', correo: '', url: '', nombre_completo: { nombre: '', apellido: '' } }),
+        ...(user ?? { uid: '', _id: '', correo: '', url: '', nombre_completo_changed_at: null, nombre_completo: { nombre: '', apellido: '' } }),
         imagen_perfil: imagenPerfil,
+        nombre_completo_changed_at: user?.nombre_completo_changed_at ?? null,
       };
 
       // ✅ Obtener versión optimizada

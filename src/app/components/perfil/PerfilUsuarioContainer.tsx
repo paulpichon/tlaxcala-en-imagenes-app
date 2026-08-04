@@ -12,6 +12,7 @@ import Publicidad from "../../components/Publicidad";
 import FooterSugerencias from "../../components/FooterSugerencias";
 import { useUsuarioPerfil } from "@/app/hooks/useUsuarioPerfil";
 import Spinner from "../spinner";
+import ToastGlobal from "../ToastGlobal";
 
 // Props de url de perfil
 interface UrlProps {
@@ -19,7 +20,7 @@ interface UrlProps {
 }
 
 export default function PerfilUsuarioContainer({ url }: UrlProps) {
-  const { usuario, loading, error, isNotFoundError } = useUsuarioPerfil(url);
+  const { usuario, loading, error, isNotFoundError, redirectMessage, clearRedirectMessage } = useUsuarioPerfil(url);
   const [refreshPosteos, setRefreshPosteos] = useState(0);
 
   // 1️⃣ Inicializa con el valor del usuario si ya existe (lazy init)
@@ -44,6 +45,9 @@ export default function PerfilUsuarioContainer({ url }: UrlProps) {
 
   return (
     <div className="contenedor_principal">
+      {redirectMessage && (
+        <ToastGlobal message={redirectMessage} type="warning" onClose={clearRedirectMessage} />
+      )}
       <div className="row g-0">
         {/* Menú lateral */}
         <div className="col-md-2 col-lg-2 col-xl-2">

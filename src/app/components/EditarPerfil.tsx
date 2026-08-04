@@ -25,12 +25,15 @@ export default function EditarPerfil() {
     setImagenPerfil,
     handleChange,
     handleSubmit,
+    estadoCooldown,
+    submitDeshabilitado,
+    nombreCambio,
   } = useEditarPerfil();
 
   return (
     <div className="d-flex flex-column bg-light vh-100">
       {toast.message && (
-        <ToastGlobal message={toast.message} type={toast.type} onClose={() => setToast({ message: '', type: undefined })} />
+        <ToastGlobal message={toast.message} type={toast.type} duration={toast.duration} actions={toast.actions} onClose={() => setToast({ message: '' })} />
       )}
 
       {/* Header superior */}
@@ -54,6 +57,9 @@ export default function EditarPerfil() {
               loading={loading}
               handleChange={handleChange}
               handleSubmit={handleSubmit}
+              estadoCooldown={estadoCooldown}
+              submitDeshabilitado={submitDeshabilitado}
+              nombreCambio={nombreCambio}
             />
           </div> 
         </div>

@@ -131,6 +131,7 @@ export interface UsuarioLogueado {
   };
   genero?: string;
   fecha_nacimiento?: string;
+  nombre_completo_changed_at: string | null;
   url: string; // slug del perfil
   uid: string;
   _id: string;
@@ -204,6 +205,8 @@ export interface ToastGlobalProps {
   message: string;
   type?: "success" | "danger" | "warning" | "creacion";
   onClose?: () => void;
+  duration?: number;
+  actions?: Array<{ label: string; onClick: () => void; variant?: 'primary' | 'outline' }>;
 }
 // Predefinidos de Cloudinary
 export type CloudinaryPreset =

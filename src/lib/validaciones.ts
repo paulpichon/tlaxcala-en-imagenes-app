@@ -4,8 +4,22 @@ import { z } from "zod";
 
 //* Esquema de validación para el formulario de registro
 export const usuarioSchema = z.object({
-    nombre: z.string().min(1, { message: "El nombre es requerido" }),
-    apellido: z.string().min(1, { message: "El apellido es requerido" }),
+    nombre: z
+      .string()
+      .trim()
+      .min(1, { message: "El nombre es requerido" })
+      .max(60, { message: "El nombre no puede exceder 60 caracteres" })
+      .regex(/^[a-zA-Z0-9áéíóúñÁÉÍÓÚÑ .'\-]+$/, {
+        message: "El nombre contiene caracteres no permitidos",
+      }),
+    apellido: z
+      .string()
+      .trim()
+      .min(1, { message: "El apellido es requerido" })
+      .max(60, { message: "El apellido no puede exceder 60 caracteres" })
+      .regex(/^[a-zA-Z0-9áéíóúñÁÉÍÓÚÑ .'\-]+$/, {
+        message: "El apellido contiene caracteres no permitidos",
+      }),
     correo: z.email({ message: "Ingresa un correo válido" }),
     password: z
         .string()
@@ -147,4 +161,14 @@ export const imageFileSchema = z
     return ext && ALLOWED_EXTENSIONS.includes(ext);
   }, {
     message: "Extensión no válida. Solo JPG, JPEG, PNG o WebP.",
-});
+  });
+
+export const REGEX_NOMBRE = /^[a-zA-Z0-9áéíóúñÁÉÍÓÚÑ .'\-]+$/;
+export const MAX_NOMBRE = 60;
+
+export function validarNombre(valor: string): string | null {
+  if (!valor.trim()) return "El campo es obligatorio";
+  if (valor.length > MAX_NOMBRE) return `Máximo ${MAX_NOMBRE} caracteres`;
+  if (!REGEX_NOMBRE.test(valor)) return "Sólo letras, números, espacios, '.', '-' y apóstrofo";
+  return null;
+}

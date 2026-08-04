@@ -13,13 +13,15 @@ export default function ToastGlobal({
   message,
   type = "creacion",
   onClose,
+  duration,
+  actions,
 }: ToastGlobalProps) {
   // Cerrar automáticamente después de unos segundos
   useEffect(() => {
     if (!message) return;
-    const timer = setTimeout(() => onClose?.(), 4000);
+    const timer = setTimeout(() => onClose?.(), duration ?? 4000);
     return () => clearTimeout(timer);
-  }, [message, onClose]);
+  }, [message, onClose, duration]);
 
   if (!message) return null;
 
@@ -55,6 +57,16 @@ export default function ToastGlobal({
             }}
           >
             <span style={{ flex: 1 }}>{message}</span>
+            {actions?.map((action, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={action.onClick}
+                className={`btn btn-sm ${action.variant === 'primary' ? 'btn-primary' : 'btn-outline-light'}`}
+              >
+                {action.label}
+              </button>
+            ))}
             {onClose && (
               <button
                 type="button"

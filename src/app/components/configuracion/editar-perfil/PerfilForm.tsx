@@ -2,8 +2,8 @@
 'use client';
 
 import { FormDataEditarPerfil, Municipio } from '@/types/types';
-import { ChangeEvent, SubmitEvent, useState } from 'react';
-import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { ChangeEvent, SubmitEvent, useState, ReactNode } from 'react';
+import { FiEye, FiEyeOff, FiClock, FiInfo, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 // Estilos específicos de la página
 import editarPerfil from '@/app/ui/configuracion/editar-perfil/EditarPerfil.module.css';
 import PasswordRequisitos from './PasswordRequisitos';
@@ -15,6 +15,9 @@ interface PerfilFormProps {
   loading: boolean;
   handleChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   handleSubmit: (e: SubmitEvent<HTMLFormElement>) => void;
+  estadoCooldown: { tipo: 'libre' | 'disponible' | 'cooldown'; diasRestantes?: number; fechaLiberacion?: string };
+  submitDeshabilitado: boolean;
+  nombreCambio: boolean;
 }
 
 export default function PerfilForm({
@@ -24,6 +27,9 @@ export default function PerfilForm({
   loading,
   handleChange,
   handleSubmit,
+  estadoCooldown,
+  submitDeshabilitado,
+  nombreCambio,
 }: PerfilFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -34,7 +40,11 @@ export default function PerfilForm({
     name: keyof FormDataEditarPerfil,
     type: string = 'text',
     extraProps: Record<string, unknown> = {}
-  ) => (
+  ) => {
+    const hasError = !!errors[name];
+    const hasValue = (formData[name] as string)?.trim?.()?.length > 0;
+    const isValid = !hasError && hasValue;
+    return (
     <div className="mb-3">
       <label className="form-label fw-medium" htmlFor={name}>
         {label}
@@ -45,12 +55,14 @@ export default function PerfilForm({
         name={name}
         value={formData[name] as string}
         onChange={handleChange}
-        className={`form-control form-control-lg ${errors[name] ? 'is-invalid' : ''}`}
+        className={`form-control form-control-lg ${hasError ? 'is-invalid' : ''} ${isValid ? 'is-valid' : ''}`}
         {...extraProps}
       />
-      {errors[name] && <div className="invalid-feedback">{errors[name]}</div>}
-    </div>
-  );
+      {hasError && <div className="invalid-feedback">{errors[name]}</div>}
+      {isValid && (name === 'nombre' || name === 'apellido') && (
+        <div className="valid-feedback">Válido</div>
+      )}
+    </div>);}
 
   const renderPasswordInput = (
     label: string,
@@ -104,15 +116,96 @@ export default function PerfilForm({
     </div>
   );
 
+  const tieneSufijoHex = /-[0-9a-f]{5}$/.test(formData.url);
+  const sufijoHex = tieneSufijoHex ? formData.url.match(/-[0-9a-f]{5}$/)?.[0] ?? '' : '';
+
+  function CollapsibleAlert({
+    type,
+    icon,
+    summary,
+    children,
+    show = true,
+  }: {
+    type: 'info' | 'warning' | 'success';
+    icon: ReactNode;
+    summary: string;
+    children: ReactNode;
+    show?: boolean;
+  }) {
+    const [expanded, setExpanded] = useState(false);
+    if (!show) return null;
+    return (
+      <>
+        <button
+          type="button"
+          className={`d-md-none alert alert-${type} d-flex align-items-center gap-2 py-2 mb-2 w-100 text-start border-0`}
+          style={{ fontSize: '0.85rem', cursor: 'pointer' }}
+          aria-expanded={expanded}
+          onClick={() => setExpanded(!expanded)}
+        >
+          <span className="flex-shrink-0">{icon}</span>
+          <span className="fw-medium">{summary}</span>
+          <span className="ms-auto">
+            {expanded ? <FiChevronUp size={14} /> : <FiChevronDown size={14} />}
+          </span>
+        </button>
+        {expanded && (
+          <div className={`d-md-none alert alert-${type} py-2 mb-2`} style={{ fontSize: '0.85rem' }}>
+            {children}
+          </div>
+        )}
+        <div
+          className={`d-none d-md-flex alert alert-${type} align-items-center gap-2 py-2 mb-2`}
+          style={{ fontSize: '0.85rem' }}
+        >
+          <span className="flex-shrink-0">{icon}</span>
+          <span>{children}</span>
+        </div>
+      </>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit}>
-      {renderInput('Nombre', 'nombre')}
-      {renderInput('Apellido', 'apellido')}
+      {renderInput('Nombre', 'nombre', 'text', { maxLength: 60 })}
+      {renderInput('Apellido', 'apellido', 'text', { maxLength: 60 })}
+
+      <CollapsibleAlert type="info" icon={<FiInfo size={18} />} summary={`@${formData.url}`}>
+        Tu URL de perfil es <strong>@{formData.url}</strong>. Se regenera automáticamente cuando cambias tu nombre. Si tu nombre completo coincide con el de otra persona, se añadirá un sufijo aleatorio (ej. <strong>-7a3f9</strong>) para evitar duplicados.
+      </CollapsibleAlert>
+
+      <CollapsibleAlert
+        type="warning"
+        icon={<FiClock size={18} />}
+        summary={`Podrás cambiar en ${estadoCooldown.diasRestantes} día(s)`}
+        show={estadoCooldown.tipo === 'cooldown'}
+      >
+        Estás en periodo de espera: podrás volver a cambiar tu nombre en <strong>{estadoCooldown.diasRestantes} día(s)</strong> (aprox. el {estadoCooldown.fechaLiberacion}).
+      </CollapsibleAlert>
+
+      <CollapsibleAlert
+        type="success"
+        icon={<FiInfo size={18} />}
+        summary="Puedes cambiar tu nombre"
+        show={estadoCooldown.tipo !== 'cooldown' && nombreCambio}
+      >
+        Puedes cambiar tu nombre ahora. Tu URL se regenerará automáticamente y la anterior quedará como redirección.
+      </CollapsibleAlert>
+
+      <CollapsibleAlert
+        type="info"
+        icon={<FiInfo size={18} />}
+        summary="URL con sufijo único"
+        show={tieneSufijoHex}
+      >
+        Tu URL incluye un sufijo aleatorio (<strong>{sufijoHex}</strong>) porque otra persona tiene tu mismo nombre. Esto es normal y no afecta el funcionamiento de tu perfil.
+      </CollapsibleAlert>
+
       {renderInput('Fecha de nacimiento', 'fecha_nacimiento', 'date')}
 
       {/* Correo electronico solo para mostralo en el input, no se modifica!!!*/}
       <div className="mb-3">
-        <label className="form-label fw-medium">Correo electronico</label>
+        <label className="form-label fw-medium">Correo electrónico</label>
         <input
           type="text"
           value={formData.correo}
@@ -210,8 +303,13 @@ export default function PerfilForm({
       )}
 
       <div className="border-top p-4">
-        <button type="submit" className={`${editarPerfil.btnGuardarCambiarMedium} w-100`} disabled={loading}>
-          {loading ? 'Guardando...' : 'Guardar cambios'}
+        <button
+          type="submit"
+          className={`${editarPerfil.btnGuardarCambiarMedium} w-100`}
+          disabled={loading || submitDeshabilitado}
+          title={submitDeshabilitado ? `No puedes cambiar tu nombre aún. Faltan ${estadoCooldown.diasRestantes} días.` : undefined}
+        >
+          {loading ? 'Guardando...' : submitDeshabilitado ? 'Guardar cambios (bloqueado)' : 'Guardar cambios'}
         </button>
       </div>
     </form>

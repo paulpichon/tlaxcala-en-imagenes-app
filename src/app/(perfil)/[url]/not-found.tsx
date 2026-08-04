@@ -28,7 +28,7 @@ export default function PerfilNotFound() {
             <div className="text-center">
               <h2 className="fw-bold text-danger">Perfil no encontrado</h2>
               <p className="text-muted">
-                El usuario que buscas no existe o fue eliminado.
+                El perfil que buscas ya no está disponible.
               </p>
             </div>
           </div>

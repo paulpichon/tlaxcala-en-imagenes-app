@@ -5,7 +5,7 @@ import crearCuenta from "../../../ui/cuentas/crear-cuenta/CrearCuenta.module.css
 import { useRouter } from "next/navigation";
 // Funcion para Crear usuario
 import { createUsuario } from '@/lib/actions';
-import { isApiError, isRateLimit, ApiErrorCode, getUserMessage } from "@/lib/apiClient";
+import { isApiError, isRateLimit, ApiErrorCode, getUserMessage, getValidationErrors } from "@/lib/apiClient";
 // UseState, formEvent
 import { SubmitEvent, useState } from 'react';
 // interfaces, types
@@ -118,20 +118,19 @@ export function FormularioRegistro() {
             field: "correo",
           });
         } else if (code === ApiErrorCode.VALIDATION_FAILED || code === ApiErrorCode.BAD_REQUEST) {
-          const errores = err.data.errores as Array<{ path: string; msg: string }> | undefined;
-          const data = err.data.data as { field?: keyof UsuarioSchema; message?: string } | undefined;
-          if (Array.isArray(errores)) {
-            errores.forEach((e) => {
-              if (e.path && e.msg) {
-                setValidationErrors(prev => ({ ...prev, [e.path]: e.msg }));
+          const apiErrors = getValidationErrors(err);
+          if (apiErrors && apiErrors.length > 0) {
+            apiErrors.forEach((e) => {
+              const fieldName = e.field === 'nombre_completo.nombre'
+                ? 'nombre'
+                : e.field === 'nombre_completo.apellido'
+                  ? 'apellido'
+                  : e.field;
+              if (fieldName === 'nombre' || fieldName === 'apellido' || fieldName === 'correo' || fieldName === 'password') {
+                setValidationErrors(prev => ({ ...prev, [fieldName]: e.message }));
               } else {
-                setError(e.msg || "Los datos enviados son inválidos.");
+                setError(e.message || "Los datos enviados son inválidos.");
               }
-            });
-          } else if (data?.field) {
-            handleAPIError({
-              message: data.message || "Datos inválidos",
-              field: data.field,
             });
           } else {
             setError("Los datos enviados son inválidos.");
