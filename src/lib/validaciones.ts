@@ -66,7 +66,7 @@ export const posteoBaseSchema = z.object({
         message: "La imagen no debe superar los 5 MB",
         })
         .refine(
-        (file) => ["image/jpeg", "image/jpg", "image/png","image/webp"].includes(file.type),
+        (file) => ["image/jpeg", "image/png","image/webp"].includes(file.type),
         {
             //? Mnesaje que se muestra de error en el formulario
             message: "No se admite este tipo de archivo.",
