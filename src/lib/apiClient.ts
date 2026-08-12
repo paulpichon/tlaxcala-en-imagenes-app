@@ -26,6 +26,7 @@ export const ApiErrorCode = {
   EMAIL_BLOCKED: 'EMAIL_BLOCKED',
   REGISTER_BLOCKED: 'REGISTER_BLOCKED',
   POSTEO_BLOCKED: 'POSTEO_BLOCKED',
+  IMAGEN_BLOCKED: 'IMAGEN_BLOCKED',
   SOPORTE_BLOCKED: 'SOPORTE_BLOCKED',
   READ_BLOCKED: 'READ_BLOCKED',
   COMENTARIO_BLOCKED: 'COMENTARIO_BLOCKED',
@@ -133,6 +134,7 @@ export type Operacion =
   | 'cargar_seguidores'
   | 'cargar_seguidos'
   | 'actualizar_perfil'
+  | 'actualizar_imagen_perfil'
   | 'obtener_ubicacion'
   | 'notificaciones_push'
   | 'recuperar_password'
@@ -158,6 +160,7 @@ const MENSAJES_POR_DEFECTO: Record<Operacion, string> = {
   cargar_seguidores: 'No se pudieron cargar los seguidores. Intenta de nuevo.',
   cargar_seguidos: 'No se pudieron cargar los seguidos. Intenta de nuevo.',
   actualizar_perfil: 'No se pudo actualizar el perfil. Intenta de nuevo.',
+  actualizar_imagen_perfil: 'No se pudo actualizar la imagen de perfil. Intenta de nuevo.',
   obtener_ubicacion: 'No se pudo obtener la ubicación automáticamente.',
   notificaciones_push: 'No se pudieron activar las notificaciones. Intenta de nuevo.',
   recuperar_password: 'No se pudo procesar la solicitud. Intenta de nuevo.',
