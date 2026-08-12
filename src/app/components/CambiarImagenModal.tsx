@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiCamera } from 'react-icons/fi';
 import { imageFileSchema } from '@/lib/validaciones';
 import { UsuarioLogueado, ApiResponse } from '@/types/types';
-import { apiPut } from '@/lib/apiClient';
+import { apiPut, getUserMessage } from '@/lib/apiClient';
 
 interface CambiarImagenModalProps {
   currentImage: string; // 👈 nueva
@@ -120,8 +120,9 @@ export default function CambiarImagenModal({
         onClose();
       }, 1300);
     } catch (error) {
-      console.error(error);
-      setToast({ message: 'No se pudo subir la imagen', type: 'danger' });
+      const msg = getUserMessage(error, 'actualizar_imagen_perfil');
+      console.error(msg, error);
+      setToast({ message: msg, type: 'danger' });
     } finally {
       setLoading(false);
     }
