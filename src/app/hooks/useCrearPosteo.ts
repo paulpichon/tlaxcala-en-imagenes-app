@@ -4,7 +4,7 @@ import { ZodError } from "zod";
 import { useAuth } from "@/context/AuthContext";
 import { Posteo, ApiResponse } from "@/types/types";
 import { useObtenerUbicacion } from "./useObtenerUbicacion";
-import { apiPost, isRateLimit, getUserMessage } from "@/lib/apiClient";
+import { apiPost, getUserMessage } from "@/lib/apiClient";
 
 export function useCrearPosteo(
   onPostCreated?: (newPost?: Posteo) => void,
@@ -155,8 +155,6 @@ export function useCrearPosteo(
     } catch (err) {
       if (err instanceof ZodError) {
         setErrors(err.issues.map((e) => e.message));
-      } else if (isRateLimit(err)) {
-        setErrors([getUserMessage(err, 'crear_posteo')]);
       } else {
         setErrors([getUserMessage(err, 'crear_posteo')]);
       }
