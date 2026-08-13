@@ -7,7 +7,7 @@ import Image from "next/image";
 import FollowButton from "../FollowButton";
 import { useAuth } from "@/context/AuthContext";
 import { FollowerUserItemProps, ApiResponse } from "@/types/types";
-import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
+import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 import Link from "next/link";
 import { apiGet, isNotFound, getUserMessage } from "@/lib/apiClient";
 
@@ -97,9 +97,7 @@ export default function FollowersModal({ userId, loggedUserId, show, onClose }: 
               followers.map((item) => {
                 const follower = item.follower;
 
-                const imageSrc = follower.imagen_perfil?.public_id
-                  ? getCloudinaryUrl(follower.imagen_perfil.public_id, "mini")
-                  : follower.imagen_perfil?.secure_url || "/default-profile.png";
+                const imageSrc = obtenerImagenPerfilUsuario(follower, "mini");
 
                 return (
                   <div

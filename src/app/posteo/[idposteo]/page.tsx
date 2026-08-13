@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { apiUrl } from "@/lib/apiClient";
+import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import PosteoPageClient from "@/app/components/PosteoPageClient";
 import "../../ui/inicio/Inicio.module.css";
 
@@ -9,7 +10,6 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { idposteo } = await params;
-  const CLOUDINARY_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_NAME;
 
   try {
     const res = await fetch(apiUrl(`/api/posteos/post/${idposteo}`), {
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       };
     }
 
-    const imageUrl = `https://res.cloudinary.com/${CLOUDINARY_NAME}/image/upload/c_pad,w_1080,h_1080/${posteo.public_id}`;
+    const imageUrl = getCloudinaryUrl(posteo.public_id, "detalle");
     const nombreAutor = posteo._idUsuario?.nombre_completo
       ? `${posteo._idUsuario.nombre_completo.nombre} ${posteo._idUsuario.nombre_completo.apellido}`
       : "un usuario";

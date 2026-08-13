@@ -2,6 +2,14 @@
 // Zod
 import { z } from "zod";
 
+// ======================================
+// 📦 Constantes de subida de imágenes (compartidas con el backend)
+// ======================================
+export const MAX_IMAGEN_BYTES = 8 * 1024 * 1024; // 8 MB
+export const MAX_IMAGEN_MB = 8;
+export const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
+export const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp"];
+
 //* Esquema de validación para el formulario de registro
 export const usuarioSchema = z.object({
     nombre: z
@@ -61,12 +69,12 @@ export const posteoBaseSchema = z.object({
     .optional(),
     file: z
         .instanceof(File)
-        .refine((file) => file.size <= 5 * 1024 * 1024, {
+        .refine((file) => file.size <= MAX_IMAGEN_BYTES, {
             //? Este mensaje de error debe ser igual al que se ponga en el archivo CrearPosteoModal.tsx, de lo contrario prodria crearse un error
-        message: "La imagen no debe superar los 5 MB",
+        message: `La imagen no debe superar los ${MAX_IMAGEN_MB} MB`,
         })
         .refine(
-        (file) => ["image/jpeg", "image/png","image/webp"].includes(file.type),
+        (file) => ALLOWED_MIME_TYPES.includes(file.type),
         {
             //? Mnesaje que se muestra de error en el formulario
             message: "No se admite este tipo de archivo.",
@@ -149,11 +157,9 @@ export const comentarioSchema = z.object({
 export type ComentarioFormData = z.infer<typeof comentarioSchema>;
 
 // Validacion para extenciones de imagen de perfil
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp"];
 export const imageFileSchema = z
   .instanceof(File)
-  .refine((file) => ALLOWED_TYPES.includes(file.type), {
+  .refine((file) => ALLOWED_MIME_TYPES.includes(file.type), {
     message: "Solo se permiten archivos de imagen (JPG, JPEG, PNG o WebP)",
   })
   .refine((file) => {

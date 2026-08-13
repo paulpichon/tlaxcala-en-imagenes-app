@@ -113,7 +113,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
               aria-label={`Perfil de @${user.url}`}
             >
               <Image
-                key={user?.imagen_perfil?.secure_url || "default"}
+                key={user?.imagen_perfil?.public_id || "default"}
                 src={obtenerImagenPerfilUsuario(user, "mini")}
                 alt={`${user?.nombre_completo?.nombre} ${user?.nombre_completo?.apellido} `}
                 width={100}

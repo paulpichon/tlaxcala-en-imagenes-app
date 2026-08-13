@@ -3,6 +3,7 @@
 import Image from "next/image";
 // import FollowButton from "@/components/FollowButton";
 import { useNuevosUsuarios } from "@/context/NuevosUsuariosContext";
+import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 import FollowButton from "./FollowButton";
 
 export default function NuevosUsuariosRegistrados() {
@@ -34,7 +35,7 @@ export default function NuevosUsuariosRegistrados() {
           <div key={u._id} className="d-flex align-items-center gap-3 p-2 user-card">
             <a href={`/${u.url}`}>
               <Image
-                src={u.imagen_perfil.secure_url}
+                src={obtenerImagenPerfilUsuario(u, "mini")}
                 alt={u.nombre_completo.nombre}
                 width={50}
                 height={50}

@@ -105,8 +105,8 @@ export function useComentarios(postId: string) {
       autorId: {
         _id: user.uid,
         nombre_completo: user.nombre_completo,
-        imagen_perfil: user.imagen_perfil
-          ? { secure_url: user.imagen_perfil.secure_url }
+        imagen_perfil: user.imagen_perfil?.public_id
+          ? { public_id: user.imagen_perfil.public_id }
           : undefined,
         url: user.url,
       },

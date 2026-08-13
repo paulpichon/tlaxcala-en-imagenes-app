@@ -6,7 +6,7 @@ import Image from "next/image";
 import FollowButton from "../FollowButton";
 import { useAuth } from "@/context/AuthContext";
 import { FollowingUserItemProps, ApiResponse } from "@/types/types";
-import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
+import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 import Link from "next/link";
 import { apiGet, isNotFound, getUserMessage } from "@/lib/apiClient";
 
@@ -95,9 +95,7 @@ export default function FollowingModal({ userId, loggedUserId, show, onClose }: 
               following.map((item) => {
                 const user = item.following;
 
-                const imageSrc = user.imagen_perfil?.public_id
-                  ? getCloudinaryUrl(user.imagen_perfil.public_id, "mini")
-                  : user.imagen_perfil?.secure_url || "/default-profile.png";
+                const imageSrc = obtenerImagenPerfilUsuario(user, "mini");
 
                 return (
                   <div

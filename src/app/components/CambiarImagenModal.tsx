@@ -7,7 +7,7 @@ import { obtenerImagenPerfilUsuario } from '@/lib/cloudinary/obtenerImagenPerfil
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiCamera } from 'react-icons/fi';
-import { imageFileSchema } from '@/lib/validaciones';
+import { imageFileSchema, MAX_IMAGEN_BYTES, MAX_IMAGEN_MB } from '@/lib/validaciones';
 import { UsuarioLogueado, ApiResponse } from '@/types/types';
 import { apiPut, getUserMessage } from '@/lib/apiClient';
 
@@ -63,10 +63,9 @@ export default function CambiarImagenModal({
     }
 
 
-    // ✅ Validar tamaño (máx. 5 MB)
-    const maxSizeMB = 5;
-    if (file.size > maxSizeMB * 1024 * 1024) {
-      setToast({ message: `La imagen no debe superar los ${maxSizeMB} MB`, type: 'danger' });
+    // ✅ Validar tamaño (máx. 8 MB)
+    if (file.size > MAX_IMAGEN_BYTES) {
+      setToast({ message: `La imagen no debe superar los ${MAX_IMAGEN_MB} MB`, type: 'danger' });
       e.target.value = '';
       return;
     }

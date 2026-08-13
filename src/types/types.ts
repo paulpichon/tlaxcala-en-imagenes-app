@@ -32,7 +32,6 @@ export interface Posteo {
       coordinates: [number, number] //[lng, lat]
     }
   }
-  secure_url: string;
   posteo_publico: boolean;
   fecha_creacion: string;
   fecha_actualizacion?: string;
@@ -126,8 +125,7 @@ export interface UsuarioLogueado {
   };
   correo: string;
   imagen_perfil?: {
-    secure_url: string;
-    public_id: string;
+    public_id?: string;
   };
   genero?: string;
   fecha_nacimiento?: string;
@@ -242,7 +240,7 @@ export interface Comentario {
       apellido: string;
     };
     imagen_perfil?: {
-      secure_url: string;
+      public_id?: string;
     };
     url: string;
   };
@@ -348,7 +346,6 @@ export interface FollowerUserItemProps {
     };
     imagen_perfil?: {
       public_id?: string;
-      secure_url: string;
     };
   };
   following: string;
@@ -370,7 +367,6 @@ export interface FollowingUserItemProps {
     };
     imagen_perfil?: {
       public_id?: string;
-      secure_url?: string;
     };
   };
   isFollowing: boolean; // si el usuario logueado sigue a este usuario

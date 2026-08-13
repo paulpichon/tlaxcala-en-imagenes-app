@@ -198,7 +198,7 @@ export default function PublicacionesUsuarioGrid({
 
   return (
     <>
-      <ImagePreloader images={posteos.map((p) => p.secure_url)} />
+      <ImagePreloader images={posteos.map((p) => getCloudinaryUrl(p.public_id, "grid"))} />
 
       {refreshing && (
         <div className="text-center py-2">

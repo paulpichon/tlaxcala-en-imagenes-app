@@ -3,11 +3,18 @@
 // Funcion para verificar si viene una imagen de perfil, si no viene, poner una imagen por defecto
 // y si viene, obtener la URL optimizada de cloudinary
 
-import { CloudinaryPreset, UsuarioLogueado } from "@/types/types";
+import { CloudinaryPreset } from "@/types/types";
 import { getCloudinaryUrl } from "./getCloudinaryUrl";
 
+// Acepta cualquier objeto que tenga `imagen_perfil.public_id` (UsuarioLogueado, autor de comentario, nuevo usuario, etc.)
+type ImagenPerfilOwner = {
+  imagen_perfil?: { public_id?: string } | null;
+};
 
-export const obtenerImagenPerfilUsuario = (user: UsuarioLogueado, preset: CloudinaryPreset) => {
+export const obtenerImagenPerfilUsuario = (
+  user: ImagenPerfilOwner | null | undefined,
+  preset: CloudinaryPreset
+) => {
 
     // ✅ Imagen por defecto para usuarios sin imagen de perfil
     const DEFAULT_PROFILE_IMAGE = `${process.env.NEXT_PUBLIC_IMAGEN_PERFIL_DEFAULT}`;

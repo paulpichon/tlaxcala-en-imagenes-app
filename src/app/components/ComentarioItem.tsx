@@ -6,8 +6,7 @@ import Image from "next/image";
 import { FiTrash2 } from "react-icons/fi";
 import { Comentario } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
-
-const DEFAULT_PROFILE = process.env.NEXT_PUBLIC_IMAGEN_PERFIL_DEFAULT || "";
+import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 
 interface ComentarioItemProps {
   comentario: Comentario;
@@ -20,7 +19,7 @@ export default function ComentarioItem({ comentario, onDelete, posteoAutorId }: 
   const [deleting, setDeleting] = useState(false);
 
   const puedeEliminar = !!(user && (user.uid === comentario.autorId._id || user.uid === posteoAutorId));
-  const avatarUrl = comentario.autorId.imagen_perfil?.secure_url || DEFAULT_PROFILE;
+  const avatarUrl = obtenerImagenPerfilUsuario(comentario.autorId, "mini");
 
   const fecha = new Date(comentario.createdAt);
   const fechaFormateada = new Intl.DateTimeFormat("es-MX", {

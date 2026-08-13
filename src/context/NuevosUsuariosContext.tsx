@@ -7,7 +7,7 @@ import { ApiResponse } from "@/types/types";
 
 type UsuarioNuevo = {
   nombre_completo: { nombre: string; apellido: string };
-  imagen_perfil: { secure_url: string };
+  imagen_perfil?: { public_id?: string };
   url: string;
   _id: string;
   isFollowing: boolean;
@@ -64,12 +64,12 @@ export function NuevosUsuariosProvider({ children }: { children: React.ReactNode
     if (!user || !usuarios.length) return;
     setUsuarios(prev =>
       prev.map(u =>
-        u._id === user._id && u.imagen_perfil.secure_url !== user.imagen_perfil?.secure_url
-          ? { ...u, imagen_perfil: { secure_url: user.imagen_perfil!.secure_url } }
+        u._id === user._id && u.imagen_perfil?.public_id !== user.imagen_perfil?.public_id
+          ? { ...u, imagen_perfil: { public_id: user.imagen_perfil?.public_id } }
           : u
       )
     );
-  }, [user?.imagen_perfil?.secure_url, user?._id]);
+  }, [user?.imagen_perfil?.public_id, user?._id]);
 
   // Polling cada 60s para detectar cambios de otros usuarios entre sesiones/navegadores.
   // Se pausa cuando la pestaña no está visible (ahorra requests).

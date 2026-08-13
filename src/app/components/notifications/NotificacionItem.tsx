@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
+import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Notificacion } from "@/types/types";
@@ -48,11 +48,7 @@ export default function NotificacionItem({ notif, onClick, onEliminar }: Props) 
         style={{ cursor: "pointer" }}
       >
         <Image
-          src={
-            notif.emisor.imagen_perfil?.public_id ?     
-            getCloudinaryUrl( notif.emisor.imagen_perfil?.public_id, "mini" )
-            : notif.emisor.imagen_perfil!.secure_url
-        }
+          src={obtenerImagenPerfilUsuario(notif.emisor, "mini")}
           alt={notif.emisor.nombre_completo.nombre}
           width={50}
           height={50}
