@@ -224,6 +224,7 @@ export interface CloudinaryCustomOptions {
   quality?: "auto" | number | null;
   format?: "auto" | "jpg" | "webp" | "avif" | "png" | null;
   useAutoTransforms?: boolean;
+  dpr?: "auto" | number;
 }
 // ======================================
 // 📦 Comentarios
