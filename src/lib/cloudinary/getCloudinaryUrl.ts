@@ -46,7 +46,6 @@ export function getCloudinaryUrl(
       width: 1080,
       height: 1080,
       crop: "pad",
-      gravity: "auto",
       background: "auto",
       quality: 85,
       format: null, // ❌ sin f_auto
@@ -84,7 +83,7 @@ export function getCloudinaryUrl(
     },
   };
 
-  const config = preset === "custom" ? options : presets[preset];
+  const config = preset === "custom" ? options : { ...presets[preset], ...options };
 
   const {
     width,
@@ -95,6 +94,7 @@ export function getCloudinaryUrl(
     quality,
     format,
     useAutoTransforms = false,
+    dpr,
   } = config;
 
   // 4️⃣ Construcción de transformaciones seguras
@@ -114,6 +114,8 @@ export function getCloudinaryUrl(
     if (typeof quality === "number" || quality === "auto") parts.push(`q_${quality}`);
     if (format && format !== "auto") parts.push(`f_${format}`);
   }
+
+  if (dpr) parts.push(`dpr_${dpr}`);
 
   const transformation = parts.filter(Boolean).join(",");
 
