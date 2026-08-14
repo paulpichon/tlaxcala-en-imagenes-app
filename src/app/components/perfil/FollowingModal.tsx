@@ -7,6 +7,7 @@ import FollowButton from "../FollowButton";
 import { useAuth } from "@/context/AuthContext";
 import { FollowingUserItemProps, ApiResponse } from "@/types/types";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
+import { avatarMiniLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import Link from "next/link";
 import { apiGet, isNotFound, getUserMessage } from "@/lib/apiClient";
 
@@ -95,7 +96,7 @@ export default function FollowingModal({ userId, loggedUserId, show, onClose }: 
               following.map((item) => {
                 const user = item.following;
 
-                const imageSrc = obtenerImagenPerfilUsuario(user, "mini");
+                const imageSrc = obtenerImagenPerfilUsuario(user);
 
                 return (
                   <div
@@ -107,6 +108,7 @@ export default function FollowingModal({ userId, loggedUserId, show, onClose }: 
                       <Link href={`/${user.url}`}>
                         <Image
                           src={imageSrc}
+                          loader={avatarMiniLoader}
                           width={45}
                           height={45}
                           className="rounded-circle"

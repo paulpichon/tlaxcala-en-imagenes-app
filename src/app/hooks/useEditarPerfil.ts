@@ -80,7 +80,7 @@ export function useEditarPerfil() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [municipios, setMunicipios] = useState<Municipio[]>([]);
-  const [imagenPerfil, setImagenPerfil] = useState(obtenerImagenPerfilUsuario(user!, 'perfil'));
+  const [imagenPerfil, setImagenPerfil] = useState(obtenerImagenPerfilUsuario(user!));
   const [showModal, setShowModal] = useState(false);
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'danger' | 'creacion'; duration?: number; actions?: Array<{ label: string; onClick: () => void; variant?: 'primary' | 'outline' }> }>({ message: '' });
   const [loading, setLoading] = useState(false);

@@ -6,6 +6,7 @@ import { LikeUsuario } from "@/types/types";
 import Link from "next/link";
 // Verificar la imagen de perfil del usuario
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
+import { avatarMiniLoader } from "@/lib/cloudinary/cloudinaryLoader";
 
 interface ModalLikesUsuariosProps {
   isOpen: boolean;
@@ -61,11 +62,8 @@ export default function ModalLikesUsuarios({
                     <Link className="text-decoration-none text-dark" href={`/${like._idUsuario.url}`} key={like._idUsuario._id}>
                       <li className="d-flex align-items-center mb-3">
                         <Image
-                          src={
-                            // Se verifica si la imagen viene por default o si el usuario ya ha subido alguna imagen de perfil, despues llama a getCloudinaryUrl para obtener la URL optimizada
-                            // obtenerImagenPerfilUsuario(usuarioLogueado, preset)
-                            obtenerImagenPerfilUsuario(like._idUsuario, "mini")
-                          }
+                          src={obtenerImagenPerfilUsuario(like._idUsuario)}
+                          loader={avatarMiniLoader}
                           alt={`Imagen de perfil de @${like._idUsuario.url}`}
                           width={40}
                           height={40}

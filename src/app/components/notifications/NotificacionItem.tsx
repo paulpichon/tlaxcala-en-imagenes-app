@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
+import { avatarMiniLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Notificacion } from "@/types/types";
@@ -48,7 +49,8 @@ export default function NotificacionItem({ notif, onClick, onEliminar }: Props) 
         style={{ cursor: "pointer" }}
       >
         <Image
-          src={obtenerImagenPerfilUsuario(notif.emisor, "mini")}
+          src={obtenerImagenPerfilUsuario(notif.emisor)}
+          loader={avatarMiniLoader}
           alt={notif.emisor.nombre_completo.nombre}
           width={50}
           height={50}

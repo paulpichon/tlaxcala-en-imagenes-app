@@ -36,3 +36,14 @@ export function createCloudinaryLoader(
     });
   };
 }
+
+// ✅ Loaders listos para avatares (perfil y miniaturas)
+export const avatarPerfilLoader = createCloudinaryLoader("perfil", {
+  square: true,
+  cap: 200,
+});
+
+export const avatarMiniLoader = createCloudinaryLoader("mini", {
+  square: true,
+  cap: 120,
+});

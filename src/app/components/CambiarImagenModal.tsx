@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import ToastGlobal from './ToastGlobal';
 import { useAuth } from '@/context/AuthContext';
 import { obtenerImagenPerfilUsuario } from '@/lib/cloudinary/obtenerImagenPerfilUsuario';
+import { avatarPerfilLoader } from '@/lib/cloudinary/cloudinaryLoader';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiCamera } from 'react-icons/fi';
@@ -105,9 +106,9 @@ export default function CambiarImagenModal({
         nombre_completo_changed_at: user?.nombre_completo_changed_at ?? null,
       };
 
-      // ✅ Obtener versión optimizada
-      const optimizedUrl = obtenerImagenPerfilUsuario(usuarioParcial, 'perfil');
-      onSuccess(optimizedUrl);
+      // ✅ Obtener la referencia de la imagen (public_id o default) para render vía loader
+      const nuevoSrc = obtenerImagenPerfilUsuario(usuarioParcial);
+      onSuccess(nuevoSrc);
 
       // ✅ Actualizar usuario global
       updateUser({ imagen_perfil: imagenPerfil });
@@ -170,6 +171,7 @@ export default function CambiarImagenModal({
                   <Image
                     key={preview}
                     src={preview}
+                    loader={avatarPerfilLoader}
                     alt="Vista previa"
                     fill 
                     sizes="150px" // Ayuda a Next.js a optimizar el tamaño de carga

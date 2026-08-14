@@ -14,6 +14,7 @@ import Link from "next/link";
 import { apiGet } from "@/lib/apiClient";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
+import { avatarMiniLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import { useComentarios } from "@/app/hooks/useComentarios";
 import ComentarioItem from "../ComentarioItem";
 import { comentarioSchema } from "@/lib/validaciones";
@@ -230,11 +231,12 @@ const ImageModal: React.FC<PropsImageModal> = ({
                   <Image
                     priority
                     key={posteoActual._id}
-                    src={obtenerImagenPerfilUsuario(posteoActual._idUsuario, "mini")}
-                    alt={`Imagen de perfil de @${posteoActual._idUsuario.url}`}
-                    width={40}
-                    height={40}
-                    className="rounded-circle me-2 border"
+          src={obtenerImagenPerfilUsuario(posteoActual._idUsuario)}
+          loader={avatarMiniLoader}
+          alt={`Imagen de perfil de @${posteoActual._idUsuario.url}`}
+          width={40}
+          height={40}
+          className="rounded-circle me-2 border"
                   />
                   <span className="text-dark text-decoration-none fw-bold">
                     {posteoActual._idUsuario.url}
@@ -361,7 +363,8 @@ const ImageModal: React.FC<PropsImageModal> = ({
                         <Image
                           priority
                           key={posteoActual._id}
-                          src={obtenerImagenPerfilUsuario(posteoActual._idUsuario, "mini")}
+                          src={obtenerImagenPerfilUsuario(posteoActual._idUsuario)}
+                          loader={avatarMiniLoader}
                           alt={`Imagen de perfil de @${posteoActual._idUsuario.url}`}
                           width={40}
                           height={40}

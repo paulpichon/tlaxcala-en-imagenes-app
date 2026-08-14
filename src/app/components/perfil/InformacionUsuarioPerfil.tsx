@@ -7,6 +7,7 @@ import { UsuarioPerfil } from "@/types/types";
 import FollowButton from "../FollowButton";
 import { useAuth } from "@/context/AuthContext";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
+import { avatarPerfilLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import CambiarImagenModal from "../CambiarImagenModal";
 import FollowersModal from "./FollowersModal";
 import { FiCamera } from "react-icons/fi";
@@ -22,7 +23,7 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
   const isOwnProfile = user?.uid === usuario._id;
 
   const [imagenPerfil, setImagenPerfil] = useState(
-    obtenerImagenPerfilUsuario(usuario, "perfil")
+    obtenerImagenPerfilUsuario(usuario)
   );
   const [showModal, setShowModal] = useState(false);
   const [showFollowersModal, setShowFollowersModal] = useState(false);
@@ -84,6 +85,7 @@ export default function InformacionUsuarioPerfil({ usuario, totalPosteos }: Prop
           priority
           key={imagenPerfil} // Asegura que se recargue la imagen al cambiar
           src={imagenPerfil}
+          loader={avatarPerfilLoader}
           width={100}
           height={100}
           className="rounded-circle object-cover"

@@ -7,6 +7,7 @@ import { FiTrash2 } from "react-icons/fi";
 import { Comentario } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
+import { avatarMiniLoader } from "@/lib/cloudinary/cloudinaryLoader";
 
 interface ComentarioItemProps {
   comentario: Comentario;
@@ -19,7 +20,7 @@ export default function ComentarioItem({ comentario, onDelete, posteoAutorId }: 
   const [deleting, setDeleting] = useState(false);
 
   const puedeEliminar = !!(user && (user.uid === comentario.autorId._id || user.uid === posteoAutorId));
-  const avatarUrl = obtenerImagenPerfilUsuario(comentario.autorId, "mini");
+  const avatarUrl = obtenerImagenPerfilUsuario(comentario.autorId);
 
   const fecha = new Date(comentario.createdAt);
   const fechaFormateada = new Intl.DateTimeFormat("es-MX", {
@@ -41,6 +42,7 @@ export default function ComentarioItem({ comentario, onDelete, posteoAutorId }: 
       <Link href={`/${comentario.autorId.url}`}>
         <Image
           src={avatarUrl}
+          loader={avatarMiniLoader}
           alt={`@${comentario.autorId.url}`}
           width={32}
           height={32}

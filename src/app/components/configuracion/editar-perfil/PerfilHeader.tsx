@@ -3,6 +3,7 @@
 
 import Image from 'next/image';
 import { FiCamera } from 'react-icons/fi';
+import { avatarPerfilLoader } from "@/lib/cloudinary/cloudinaryLoader";
 // Estilos específicos de la página
 import editarPerfil from "@/app/ui/configuracion/editar-perfil/EditarPerfil.module.css";
 
@@ -20,7 +21,8 @@ export default function PerfilHeader({ url, imagenPerfil, onCambiarFoto }: Perfi
         <div className="rounded-circle overflow-hidden position-relative" style={{ width: '128px', height: '128px' }}>
           <Image 
             priority
-            src={imagenPerfil} 
+            src={imagenPerfil}
+            loader={avatarPerfilLoader}
             alt="Foto de perfil" 
             fill 
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

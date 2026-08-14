@@ -14,6 +14,7 @@ import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import { apiGet, isNotFound, getUserMessage } from "@/lib/apiClient";
 import posteoCard from "../ui/posteos/PosteoCard.module.css";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
+import { avatarPerfilLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import { useComentarios } from "@/app/hooks/useComentarios";
 import ComentariosModal from "./ComentariosModal";
 import ComentariosSection from "./posteo/ComentariosSection";
@@ -108,7 +109,8 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
             aria-label={`Perfil de ${posteoActual._idUsuario.url}`}
             >
             <Image
-              src={obtenerImagenPerfilUsuario(posteoActual._idUsuario, "perfil")}
+              src={obtenerImagenPerfilUsuario(posteoActual._idUsuario)}
+              loader={avatarPerfilLoader}
               alt={`Foto de perfil de @${posteoActual._idUsuario.url}`}
               width={40}
               height={40}

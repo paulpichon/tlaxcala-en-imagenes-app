@@ -8,6 +8,7 @@ import { FiHome, FiBell, FiPlusCircle, FiSliders, FiAlignJustify } from "react-i
 import Image from "next/image";
 import CrearPosteoModal from "./CrearPosteoModal";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
+import { avatarMiniLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import { useLogout } from "../hooks/auth/logout";
 
 interface Props {
@@ -114,7 +115,8 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
             >
               <Image
                 key={user?.imagen_perfil?.public_id || "default"}
-                src={obtenerImagenPerfilUsuario(user, "mini")}
+                src={obtenerImagenPerfilUsuario(user)}
+                loader={avatarMiniLoader}
                 alt={`${user?.nombre_completo?.nombre} ${user?.nombre_completo?.apellido} `}
                 width={100}
                 height={100}
