@@ -23,11 +23,16 @@
 
 ## Images (Cloudinary)
 
-- Helper `src/lib/cloudinary/getCloudinaryUrl.ts` builds URLs manually — **not** using Next.js image loader
-- Presets: `feed` (600×600 fill), `detalle` (1080×1080 pad), `perfil` (300×300 thumb), `grid` (300×300 fill), `mini` (60×60 fill)
-- All presets intentionally omit `f_auto` to avoid broken-image bugs
-- `remotePatterns` configured for `res.cloudinary.com` in `next.config.ts`
-- File validation: max 5 MB, allowed types jpeg/jpg/png/webp
+- El backend **nunca** envía `secure_url`; todo se renderiza desde `public_id`.
+- `src/lib/cloudinary/getCloudinaryUrl.ts` construye las URLs de entrega a partir de `public_id` con transformaciones.
+- **Loader de next/image** en `src/lib/cloudinary/cloudinaryLoader.ts`: cada `<Image>` usa `src={public_id}` + `loader={xxxLoader}` (bypass del optimizer de Next; Cloudinary sirve directo con `srcset` responsive y `q_auto,f_auto`).
+  - Loaders listos: `avatarPerfilLoader` (cap 200), `avatarMiniLoader` (cap 120), `feedLoader` (cap 800), `detalleLoader` (cap 1080), `gridLoader` (cap 400), `imageModalLoader` (custom `c_limit`, cap 1400).
+  - El loader hace passthrough de URLs completas (`http/https`), blobs (`blob:`) y data URIs.
+- `src/lib/cloudinary/obtenerImagenPerfilUsuario.ts` devuelve **src** (el `public_id` o `NEXT_PUBLIC_IMAGEN_PERFIL_DEFAULT`), no una URL completa.
+- Presets base en `getCloudinaryUrl.ts` usan `q_85` determinista; los auto-flags los inyecta el loader. `f_auto`/`q_auto` son **seguros** — el histórico "bug de imágenes rotas" era en realidad un merge de `options` que pisaba el `crop` con `undefined` (`g_face` sin `c_fill` → 400); corregido filtrando `undefined` antes del merge.
+- OG/Twitter metadata usa `getCloudinaryUrl(public_id, "detalle")` directo (sin loader).
+- `remotePatterns` para `res.cloudinary.com` en `next.config.ts` (solo para imágenes sin loader, ej. Publicidad).
+- File validation: max **8 MB**, MIME `image/jpeg|png|webp`, extensiones `jpg|jpeg|png|webp` (constantes en `src/lib/validaciones.ts`).
 
 ## Env Variables
 
