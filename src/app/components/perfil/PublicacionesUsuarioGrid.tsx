@@ -5,7 +5,6 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import perfil from "../../ui/perfil/perfil.module.css";
 import Image from "next/image";
 import ImageModal from "./ImageModal";
-import ImagePreloader from "../ImagePreloader";
 import {
   Posteo,
   ApiResponse,
@@ -13,7 +12,6 @@ import {
   PublicacionesUsuarioProps,
 } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
-import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import { gridLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import ToastGlobal from "../ToastGlobal";
 import { apiGet, isNotFound, getUserMessage } from "@/lib/apiClient";
@@ -199,8 +197,6 @@ export default function PublicacionesUsuarioGrid({
 
   return (
     <>
-      <ImagePreloader images={posteos.map((p) => getCloudinaryUrl(p.public_id, "grid"))} />
-
       {refreshing && (
         <div className="text-center py-2">
           <div className="spinner-border spinner-border-sm text-primary" role="status" />
