@@ -14,6 +14,7 @@ import {
 } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
+import { gridLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import ToastGlobal from "../ToastGlobal";
 import { apiGet, isNotFound, getUserMessage } from "@/lib/apiClient";
 
@@ -216,7 +217,8 @@ export default function PublicacionesUsuarioGrid({
           <div key={posteo._id} className="col-6 col-sm-6 col-md-4 col-lg-4">
             <div className="card">
               <Image
-                src={getCloudinaryUrl(posteo.public_id, "grid")}
+                src={posteo.public_id}
+                loader={gridLoader}
                 alt={`Publicación de usuario: ${posteo._id}`}
                 width={200}
                 height={200}

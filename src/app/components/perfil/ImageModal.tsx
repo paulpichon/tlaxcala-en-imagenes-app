@@ -12,9 +12,8 @@ import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { apiGet } from "@/lib/apiClient";
-import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
-import { avatarMiniLoader } from "@/lib/cloudinary/cloudinaryLoader";
+import { avatarMiniLoader, imageModalLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import { useComentarios } from "@/app/hooks/useComentarios";
 import ComentarioItem from "../ComentarioItem";
 import { comentarioSchema } from "@/lib/validaciones";
@@ -58,17 +57,6 @@ const ImageModal: React.FC<PropsImageModal> = ({
 
   const fechaFormateada = posteoActual
     ? new Date(posteoActual.fecha_creacion).toLocaleDateString()
-    : "";
-
-  const postImageUrl = posteoActual
-    ? getCloudinaryUrl(posteoActual.public_id, "custom", {
-        width: 1400,
-        height: 1400,
-        crop: "limit",
-        background: "black",
-        quality: 90,
-        useAutoTransforms: false,
-      })
     : "";
 
   const openLikesModal = async () => {
@@ -268,7 +256,8 @@ const ImageModal: React.FC<PropsImageModal> = ({
                   className="w-100 h-100 position-relative"
                 >
                   <Image
-                    src={postImageUrl}
+                    src={posteoActual.public_id}
+                    loader={imageModalLoader}
                     alt={`Posteo de @${posteoActual._idUsuario.url}, texto: ${posteoActual.texto || "Imagen del post"}`}
                     fill
                     priority
@@ -341,7 +330,8 @@ const ImageModal: React.FC<PropsImageModal> = ({
                   className="w-100 h-100 position-relative"
                 >
                   <Image
-                    src={postImageUrl}
+                    src={posteoActual.public_id}
+                    loader={imageModalLoader}
                     alt={`Posteo de @${posteoActual._idUsuario.url}, texto: ${posteoActual.texto || "Imagen del post"}`}
                     fill
                     priority

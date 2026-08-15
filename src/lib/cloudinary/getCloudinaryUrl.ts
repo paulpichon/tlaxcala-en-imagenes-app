@@ -83,7 +83,11 @@ export function getCloudinaryUrl(
     },
   };
 
-  const config = preset === "custom" ? options : { ...presets[preset], ...options };
+  // Filtra los valores undefined para que no pisen los valores del preset en el merge
+  const cleanOptions = Object.fromEntries(
+    Object.entries(options).filter(([, v]) => v !== undefined)
+  );
+  const config = preset === "custom" ? cleanOptions : { ...presets[preset], ...cleanOptions };
 
   const {
     width,

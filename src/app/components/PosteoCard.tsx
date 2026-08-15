@@ -10,11 +10,10 @@ import ModalOpcionesPublicacion from "./ModalOpcionesPublicacion";
 import ModalLikesUsuarios from "./ModalLikesUsuarios";
 import { Posteo, LikeUsuario, PosteoCardProps, ApiResponse } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
-import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
 import { apiGet, isNotFound, getUserMessage } from "@/lib/apiClient";
 import posteoCard from "../ui/posteos/PosteoCard.module.css";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
-import { avatarPerfilLoader } from "@/lib/cloudinary/cloudinaryLoader";
+import { avatarPerfilLoader, feedLoader, detalleLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import { useComentarios } from "@/app/hooks/useComentarios";
 import ComentariosModal from "./ComentariosModal";
 import ComentariosSection from "./posteo/ComentariosSection";
@@ -84,10 +83,7 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
     year: "numeric",
   }).format(new Date(posteoActual.fecha_creacion));
 
-  const postImageUrl = getCloudinaryUrl(
-    posteoActual.public_id,
-    isDetail ? "detalle" : "feed"
-  );
+  const postImageLoader = isDetail ? detalleLoader : feedLoader;
 
   const displayedCommentsCount = isPublicView
     ? (posteoActual.comentariosCount ?? 0)
@@ -175,7 +171,8 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
           }
         >
           <Image
-            src={postImageUrl}
+            src={posteoActual.public_id}
+            loader={postImageLoader}
             alt={`Fotografía por @${posteoActual._idUsuario.url}, texto: ${posteoActual.texto || "Imagen del post"}`}
             fill={!isDetail}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 600px"

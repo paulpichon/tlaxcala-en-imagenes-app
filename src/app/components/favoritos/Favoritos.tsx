@@ -8,7 +8,7 @@ import favoritoStyles from "../../ui/favoritos/Favorito.module.css";
 import { Favorito, ApiResponsePaginado } from "@/types/types";
 import Spinner from "../spinner";
 import FavoritoButton from "../FavoritoButton";
-import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
+import { gridLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import { useFavorito } from "@/context/FavoritoContext";
 import { apiGet } from "@/lib/apiClient";
 
@@ -96,7 +96,8 @@ export default function Favoritos() {
                           title={`Ver posteo de ${fav.autorId.nombre_completo.nombre} ${fav.autorId.nombre_completo.apellido}`}
                         >
                           <Image
-                            src={getCloudinaryUrl(fav.posteoId.public_id, "grid")}
+                            src={fav.posteoId.public_id}
+                            loader={gridLoader}
                             alt={`Favorito de ${fav.autorId.nombre_completo.nombre}`}
                             width={400}
                             height={400}

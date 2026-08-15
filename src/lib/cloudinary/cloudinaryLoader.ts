@@ -3,7 +3,7 @@
 // usando los presets existentes. Se usa por <Image> con el prop `loader`.
 
 import type { ImageLoaderProps } from "next/image";
-import { CloudinaryPreset } from "@/types/types";
+import { CloudinaryPreset, CloudinaryCustomOptions } from "@/types/types";
 import { getCloudinaryUrl } from "./getCloudinaryUrl";
 
 type CloudinaryLoaderOptions = {
@@ -11,6 +11,9 @@ type CloudinaryLoaderOptions = {
   square?: boolean;
   // Ancho máximo solicitado a Cloudinary (protege contra srcset muy grandes).
   cap?: number;
+  // Overrides de crop/background para presets custom (ej. ImageModal).
+  crop?: CloudinaryCustomOptions["crop"];
+  background?: string;
 };
 
 /**
@@ -20,7 +23,7 @@ type CloudinaryLoaderOptions = {
  */
 export function createCloudinaryLoader(
   preset: CloudinaryPreset,
-  { square = false, cap }: CloudinaryLoaderOptions = {}
+  { square = false, cap, crop, background }: CloudinaryLoaderOptions = {}
 ) {
   return ({ src, width }: ImageLoaderProps): string => {
     if (!src || /^(https?:|blob:|data:|\/)/i.test(src)) return src;
@@ -30,6 +33,8 @@ export function createCloudinaryLoader(
     return getCloudinaryUrl(src, preset, {
       width: w,
       height: square ? w : undefined,
+      crop,
+      background,
       quality: "auto",
       format: "auto",
       useAutoTransforms: true,
@@ -46,4 +51,27 @@ export const avatarPerfilLoader = createCloudinaryLoader("perfil", {
 export const avatarMiniLoader = createCloudinaryLoader("mini", {
   square: true,
   cap: 120,
+});
+
+// ✅ Loaders para posteos
+export const feedLoader = createCloudinaryLoader("feed", {
+  square: true,
+  cap: 800,
+});
+
+export const detalleLoader = createCloudinaryLoader("detalle", {
+  square: true,
+  cap: 1080,
+});
+
+export const gridLoader = createCloudinaryLoader("grid", {
+  square: true,
+  cap: 400,
+});
+
+export const imageModalLoader = createCloudinaryLoader("custom", {
+  square: false,
+  cap: 1400,
+  crop: "limit",
+  background: "black",
 });

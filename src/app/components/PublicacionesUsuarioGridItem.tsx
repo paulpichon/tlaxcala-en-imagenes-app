@@ -2,7 +2,7 @@
 import Image from "next/image";
 import perfil from "../ui/perfil/perfil.module.css";
 import { Posteo } from "@/types/types";
-import { getCloudinaryUrl } from "@/lib/cloudinary/getCloudinaryUrl";
+import { gridLoader } from "@/lib/cloudinary/cloudinaryLoader";
 
 interface Props {
   posteo: Posteo;
@@ -14,7 +14,8 @@ export default function PublicacionesUsuarioGridItem({ posteo, onClick }: Props)
     <div className="col-6 col-sm-6 col-md-4 col-lg-4">
       <div className="card">
         <Image
-          src={getCloudinaryUrl(posteo.public_id, "grid")}
+          src={posteo.public_id}
+          loader={gridLoader}
           alt={posteo.texto}
           width={200}
           height={200}
