@@ -7,8 +7,11 @@ import { CloudinaryCustomOptions, CloudinaryPreset } from "@/types/types";
   
 /**
  * ✅ Genera una URL transformada de Cloudinary según un preset o configuración custom.
- * - Evita el bug de imágenes rotas por combinación g_auto,q_auto,f_auto.
- * - Usa configuraciones seguras por preset.
+ * - Los presets base usan calidad numérica (q_85) sin formatos automáticos.
+ * - `q_auto`/`f_auto` se activan vía el loader (`cloudinaryLoader.ts`) al renderizar con <Image>.
+ * - Nota histórica: un bug previo de "imágenes rotas" con f_auto era en realidad el merge de
+ *   options pisando el `crop` con `undefined` (g_face sin c_fill → 400). Corregido al filtrar
+ *   los valores `undefined` antes del merge (ver abajo).
  */
 export function getCloudinaryUrl(
   publicId: string,
@@ -38,7 +41,7 @@ export function getCloudinaryUrl(
       crop: "fill",
       gravity: "face", // centrado en rostro si es posible
       quality: 85,
-      format: null, // ❌ sin f_auto (evita bug)
+      format: null, // presets base: sin formato automático (lo inyecta el loader)
       useAutoTransforms: false,
     },
     // Detalle (grande, sin recorte y con fondo gris oscuro)
@@ -48,7 +51,7 @@ export function getCloudinaryUrl(
       crop: "pad",
       background: "auto",
       quality: 85,
-      format: null, // ❌ sin f_auto
+      format: null, // presets base: sin formato automático (lo inyecta el loader)
       useAutoTransforms: false,
     },
     // Foto de perfil
