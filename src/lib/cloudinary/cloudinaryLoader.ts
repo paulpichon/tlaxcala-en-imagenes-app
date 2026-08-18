@@ -9,10 +9,13 @@ import { getCloudinaryUrl } from "./getCloudinaryUrl";
 type CloudinaryLoaderOptions = {
   // Si es true, fuerza h = w (recortes/pads cuadrados).
   square?: boolean;
+  // Proporción alto/ancho para el recorte (ej. 1.25 = 4:5 tipo Instagram).
+  aspectRatio?: number;
   // Ancho máximo solicitado a Cloudinary (protege contra srcset muy grandes).
   cap?: number;
   // Overrides de crop/background para presets custom (ej. ImageModal).
   crop?: CloudinaryCustomOptions["crop"];
+  gravity?: CloudinaryCustomOptions["gravity"];
   background?: string;
 };
 
@@ -23,17 +26,30 @@ type CloudinaryLoaderOptions = {
  */
 export function createCloudinaryLoader(
   preset: CloudinaryPreset,
-  { square = false, cap, crop, background }: CloudinaryLoaderOptions = {}
+  {
+    square = false,
+    aspectRatio,
+    cap,
+    crop,
+    gravity,
+    background,
+  }: CloudinaryLoaderOptions = {}
 ) {
   return ({ src, width }: ImageLoaderProps): string => {
     if (!src || /^(https?:|blob:|data:|\/)/i.test(src)) return src;
 
     const w = cap ? Math.min(width, cap) : width;
+    const height = aspectRatio
+      ? Math.round(w * aspectRatio)
+      : square
+        ? w
+        : undefined;
 
     return getCloudinaryUrl(src, preset, {
       width: w,
-      height: square ? w : undefined,
+      height,
       crop,
+      gravity,
       background,
       quality: "auto",
       format: "auto",
@@ -55,8 +71,9 @@ export const avatarMiniLoader = createCloudinaryLoader("mini", {
 
 // ✅ Loaders para posteos
 export const feedLoader = createCloudinaryLoader("feed", {
-  square: true,
-  cap: 800,
+  aspectRatio: 1.25,
+  cap: 1080,
+  gravity: "auto",
 });
 
 export const detalleLoader = createCloudinaryLoader("detalle", {

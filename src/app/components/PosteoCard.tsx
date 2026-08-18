@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FiMoreHorizontal, FiMessageCircle } from "react-icons/fi";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import LikeButton from "./LikeButton";
 import ModalOpcionesPublicacion from "./ModalOpcionesPublicacion";
@@ -154,38 +154,44 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
         </div>
 
         {/* Imagen del post */}
-        <div
-          className={`${
-            isDetail
-              ? "d-flex justify-content-center align-items-center bg-black"
-              : "ratio ratio-1x1"
-          }`}
-          style={
-            isDetail
-              ? {
-                  backgroundColor: "black",
-                  maxHeight: "90vh",
-                  overflow: "hidden",
-                }
-              : {}
-          }
-        >
-          <Image
-            src={posteoActual.public_id}
-            loader={postImageLoader}
-            alt={`Fotografía por @${posteoActual._idUsuario.url}, texto: ${posteoActual.texto || "Imagen del post"}`}
-            fill={!isDetail}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 600px"
-            width={isDetail ? 1080 : undefined}
-            height={isDetail ? 1080 : undefined}
-            loading="eager"
-            className={`${
-              isDetail ? posteoCard.detalleImagen : "object-fit-cover"
-            } ${loaded ? posteoCard.fadeIn : posteoCard.hidden}`}
-            priority={isDetail}
-            onLoad={() => setLoaded(true)}
-          />
-        </div>
+        {isDetail ? (
+          <div
+            className="d-flex justify-content-center align-items-center bg-black"
+            style={{ backgroundColor: "black", maxHeight: "90vh", overflow: "hidden" }}
+          >
+            <Image
+              src={posteoActual.public_id}
+              loader={postImageLoader}
+              alt={`Fotografía por @${posteoActual._idUsuario.url}, texto: ${posteoActual.texto || "Imagen del post"}`}
+              fill={false}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 600px"
+              width={1080}
+              height={1080}
+              loading="eager"
+              className={`${posteoCard.detalleImagen} ${loaded ? posteoCard.fadeIn : posteoCard.hidden}`}
+              priority
+              onLoad={() => setLoaded(true)}
+            />
+          </div>
+        ) : (
+          <Link
+            href={`/posteo/${posteoActual._id}`}
+            className="ratio ratio-1x1 d-block"
+            style={{ "--bs-aspect-ratio": "125%" } as CSSProperties}
+            aria-label="Ver publicación completa"
+          >
+            <Image
+              src={posteoActual.public_id}
+              loader={postImageLoader}
+              alt={`Fotografía por @${posteoActual._idUsuario.url}, texto: ${posteoActual.texto || "Imagen del post"}`}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 600px"
+              loading="eager"
+              className={`object-fit-cover ${loaded ? posteoCard.fadeIn : posteoCard.hidden}`}
+              onLoad={() => setLoaded(true)}
+            />
+          </Link>
+        )}
 
         {/* Body */}
         <div className="card-body bg-light">
