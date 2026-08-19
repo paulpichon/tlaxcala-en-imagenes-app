@@ -55,6 +55,26 @@ const ImageModal: React.FC<PropsImageModal> = ({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // ✅ Bloquear el scroll del fondo y cerrar con Escape mientras el modal está abierto
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !isOptionsOpen && !isLikesModalOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, isOptionsOpen, isLikesModalOpen, onClose]);
+
   const fechaFormateada = posteoActual
     ? new Date(posteoActual.fecha_creacion).toLocaleDateString()
     : "";
@@ -189,25 +209,21 @@ const ImageModal: React.FC<PropsImageModal> = ({
           exit={{ opacity: 0 }}
           className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
           style={{ backgroundColor: "rgba(0,0,0,0.8)", zIndex: 1050 }}
+          onClick={() => {
+            if (!isOptionsOpen && !isLikesModalOpen) onClose();
+          }}
         >
-        <button
-          onClick={onClose}
-          className="btn btn-dark position-absolute"
-          style={{ top: "15px", right: "25px", zIndex: 1050 }}
-        >
-          <FiX size={28} />
-        </button>
-
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
           transition={{ duration: 0.25 }}
-          className="bg-white rounded shadow-lg d-flex flex-column flex-md-row"
+          className="bg-white shadow-lg d-flex flex-column flex-md-row"
           style={{
-            width: isMobile ? "95%" : "90%",
-            maxWidth: isMobile ? "500px" : "1000px",
-            height: isMobile ? "85%" : "90%",
+            width: isMobile ? "100%" : "95%",
+            maxWidth: isMobile ? "none" : "1500px",
+            height: isMobile ? "100%" : "92%",
+            borderRadius: isMobile ? 0 : undefined,
             overflow: "hidden",
           }}
           onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
@@ -235,19 +251,30 @@ const ImageModal: React.FC<PropsImageModal> = ({
                     </span>
                   )}
                 </div>
-                <button
-                  type="button"
-                  className={perfil.btn_opciones_modal_perfil}
-                  aria-label="Options"
-                  onClick={() => setIsOptionsOpen(true)}
-                >
-                  <FiMoreHorizontal />
-                </button>
+                <div className="d-flex align-items-center gap-1">
+                  <button
+                    type="button"
+                    className={perfil.btn_opciones_modal_perfil}
+                    aria-label="Options"
+                    onClick={() => setIsOptionsOpen(true)}
+                  >
+                    <FiMoreHorizontal />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    aria-label="Cerrar"
+                    className="btn d-flex align-items-center justify-content-center p-1"
+                    style={{ background: "none", border: "none", color: "#333" }}
+                  >
+                    <FiX size={24} />
+                  </button>
+                </div>
               </div>
 
               <div
                 className="bg-black position-relative d-flex justify-content-center align-items-center flex-shrink-0"
-                style={{ width: "100%", height: "35vh", overflow: "hidden" }}
+                style={{ width: "100%", aspectRatio: "1 / 1", maxHeight: "55vh", overflow: "hidden" }}
               >
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -321,7 +348,7 @@ const ImageModal: React.FC<PropsImageModal> = ({
             <>
               <div
                 className="flex-grow-1 bg-black position-relative d-flex justify-content-center align-items-center"
-                style={{ width: "auto", height: "100%", minHeight: "400px", maxHeight: "90vh", overflow: "hidden" }}
+                style={{ width: "auto", height: "100%", minHeight: "400px", maxHeight: "92vh", overflow: "hidden" }}
               >
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -335,7 +362,7 @@ const ImageModal: React.FC<PropsImageModal> = ({
                     alt={`Posteo de @${posteoActual._idUsuario.url}, texto: ${posteoActual.texto || "Imagen del post"}`}
                     fill
                     priority
-                    sizes="60vw"
+                    sizes="calc(min(95vw, 1500px) - 350px)"
                     className="object-contain"
                     style={{ objectFit: "contain" }}
                   />
@@ -373,14 +400,25 @@ const ImageModal: React.FC<PropsImageModal> = ({
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      className={perfil.btn_opciones_modal_perfil}
-                      aria-label="Options"
-                      onClick={() => setIsOptionsOpen(true)}
-                    >
-                      <FiMoreHorizontal />
-                    </button>
+                    <div className="d-flex align-items-center gap-1">
+                      <button
+                        type="button"
+                        className={perfil.btn_opciones_modal_perfil}
+                        aria-label="Options"
+                        onClick={() => setIsOptionsOpen(true)}
+                      >
+                        <FiMoreHorizontal />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={onClose}
+                        aria-label="Cerrar"
+                        className="btn d-flex align-items-center justify-content-center p-1"
+                        style={{ background: "none", border: "none", color: "#333" }}
+                      >
+                        <FiX size={24} />
+                      </button>
+                    </div>
                   </div>
 
                   <p className="mb-1">
