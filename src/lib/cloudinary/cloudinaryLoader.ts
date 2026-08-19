@@ -88,7 +88,7 @@ export const gridLoader = createCloudinaryLoader("grid", {
 
 export const imageModalLoader = createCloudinaryLoader("custom", {
   square: false,
-  cap: 1400,
+  cap: 1920,
   crop: "limit",
   background: "black",
 });
