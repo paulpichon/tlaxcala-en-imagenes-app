@@ -19,16 +19,15 @@ export default function ModalLikesUsuarios({
   onClose,
   usuarios,
 }: ModalLikesUsuariosProps) {
-  // Bloquear scroll cuando el modal está abierto
+  // Bloquear scroll cuando el modal está abierto, restaurando el valor previo
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    // Restaurar siempre al desmontar
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
     };
   }, [isOpen]);
 
