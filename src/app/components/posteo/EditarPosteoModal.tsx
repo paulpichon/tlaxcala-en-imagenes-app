@@ -4,13 +4,21 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import ToastGlobal from "../ToastGlobal";
-import { editarPosteoSchema } from "@/lib/validaciones";
+import { editarPosteoSchema, validarUbicacionPost } from "@/lib/validaciones";
 import { AnimatePresence, motion } from "framer-motion";
-import { Posteo } from "@/types/types";
+import { Posteo, SeleccionLocalidad } from "@/types/types";
 import { FiMapPin } from "react-icons/fi";
 import { useObtenerUbicacion } from "@/app/hooks/useObtenerUbicacion";
 import ManualMunicipioSelector from "../ManualMunicipioSelector";
-import { apiPut, isNotFound, getUserMessage } from "@/lib/apiClient";
+import {
+  apiPut,
+  isNotFound,
+  getUserMessage,
+  isApiErrorCode,
+  getApiErrorMessage,
+  ApiErrorCode,
+} from "@/lib/apiClient";
+import { invalidarCatalogos } from "@/lib/catalogos";
 
 // ✅ Actualizar la interfaz del callback
 interface EditarPosteoModalProps {
@@ -39,6 +47,7 @@ export default function EditarPosteoModal({
     ciudad,
     estado,
     pais,
+    localidadCercana,
     setMunicipioId,
     setCiudad,
     setEstado,
@@ -46,6 +55,10 @@ export default function EditarPosteoModal({
     setLat,
     setLng,
   } = useObtenerUbicacion();
+
+  // Localidad INEGI vigente ({clave, nombre}): la clave viaja en el PUT,
+  // el nombre alimenta la etiqueta y el objeto optimista.
+  const [localidad, setLocalidad] = useState<SeleccionLocalidad | null>(null);
 
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "danger" | "creacion">("success");
@@ -64,7 +77,15 @@ export default function EditarPosteoModal({
       setCiudad(posteo.ubicacion.ciudad || null);
       setEstado(posteo.ubicacion.estado || null);
       setPais(posteo.ubicacion.pais || null);
-      
+
+      // Localidad guardada (posts antiguos: null)
+      const { localidadClave, localidadNombre } = posteo.ubicacion;
+      setLocalidad(
+        localidadClave && localidadNombre
+          ? { clave: localidadClave, nombre: localidadNombre }
+          : null
+      );
+
       // ✅ Verificación ultra-segura
       // Comprobamos que existan las coordenadas y que el array interno no sea null
       const coordsArray = posteo.ubicacion.coordinates?.coordinates;
@@ -105,12 +126,34 @@ export default function EditarPosteoModal({
     setCiudad(null);
     setEstado(null);
     setPais(null);
+    setLocalidad(null);
     setLat(null);
     setLng(null);
   };
 
+  // Envuelve al GPS para adoptar la localidad sugerida por el backend
+  const detectarUbicacion = async () => {
+    const resultado = await obtenerUbicacion();
+    const cercana = resultado?.localidadCercana;
+    setLocalidad(
+      cercana ? { clave: cercana.clave, nombre: cercana.nombre } : null
+    );
+    return resultado;
+  };
+
   const handleGuardar = async () => {
     if (!validarTexto()) return;
+
+    // Validación espejo de ubicación (UX; la autoritativa es el backend)
+    const errorUbicacion = validarUbicacionPost(
+      municipioId,
+      localidad?.clave ?? null
+    );
+    if (errorUbicacion) {
+      setToastMessage(errorUbicacion);
+      setToastType("danger");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -120,19 +163,25 @@ export default function EditarPosteoModal({
         texto: texto.trim(), // Enviamos el texto (aunque sea "")
       };
 
-      // Lógica de ubicación (se mantiene igual a tu código)
+      // Lógica de ubicación (el backend reconstruye ubicacion completa)
       if (municipioId) {
         body.municipio = municipioId;
         body.ciudad = ciudad;
         body.estado = estado;
         body.pais = pais;
+        // Clave INEGI; el backend valida que pertenezca al municipio
+        if (localidad) {
+          body.localidadClave = localidad.clave;
+        }
         if (lat && lng) {
           body.lat = lat;
           body.lng = lng;
         }
       } else {
+        // Quitar ubicación por completo (sin residuos de coordenadas ni localidad)
         body.municipio = null;
         body.lat = null;
+        body.lng = null;
       }
 
       const data = await apiPut<{ msg: string }>(
@@ -141,7 +190,7 @@ export default function EditarPosteoModal({
         body
       );
 
-      setToastMessage("Publicación actualizada correctamente 🎉");
+      setToastMessage("Publicación actualizada correctamente");
       setToastType("success");
 
         // ✅ Crear objeto posteo actualizado
@@ -154,6 +203,13 @@ export default function EditarPosteoModal({
                 ciudad: ciudad || "",
                 estado: estado || "",
                 pais: pais || "",
+                ...(localidad
+                  ? { localidadClave: localidad.clave, localidadNombre: localidad.nombre }
+                  : { localidadClave: null, localidadNombre: null }),
+                coordinates:
+                  lat && lng
+                    ? { type: "Point", coordinates: [lng, lat] }
+                    : posteo.ubicacion?.coordinates,
               }
             : undefined,
         };
@@ -165,7 +221,18 @@ export default function EditarPosteoModal({
       const msg = getUserMessage(err, 'editar_posteo');
       console.error(msg, err);
       if (isNotFound(err)) {
-        setToastMessage("La publicación ya no existe ❌");
+        setToastMessage("La publicación ya no existe");
+      } else if (isApiErrorCode(err, ApiErrorCode.BAD_REQUEST)) {
+        // 400 típico: municipio inexistente o localidad ajena al municipio.
+        // Catálogo obsoleto → invalidar y pedir re-selección.
+        invalidarCatalogos();
+        setToastMessage(
+          getApiErrorMessage(
+            err,
+            "Datos de ubicación inválidos. Vuelve a seleccionar municipio y localidad"
+          )
+        );
+        setToastType("danger");
       } else {
         setToastMessage(msg);
       }
@@ -216,7 +283,7 @@ export default function EditarPosteoModal({
                   {/* Si no hay una ciudad seleccionada/detectada, mostrar botón de GPS */}
                   {!ciudad && !loadingUbicacion && (
                     <button
-                      onClick={obtenerUbicacion}
+                      onClick={detectarUbicacion}
                       className="iconLocationBtn"
                       title="Detectar ubicación automáticamente"
                     >
@@ -242,6 +309,13 @@ export default function EditarPosteoModal({
                 {ciudad && (
                   <div className="alert alert-success py-2 px-3 mb-2">
                     <strong>{ciudad}</strong>, {estado}, {pais}
+                    {/* Sugerencia del reverse geocoding (informativa;
+                        la localidad vigente es la del select) */}
+                    {lat && lng && localidadCercana && (
+                      <span className="d-block small mt-1">
+                        📍 Cerca de <strong>{localidadCercana.nombre}</strong> (~{Math.round(localidadCercana.distancia_metros)} m)
+                      </span>
+                    )}
                     <div className="small text-muted">
                       {/* Lógica dinámica para el origen de la ubicación */}
                       {lat && lng ? (
@@ -261,15 +335,19 @@ export default function EditarPosteoModal({
 
                 <ManualMunicipioSelector
                   municipio={municipioId}
-                  onSelect={(id, data) => {
+                  localidadClave={localidad?.clave ?? null}
+                  onSelect={(id, data, localidadSel) => {
+                    // Cambiar de municipio abandona el GPS detectado.
+                    // Cambiar sólo la localidad conserva lat/lng (esExacta: true).
+                    if (id !== municipioId) {
+                      setLat(null);
+                      setLng(null);
+                    }
                     setMunicipioId(id);
                     setCiudad(data.ciudad);
                     setEstado(data.estado);
                     setPais(data.pais);
-                    // Al seleccionar manualmente, nos aseguramos de limpiar las coordenadas GPS
-                    // para que el texto cambie a "Selección manual"
-                    if (typeof setLat === 'function') setLat(null);
-                    if (typeof setLng === 'function') setLng(null);
+                    setLocalidad(localidadSel);
                   }}
                 />
               </div>

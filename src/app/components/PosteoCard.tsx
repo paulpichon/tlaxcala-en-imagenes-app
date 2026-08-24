@@ -14,6 +14,7 @@ import { apiGet, isNotFound, getUserMessage } from "@/lib/apiClient";
 import posteoCard from "../ui/posteos/PosteoCard.module.css";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 import { avatarPerfilLoader, feedLoader, detalleLoader } from "@/lib/cloudinary/cloudinaryLoader";
+import { formatearEtiquetaUbicacion } from "@/lib/etiquetaUbicacion";
 import { useComentarios } from "@/app/hooks/useComentarios";
 import ComentariosModal from "./ComentariosModal";
 import ComentariosSection from "./posteo/ComentariosSection";
@@ -58,13 +59,7 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
   const openOptions = () => setIsOptionsOpen(true);
   const closeOptions = () => setIsOptionsOpen(false);
 
-  const obtenerTextoUbicacion = () => {
-    if (!posteoActual.ubicacion) return null;
-  
-    const { ciudad, estado, pais } = posteoActual.ubicacion;
-  
-    return [ciudad, estado, pais].filter(Boolean).join(", ");
-  };
+  const textoUbicacion = formatearEtiquetaUbicacion(posteoActual.ubicacion);
 
   const handlePostDeleted = () => {
     closeOptions();
@@ -135,9 +130,9 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
             </Link>
           )}
 
-          {obtenerTextoUbicacion() && (
+          {textoUbicacion && (
             <span className="text-muted small d-flex align-items-center">
-              {obtenerTextoUbicacion()}
+              {textoUbicacion}
             </span>
           )}
         </div>

@@ -17,6 +17,7 @@ import { avatarMiniLoader, imageModalLoader } from "@/lib/cloudinary/cloudinaryL
 import { useComentarios } from "@/app/hooks/useComentarios";
 import ComentarioItem from "../ComentarioItem";
 import { comentarioSchema } from "@/lib/validaciones";
+import { formatearEtiquetaUbicacion } from "@/lib/etiquetaUbicacion";
 import ToastGlobal from "../ToastGlobal";
 
 interface PropsImageModal {
@@ -93,13 +94,7 @@ const ImageModal: React.FC<PropsImageModal> = ({
     }
   };
 
-  const obtenerTextoUbicacion = () => {
-    if (!posteoActual?.ubicacion) return null;
-  
-    const { ciudad, estado, pais } = posteoActual.ubicacion;
-  
-    return [ciudad, estado, pais].filter(Boolean).join(", ");
-  };
+  const textoUbicacion = formatearEtiquetaUbicacion(posteoActual?.ubicacion);
 
   const {
     comentarios,
@@ -245,9 +240,9 @@ const ImageModal: React.FC<PropsImageModal> = ({
                   <span className="text-dark text-decoration-none fw-bold">
                     {posteoActual._idUsuario.url}
                   </span>
-                  {obtenerTextoUbicacion() && (
+                  {textoUbicacion && (
                     <span className="text-muted small d-flex align-items-center ms-2">
-                      {obtenerTextoUbicacion()}
+                      {textoUbicacion}
                     </span>
                   )}
                 </div>
@@ -392,9 +387,9 @@ const ImageModal: React.FC<PropsImageModal> = ({
                         <span className="text-dark text-decoration-none fw-bold">
                           {posteoActual._idUsuario.url}
                         </span>
-                        {obtenerTextoUbicacion() && (
+                        {textoUbicacion && (
                           <span className="text-muted small d-flex align-items-center">
-                            {obtenerTextoUbicacion()}
+                            {textoUbicacion}
                           </span>
                         )}
                       </div>

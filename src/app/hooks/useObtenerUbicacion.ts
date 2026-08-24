@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { apiPost, getUserMessage } from "@/lib/apiClient";
-import { ApiResponse } from "@/types/types";
+import { ApiResponse, LocalidadCercana } from "@/types/types";
 
 export function useObtenerUbicacion() {
   const { fetchWithAuth } = useAuth();
@@ -19,6 +19,11 @@ export function useObtenerUbicacion() {
   // Guardar coordenadas y datos de ubicacion en el estado del componente
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
+
+  // Localidad sugerida por el backend (puede ser null: municipio sin
+  // localidades con coordenadas)
+  const [localidadCercana, setLocalidadCercana] =
+    useState<LocalidadCercana | null>(null);
 
   // ⚡ Función reutilizable
   const obtenerUbicacion = async () => {
@@ -43,9 +48,10 @@ export function useObtenerUbicacion() {
       setLat(coords.latitude);
       setLng(coords.longitude);
 
-      // 2️⃣ Consultar tu backend para convertir coords → municipio
+      // 2️⃣ Consultar backend para convertir coords → municipio + localidad cercana
       const data = await apiPost<ApiResponse<{
         municipio?: { _id: string; nombreMunicipio: string; nombreEntidad: string };
+        localidad_cercana?: LocalidadCercana | null;
         metodo?: string;
         precision?: string;
       }>>(fetchWithAuth, "/api/ubicacion/reverse", {
@@ -53,11 +59,14 @@ export function useObtenerUbicacion() {
         lng: coords.longitude,
       });
 
+      const cercana = data.data.localidad_cercana || null;
+
       // 3️⃣ Guardar valores
       setMunicipioId(data.data.municipio?._id || null);
       setCiudad(data.data.municipio?.nombreMunicipio || null);
       setEstado(data.data.municipio?.nombreEntidad || null);
       setPais("México"); // Asumimos que siempre sera Mexico, ya que el servicio solo devuelve municipios mexicanos
+      setLocalidadCercana(cercana);
 
       return {
         lat: coords.latitude,
@@ -66,6 +75,7 @@ export function useObtenerUbicacion() {
         ciudad: data.data.municipio?.nombreMunicipio || null,
         estado: data.data.municipio?.nombreEntidad || null,
         pais: "México", // Asumimos que siempre sera Mexico, ya que el servicio solo devuelve municipios mexicanos
+        localidadCercana: cercana,
       };
     } catch (err) {
       const msg = getUserMessage(err, 'obtener_ubicacion');
@@ -88,10 +98,12 @@ export function useObtenerUbicacion() {
     ciudad,
     estado,
     pais,
+    localidadCercana,
     setMunicipioId,
     setCiudad,
     setEstado,
     setPais,
+    setLocalidadCercana,
     setLat,
     setLng,
   };

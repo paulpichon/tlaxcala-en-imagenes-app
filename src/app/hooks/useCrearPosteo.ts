@@ -1,10 +1,21 @@
 import { useState, useEffect } from "react";
-import { posteoSchema, posteoBaseSchema } from "@/lib/validaciones";
+import {
+  posteoSchema,
+  posteoBaseSchema,
+  validarUbicacionPost,
+} from "@/lib/validaciones";
 import { ZodError } from "zod";
 import { useAuth } from "@/context/AuthContext";
-import { Posteo, ApiResponse } from "@/types/types";
+import { Posteo, ApiResponse, SeleccionLocalidad } from "@/types/types";
 import { useObtenerUbicacion } from "./useObtenerUbicacion";
-import { apiPost, getUserMessage } from "@/lib/apiClient";
+import {
+  apiPost,
+  getUserMessage,
+  isApiErrorCode,
+  getApiErrorMessage,
+  ApiErrorCode,
+} from "@/lib/apiClient";
+import { invalidarCatalogos } from "@/lib/catalogos";
 
 export function useCrearPosteo(
   onPostCreated?: (newPost?: Posteo) => void,
@@ -61,6 +72,7 @@ export function useCrearPosteo(
     setCiudad(null);
     setEstado(null);
     setPais(null);
+    setLocalidad(null);
   };
 
   /*
@@ -107,6 +119,7 @@ export function useCrearPosteo(
     pais,
     lat,
     lng,
+    localidadCercana,
     setMunicipioId,
     setCiudad,
     setEstado,
@@ -114,6 +127,21 @@ export function useCrearPosteo(
     setLat,
     setLng,
   } = useObtenerUbicacion();
+
+  // Localidad INEGI seleccionada (por GPS o cascada manual). Se guarda
+  // {clave, nombre}: la clave viaja al backend, el nombre alimenta la UI.
+  const [localidad, setLocalidad] = useState<SeleccionLocalidad | null>(null);
+
+  // Envuelve al GPS para adoptar la localidad sugerida por el backend.
+  // Si no hay sugerencia (localidad_cercana: null) se limpia la selección.
+  const detectarUbicacion = async () => {
+    const resultado = await obtenerUbicacion();
+    const cercana = resultado?.localidadCercana;
+    setLocalidad(
+      cercana ? { clave: cercana.clave, nombre: cercana.nombre } : null
+    );
+    return resultado;
+  };
   
   
 
@@ -127,6 +155,16 @@ export function useCrearPosteo(
       // Validación completa antes de enviar
       posteoSchema.parse({ texto, file, posteo_publico: posteoPublico });
       setErrors([]);
+
+      // Validación espejo de ubicación (UX; la autoritativa es el backend)
+      const errorUbicacion = validarUbicacionPost(
+        municipioId,
+        localidad?.clave ?? null
+      );
+      if (errorUbicacion) {
+        setErrors([errorUbicacion]);
+        return;
+      }
 
       if (!file) return;
 
@@ -142,6 +180,11 @@ export function useCrearPosteo(
       if (ciudad) formData.append("ciudad", ciudad);
       if (estado) formData.append("estado", estado);
       if (pais) formData.append("pais", pais);
+      // Localidad INEGI (4 dígitos). Requiere municipio; el backend resuelve
+      // y valida el nombre contra la colección Municipio.
+      if (municipioId && localidad) {
+        formData.append("localidadClave", localidad.clave);
+      }
 
       // 🆕 Agregamos las coordenadas si existen
       if (lat) formData.append("lat", String(lat));
@@ -155,6 +198,16 @@ export function useCrearPosteo(
     } catch (err) {
       if (err instanceof ZodError) {
         setErrors(err.issues.map((e) => e.message));
+      } else if (isApiErrorCode(err, ApiErrorCode.BAD_REQUEST)) {
+        // 400 típico: municipio inexistente o localidad ajena al municipio.
+        // El catálogo local quedó obsoleto → invalidar y pedir re-selección.
+        invalidarCatalogos();
+        setErrors([
+          getApiErrorMessage(
+            err,
+            "Datos de ubicación inválidos. Vuelve a seleccionar municipio y localidad"
+          ),
+        ]);
       } else {
         setErrors([getUserMessage(err, 'crear_posteo')]);
       }
@@ -187,17 +240,20 @@ export function useCrearPosteo(
     resetForm,
 
     // ubicación
-    obtenerUbicacion,
+    detectarUbicacion,
     lat,
     lng,
     municipioId,
     ciudad,
     estado,
     pais,
+    localidad,
+    localidadCercana,
     setMunicipioId,
     setCiudad,
     setEstado,
     setPais,
+    setLocalidad,
     setLat,
     setLng,
     loadingUbicacion,

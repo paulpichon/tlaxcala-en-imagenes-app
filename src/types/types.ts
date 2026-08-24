@@ -27,6 +27,8 @@ export interface Posteo {
     ciudad?: string;
     estado?: string;
     pais?: string;
+    localidadClave?: string | null; // clave INEGI de 4 dígitos, ej. "0024" (posts antiguos: null)
+    localidadNombre?: string | null; // resuelto por el backend, solo lectura
     coordinates?: {
       type: "Point",
       coordinates: [number, number] //[lng, lat]
@@ -272,6 +274,32 @@ export interface DatosUbicacion {
   ciudad: string | null; // nombre de la ciudad o municipio
   estado: string | null; // nombre de la entidad federativa
   pais: string | null; // nombre del país
+}
+
+// ======================================
+// 🗺️ Catálogo INEGI (localidades embebidas por municipio)
+// ======================================
+export interface Localidad {
+  clave: string; // 4 dígitos con ceros a la izquierda, ej. "0024". Única solo dentro del municipio
+  nombre: string;
+  altitud?: number;
+  location?: {
+    type: "Point";
+    coordinates: [number, number]; // [lng, lat] — orden GeoJSON
+  };
+}
+
+// Selección mínima que propaga el selector en cascada (clave para enviar + nombre para UI/optimista)
+export interface SeleccionLocalidad {
+  clave: string;
+  nombre: string;
+}
+
+// Localidad sugerida por el reverse geocoding (POST /api/ubicacion/reverse)
+export interface LocalidadCercana {
+  clave: string;
+  nombre: string;
+  distancia_metros: number;
 }
 
 // FormData para Editar Perfil

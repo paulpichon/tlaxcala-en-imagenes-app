@@ -31,17 +31,20 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
     resetForm,
   
     // 🌍 ubicación
-    obtenerUbicacion,
+    detectarUbicacion,
     lat,
     lng,
     municipioId,
     ciudad,
     estado,
     pais,
+    localidad,
+    localidadCercana,
     setMunicipioId,
     setCiudad,
     setEstado,
     setPais,
+    setLocalidad,
     setLat,
     setLng,
     loadingUbicacion,
@@ -73,6 +76,7 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
     setCiudad(null);
     setEstado(null);
     setPais(null);
+    setLocalidad(null);
     setLat(null);
     setLng(null);
   };
@@ -231,7 +235,7 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                         {/* Ícono de obtener ubicación (GPS) */}
                         {!ciudad && !loadingUbicacion && (
                           <button
-                            onClick={obtenerUbicacion}
+                            onClick={detectarUbicacion}
                             className="iconLocationBtn"
                             type="button" // Siempre define el tipo en botones dentro de forms
                             title="Detectar ubicación automáticamente"
@@ -259,6 +263,13 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                       {ciudad && (
                         <div className="alert alert-success py-2 px-3 mb-2">
                           <strong>{ciudad}</strong>, {estado}, {pais}
+                          {/* Sugerencia del reverse geocoding (informativa;
+                              la localidad vigente es la del select) */}
+                          {lat && lng && localidadCercana && (
+                            <span className="d-block small mt-1">
+                              📍 Cerca de <strong>{localidadCercana.nombre}</strong> (~{Math.round(localidadCercana.distancia_metros)} m)
+                            </span>
+                          )}
                           <div className="small mt-1">
                             {lat && lng ? (
                               <span className="text-success">✨ Detectada automáticamente</span>
@@ -275,17 +286,23 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                         </div>
                       )}
 
-                      {/* Selector manual */}
+                      {/* Selector manual en cascada (municipio → localidad) */}
                       <ManualMunicipioSelector
                         municipio={municipioId}
-                        onSelect={(id, data) => {
+                        localidadClave={localidad?.clave ?? null}
+                        onSelect={(id, data, localidadSel) => {
+                          // Cambiar de municipio abandona el GPS detectado
+                          // (las coordenadas corresponden al municipio anterior).
+                          // Cambiar sólo la localidad conserva lat/lng (esExacta: true).
+                          if (id !== municipioId) {
+                            setLat(null);
+                            setLng(null);
+                          }
                           setMunicipioId(id);
                           setCiudad(data.ciudad);
                           setEstado(data.estado);
                           setPais(data.pais);
-                          // Al elegir manualmente, "matamos" las coordenadas GPS
-                          setLat(null);
-                          setLng(null);
+                          setLocalidad(localidadSel);
                         }}
                       />
                     </div>

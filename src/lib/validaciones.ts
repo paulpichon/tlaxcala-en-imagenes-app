@@ -178,3 +178,22 @@ export function validarNombre(valor: string): string | null {
   if (!REGEX_NOMBRE.test(valor)) return "Sólo letras, números, espacios, '.', '-' y apóstrofo";
   return null;
 }
+
+// Validación espejo client-side de ubicación al publicar/editar posteos.
+// Solo UX: la autoritativa es el backend. El frontend nunca envía nombres,
+// sólo la clave INEGI de la localidad (4 dígitos con ceros, ej. "0024").
+export const REGEX_CLAVE_LOCALIDAD = /^\d{4}$/;
+
+export function validarUbicacionPost(
+  municipioId?: string | null,
+  localidadClave?: string | null
+): string | null {
+  // localidadClave requiere municipio; municipio puede ir solo
+  if (localidadClave && !REGEX_CLAVE_LOCALIDAD.test(localidadClave)) {
+    return "La clave de la localidad debe ser una clave INEGI de 4 dígitos";
+  }
+  if (localidadClave && !municipioId) {
+    return "Selecciona primero un municipio";
+  }
+  return null;
+}
