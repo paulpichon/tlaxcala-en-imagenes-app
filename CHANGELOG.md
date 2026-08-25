@@ -8,6 +8,45 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [No publicado] — 2026-08-21 a 2026-08-24 · Localidades INEGI en la ubicación de posteos
+
+Ciclo centrado en adoptar del backend el catálogo de municipios/localidades INEGI (localidades embebidas por municipio): selector en cascada **municipio → localidad**, envío de la **clave INEGI** de 4 dígitos (el nombre lo resuelve siempre el backend), sugerencia de localidad cercana en el reverse geocoding y etiquetas "Municipio · Localidad". Cambios aditivos y retrocompatibles: los posts antiguos devuelven `localidadClave` / `localidadNombre` como `null` y se muestran igual que antes.
+
+### Añadido
+
+- Tipos espejo del backend en `types.ts`: `localidadClave` / `localidadNombre` en `Posteo.ubicacion` y nuevas interfaces `Localidad`, `SeleccionLocalidad` y `LocalidadCercana`. (`d8b900f`)
+- Módulo de caché de catálogos `src/lib/catalogos.ts`: `getMunicipios` / `getLocalidades(claveMunicipio)` con caché en memoria del tab (sin `localStorage`) y deduplicación de peticiones en vuelo — varios consumidores simultáneos comparten una sola request —, además de `invalidarCatalogos(claveMunicipio?)` para refrescar un catálogo obsoleto. (`e36f4de`)
+- Validación espejo client-side en `validaciones.ts`: regex `REGEX_CLAVE_LOCALIDAD` (`/^\d{4}$/`) y función `validarUbicacionPost(municipioId?, localidadClave?)`; la validación autoritativa sigue siendo el backend. (`d8b900f`)
+- Selector en cascada municipio → localidad reescrito (`ManualMunicipioSelector`): segundo `<select>` habilitado al elegir municipio, carga de localidades a partir de `claveMunicipio`, guard anti-carrera que descarta respuestas tardías del effect y reset obligatorio de la localidad al cambiar de municipio. (`d8b900f`)
+- Lectura de `localidad_cercana` en el reverse geocoding (`useObtenerUbicacion`): nuevo estado expuesto e incluido en el retorno de `obtenerUbicacion()`. (`d8b900f`)
+- Envío de `localidadClave` al **crear** publicación (`FormData`, sólo si hay municipio y localidad seleccionada) mediante el wrapper `detectarUbicacion()`, que adopta la localidad sugerida por GPS o limpia la selección si no hay sugerencia. (`d8b900f`)
+- Soporte de localidades al **editar** publicación (`EditarPosteoModal`): hidratación desde `posteo.ubicacion`, cascada manual para cambiarla y PUT que reenvía todos los campos de ubicación más `localidadClave`. (`d8b900f`)
+- Hint informativo "📍 Cerca de X (~N m)" con la distancia reportada por el backend, bajo la alerta de ubicación en los modales de crear y editar. (`d8b900f`)
+- Helper compartido `src/lib/etiquetaUbicacion.ts` con `formatearEtiquetaUbicacion(ubicacion)` para la etiqueta de ubicación de cards y modales. (`e36f4de`)
+
+### Cambiado
+
+- Etiquetas de ubicación en `PosteoCard` e `ImageModal` adoptan el formato "**Municipio · Localidad**" vía el helper compartido, eliminando sus funciones duplicadas `obtenerTextoUbicacion()`; los posts sin localidad conservan el formato histórico "ciudad, estado, país". (`d8b900f`)
+- Regla de ubicación en crear/editar: cambiar de **municipio** limpia las coordenadas GPS detectadas; cambiar sólo la **localidad** las conserva. (`d8b900f`)
+- Manejo del error 400 `BAD_REQUEST` al publicar/editar (municipio inexistente o clave de localidad ajena al municipio): se invalidan los catálogos en memoria y se muestra el mensaje del backend con `getApiErrorMessage`. (`d8b900f`)
+
+### Corregido
+
+- Al quitar la ubicación en edición se enviaba `lat: null` pero no `lng: null`; ahora ambos se limpian sin residuos. (`d8b900f`)
+- El objeto optimista tras editar incluye ahora `coordinates` (conserva las coordenadas previas cuando no hay nuevas); antes se perdían al actualizar, lo que degradaba silenciosamente un posteo con GPS a selección manual al re-editarlo. (`d8b900f`)
+
+### Eliminado
+
+- Documentación antigua de especificaciones: `SPECS.md`, `SPECS-CAMBIOS-SUBIDA-IMG.md` y `subida-imagenes.md`. (`b9b4b0a`)
+
+### Documentación
+
+- Creación de este `CHANGELOG.md` (formato Keep a Changelog, secciones por ciclos fechados) junto con el reporte del documentador en `reports/documentador/`. (`fa0649f`)
+
+*Verificación: `pnpm build` exitoso (Next.js 16.2.12 · Turbopack, compilación + TypeScript, 26 rutas generadas). Sin cambios de dependencias. Pendiente fuera de código: ejecutar contra el backend de desarrollo la matriz de pruebas de ubicación (cascada completa, clave de localidad ajena → 400, GPS con `esExacta`, edición limpiando la ubicación por completo).*
+
+---
+
 ## [No publicado] — 2026-08-04 a 2026-08-19 · Sistema de entregas de imágenes Cloudinary
 
 Ciclo centrado en la infraestructura de imágenes: loaders propios de `next/image`, transformaciones de Cloudinary y hardening de la subida de imágenes.
