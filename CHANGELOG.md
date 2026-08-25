@@ -8,6 +8,20 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [No publicado] — 2026-08-25 · Rediseño visual de los modales de crear/editar posteo
+
+Ciclo corto de diseño sobre los modales de creación y edición de publicaciones: sustitución de los emojis de los títulos de sección por íconos Feather (`react-icons/fi`) coherentes con la paleta monocromática de la marca (`#EBCA9A`) y rediseño del botón de detección automática de ubicación (GPS). Sin cambios funcionales ni de API.
+
+### Cambiado
+
+- Títulos de sección con íconos Feather en lugar de emojis: en `CrearPosteoModal.tsx`, "📍 Ubicación" → `FiMapPin`, "📝 Descripción" → `FiEdit3` y "🔐 Privacidad" → `FiLock`; en `EditarPosteoModal.tsx`, "📍 Ubicación" → `FiMapPin` y "📝 Descripción" → `FiEdit3` (este modal no tiene título de Privacidad). Todos con `size={18}`, color de marca `#EBCA9A` y clase `me-1`, para uniformidad con los íconos Feather ya usados en la app y consistencia de renderizado entre plataformas. Se conservó intencionalmente el emoji del hint informativo "📍 Cerca de…" del reverse geocoding (no es un título). (`2273c55`)
+- Rediseño del botón GPS "Detectar mi ubicación" (clase `.iconLocationBtn` en `src/app/ui/globals.css`): pasó de un círculo pequeño de solo ícono (`FiMapPin` gris `#555` sobre fondo `#EBCA9A`, contraste pobre y sin texto, poco visible en móvil) a un **botón píldora** — `display: inline-flex`, `gap: 6px`, `border-radius: 999px`, `padding: 8px 16px`, `font-size: 14px`, `font-weight: 600`, `white-space: nowrap` — con ícono `FiNavigation` de 16 px más etiqueta de texto "**Detectar mi ubicación**"; fondo `#EBCA9A` con texto e ícono en marrón oscuro `#4a3b2a` (contraste alto), hover `#e2b579`, active `#d4a866` con `transform: scale(0.97)`. En ambos modales se conserva `title="Detectar ubicación automáticamente"` y la lógica de visibilidad previa (`!ciudad && !loadingUbicacion`). (`8a3e634`)
+- Reubicación del botón GPS bajo el título "Ubicación": el contenedor de la cabecera de la sección pasó de una fila `justify-content-between align-items-center` (título y píldora se encimaban en pantallas pequeñas, ej. iPhone SE ~375 px) a una columna siempre apilada `d-flex flex-column gap-2 mb-2` (`align-items-center` en `CrearPosteoModal.tsx`; `align-items-start` en `EditarPosteoModal.tsx`), con título arriba y botón debajo alineados a la izquierda en todos los tamaños de pantalla; la misma columna agrupa también el botón "Quitar" que aparece cuando ya hay ubicación seleccionada. (`8a3e634`)
+
+*Verificación: `pnpm build` exitoso tras cada cambio (Next.js 16.2.12 · Turbopack, compilación + TypeScript, 26 páginas estáticas generadas).*
+
+---
+
 ## [No publicado] — 2026-08-21 a 2026-08-24 · Localidades INEGI en la ubicación de posteos
 
 Ciclo centrado en adoptar del backend el catálogo de municipios/localidades INEGI (localidades embebidas por municipio): selector en cascada **municipio → localidad**, envío de la **clave INEGI** de 4 dígitos (el nombre lo resuelve siempre el backend), sugerencia de localidad cercana en el reverse geocoding y etiquetas "Municipio · Localidad". Cambios aditivos y retrocompatibles: los posts antiguos devuelven `localidadClave` / `localidadNombre` como `null` y se muestran igual que antes.
