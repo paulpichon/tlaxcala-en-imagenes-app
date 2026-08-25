@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { FiCamera, FiEdit3, FiImage, FiLock, FiMapPin } from "react-icons/fi";
+import { FiCamera, FiEdit3, FiImage, FiLock, FiMapPin, FiNavigation } from "react-icons/fi";
 import { useCrearPosteo } from "../hooks/useCrearPosteo";
 import posteo from "../ui/posteos/CrearPosteoModal.module.css";
 import ToastGlobal from "./ToastGlobal";
@@ -229,7 +229,7 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                     {/* ========================== */}
 
                     <div className="mt-4 border rounded p-3 mb-3 bg-light">
-                      <div className="d-flex justify-content-between align-items-center mb-2">
+                      <div className="d-flex flex-column align-items-center gap-2 mb-2">
                         <h6 className="fw-bold mb-0">
                           <FiMapPin size={18} style={{ color: "#EBCA9A" }} className="me-1" />
                           Ubicación
@@ -243,7 +243,8 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                             type="button" // Siempre define el tipo en botones dentro de forms
                             title="Detectar ubicación automáticamente"
                           >
-                            <FiMapPin size={20} />
+                            <FiNavigation size={16} />
+                            Detectar mi ubicación
                           </button>
                         )}
 

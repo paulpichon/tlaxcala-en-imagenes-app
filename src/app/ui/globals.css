@@ -154,27 +154,32 @@ a.postear {
 
 /* Estilos par ael boton de obtener ubicacion automaticamente */
 .iconLocationBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: #EBCA9A;
   border: none;
-  padding: 6px 8px;
-  border-radius: 50%;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4a3b2a;
   cursor: pointer;
-  transition: background 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  white-space: nowrap;
+  transition: background 0.2s ease, transform 0.1s ease;
 }
 
 .iconLocationBtn:hover {
-  background: #e3e3e3;
+  background: #e2b579;
 }
 
 .iconLocationBtn:active {
-  background: #d6d6d6;
+  background: #d4a866;
+  transform: scale(0.97);
 }
 
 .iconLocationBtn svg {
-  color: #555;
+  color: #4a3b2a;
 }
 /* Fin Estilos par ael boton de obtener ubicacion automaticamente */
 

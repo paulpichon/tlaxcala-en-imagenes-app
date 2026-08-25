@@ -7,7 +7,7 @@ import ToastGlobal from "../ToastGlobal";
 import { editarPosteoSchema, validarUbicacionPost } from "@/lib/validaciones";
 import { AnimatePresence, motion } from "framer-motion";
 import { Posteo, SeleccionLocalidad } from "@/types/types";
-import { FiEdit3, FiMapPin } from "react-icons/fi";
+import { FiEdit3, FiMapPin, FiNavigation } from "react-icons/fi";
 import { useObtenerUbicacion } from "@/app/hooks/useObtenerUbicacion";
 import ManualMunicipioSelector from "../ManualMunicipioSelector";
 import {
@@ -277,7 +277,7 @@ export default function EditarPosteoModal({
               {/* ====================== */}
 
               <div className="border rounded p-3 mb-3 bg-light">
-                <div className="d-flex justify-content-between align-items-center mb-2">
+                <div className="d-flex flex-column align-items-start gap-2 mb-2">
                   <h6 className="fw-bold mb-0">
                     <FiMapPin size={18} style={{ color: "#EBCA9A" }} className="me-1" />
                     Ubicación
@@ -290,7 +290,8 @@ export default function EditarPosteoModal({
                       className="iconLocationBtn"
                       title="Detectar ubicación automáticamente"
                     >
-                      <FiMapPin size={20} />
+                      <FiNavigation size={16} />
+                      Detectar mi ubicación
                     </button>
                   )}
 
