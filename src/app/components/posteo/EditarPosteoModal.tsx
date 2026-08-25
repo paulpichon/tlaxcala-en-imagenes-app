@@ -7,7 +7,7 @@ import ToastGlobal from "../ToastGlobal";
 import { editarPosteoSchema, validarUbicacionPost } from "@/lib/validaciones";
 import { AnimatePresence, motion } from "framer-motion";
 import { Posteo, SeleccionLocalidad } from "@/types/types";
-import { FiMapPin } from "react-icons/fi";
+import { FiEdit3, FiMapPin } from "react-icons/fi";
 import { useObtenerUbicacion } from "@/app/hooks/useObtenerUbicacion";
 import ManualMunicipioSelector from "../ManualMunicipioSelector";
 import {
@@ -278,7 +278,10 @@ export default function EditarPosteoModal({
 
               <div className="border rounded p-3 mb-3 bg-light">
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <h6 className="fw-bold mb-0">📍 Ubicación</h6>
+                  <h6 className="fw-bold mb-0">
+                    <FiMapPin size={18} style={{ color: "#EBCA9A" }} className="me-1" />
+                    Ubicación
+                  </h6>
 
                   {/* Si no hay una ciudad seleccionada/detectada, mostrar botón de GPS */}
                   {!ciudad && !loadingUbicacion && (
@@ -357,7 +360,10 @@ export default function EditarPosteoModal({
               {/* ====================== */}
 
               <div className="border rounded p-3 mb-3 bg-light">
-                <h6 className="fw-bold mb-2">📝 Descripción</h6>
+                <h6 className="fw-bold mb-2">
+                  <FiEdit3 size={18} style={{ color: "#EBCA9A" }} className="me-1" />
+                  Descripción
+                </h6>
 
                 <textarea
                   className="form-control"

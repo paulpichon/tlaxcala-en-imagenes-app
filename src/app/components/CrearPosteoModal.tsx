@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { FiCamera, FiImage, FiMapPin } from "react-icons/fi";
+import { FiCamera, FiEdit3, FiImage, FiLock, FiMapPin } from "react-icons/fi";
 import { useCrearPosteo } from "../hooks/useCrearPosteo";
 import posteo from "../ui/posteos/CrearPosteoModal.module.css";
 import ToastGlobal from "./ToastGlobal";
@@ -230,7 +230,10 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
 
                     <div className="mt-4 border rounded p-3 mb-3 bg-light">
                       <div className="d-flex justify-content-between align-items-center mb-2">
-                        <h6 className="fw-bold mb-0">📍 Ubicación</h6>
+                        <h6 className="fw-bold mb-0">
+                          <FiMapPin size={18} style={{ color: "#EBCA9A" }} className="me-1" />
+                          Ubicación
+                        </h6>
 
                         {/* Ícono de obtener ubicación (GPS) */}
                         {!ciudad && !loadingUbicacion && (
@@ -312,7 +315,10 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                     {/* ========================== */}
 
                     <div className="border rounded p-3 mb-3 bg-light">
-                      <h6 className="fw-bold mb-2">📝 Descripción</h6>
+                      <h6 className="fw-bold mb-2">
+                        <FiEdit3 size={18} style={{ color: "#EBCA9A" }} className="me-1" />
+                        Descripción
+                      </h6>
 
                       <textarea
                         className="form-control"
@@ -333,7 +339,10 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                     {/* ========================== */}
 
                     <div className="border rounded p-3 mb-3 bg-light">
-                      <h6 className="fw-bold mb-3">🔐 Privacidad</h6>
+                      <h6 className="fw-bold mb-3">
+                        <FiLock size={18} style={{ color: "#EBCA9A" }} className="me-1" />
+                        Privacidad
+                      </h6>
 
                       <div className="d-flex gap-3">
                         {/* Público */}
