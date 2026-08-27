@@ -8,6 +8,49 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [No publicado] — 2026-08-26 · Edición parcial de posteos y eliminación de ubicación
+
+Ciclo centrado en adoptar del backend el nuevo contrato de edición de posteos (`PUT /api/posteos/:id` parcial) y el endpoint dedicado de eliminación de ubicación (`DELETE /api/posteos/:id/ubicacion`). Resuelve el caso donde editar solo el texto de un posteo sin ubicación respondía `422 VALIDATION_FAILED` por el eco de campos vacíos, y el flujo deprecado de "quitar ubicación" con un trío de nulls que ahora significa "no tocar".
+
+### Añadido
+
+- **Edición parcial con dirty tracking** en `EditarPosteoModal`: comparación del formulario contra la ubicación guardada (`snapshotDesdePosteo` + `esMismaUbicacion`) para clasificar si la ubicación queda intacta, se modifica o se elimina; el PUT solo lleva los campos realmente tocados.
+- **Endpoint `DELETE /api/posteos/:id/ubicacion`** integrado vía `apiDelete`: el botón "Quitar" limpia el formulario y al presionar Guardar ejecuta la eliminación real (idempotente), junto al PUT de texto solo cuando este cambió.
+- **Sincronización con `data.posteo` vía merge selectivo**: las respuestas del PUT y del DELETE traen el documento real post-escritura, pero el frontend aplica únicamente los campos que la edición controla (`texto`, `ubicacion`, `posteo_publico`, `fecha_actualizacion`, `comentariosCount`) mediante el helper `fusionarCambios`; el resto del objeto ya cargado en memoria se conserva intacto. Se eliminó el objeto optimista construido en cliente. Confirmación del contrato backend (2026-08-26): `_idUsuario` viene **siempre poblado** en las escrituras; `likesCount`, `hasLiked`, `isFavorito` e `isFollowing` **no se computan** (solo GETs con sesión) y se conservan del estado previo por construcción; `comentariosCount` **sí** viene autoritativo y se sincroniza desde la respuesta.
+- **Defaults de flags al crear posteo** (`useCrearPosteo`): el POST no computa flags de sesión, por lo que el posteo nuevo se inicializa con `likesCount: 0`, `hasLiked: false`, `isFavorito: false` e `isFollowing: false` antes de invocar `onPostCreated`, dándole shape completo en memoria.
+- **Propagación de ediciones a listas**: nuevo `updatePost(postId, posteo)` en `useInfinitePosts` (feed de inicio) consumido desde `PublicacionUsuario`; `PosteoCard` acepta prop opcional `onPostUpdated` y la invoca tras cada edición; `PublicacionesUsuarioGrid` actualiza su estado por `_id` y pasa el callback al `ImageModal` (grid de perfil). Antes las listas quedaban desincronizadas hasta recargar.
+- `esExacta?: boolean` en `Posteo.ubicacion` (`types.ts`).
+- Operación de error dedicada `'quitar_ubicacion'` en `Operacion`/`getUserMessage` (`apiClient.ts`): mensaje "No se pudo quitar la ubicación…" para fallos del DELETE.
+
+### Cambiado
+
+- Payload del `PUT /api/posteos/:id`: envía `{ texto }` cuando la ubicación quedó intacta o no hubo selección; incluye `municipio`/`localidadClave`/`ciudad`/`estado`/`pais` únicamente si el usuario modificó la ubicación; `lat`/`lng` solo si hay coordenadas GPS (con checks estrictos contra `null`, a diferencia del truthy anterior que descartaba valores `0`).
+- Regla conservada: cambiar de municipio abandona las coordenadas GPS (el backend guarda `coordinates: null` / `esExacta: false`); cambiar solo la localidad las conserva.
+- Manejo de errores del guardado: mensaje específico para `403 FORBIDDEN` (no dueño), operación dinámica según fase fallida (`editar_posteo` / `quitar_ubicacion`) y toasts de error siempre en tipo `danger`.
+- Toast diferenciado al guardar: "Ubicación eliminada correctamente" cuando la única acción fue quitarla; "Publicación actualizada correctamente" en el resto.
+- Al guardar una edición con éxito se cierra también el modal de opciones de la publicación (además del de edición): los cambios quedan visibles detrás y se evita reabrir el formulario con snapshots intermedias desactualizadas.
+
+### Corregido
+
+- Coordenadas fantasma al re-editar: pasar de GPS a selección manual ya no conserva `coordinates` previas — antes el objeto optimista copiaba las coordenadas antiguas cuando no había nuevas, degradando el posteo; ahora se sincroniza con la respuesta del servidor (que devuelve `coordinates: null` / `esExacta: false` para selección manual).
+- **Corrupción del posteo al guardar una edición**: el merge ciego (`{ ...posteo, ...data.posteo }`) pisaba el `_idUsuario` poblado con el ObjectId crudo que devolvían las escrituras, rompiendo avatar, nombre/URL, contadores y el menú de opciones (que dejaba de reconocer el posteo como propio, `ModalOpcionesPublicacion` compara `_idUsuario._id`). Resuelto con el merge selectivo de `fusionarCambios`, que nunca toca `_idUsuario` ni flags de sesión/contadores desde la respuesta de escritura. El backend posteriormente completó el ticket de poblar `_idUsuario` en POST/PUT/DELETE-ubicacion, eliminando el riesgo a nivel contrato (el merge selectivo se mantiene por los flags).
+- El eco de campos vacíos de ubicación ya no reconstruye ni borra datos guardados (contrato "los vacíos = no tocar"); el caso del bug (editar solo texto con `municipio: null, lat: null, lng: null`) ya no produce `422`.
+- Interfaz obsoleta `EditarPosteoModalProps` eliminada de `types.ts`: estaba desincronizada con las props reales del modal y nadie la consumía.
+- **Selects de municipio/localidad vacíos al reabrir el editor tras guardar la ubicación**: el populate de escrituras devolvía `ubicacion.municipio` como **objeto** (`{ _id, nombreMunicipio, … }`) en lugar del string ObjectId de los GETs; al reabrir "Editar" sin cerrar, el `<select value={objeto}>` no matcheaba ninguna opción y la cascada de localidades quedaba vacía. Resuelto con el helper `normalizarUbicacionBackend` (aplica en `fusionarCambios` y en `snapshotDesdePosteo`), el tipo ampliado `municipio?: string | { _id: string }` y la sincronización de `selectedImage` en el grid de perfil. Además evita un `400 BAD_REQUEST` latente al re-guardar con el municipio corrupto.
+- **Trazabilidad del doble shape de `ubicacion.municipio`** (GETs string vs escrituras objeto): el backend revisó el ticket de consistencia y confirmó que no hay nada obligatorio que cambiar; la normalización del frontend se conserva como blindaje ante regresiones futuras (revisión backend, 2026-08-26).
+
+### Documentación
+
+- `api/2026-08-13_12-50-21_03-posteos.md`: contrato parcial del PUT (Regla de Oro, `400 BAD_REQUEST` por `localidadClave` sin `municipio`, redondeo a 3 decimales), sincronización con `data.posteo` actualizada a la confirmación del contrato (`_idUsuario` poblado, flags de sesión no computados, `comentariosCount` autoritativo), validadores tolerantes `optional({ values: 'falsy' })` en POST/PUT para `lat`/`lng` (+ filas de `municipio` isMongoId y `localidadClave`), ejemplo de POST con `_idUsuario` poblado y sección nueva del endpoint `DELETE /api/posteos/:id/ubicacion`. Nota deprecada "para eliminar la ubicación enviar nulls" retirada.
+
+### Eliminado
+
+- `SPECS-EDICION-POSTEOS.md`: specs backend ya consumidos por esta implementación.
+
+*Verificación: `pnpm build` exitoso (Next.js 16.2.12 · Turbopack, compilación + TypeScript, 26 páginas estáticas generadas). Sin cambios de dependencias. Hashes de commit pendientes de asignar al crear los commits. Pendiente fuera de código: ejecutar la matriz de pruebas §5 de las specs (escenarios 1–10) contra el backend de desarrollo.*
+
+---
+
 ## [No publicado] — 2026-08-25 · Rediseño visual de los modales de crear/editar posteo
 
 Ciclo corto de diseño sobre los modales de creación y edición de publicaciones: sustitución de los emojis de los títulos de sección por íconos Feather (`react-icons/fi`) coherentes con la paleta monocromática de la marca (`#EBCA9A`) y rediseño del botón de detección automática de ubicación (GPS). Sin cambios funcionales ni de API.
