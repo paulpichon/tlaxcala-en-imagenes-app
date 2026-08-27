@@ -3,6 +3,7 @@
 import { useInfinitePosts } from "@/app/hooks/useInfinitePosts";
 import Spinner from "../spinner";
 import PosteoCard from "../PosteoCard";
+import { Posteo } from "@/types/types";
 
 export default function PublicacionUsuario() {
   const {
@@ -12,9 +13,13 @@ export default function PublicacionUsuario() {
     finished,
     error,
     clearError,
+    updatePost,
   } = useInfinitePosts(
     `${process.env.NEXT_PUBLIC_API_URL}/api/posteos`,
   );
+
+  const handlePostUpdated = (posteoEditado: Posteo) =>
+    updatePost(posteoEditado._id, posteoEditado);
 
   // Loading inicial
   if (loading && posts.length === 0) {
@@ -56,6 +61,7 @@ export default function PublicacionUsuario() {
         <PosteoCard
           key={post._id}
           post={post}
+          onPostUpdated={handlePostUpdated}
         />
       ))}
       <div ref={observerRef} />

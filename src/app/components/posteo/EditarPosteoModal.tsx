@@ -6,19 +6,107 @@ import { useAuth } from "@/context/AuthContext";
 import ToastGlobal from "../ToastGlobal";
 import { editarPosteoSchema, validarUbicacionPost } from "@/lib/validaciones";
 import { AnimatePresence, motion } from "framer-motion";
-import { Posteo, SeleccionLocalidad } from "@/types/types";
+import { ApiResponse, Posteo, SeleccionLocalidad } from "@/types/types";
 import { FiEdit3, FiMapPin, FiNavigation } from "react-icons/fi";
 import { useObtenerUbicacion } from "@/app/hooks/useObtenerUbicacion";
 import ManualMunicipioSelector from "../ManualMunicipioSelector";
 import {
   apiPut,
+  apiDelete,
   isNotFound,
+  isForbidden,
   getUserMessage,
   isApiErrorCode,
   getApiErrorMessage,
   ApiErrorCode,
+  type Operacion,
 } from "@/lib/apiClient";
 import { invalidarCatalogos } from "@/lib/catalogos";
+
+// Ubicación normalizada para comparar el formulario contra lo guardado en el posteo
+type SnapshotUbicacion = {
+  municipioId: string | null;
+  ciudad: string | null;
+  estado: string | null;
+  pais: string | null;
+  localidadClave: string | null;
+  lat: number | null;
+  lng: number | null;
+};
+
+// Las escrituras (POST/PUT/DELETE) pueden devolver `ubicacion.municipio` poblado
+// como objeto ({ _id, nombreMunicipio, ... }) en lugar del string ObjectId que
+// traen los GETs. Se reduce siempre a string|null para no romper los selects.
+type UbicacionNormalizada = Omit<NonNullable<Posteo["ubicacion"]>, "municipio"> & {
+  municipio?: string | null;
+};
+
+function normalizarUbicacionBackend(
+  u?: Posteo["ubicacion"]
+): UbicacionNormalizada | undefined {
+  if (!u) return u;
+  const municipio = u.municipio;
+  return {
+    ...u,
+    municipio:
+      typeof municipio === "string"
+        ? municipio
+        : (municipio?._id as string | undefined) || null,
+  };
+}
+
+function snapshotDesdePosteo(u?: Posteo["ubicacion"]): SnapshotUbicacion {
+  const normalizada = normalizarUbicacionBackend(u);
+  const coords = normalizada?.coordinates?.coordinates;
+  return {
+    municipioId: normalizada?.municipio || null,
+    ciudad: normalizada?.ciudad || null,
+    estado: normalizada?.estado || null,
+    pais: normalizada?.pais || null,
+    localidadClave: normalizada?.localidadClave || null,
+    lat: coords && coords.length >= 2 ? coords[1] : null,
+    lng: coords && coords.length >= 2 ? coords[0] : null,
+  };
+}
+
+const esMismaUbicacion = (a: SnapshotUbicacion, b: SnapshotUbicacion): boolean =>
+  a.municipioId === b.municipioId &&
+  a.ciudad === b.ciudad &&
+  a.estado === b.estado &&
+  a.pais === b.pais &&
+  a.localidadClave === b.localidadClave &&
+  a.lat === b.lat &&
+  a.lng === b.lng;
+
+// Campos que la edición puede sincronizar desde la respuesta del backend.
+// `_idUsuario` SIEMPRE viene poblado en las escrituras (idéntico a los GETs);
+// los flags de sesión (likesCount, hasLiked, isFavorito, isFollowing) NO se
+// computan en escrituras (solo GETs con sesión) y se conservan del estado
+// previo por construcción. `comentariosCount` SÍ viene autoritativo.
+const CAMPOS_EDICION = [
+  "texto",
+  "ubicacion",
+  "posteo_publico",
+  "fecha_actualizacion",
+  "comentariosCount",
+] as const;
+
+// Merge selectivo: aplica SOLO los campos de edición presentes en `cambios`,
+// conservando intacto el resto del posteo original (autor poblado, likes, etc.)
+function fusionarCambios(base: Posteo, cambios?: Partial<Posteo>): Posteo {
+  if (!cambios) return base;
+  const resultado: Posteo = { ...base };
+  for (const campo of CAMPOS_EDICION) {
+    if (campo in cambios) {
+      const valor =
+        campo === "ubicacion"
+          ? normalizarUbicacionBackend(cambios[campo])
+          : cambios[campo];
+      (resultado as unknown as Record<string, unknown>)[campo] = valor;
+    }
+  }
+  return resultado;
+}
 
 // ✅ Actualizar la interfaz del callback
 interface EditarPosteoModalProps {
@@ -73,13 +161,15 @@ export default function EditarPosteoModal({
 
   useEffect(() => {
     if (posteo?.ubicacion) {
-      setMunicipioId(posteo.ubicacion.municipio || null);
-      setCiudad(posteo.ubicacion.ciudad || null);
-      setEstado(posteo.ubicacion.estado || null);
-      setPais(posteo.ubicacion.pais || null);
+      const ubicacionNormalizada = normalizarUbicacionBackend(posteo.ubicacion);
+      if (!ubicacionNormalizada) return;
+      setMunicipioId(ubicacionNormalizada.municipio || null);
+      setCiudad(ubicacionNormalizada.ciudad || null);
+      setEstado(ubicacionNormalizada.estado || null);
+      setPais(ubicacionNormalizada.pais || null);
 
       // Localidad guardada (posts antiguos: null)
-      const { localidadClave, localidadNombre } = posteo.ubicacion;
+      const { localidadClave, localidadNombre } = ubicacionNormalizada;
       setLocalidad(
         localidadClave && localidadNombre
           ? { clave: localidadClave, nombre: localidadNombre }
@@ -88,7 +178,7 @@ export default function EditarPosteoModal({
 
       // ✅ Verificación ultra-segura
       // Comprobamos que existan las coordenadas y que el array interno no sea null
-      const coordsArray = posteo.ubicacion.coordinates?.coordinates;
+      const coordsArray = ubicacionNormalizada.coordinates?.coordinates;
   
       if (Array.isArray(coordsArray) && coordsArray.length >= 2) {
         setLng(coordsArray[0]); // Longitud
@@ -155,73 +245,94 @@ export default function EditarPosteoModal({
       return;
     }
 
+    let operacionError: Operacion = "editar_posteo";
+
     try {
       setLoading(true);
 
-      // Preparamos el body
-      const body: any = {
-        texto: texto.trim(), // Enviamos el texto (aunque sea "")
+      const inicial = snapshotDesdePosteo(posteo.ubicacion);
+      const actual: SnapshotUbicacion = {
+        municipioId,
+        ciudad,
+        estado,
+        pais,
+        localidadClave: localidad?.clave ?? null,
+        lat,
+        lng,
       };
 
-      // Lógica de ubicación (el backend reconstruye ubicacion completa)
-      if (municipioId) {
-        body.municipio = municipioId;
-        body.ciudad = ciudad;
-        body.estado = estado;
-        body.pais = pais;
-        // Clave INEGI; el backend valida que pertenezca al municipio
-        if (localidad) {
-          body.localidadClave = localidad.clave;
+      const huboCambiosUbicacion = !esMismaUbicacion(inicial, actual);
+      const ubicacionElegida = Boolean(municipioId);
+
+      // Regla de Oro (spec): enviar campos de ubicación SOLO si el usuario los modificó.
+      // Los vacíos en el PUT significan "no tocar", nunca borrar la ubicación guardada.
+      const putConUbicacion = ubicacionElegida && huboCambiosUbicacion;
+
+      // Formulario sin ubicación + posteo con ubicación guardada => quitar al guardar
+      const eliminarUbicacionGuardada =
+        !ubicacionElegida && Boolean(posteo.ubicacion) && huboCambiosUbicacion;
+
+      const textoCambio = texto.trim() !== (posteo.texto || "");
+      const soloEliminarUbicacion = eliminarUbicacionGuardada && !textoCambio;
+
+      let posteoFinal: Posteo = posteo;
+
+      if (!soloEliminarUbicacion) {
+        const body: Record<string, unknown> = { texto: texto.trim() };
+
+        if (putConUbicacion) {
+          body.municipio = municipioId;
+          body.ciudad = ciudad;
+          body.estado = estado;
+          body.pais = pais;
+          // Clave INEGI; el backend valida que pertenezca al municipio
+          if (localidad) {
+            body.localidadClave = localidad.clave;
+          }
+          if (lat !== null && lng !== null) {
+            body.lat = lat;
+            body.lng = lng;
+          }
         }
-        if (lat && lng) {
-          body.lat = lat;
-          body.lng = lng;
+
+        const resp = await apiPut<ApiResponse<{ posteo: Partial<Posteo> }>>(
+          fetchWithAuth,
+          `/api/posteos/${posteo._id}`,
+          body
+        );
+        // Merge selectivo: solo campos de edición presentes en la respuesta.
+        // El documento crudo puede venir sin _idUsuario poblado ni flags de
+        // sesión; nunca debe pisar los datos ya cargados en memoria.
+        if (resp.data?.posteo) {
+          posteoFinal = fusionarCambios(posteoFinal, resp.data.posteo);
         }
-      } else {
-        // Quitar ubicación por completo (sin residuos de coordenadas ni localidad)
-        body.municipio = null;
-        body.lat = null;
-        body.lng = null;
       }
 
-      const data = await apiPut<{ msg: string }>(
-        fetchWithAuth,
-        `/api/posteos/${posteo._id}`,
-        body
-      );
+      if (eliminarUbicacionGuardada) {
+        operacionError = "quitar_ubicacion";
+        const resp = await apiDelete<ApiResponse<{ posteo: Partial<Posteo> }>>(
+          fetchWithAuth,
+          `/api/posteos/${posteo._id}/ubicacion`
+        );
+        if (resp.data?.posteo) {
+          posteoFinal = fusionarCambios(posteoFinal, resp.data.posteo);
+        }
+      }
 
-      setToastMessage("Publicación actualizada correctamente");
+      setToastMessage(
+        soloEliminarUbicacion
+          ? "Ubicación eliminada correctamente"
+          : "Publicación actualizada correctamente"
+      );
       setToastType("success");
 
-        // ✅ Crear objeto posteo actualizado
-        const posteoActualizado: Posteo = {
-          ...posteo,
-          texto,
-          ubicacion: municipioId
-            ? {
-                municipio: municipioId,
-                ciudad: ciudad || "",
-                estado: estado || "",
-                pais: pais || "",
-                ...(localidad
-                  ? { localidadClave: localidad.clave, localidadNombre: localidad.nombre }
-                  : { localidadClave: null, localidadNombre: null }),
-                coordinates:
-                  lat && lng
-                    ? { type: "Point", coordinates: [lng, lat] }
-                    : posteo.ubicacion?.coordinates,
-              }
-            : undefined,
-        };
-
-        setTimeout(() => {
-          onClose(true, posteoActualizado);
-        }, 600);
+      setTimeout(() => {
+        onClose(true, posteoFinal);
+      }, 600);
     } catch (err) {
-      const msg = getUserMessage(err, 'editar_posteo');
-      console.error(msg, err);
       if (isNotFound(err)) {
         setToastMessage("La publicación ya no existe");
+        setToastType("danger");
       } else if (isApiErrorCode(err, ApiErrorCode.BAD_REQUEST)) {
         // 400 típico: municipio inexistente o localidad ajena al municipio.
         // Catálogo obsoleto → invalidar y pedir re-selección.
@@ -233,8 +344,16 @@ export default function EditarPosteoModal({
           )
         );
         setToastType("danger");
+      } else if (isForbidden(err)) {
+        setToastMessage(
+          getApiErrorMessage(err, "No tienes permiso para modificar esta publicación")
+        );
+        setToastType("danger");
       } else {
+        const msg = getUserMessage(err, operacionError);
+        console.error(msg, err);
         setToastMessage(msg);
+        setToastType("danger");
       }
     } finally {
       setLoading(false);
@@ -277,7 +396,7 @@ export default function EditarPosteoModal({
               {/* ====================== */}
 
               <div className="border rounded p-3 mb-3 bg-light">
-                <div className="d-flex flex-column align-items-start gap-2 mb-2">
+                <div className="d-flex flex-column align-items-center gap-2 mb-2">
                   <h6 className="fw-bold mb-0">
                     <FiMapPin size={18} style={{ color: "#EBCA9A" }} className="me-1" />
                     Ubicación

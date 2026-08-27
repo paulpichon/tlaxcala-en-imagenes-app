@@ -64,6 +64,16 @@ export function useInfinitePosts(initialUrl: string) {
     );
   }, []);
 
+  // Reemplaza un posteo completo en el feed tras su edición
+  const updatePost = useCallback(
+    (postId: string, posteoActualizado: Posteo) => {
+      setPosts((prev) =>
+        prev.map((post) => (post._id === postId ? posteoActualizado : post))
+      );
+    },
+    []
+  );
+
   // Intersection Observer para scroll infinito
   useEffect(() => {
     if (loading || finished) return;
@@ -98,5 +108,6 @@ export function useInfinitePosts(initialUrl: string) {
     clearError,
     updateFollowState,
     updateFavoritoState,
+    updatePost,
   };
 }

@@ -123,6 +123,7 @@ export type Operacion =
   | 'eliminar_comentario'
   | 'crear_posteo'
   | 'editar_posteo'
+  | 'quitar_ubicacion'
   | 'eliminar_posteo'
   | 'like'
   | 'follow'
@@ -149,6 +150,7 @@ const MENSAJES_POR_DEFECTO: Record<Operacion, string> = {
   eliminar_comentario: 'No se pudo eliminar el comentario. Intenta de nuevo.',
   crear_posteo: 'No se pudo crear la publicación. Intenta de nuevo.',
   editar_posteo: 'No se pudo editar la publicación. Intenta de nuevo.',
+  quitar_ubicacion: 'No se pudo quitar la ubicación. Intenta de nuevo.',
   eliminar_posteo: 'No se pudo eliminar la publicación. Intenta de nuevo.',
   like: 'No se pudo guardar el like. Intenta de nuevo.',
   follow: 'No se pudo actualizar el seguimiento. Intenta de nuevo.',

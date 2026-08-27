@@ -1,6 +1,5 @@
 // Selector en cascada: municipio (por _id) → localidades INEGI (por claveMunicipio)
 // El formulario sólo envía la clave de la localidad; el nombre lo resuelve el backend.
-"use client";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -15,7 +14,7 @@ import { getMunicipios, getLocalidades } from "@/lib/catalogos";
 // Props:
 // - municipio: id (_id) del municipio seleccionado actualmente (string o null)
 // - localidadClave: clave INEGI de la localidad seleccionada (string o null)
-// - onSelect: (idMunicipio, datosUbicacion, localidad) al cambiar cualquier select
+// - seleccionarUbicacion: (idMunicipio, datosUbicacion, localidad) al cambiar cualquier select
 export default function ManualMunicipioSelector({
   municipio,
   localidadClave = null,
@@ -117,7 +116,7 @@ export default function ManualMunicipioSelector({
   };
 
   return (
-    <div>
+    <div className="text-center">
       <label className="form-label mb-1">Ubicación (opcional)</label>
 
       <div className="row g-2">

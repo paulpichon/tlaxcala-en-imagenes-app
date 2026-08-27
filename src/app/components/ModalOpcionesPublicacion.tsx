@@ -285,6 +285,10 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
 
             if (updated && posteoActualizado) {
               onPostUpdated?.(posteoActualizado);
+              // Tras un guardado exitoso se cierra también el modal de opciones:
+              // los cambios quedan visibles detrás y se evita reabrir "Editar"
+              // con snapshots intermedias desactualizadas.
+              onClose();
             }
           }}
         />

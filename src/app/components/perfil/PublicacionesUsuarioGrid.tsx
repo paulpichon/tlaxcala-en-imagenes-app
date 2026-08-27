@@ -186,6 +186,17 @@ export default function PublicacionesUsuarioGrid({
     setToast({ message: "Publicación eliminada correctamente", type: "success" });
   };
 
+  // ✏️ Actualizar post del grid tras su edición (vía ImageModal → onPostUpdated)
+  const handlePostUpdated = (posteoEditado: Posteo) => {
+    setPosteos((prev) =>
+      prev.map((p) => (p._id === posteoEditado._id ? posteoEditado : p))
+    );
+    // Sincronizar también el snapshot abierto para no reabrir con datos viejos
+    setSelectedImage((prevSel) =>
+      prevSel && prevSel._id === posteoEditado._id ? posteoEditado : prevSel
+    );
+  };
+
   // 🌀 Estado inicial
   if (loading && posteos.length === 0) {
     return <p className="text-center mt-3">Cargando publicaciones...</p>;
@@ -253,6 +264,7 @@ export default function PublicacionesUsuarioGrid({
         selectedImage={selectedImage}
         onClose={() => setIsFirstModalOpen(false)}
         onPostDeleted={handlePostDeleted}
+        onPostUpdated={handlePostUpdated}
       />
 
       {/* ✅ Toast visual global */}

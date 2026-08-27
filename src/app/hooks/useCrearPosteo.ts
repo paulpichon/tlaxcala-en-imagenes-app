@@ -191,7 +191,17 @@ export function useCrearPosteo(
       if (lng) formData.append("lng", String(lng));
 
       const data = await apiPost<ApiResponse<{ posteo: Posteo }>>(fetchWithAuth, "/api/posteos", formData);
-      onPostCreated?.(data.data.posteo);
+
+      // El POST no computa flags de sesión (solo los GETs con sesión lo hacen):
+      // se inicializan con defaults para que el posteo devuelto tenga shape
+      // completo en memoria (como lo haría el estado previo en una edición).
+      onPostCreated?.({
+        ...data.data.posteo,
+        likesCount: data.data.posteo.likesCount ?? 0,
+        hasLiked: data.data.posteo.hasLiked ?? false,
+        isFavorito: data.data.posteo.isFavorito ?? false,
+        isFollowing: data.data.posteo.isFollowing ?? false,
+      });
 
       resetForm();
       onSuccess?.();

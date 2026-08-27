@@ -23,12 +23,13 @@ export interface Posteo {
   public_id: string;
   texto: string;
   ubicacion?: { // ubicacion opcional
-    municipio?: string;
+    municipio?: string | { _id: string } | null; // ObjectId (GETs: string; escrituras pueden poblarlo como objeto → normalizar a string antes de usar)
     ciudad?: string;
     estado?: string;
     pais?: string;
     localidadClave?: string | null; // clave INEGI de 4 dígitos, ej. "0024" (posts antiguos: null)
     localidadNombre?: string | null; // resuelto por el backend, solo lectura
+    esExacta?: boolean; // true solo si la ubicación provino de GPS (coordenadas redondeadas a 3 decimales)
     coordinates?: {
       type: "Point",
       coordinates: [number, number] //[lng, lat]
@@ -57,6 +58,7 @@ export interface PosteoCardProps {
   post: Posteo;
   isDetail?: boolean;
   showUserUrl?: boolean;
+  onPostUpdated?: (posteo: Posteo) => void; // Propaga la edición a la lista contenedora
 }
 
 // ======================================
@@ -345,23 +347,6 @@ export interface Favorito {
   __v: number;
 }
 
-// ======================================
-// 📦 Editar el posteo modal
-// ======================================
-export interface EditarPosteoModalProps {
-  isOpen: boolean;
-  posteo: {
-    _id: string;
-    texto?: string;
-    ubicacion?: { // ubicacion opcional
-      municipio?: string;
-      ciudad?: string;
-      estado?: string;
-      pais?: string;
-    }
-  } | null;
-  onClose: (updated: boolean, newText?: string) => void;
-}
 // ======================================
 // 📦 Interface para mostrar Followers del usuario logueado
 // ======================================

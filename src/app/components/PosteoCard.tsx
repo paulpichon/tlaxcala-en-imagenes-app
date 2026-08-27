@@ -21,7 +21,7 @@ import ComentariosSection from "./posteo/ComentariosSection";
 
 
 
-export default function PosteoCard({ post, isDetail = false, showUserUrl = false  }: PosteoCardProps) {
+export default function PosteoCard({ post, isDetail = false, showUserUrl = false, onPostUpdated }: PosteoCardProps) {
   const { fetchWithAuth, user } = useAuth();
   const router = useRouter();
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -70,6 +70,8 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
 
   const handlePostUpdated = (posteoEditado: Posteo) => {
     setPosteoActual(posteoEditado);
+    // Propaga la edición a la lista contenedora (feed, grid, etc.) si se registró
+    onPostUpdated?.(posteoEditado);
   };
 
   const fechaFormateada = new Intl.DateTimeFormat("es-MX", {
