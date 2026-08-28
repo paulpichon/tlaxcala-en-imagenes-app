@@ -17,6 +17,9 @@ export interface FormFieldError {
   message: string;
   field?: keyof UsuarioSchema; // Campo opcional que indica qué campo específico tiene el error
 }
+// Visibilidad de un posteo: 'publico' aparece en el feed y es accesible por link directo; 'perfil' solo se muestra en el perfil del autor y exige sesión por link directo.
+export type Visibilidad = 'publico' | 'perfil';
+
 // Interface para el posteo 
 export interface Posteo {
   _idUsuario: UsuarioLogueado;
@@ -35,7 +38,7 @@ export interface Posteo {
       coordinates: [number, number] //[lng, lat]
     }
   }
-  posteo_publico: boolean;
+  visibilidad: Visibilidad;
   fecha_creacion: string;
   fecha_actualizacion?: string;
   idPost: string;

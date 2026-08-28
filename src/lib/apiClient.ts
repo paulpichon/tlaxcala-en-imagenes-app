@@ -13,6 +13,7 @@ export const ApiErrorCode = {
   // Errores HTTP estándar
   BAD_REQUEST: 'BAD_REQUEST',
   UNAUTHORIZED: 'UNAUTHORIZED',
+  AUTHENTICATION_ERROR: 'AUTHENTICATION_ERROR',
   FORBIDDEN: 'FORBIDDEN',
   NOT_FOUND: 'NOT_FOUND',
   CONFLICT: 'CONFLICT',
@@ -85,7 +86,13 @@ export function isNotFound(err: unknown): boolean {
 }
 
 export function isUnauthorized(err: unknown): boolean {
-  return isApiErrorCode(err, ApiErrorCode.UNAUTHORIZED);
+  const code = getApiErrorCode(err);
+  // 'AUTHENTICATION_ERROR' es el 401 que devuelve el backend para recursos
+  // que exigen sesión (ej. detalle de un posteo con visibilidad 'perfil').
+  return (
+    code === ApiErrorCode.UNAUTHORIZED ||
+    code === ApiErrorCode.AUTHENTICATION_ERROR
+  );
 }
 
 export function isForbidden(err: unknown): boolean {

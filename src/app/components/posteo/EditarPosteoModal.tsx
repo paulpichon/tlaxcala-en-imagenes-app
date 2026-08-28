@@ -6,8 +6,8 @@ import { useAuth } from "@/context/AuthContext";
 import ToastGlobal from "../ToastGlobal";
 import { editarPosteoSchema, validarUbicacionPost } from "@/lib/validaciones";
 import { AnimatePresence, motion } from "framer-motion";
-import { ApiResponse, Posteo, SeleccionLocalidad } from "@/types/types";
-import { FiEdit3, FiMapPin, FiNavigation } from "react-icons/fi";
+import { ApiResponse, Posteo, SeleccionLocalidad, Visibilidad } from "@/types/types";
+import { FiEdit3, FiLock, FiMapPin, FiNavigation } from "react-icons/fi";
 import { useObtenerUbicacion } from "@/app/hooks/useObtenerUbicacion";
 import ManualMunicipioSelector from "../ManualMunicipioSelector";
 import {
@@ -86,7 +86,7 @@ const esMismaUbicacion = (a: SnapshotUbicacion, b: SnapshotUbicacion): boolean =
 const CAMPOS_EDICION = [
   "texto",
   "ubicacion",
-  "posteo_publico",
+  "visibilidad",
   "fecha_actualizacion",
   "comentariosCount",
 ] as const;
@@ -124,6 +124,9 @@ export default function EditarPosteoModal({
 
   const [texto, setTexto] = useState(posteo?.texto || "");
   const [loading, setLoading] = useState(false);
+  const [visibilidad, setVisibilidad] = useState<Visibilidad>(
+    posteo?.visibilidad ?? "publico"
+  );
 
   const {
     lat,
@@ -160,6 +163,7 @@ export default function EditarPosteoModal({
   }, [toastMessage]);
 
   useEffect(() => {
+    setVisibilidad(posteo?.visibilidad ?? "publico");
     if (posteo?.ubicacion) {
       const ubicacionNormalizada = normalizarUbicacionBackend(posteo.ubicacion);
       if (!ubicacionNormalizada) return;
@@ -199,7 +203,7 @@ export default function EditarPosteoModal({
 
   const validarTexto = () => {
     // Ahora aceptará "" o texto válido
-    const result = editarPosteoSchema.safeParse({ texto });
+    const result = editarPosteoSchema.safeParse({ texto, visibilidad });
   
     if (!result.success) {
       const mensajeError = result.error.issues[0]?.message || "Campo inválido";
@@ -273,12 +277,18 @@ export default function EditarPosteoModal({
         !ubicacionElegida && Boolean(posteo.ubicacion) && huboCambiosUbicacion;
 
       const textoCambio = texto.trim() !== (posteo.texto || "");
-      const soloEliminarUbicacion = eliminarUbicacionGuardada && !textoCambio;
+      const visibilidadCambio =
+        visibilidad !== (posteo.visibilidad ?? "publico");
+      const soloEliminarUbicacion = eliminarUbicacionGuardada && !textoCambio && !visibilidadCambio;
 
       let posteoFinal: Posteo = posteo;
 
       if (!soloEliminarUbicacion) {
         const body: Record<string, unknown> = { texto: texto.trim() };
+
+        if (visibilidadCambio) {
+          body.visibilidad = visibilidad;
+        }
 
         if (putConUbicacion) {
           body.municipio = municipioId;
@@ -399,7 +409,7 @@ export default function EditarPosteoModal({
                 <div className="d-flex flex-column align-items-center gap-2 mb-2">
                   <h6 className="fw-bold mb-0">
                     <FiMapPin size={18} style={{ color: "#EBCA9A" }} className="me-1" />
-                    Ubicación
+                    Ubicación <small className="text-muted">(opcional)</small>
                   </h6>
 
                   {/* Si no hay una ciudad seleccionada/detectada, mostrar botón de GPS */}
@@ -480,9 +490,9 @@ export default function EditarPosteoModal({
               {/* ====================== */}
 
               <div className="border rounded p-3 mb-3 bg-light">
-                <h6 className="fw-bold mb-2">
+                <h6 className="text-center fw-bold mb-2">
                   <FiEdit3 size={18} style={{ color: "#EBCA9A" }} className="me-1" />
-                  Descripción
+                  Descripción <small className="text-muted">(opcional)</small>
                 </h6>
 
                 <textarea
@@ -496,6 +506,45 @@ export default function EditarPosteoModal({
 
                 <div className="text-end small text-muted mt-1">
                   {texto.length}/{maxChars}
+                </div>
+              </div>
+
+              {/* ====================== */}
+              {/* 🔐 SECCIÓN VISIBILIDAD   */}
+              {/* ====================== */}
+
+              <div className="border rounded p-3 mb-3 bg-light">
+                <h6 className="text-center fw-bold mb-3">
+                  <FiLock size={18} style={{ color: "#EBCA9A" }} className="me-1" />
+                  Visibilidad
+                </h6>
+
+                <div className="d-flex gap-3">
+                  {/* Público */}
+                  <div
+                    className={`p-3 rounded border flex-fill btn ${
+                      visibilidad === "publico" ? "border-primary bg-white shadow-sm" : "bg-light"
+                    }`}
+                    onClick={() => setVisibilidad("publico")}
+                  >
+                    <div className="fw-bold">Público</div>
+                    <small className="text-muted">
+                      Aparecerá en el inicio de todos los usuarios y en tu perfil.
+                    </small>
+                  </div>
+
+                  {/* Solo perfil */}
+                  <div
+                    className={`p-3 rounded border flex-fill btn ${
+                      visibilidad === "perfil" ? "border-primary bg-white shadow-sm" : "bg-light"
+                    }`}
+                    onClick={() => setVisibilidad("perfil")}
+                  >
+                    <div className="fw-bold">Solo perfil</div>
+                    <small className="text-muted">
+                      Solo se muestra en tu perfil; no aparece en el inicio.
+                    </small>
+                  </div>
                 </div>
               </div>
 

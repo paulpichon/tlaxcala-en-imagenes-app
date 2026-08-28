@@ -8,6 +8,36 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [No publicado] — 2026-08-27 · Visibilidad de posteos (`posteo_publico` → `visibilidad`)
+
+Ciclo centrado en migrar por completo el frontend del campo booleano `posteo_publico` al enum `visibilidad` (`'publico' | 'perfil'`) adoptando el contrato del backend (SPECS-VISIBILIDAD-POSTEOS). Un posteo `perfil` ya no aparece en el feed, y su link directo exige sesión (el backend responde `401 AUTHENTICATION_ERROR` sin token); el frontend bloquea el compartir por link para estos posteos.
+
+### Añadido
+
+- **Selector de visibilidad en la creación** (`CrearPosteoModal`): opciones **Público** (`'publico'`) y **Solo perfil** (`'perfil'`) con descripción *"Solo se muestra en tu perfil; no aparece en el inicio."*; el envío usa `formData.append('visibilidad', …)`.
+- **Selector de visibilidad en la edición** (`EditarPosteoModal`): sección "Privacidad" con las mismas opciones, hidratada desde `posteo.visibilidad`; el PUT envía `visibilidad` solo cuando el usuario la modifica (dirty tracking, igual que texto/ubicación) y se sincroniza vía `fusionarCambios`.
+- **Bloqueo de compartir para posteos `perfil`** (`ModalOpcionesPublicacion`): el botón compartir aparece atenuado (opacity) y al intentarlo no genera link; muestra una advertencia inline pequeña (*"Este posteo solo se puede ver dentro de TlaxApp porque está configurado como 'Solo perfil'."*) que se oculta sola a los 5 s o al cerrarla.
+- **Pantalla de "Inicia sesión para ver este posteo"** (`PosteoDetalle`): el `401` con código `AUTHENTICATION_ERROR` en `GET /api/posteos/post/:id` se interpreta como recurso restringido (no como error fatal), con acción **Ir a login**; al iniciar sesión el `useEffect` re-ejecuta el fetch y el mismo link funciona.
+- `isUnauthorized()` en `apiClient.ts` ahora reconoce también el código `AUTHENTICATION_ERROR` (además de `UNAUTHORIZED`), y se agregó la constante `ApiErrorCode.AUTHENTICATION_ERROR`.
+- Tipo `Visibilidad = 'publico' | 'perfil'` y campo `visibilidad` requerido en `Posteo` (`types.ts`); schemas Zod actualizados (`posteoBaseSchema` con `z.enum` default `'publico'`, `editarPosteoSchema` con `visibilidad` opcional).
+
+### Cambiado
+
+- Se eliminó `posteo_publico` de tipos, validaciones, hooks y UI (transición completa; el frontend ya no lo envía ni lo lee).
+
+### Corregido
+
+- (Sin regresiones) El build pasa con los tipos migrados.
+
+### Documentación
+
+- `AGENTS.md`: sección "Posteo visibility (`visibilidad`)" con la semántica, el envío, el bloqueo de compartir y el manejo del `401`.
+- `README.md`: fila `/posteo/[id]` actualizada (pública para posteos públicos; exige login para "Solo perfil").
+
+*Verificación: `pnpm build` exitoso (Next.js 16.2.12 · Turbopack, compilación + TypeScript, 26 páginas estáticas generadas). Pendiente fuera de código: ejecutar la matriz de pruebas §10 de `SPECS-VISIBILIDAD-POSTEOS.md` contra el backend de desarrollo.*
+
+---
+
 ## [No publicado] — 2026-08-26 · Edición parcial de posteos y eliminación de ubicación
 
 Ciclo centrado en adoptar del backend el nuevo contrato de edición de posteos (`PUT /api/posteos/:id` parcial) y el endpoint dedicado de eliminación de ubicación (`DELETE /api/posteos/:id/ubicacion`). Resuelve el caso donde editar solo el texto de un posteo sin ubicación respondía `422 VALIDATION_FAILED` por el eco de campos vacíos, y el flujo deprecado de "quitar ubicación" con un trío de nulls que ahora significa "no tocar".

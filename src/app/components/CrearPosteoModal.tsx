@@ -18,13 +18,13 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
     file,
     preview,
     texto,
-    posteoPublico,
+    visibilidad,
     loading,
     showConfirmDiscard,
     errors,
     isMobile,
     setTexto,
-    setPosteoPublico,
+    setVisibilidad,
     setShowConfirmDiscard,
     processFile,
     handleSubmit,
@@ -232,7 +232,7 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                       <div className="d-flex flex-column align-items-center gap-2 mb-2">
                         <h6 className="fw-bold mb-0">
                           <FiMapPin size={18} style={{ color: "#EBCA9A" }} className="me-1" />
-                          Ubicación
+                          Ubicación <small className="text-muted">(opcional)</small>
                         </h6>
 
                         {/* Ícono de obtener ubicación (GPS) */}
@@ -318,7 +318,7 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                     <div className="border rounded p-3 mb-3 bg-light">
                       <h6 className="fw-bold mb-2">
                         <FiEdit3 size={18} style={{ color: "#EBCA9A" }} className="me-1" />
-                        Descripción
+                        Descripción <small className="text-muted">(opcional)</small>
                       </h6>
 
                       <textarea
@@ -336,22 +336,22 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                     </div>
 
                     {/* ========================== */}
-                    {/* 🔐 SECCIÓN: PRIVACIDAD     */}
+                    {/* 🔐 SECCIÓN: VISIBILIDAD     */}
                     {/* ========================== */}
 
                     <div className="border rounded p-3 mb-3 bg-light">
                       <h6 className="fw-bold mb-3">
                         <FiLock size={18} style={{ color: "#EBCA9A" }} className="me-1" />
-                        Privacidad
+                        Visibilidad
                       </h6>
 
                       <div className="d-flex gap-3">
                         {/* Público */}
                         <div
                           className={`p-3 rounded border flex-fill btn ${
-                            posteoPublico ? "border-primary bg-white shadow-sm" : "bg-light"
+                            visibilidad === "publico" ? "border-primary bg-white shadow-sm" : "bg-light"
                           }`}
-                          onClick={() => setPosteoPublico(true)}
+                          onClick={() => setVisibilidad("publico")}
                         >
                           <div className="fw-bold">Público</div>
                           <small className="text-muted">
@@ -359,16 +359,16 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                           </small>
                         </div>
 
-                        {/* Privado */}
+                        {/* Solo perfil */}
                         <div
                           className={`p-3 rounded border flex-fill btn ${
-                            !posteoPublico ? "border-primary bg-white shadow-sm" : "bg-light"
+                            visibilidad === "perfil" ? "border-primary bg-white shadow-sm" : "bg-light"
                           }`}
-                          onClick={() => setPosteoPublico(false)}
+                          onClick={() => setVisibilidad("perfil")}
                         >
-                          <div className="fw-bold">Solo yo</div>
+                          <div className="fw-bold">Solo perfil</div>
                           <small className="text-muted">
-                            No se mostrará en el inicio de los demás, solo en tu perfil.
+                            Solo se muestra en tu perfil; no aparece en el inicio.
                           </small>
                         </div>
                       </div>

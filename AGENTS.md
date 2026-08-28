@@ -47,6 +47,15 @@ Copied from `.env.example`. Key vars: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_API_UR
 - Reports directory (`reports/`) is empty — used by OpenCode subagents
 - Existing OpenCode subagents: `documentador` (writes to `reports/documentador/`), `technical-analysis` (writes to `reports/technical-analysis/`)
 
+## Posteo visibility (`visibilidad`)
+
+- The field `posteo_publico` is **DEPRECATED** and no longer used in the frontend (transition complete). The source of truth is `visibilidad: 'publico' | 'perfil'` (type `Visibilidad` in `src/types/types.ts`).
+  - `'publico'`: appears in feed + profile; direct link accessible without session.
+  - `'perfil'`: only in the author's profile; direct link requires session (backend returns `401` with code `AUTHENTICATION_ERROR` without token).
+- Sending: create/edit posteos send `visibilidad` (FormData `append('visibilidad', …)` for POST, JSON field for PUT). Never send `posteo_publico`.
+- Sharing: the share button is blocked for `visibilidad === 'perfil'` — `ModalOpcionesPublicacion` never generates a link and shows a small inline warning instead.
+- The `401` `AUTHENTICATION_ERROR` on `GET /api/posteos/post/:id` is handled in `PosteoDetalle` as "requires login" (screen with `Ir a login` action), not as a fatal error. `isUnauthorized()` in `apiClient.ts` matches both `UNAUTHORIZED` and `AUTHENTICATION_ERROR`.
+
 ## Error Handling
 
 - **All API calls must go through `src/lib/apiClient.ts`** (`apiGet`, `apiPost`, `apiPut`, `apiPatch`, `apiDelete`). Raw `fetch` is only allowed inside `fetchWithAuth`.

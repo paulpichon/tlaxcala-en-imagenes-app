@@ -12,6 +12,7 @@ import { useState } from "react";
 import ToastGlobal from "./ToastGlobal";
 import EditarPosteoModal from "./posteo/EditarPosteoModal";
 import { apiDelete, apiPut, isNotFound, getUserMessage } from "@/lib/apiClient";
+import { FiLock } from "react-icons/fi";
 
 interface ModalOpcionesPublicacionProps extends PropsModalOpcionesPublicacion {
   onPostDeleted?: (postId: string) => void;
@@ -32,6 +33,7 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   const [showEditModal, setShowEditModal] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showShareWarning, setShowShareWarning] = useState(false);
   const [toast, setToast] = useState<{ message: string; type?: "success" | "danger" | "creacion" } | null>(null);
 
   if (!isOpen || !selectedImage) return null;
@@ -40,10 +42,18 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   const isOwnPost = user?.uid === selectedImage._idUsuario._id;
   const esFavoritoGlobal = favoritosMap[selectedImage._id] ?? selectedImage.isFavorito;
   const isPublicView = !user;
+  const esSoloPerfil = selectedImage.visibilidad === "perfil";
 
   const handleShare = async () => {
     if (!selectedImage) return;
-  
+
+    // Un posteo con visibilidad 'perfil' nunca genera link de compartir.
+    if (esSoloPerfil) {
+      setShowShareWarning(true);
+      setTimeout(() => setShowShareWarning(false), 5000);
+      return;
+    }
+
     const link = `${process.env.NEXT_PUBLIC_BASE_URL}/posteo/${selectedImage._id}`;
   
     const shareData = {
@@ -141,6 +151,7 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                         type="button"
                         className={`${perfil.btn_opciones_publicaciones}`}
                         onClick={handleShare}
+                        style={esSoloPerfil ? { opacity: 0.6 } : undefined}
                       >
                         {"share" in navigator
                           ? "Compartir publicación"
@@ -206,6 +217,7 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                         type="button"
                         className={`${perfil.btn_opciones_publicaciones}`}
                         onClick={handleShare}
+                        style={esSoloPerfil ? { opacity: 0.6 } : undefined}
                       >
                         {"share" in navigator
                           ? "Compartir publicación"
@@ -225,6 +237,30 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                   </button>
                 </div>
               </div>
+
+              {showShareWarning && (
+                <div
+                  role="alert"
+                  className="mt-3 d-flex align-items-start gap-2 p-2 rounded"
+                  style={{
+                    backgroundColor: "#fff3cd",
+                    border: "1px solid #ffc107",
+                    color: "#856404",
+                  }}
+                >
+                  <FiLock size={14} className="flex-shrink-0 mt-0.5" />
+                  <small>
+                    Este posteo solo se puede ver dentro de TlaxApp porque está configurado como "Solo perfil".
+                  </small>
+                  <button
+                    type="button"
+                    className="btn-close ms-auto"
+                    style={{ fontSize: "10px" }}
+                    aria-label="Cerrar advertencia"
+                    onClick={() => setShowShareWarning(false)}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

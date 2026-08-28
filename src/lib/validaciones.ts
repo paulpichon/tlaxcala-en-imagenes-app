@@ -81,7 +81,7 @@ export const posteoBaseSchema = z.object({
         }
         )
         .optional(),
-    posteo_publico: z.boolean(),
+    visibilidad: z.enum(['publico', 'perfil']).default('publico'),
 });
 
 // Esquema completo con la regla extra
@@ -99,6 +99,7 @@ export const posteoSchema = posteoBaseSchema.refine(
  */
 const spamRegex = /(http|www|free money|click here|suscríbete|followers|porno|xxx)/i;
 export const editarPosteoSchema = z.object({
+  visibilidad: z.enum(['publico', 'perfil']).optional(),
   texto: z
     .string()
     .trim()

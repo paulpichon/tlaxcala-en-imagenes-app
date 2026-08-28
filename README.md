@@ -48,7 +48,7 @@ Ver `.env` para valores actuales. Variables principales:
 | `/cuentas/login` | Inicio de sesión | Solo no auth |
 | `/cuentas/crear-cuenta` | Registro | Solo no auth |
 | `/[url]` | Perfil de usuario | Requiere login |
-| `/posteo/[id]` | Detalle de publicación | Requiere login |
+| `/posteo/[id]` | Detalle de publicación | Pública para posteos públicos; exige login para posteos "Solo perfil" |
 | `/configuracion` | Ajustes | Requiere login |
 | `/notificaciones` | Centro notificaciones | Requiere login |
 | `/favoritos` | Publicaciones favoritas | Requiere login |

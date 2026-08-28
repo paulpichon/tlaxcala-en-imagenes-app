@@ -6,7 +6,7 @@ import {
 } from "@/lib/validaciones";
 import { ZodError } from "zod";
 import { useAuth } from "@/context/AuthContext";
-import { Posteo, ApiResponse, SeleccionLocalidad } from "@/types/types";
+import { Posteo, ApiResponse, SeleccionLocalidad, Visibilidad } from "@/types/types";
 import { useObtenerUbicacion } from "./useObtenerUbicacion";
 import {
   apiPost,
@@ -32,7 +32,7 @@ export function useCrearPosteo(
   const [preview, setPreview] = useState<string | null>(null);
   const [texto, setTexto] = useState("");
   const [loading, setLoading] = useState(false);
-  const [posteoPublico, setPosteoPublico] = useState(true);
+  const [visibilidad, setVisibilidad] = useState<Visibilidad>("publico");
   const [showConfirmDiscard, setShowConfirmDiscard] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [isMobile, setIsMobile] = useState(false);
@@ -64,7 +64,7 @@ export function useCrearPosteo(
     setFile(null);
     setPreview(null);
     setTexto("");
-    setPosteoPublico(true);
+    setVisibilidad("publico");
     setErrors([]);
 
     // Reset ubicación
@@ -153,7 +153,7 @@ export function useCrearPosteo(
   const handleSubmit = async () => {
     try {
       // Validación completa antes de enviar
-      posteoSchema.parse({ texto, file, posteo_publico: posteoPublico });
+      posteoSchema.parse({ texto, file, visibilidad });
       setErrors([]);
 
       // Validación espejo de ubicación (UX; la autoritativa es el backend)
@@ -173,7 +173,7 @@ export function useCrearPosteo(
       const formData = new FormData();
       formData.append("img", file);
       formData.append("texto", texto);
-      formData.append("posteo_publico", String(posteoPublico));
+      formData.append("visibilidad", visibilidad);
 
       // Ubicación opcional
       if (municipioId) formData.append("municipio", municipioId);
@@ -235,7 +235,7 @@ export function useCrearPosteo(
     file,
     preview,
     texto,
-    posteoPublico,
+    visibilidad,
     loading,
     showConfirmDiscard,
     errors,
@@ -243,7 +243,7 @@ export function useCrearPosteo(
 
     // setters
     setTexto,
-    setPosteoPublico,
+    setVisibilidad,
     setShowConfirmDiscard,
     processFile,
     handleSubmit,
