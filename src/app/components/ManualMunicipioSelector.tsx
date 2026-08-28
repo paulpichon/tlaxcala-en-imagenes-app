@@ -117,9 +117,9 @@ export default function ManualMunicipioSelector({
 
   return (
     <div className="text-center">
-      <label className="form-label mb-1">Ubicación (opcional)</label>
+      <small className="text-muted">Selección de ubicación manual</small>
 
-      <div className="row g-2">
+      <div className="row g-2 mt-1">
         <div className="col-12 col-sm-6">
           <select
             className="form-select"
