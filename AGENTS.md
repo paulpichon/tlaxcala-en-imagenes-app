@@ -56,6 +56,20 @@ Copied from `.env.example`. Key vars: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_API_UR
 - Sharing: the share button is blocked for `visibilidad === 'perfil'` — `ModalOpcionesPublicacion` never generates a link and shows a small inline warning instead.
 - The `401` `AUTHENTICATION_ERROR` on `GET /api/posteos/post/:id` is handled in `PosteoDetalle` as "requires login" (screen with `Ir a login` action), not as a fatal error. `isUnauthorized()` in `apiClient.ts` matches both `UNAUTHORIZED` and `AUTHENTICATION_ERROR`.
 
+## Reportes de publicación (Fase 1)
+
+- **Endpoint:** `POST /api/reportes/:posteoId` con body JSON `{ categoria, descripcion }`.
+- **Autenticación:** requerida (`fetchWithAuth`). El botón "Reportar publicación" solo aparece en posteos ajenos con sesión activa (`ModalOpcionesPublicacion`); nunca en vista pública ni en posteos propios.
+- **Motivos:** 7 categorías predefinidas en `CATEGORIAS_REPORTE` (`src/lib/validaciones.ts`): slug + label + prioridad denormalizada (para la cola de moderación en Fase 2).
+- **Validación:** `reporteSchema` (Zod) con `descripcion` obligatoria solo para la categoría `'otro'` (max 200 chars). No se aplica `spamRegex` — la descripción va a moderación y no se renderiza públicamente (puede citar URLs como evidencia).
+- **Efecto inmediato:** el posteo se oculta del feed y del perfil del autor para el reportante (optimista local vía `removePost` en `useInfinitePosts` / `removerPosteoDelGrid` en el grid; el backend refuerza con `$nin`).
+- **Ocultamiento permanente:** no se revierte aunque moderación descarte el reporte (Fase 2).
+- **Link directo:** `GET /api/posteos/post/:id` sigue devolviendo el posteo (el autor nunca se entera). Un segundo reporte al mismo posteo devuelve `409 CONFLICT` — manejado con `getApiErrorCode` (sin comparar strings).
+- **Rate limit:** `REPORTE_BLOCKED` (15 min / 10), cubierto automáticamente por `isRateLimit()` vía sufijo `_BLOCKED`.
+- **Anonimato:** el frontend nunca expone `reporteroId`; `ReporteResponse` solo tipa `{ reporteId }`.
+- **Toast post-navegación:** al reportar desde `/posteo/[id]` se persiste el flag `reporteExitoso` en `sessionStorage` (en `PosteoCard`) y se lee/limpia en `PerfilUsuarioContainer` (patrón establecido en `Formulario.tsx:33` de restablecer-password).
+- **Mensaje de confirmación:** centralizado en `MENSAJE_REPORTE_EXITOSO` (`src/lib/validaciones.ts`).
+
 ## Error Handling
 
 - **All API calls must go through `src/lib/apiClient.ts`** (`apiGet`, `apiPost`, `apiPut`, `apiPatch`, `apiDelete`). Raw `fetch` is only allowed inside `fetchWithAuth`.

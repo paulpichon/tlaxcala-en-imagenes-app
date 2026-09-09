@@ -8,6 +8,33 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [No publicado] — 2026-09-08 · Reportar publicaciones (Fase 1)
+
+Ciclo centrado en la adopción del endpoint `POST /api/reportes/:posteoId` (SPECS-REPORTES.md). Los usuarios autenticados pueden reportar publicaciones ajenas por 7 motivos predefinidos; el posteo reportado se oculta inmediatamente del feed y del perfil del autor para el reportante (sin eliminarse).
+
+### Añadido
+
+- Botón "Reportar publicación" en `ModalOpcionesPublicacion` (solo posteo ajeno con sesión activa; nunca en vista pública ni en posteos propios).
+- Componente `ModalReportePublicacion` con formulario react-hook-form + Zod (7 categorías, descripción condicional para "otro"), con bloqueo del backdrop durante el envío, flag anti-race (`activoRef`), cierre con Escape, bloqueo de scroll del fondo, autofocus y atributos ARIA (`role="dialog"`, `aria-modal`, `aria-labelledby`).
+- Hook `removePost` en `useInfinitePosts` para ocultamiento optimista del feed.
+- Props `onPostDeleted`/`onPostReported` en `PosteoCard`, `ImageModal` y `PublicacionesUsuarioGrid`.
+- `REPORTE_BLOCKED` en `ApiErrorCode`; operación `'reportar'` en `getUserMessage`.
+- Tipos `ReporteResponse`, `CategoriaReporteSlug`, `ReporteFormData`.
+- Constante `CATEGORIAS_REPORTE`, `MENSAJE_REPORTE_EXITOSO` y schema `reporteSchema` en `validaciones.ts`.
+- Toast post-navegación: flag `reporteExitoso` en `sessionStorage` (en `PosteoCard`) leído/limpiado en `PerfilUsuarioContainer` para confirmar el reporte hecho desde `/posteo/[id]`.
+
+### Corregido
+
+- Gap de eliminación en el feed: `PosteoCard` ahora propaga `onPostDeleted` al padre, que remueve el posteo de la lista (antes quedaba visible hasta recargar).
+
+### Documentación
+
+- `AGENTS.md`: sección "Reportes de publicación (Fase 1)".
+
+*Verificación: `pnpm build` exitoso. Pendiente fuera de código: ejecutar la matriz de pruebas contra el backend de desarrollo.*
+
+---
+
 ## [No publicado] — 2026-08-27 · Visibilidad de posteos (`posteo_publico` → `visibilidad`)
 
 Ciclo centrado en migrar por completo el frontend del campo booleano `posteo_publico` al enum `visibilidad` (`'publico' | 'perfil'`) adoptando el contrato del backend (SPECS-VISIBILIDAD-POSTEOS). Un posteo `perfil` ya no aparece en el feed, y su link directo exige sesión (el backend responde `401 AUTHENTICATION_ERROR` sin token); el frontend bloquea el compartir por link para estos posteos.
