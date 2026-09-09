@@ -198,3 +198,64 @@ export function validarUbicacionPost(
   }
   return null;
 }
+
+// ======================================
+// 📦 Reportes de publicación
+// ======================================
+// Categorías predefinidas (mirror del backend). El `slug` viaja en el body,
+// el `label` alimenta la UI y la `prioridad` la usa la moderación (Fase 2).
+export const CATEGORIAS_REPORTE = [
+  { slug: 'contenido_inapropiado', label: 'Contenido inapropiado (desnudez/sexual)', prioridad: 1 },
+  { slug: 'contenido_ofensivo', label: 'Contenido ofensivo o discurso de odio', prioridad: 2 },
+  { slug: 'acoso_bullying', label: 'Acoso o bullying', prioridad: 3 },
+  { slug: 'suplantacion_identidad', label: 'Suplantación de identidad', prioridad: 4 },
+  { slug: 'informacion_falsa', label: 'Información falsa', prioridad: 5 },
+  { slug: 'spam', label: 'Spam o publicidad no autorizada', prioridad: 6 },
+  { slug: 'otro', label: 'Otro', prioridad: 7 },
+] as const;
+
+export type CategoriaReporteSlug = (typeof CATEGORIAS_REPORTE)[number]['slug'];
+
+// Zod requiere un tuple [T, ...T[]] para z.enum(); .map() devuelve T[]
+// por lo que se castea al tuple mínimo para satisfacer el tipo.
+const categoriaSlugs = CATEGORIAS_REPORTE.map((c) => c.slug) as [
+  CategoriaReporteSlug,
+  ...CategoriaReporteSlug[],
+];
+
+// Mensaje de confirmación mostrado por el frontend al reportar un posteo.
+// Centralizado porque aparece en el feed, el grid del perfil y la página de perfil.
+export const MENSAJE_REPORTE_EXITOSO =
+  'Reporte recibido. Esta publicación ya no aparecerá en tu feed.';
+
+// NOTA: a diferencia de comentarioSchema y editarPosteoSchema, NO se aplica
+// spamRegex. La descripción de un reporte es para moderación (Fase 2), no se
+// renderiza públicamente; filtrar URLs bloquearía descripciones legítimas
+// usadas como evidencia (ej. "esta foto es de https://...").
+//
+// NOTA: maxLength=200 en el textarea cuenta caracteres crudos; Zod valida
+// el valor post-trim. Un texto con trailing spaces puede ser válido para el
+// backend pero bloqueado por maxLength — se acepta como trade-off por mantener
+// la red de seguridad del navegador.
+export const reporteSchema = z
+  .object({
+    categoria: z.enum(categoriaSlugs, {
+      error: () => ({ message: 'Selecciona un motivo para el reporte' }),
+    }),
+    descripcion: z
+      .string()
+      .trim()
+      .max(200, 'La descripción no puede superar los 200 caracteres')
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.categoria === 'otro' && !data.descripcion) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Describe brevemente el motivo del reporte',
+        path: ['descripcion'],
+      });
+    }
+  });
+
+export type ReporteFormData = z.infer<typeof reporteSchema>;

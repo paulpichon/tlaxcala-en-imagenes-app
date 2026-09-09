@@ -12,11 +12,13 @@ import { useState } from "react";
 import ToastGlobal from "./ToastGlobal";
 import EditarPosteoModal from "./posteo/EditarPosteoModal";
 import { apiDelete, apiPut, isNotFound, getUserMessage } from "@/lib/apiClient";
-import { FiLock } from "react-icons/fi";
+import { FiLock, FiFlag } from "react-icons/fi";
+import ModalReportePublicacion from "./reportes/ModalReportePublicacion";
 
 interface ModalOpcionesPublicacionProps extends PropsModalOpcionesPublicacion {
   onPostDeleted?: (postId: string) => void;
   onPostUpdated?: (posteo: Posteo) => void;
+  onPostReported?: (postId: string) => void;
 }
 
 const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
@@ -25,6 +27,7 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   onClose,
   onPostDeleted,
   onPostUpdated,
+  onPostReported,
 }) => {
   const { user, fetchWithAuth } = useAuth();
   const pathname = usePathname();
@@ -34,6 +37,7 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showShareWarning, setShowShareWarning] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const [toast, setToast] = useState<{ message: string; type?: "success" | "danger" | "creacion" } | null>(null);
 
   if (!isOpen || !selectedImage) return null;
@@ -200,6 +204,17 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                         className={perfil.btn_opciones_publicaciones}
                       />
                     </div>
+
+                    <div className="col-md-12 mb-2">
+                      <button
+                        type="button"
+                        className={`${perfil.btn_opciones_publicaciones} text-danger`}
+                        onClick={() => setShowReportModal(true)}
+                      >
+                        <FiFlag className="me-1" size={14} style={{ verticalAlign: "-2px" }} />
+                        Reportar publicación
+                      </button>
+                    </div>
                   </>
                 )}
 
@@ -324,6 +339,23 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
               // Tras un guardado exitoso se cierra también el modal de opciones:
               // los cambios quedan visibles detrás y se evita reabrir "Editar"
               // con snapshots intermedias desactualizadas.
+              onClose();
+            }
+          }}
+        />
+      )}
+
+      {showReportModal && selectedImage && (
+        <ModalReportePublicacion
+          isOpen={showReportModal}
+          posteoId={selectedImage._id}
+          onFinish={(reported) => {
+            setShowReportModal(false);
+
+            if (reported) {
+              // El toast de confirmación lo muestra el dueño de la lista
+              // (feed / grid de perfil), que sobrevive al desmontaje del modal.
+              onPostReported?.(selectedImage._id);
               onClose();
             }
           }}

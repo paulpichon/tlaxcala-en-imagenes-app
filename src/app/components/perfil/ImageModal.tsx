@@ -26,6 +26,7 @@ interface PropsImageModal {
   onClose: () => void;
   onPostDeleted?: (id: string) => void;
   onPostUpdated?: (posteo: Posteo) => void; // ✅ Nueva prop para actualizar posteo
+  onPostReported?: (id: string) => void; // Oculta el posteo tras reportarlo
 }
 
 const ImageModal: React.FC<PropsImageModal> = ({ 
@@ -33,7 +34,8 @@ const ImageModal: React.FC<PropsImageModal> = ({
   selectedImage, 
   onClose, 
   onPostDeleted,
-  onPostUpdated 
+  onPostUpdated,
+  onPostReported 
 }) => {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isLikesModalOpen, setIsLikesModalOpen] = useState(false);
@@ -478,9 +480,12 @@ const ImageModal: React.FC<PropsImageModal> = ({
           onPostDeleted={() => {
             setIsOptionsOpen(false);
             onClose();
-            if (onPostDeleted && posteoActual?._id) {
-              onPostDeleted(posteoActual._id);
-            }
+            onPostDeleted?.(posteoActual?._id ?? "");
+          }}
+          onPostReported={() => {
+            setIsOptionsOpen(false);
+            onClose();
+            onPostReported?.(posteoActual?._id ?? "");
           }}
           onPostUpdated={handlePosteoActualizado} // ✅ Pasar callback
         />

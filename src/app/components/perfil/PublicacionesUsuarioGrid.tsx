@@ -15,6 +15,7 @@ import { useAuth } from "@/context/AuthContext";
 import { gridLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import ToastGlobal from "../ToastGlobal";
 import { apiGet, isNotFound, getUserMessage } from "@/lib/apiClient";
+import { MENSAJE_REPORTE_EXITOSO } from "@/lib/validaciones";
 
 type NextResponse = string | { url?: string } | null | undefined;
 
@@ -177,14 +178,20 @@ export default function PublicacionesUsuarioGrid({
     }
   };
 
-  // 🗑️ Eliminar post del estado local tras confirmación
-  const handlePostDeleted = (postId: string) => {
+  // 🗑️🚩 Remover post del grid (eliminación o reporte) con su mensaje de confirmación
+  const removerPosteoDelGrid = (postId: string, mensaje: string) => {
     setPosteos((prev) => prev.filter((p) => p._id !== postId));
     onPostCountChange?.(posteos.length - 1);
     setIsFirstModalOpen(false);
     setSelectedImage(null);
-    setToast({ message: "Publicación eliminada correctamente", type: "success" });
+    setToast({ message: mensaje, type: "success" });
   };
+
+  const handlePostDeleted = (postId: string) =>
+    removerPosteoDelGrid(postId, "Publicación eliminada correctamente");
+
+  const handlePostReported = (postId: string) =>
+    removerPosteoDelGrid(postId, MENSAJE_REPORTE_EXITOSO);
 
   // ✏️ Actualizar post del grid tras su edición (vía ImageModal → onPostUpdated)
   const handlePostUpdated = (posteoEditado: Posteo) => {
@@ -264,6 +271,7 @@ export default function PublicacionesUsuarioGrid({
         selectedImage={selectedImage}
         onClose={() => setIsFirstModalOpen(false)}
         onPostDeleted={handlePostDeleted}
+        onPostReported={handlePostReported}
         onPostUpdated={handlePostUpdated}
       />
 

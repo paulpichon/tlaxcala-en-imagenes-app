@@ -74,6 +74,14 @@ export function useInfinitePosts(initialUrl: string) {
     []
   );
 
+  // Remueve un posteo del feed (eliminación o reporte: queda oculto para el usuario)
+  const removePost = useCallback(
+    (postId: string) => {
+      setPosts((prev) => prev.filter((post) => post._id !== postId));
+    },
+    []
+  );
+
   // Intersection Observer para scroll infinito
   useEffect(() => {
     if (loading || finished) return;
@@ -109,5 +117,6 @@ export function useInfinitePosts(initialUrl: string) {
     updateFollowState,
     updateFavoritoState,
     updatePost,
+    removePost,
   };
 }

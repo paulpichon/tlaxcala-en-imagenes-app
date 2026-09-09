@@ -13,6 +13,7 @@ import FooterSugerencias from "../../components/FooterSugerencias";
 import { useUsuarioPerfil } from "@/app/hooks/useUsuarioPerfil";
 import Spinner from "../spinner";
 import ToastGlobal from "../ToastGlobal";
+import { MENSAJE_REPORTE_EXITOSO } from "@/lib/validaciones";
 
 // Props de url de perfil
 interface UrlProps {
@@ -33,6 +34,21 @@ export default function PerfilUsuarioContainer({ url }: UrlProps) {
     if (usuario) setTotalPosteos(usuario.totalPosteos);
   }, [usuario]);
 
+  // 🚩 Toast de confirmación de reporte persistido vía sessionStorage
+  // (PosteoCard escribe "reporteExitoso" antes de navegar desde /posteo/[id]).
+  const [toastReporte, setToastReporte] = useState<{ message: string; type: "success" } | null>(null);
+
+  useEffect(() => {
+    const flag = sessionStorage.getItem("reporteExitoso");
+    if (flag) {
+      sessionStorage.removeItem("reporteExitoso");
+      setToastReporte({
+        message: MENSAJE_REPORTE_EXITOSO,
+        type: "success",
+      });
+    }
+  }, []);
+
   const handlePostCreated = () => {
     setRefreshPosteos((prev) => prev + 1);
   };
@@ -47,6 +63,9 @@ export default function PerfilUsuarioContainer({ url }: UrlProps) {
     <div className="contenedor_principal">
       {redirectMessage && (
         <ToastGlobal message={redirectMessage} type="warning" onClose={clearRedirectMessage} />
+      )}
+      {toastReporte && (
+        <ToastGlobal message={toastReporte.message} type={toastReporte.type} onClose={() => setToastReporte(null)} />
       )}
       <div className="row g-0">
         {/* Menú lateral */}

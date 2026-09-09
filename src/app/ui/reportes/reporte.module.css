@@ -1,0 +1,47 @@
+/* 
+*
+Modal de reporte de publicación
+*
+*/
+/* Opción de categoría (radio estilizado) */
+label.opcion_categoria {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.9rem;
+  margin: 0;
+  border: 1px solid rgba(127, 127, 127, 0.25);
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+label.opcion_categoria:hover {
+  border-color: #EBCA9A;
+}
+
+label.opcion_categoria_seleccionada {
+  border-color: #EBCA9A;
+  background-color: #fff8ef;
+  box-shadow: 0 0 0 1px #EBCA9A;
+}
+
+label.opcion_categoria input[type="radio"] {
+  flex-shrink: 0;
+  margin: 0;
+  accent-color: #EBCA9A;
+}
+
+/* Texto de la opción */
+span.texto_categoria {
+  font-size: 0.95rem;
+  line-height: 1.25;
+  color: #212529;
+}
+
+/* Contador de caracteres de la descripción */
+span.contador_descripcion {
+  font-size: 0.8rem;
+  color: #6c757d;
+}

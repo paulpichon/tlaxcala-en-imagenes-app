@@ -62,6 +62,8 @@ export interface PosteoCardProps {
   isDetail?: boolean;
   showUserUrl?: boolean;
   onPostUpdated?: (posteo: Posteo) => void; // Propaga la edición a la lista contenedora
+  onPostDeleted?: (postId: string) => void; // Propaga la eliminación a la lista contenedora
+  onPostReported?: (postId: string) => void; // Propaga el ocultamiento por reporte a la lista contenedora
 }
 
 // ======================================
@@ -387,4 +389,15 @@ export interface FollowingUserItemProps {
     };
   };
   isFollowing: boolean; // si el usuario logueado sigue a este usuario
+}
+
+// ======================================
+// 📦 Reportes de publicación
+// ======================================
+
+// Respuesta de POST /api/reportes/:posteoId
+export interface ReporteResponse {
+  success: boolean;
+  msg: string;
+  data: { reporteId: string };
 }

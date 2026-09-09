@@ -33,6 +33,7 @@ export const ApiErrorCode = {
   COMENTARIO_BLOCKED: 'COMENTARIO_BLOCKED',
   REFRESH_BLOCKED: 'REFRESH_BLOCKED',
   POST_DETAIL_BLOCKED: 'POST_DETAIL_BLOCKED',
+  REPORTE_BLOCKED: 'REPORTE_BLOCKED',
 
   // Otros
   FILE_ERROR: 'FILE_ERROR',
@@ -150,6 +151,7 @@ export type Operacion =
   | 'registro'
   | 'soporte'
   | 'eliminar_cuenta'
+  | 'reportar'
   | 'default';
 
 const MENSAJES_POR_DEFECTO: Record<Operacion, string> = {
@@ -177,6 +179,7 @@ const MENSAJES_POR_DEFECTO: Record<Operacion, string> = {
   registro: 'No se pudo completar el registro. Intenta de nuevo.',
   soporte: 'No se pudo enviar la solicitud de soporte. Intenta de nuevo.',
   eliminar_cuenta: 'No se pudo eliminar la cuenta. Intenta de nuevo.',
+  reportar: 'No se pudo enviar el reporte. Intenta de nuevo.',
   default: 'Ocurrió un error inesperado. Intenta de nuevo.',
 };
 

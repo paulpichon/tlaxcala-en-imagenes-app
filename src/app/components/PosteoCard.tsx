@@ -21,7 +21,7 @@ import ComentariosSection from "./posteo/ComentariosSection";
 
 
 
-export default function PosteoCard({ post, isDetail = false, showUserUrl = false, onPostUpdated }: PosteoCardProps) {
+export default function PosteoCard({ post, isDetail = false, showUserUrl = false, onPostUpdated, onPostDeleted, onPostReported }: PosteoCardProps) {
   const { fetchWithAuth, user } = useAuth();
   const router = useRouter();
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -63,8 +63,20 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
 
   const handlePostDeleted = () => {
     closeOptions();
+    onPostDeleted?.(posteoActual._id);
     if (isDetail && user) {
       router.push(`/${user.url}`);
+    }
+  };
+
+  const handlePostReported = (postId: string) => {
+    closeOptions();
+    onPostReported?.(postId);
+    if (isDetail && user) {
+      // El toast del modal se pierde al navegar; se persiste un flag en
+      // sessionStorage para que la página destino (feed) muestre la confirmación.
+      sessionStorage.setItem("reporteExitoso", "true");
+      router.push(`/inicio`);
     }
   };
 
@@ -250,6 +262,7 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
         onClose={closeOptions}
         onPostDeleted={handlePostDeleted}
         onPostUpdated={handlePostUpdated}
+        onPostReported={handlePostReported}
       />
 
       {!isPublicView && (
