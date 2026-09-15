@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Posteo, LikeUsuario, ApiResponse } from "@/types/types";
 import perfil from "../../ui/perfil/perfil.module.css";
 import Image from "next/image";
-import { FiMoreHorizontal, FiX, FiSend } from "react-icons/fi";
+import { FiMoreHorizontal, FiX, FiSend, FiEyeOff } from "react-icons/fi";
 import ModalOpcionesPublicacion from "../ModalOpcionesPublicacion";
 import LikeButton from "../LikeButton";
 import ModalLikesUsuarios from "../ModalLikesUsuarios";
@@ -196,6 +196,24 @@ const ImageModal: React.FC<PropsImageModal> = ({
     }
   };
 
+  // ⚠️ Aviso de posteo oculto por moderación (solo el autor lo ve). Se renderiza
+  // en flujo (no sobrepuesto) para no tapar nombre de usuario ni botones del modal.
+  const avisoEnRevision = posteoActual?.ocultoPorModeracion ? (
+    <div
+      role="alert"
+      className="d-flex align-items-center gap-2 px-3 py-2"
+      style={{
+        backgroundColor: "#fff3cd",
+        borderBottom: "1px solid #ffc107",
+        color: "#856404",
+        fontSize: "0.85rem",
+      }}
+    >
+      <FiEyeOff size={16} className="flex-shrink-0" />
+      <span>Tu publicación está en revisión por moderación y no es visible para otros usuarios.</span>
+    </div>
+  ) : null;
+
   return (
     <AnimatePresence>
       {isOpen && posteoActual && (
@@ -268,6 +286,8 @@ const ImageModal: React.FC<PropsImageModal> = ({
                   </button>
                 </div>
               </div>
+
+              {avisoEnRevision}
 
               <div
                 className="bg-black position-relative d-flex justify-content-center align-items-center flex-shrink-0"
@@ -370,6 +390,7 @@ const ImageModal: React.FC<PropsImageModal> = ({
                 className="d-flex flex-column bg-white"
                 style={{ width: "350px", borderLeft: "1px solid #ddd", height: "100%" }}
               >
+                {avisoEnRevision}
                 <div className="p-3">
                   <div className="d-flex justify-content-between align-items-center mb-3">
                     <div className="d-flex align-items-center gap-2">

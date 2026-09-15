@@ -90,7 +90,8 @@ export default function ListaNotificaciones() {
                           notif={notif}
                           onClick={(id, urlUsuario) => {
                             marcarComoLeida(id);
-                            router.push(`/${urlUsuario}`);
+                            // Notificación de sistema (sin emisor): no navegar a un perfil.
+                            if (urlUsuario) router.push(`/${urlUsuario}`);
                           }}
                           onEliminar={eliminarNotificacion} // 👈 pasamos la función al hijo
                         />

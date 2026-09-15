@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FiMoreHorizontal, FiMessageCircle } from "react-icons/fi";
+import { FiMoreHorizontal, FiMessageCircle, FiEyeOff } from "react-icons/fi";
 import { useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import LikeButton from "./LikeButton";
@@ -161,6 +161,23 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
             <FiMoreHorizontal size={18} />
           </button>
         </div>
+
+        {/* ⚠️ Aviso de posteo oculto por moderación (solo el autor llega aquí por link directo) */}
+        {isDetail && posteoActual.ocultoPorModeracion && (
+          <div
+            role="alert"
+            className="d-flex align-items-center gap-2 px-3 py-2"
+            style={{
+              backgroundColor: "#fff3cd",
+              borderBottom: "1px solid #ffc107",
+              color: "#856404",
+              fontSize: "0.85rem",
+            }}
+          >
+            <FiEyeOff size={16} className="flex-shrink-0" />
+            <span>Tu publicación está en revisión y solo tú puedes verla.</span>
+          </div>
+        )}
 
         {/* Imagen del post */}
         {isDetail ? (

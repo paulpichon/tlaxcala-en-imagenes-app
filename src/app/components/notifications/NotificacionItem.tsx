@@ -7,7 +7,7 @@ import { avatarMiniLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Notificacion } from "@/types/types";
-import { FiMoreVertical, FiTrash2 } from "react-icons/fi";
+import { FiMoreVertical, FiTrash2, FiShield } from "react-icons/fi";
 import ToastGlobal from "../ToastGlobal";
 
 interface Props {
@@ -20,6 +20,10 @@ export default function NotificacionItem({ notif, onClick, onEliminar }: Props) 
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [eliminando, setEliminando] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "danger" | "creacion" } | null>(null);
+
+  // Notificación de sistema (100% backend): sin identidad de emisor.
+  // Ej.: 'posteo_eliminado_moderacion' (mensaje genérico, no se antepone nombre).
+  const esSistema = notif.tipo === "posteo_eliminado_moderacion";
 
   const handleEliminar = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -45,21 +49,37 @@ export default function NotificacionItem({ notif, onClick, onEliminar }: Props) 
         className={`list-group-item list-group-item-action d-flex align-items-center gap-3 position-relative ${
           notif.notificacion_leida ? "bg-light text-muted" : "bg-white fw-semibold"
         }`}
-        onClick={() => onClick(notif._id, notif.emisor.url)}
+        onClick={() => onClick(notif._id, notif.emisor?.url ?? "")}
         style={{ cursor: "pointer" }}
       >
-        <Image
-          src={obtenerImagenPerfilUsuario(notif.emisor)}
-          loader={avatarMiniLoader}
-          alt={notif.emisor.nombre_completo.nombre}
-          width={50}
-          height={50}
-          className="rounded-circle border"
-        />
+        {esSistema ? (
+          <div
+            className="d-flex align-items-center justify-content-center rounded-circle border bg-light"
+            style={{ width: 50, height: 50, color: "#856404" }}
+            aria-hidden="true"
+          >
+            <FiShield size={24} />
+          </div>
+        ) : (
+          <Image
+            src={obtenerImagenPerfilUsuario(notif.emisor)}
+            loader={avatarMiniLoader}
+            alt={notif.emisor?.nombre_completo?.nombre ?? "Usuario"}
+            width={50}
+            height={50}
+            className="rounded-circle border"
+          />
+        )}
 
         <div className="flex-grow-1">
           <p className="mb-1">
-            <strong>{notif.emisor.nombre_completo.nombre}</strong> {notif.mensaje}
+            {esSistema ? (
+              notif.mensaje
+            ) : (
+              <>
+                <strong>{notif.emisor?.nombre_completo?.nombre}</strong> {notif.mensaje}
+              </>
+            )}
             {!notif.notificacion_leida && (
               <span className="badge bg-danger ms-2 rounded-pill">No leído</span>
             )}

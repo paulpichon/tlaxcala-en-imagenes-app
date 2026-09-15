@@ -49,6 +49,7 @@ export interface Posteo {
   comentariosCount?: number;
   hasLiked?: boolean;
   comentariosActivos?: boolean;
+  ocultoPorModeracion?: boolean; // true: oculto globalmente por moderación; solo el backend lo expone al propio autor
 }
 // Interface para crear Posteo Modal
 export interface CrearPosteoModalProps {
@@ -327,7 +328,12 @@ export interface FormDataEditarPerfil {
 // Iterface para las notificaciones
 export interface Notificacion {
   _id: string;
-  tipo: "follow" | "like" | "comentario" | "nueva_publicacion";
+  tipo:
+    | "follow"
+    | "like"
+    | "comentario"
+    | "nueva_publicacion"
+    | "posteo_eliminado_moderacion";
   mensaje: string;
   createdAt: string;
   notificacion_leida: boolean;

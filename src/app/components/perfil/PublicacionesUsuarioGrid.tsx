@@ -16,6 +16,7 @@ import { gridLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import ToastGlobal from "../ToastGlobal";
 import { apiGet, isNotFound, getUserMessage } from "@/lib/apiClient";
 import { MENSAJE_REPORTE_EXITOSO } from "@/lib/validaciones";
+import { FiEyeOff } from "react-icons/fi";
 
 type NextResponse = string | { url?: string } | null | undefined;
 
@@ -229,7 +230,7 @@ export default function PublicacionesUsuarioGrid({
       >
         {posteos.map((posteo) => (
           <div key={posteo._id} className="col-6 col-sm-6 col-md-4 col-lg-4">
-            <div className="card">
+            <div className="card position-relative">
               <Image
                 src={posteo.public_id}
                 loader={gridLoader}
@@ -241,6 +242,14 @@ export default function PublicacionesUsuarioGrid({
                 onClick={() => openFirstModal(posteo)}
                 priority
               />
+              {posteo.ocultoPorModeracion && (
+                <span
+                  className={perfil.badge_en_revision}
+                  aria-label="Publicación en revisión"
+                >
+                  <FiEyeOff size={12} /> En revisión
+                </span>
+              )}
             </div>
           </div>
         ))}

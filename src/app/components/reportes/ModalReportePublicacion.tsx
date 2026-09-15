@@ -11,7 +11,6 @@ import {
   apiPost,
   ApiErrorCode,
   getApiErrorCode,
-  getApiErrorMessage,
   getUserMessage,
 } from "@/lib/apiClient";
 import { ReporteResponse } from "@/types/types";
@@ -20,8 +19,8 @@ import estilos from "@/app/ui/reportes/reporte.module.css";
 interface ModalReportePublicacionProps {
   isOpen: boolean;
   posteoId: string;
-  /** reported: true si el reporte se guardó. El toast de confirmación lo muestra el padre. */
-  onFinish: (reported: boolean) => void;
+  /** reported: true si el reporte se guardó; conflict: true si el backend rechazó con 409 (ya reportado). */
+  onFinish: (reported: boolean, conflict?: boolean) => void;
 }
 
 const MAX_DESCRIPCION = 200;
@@ -114,12 +113,13 @@ export default function ModalReportePublicacion({
       if (!activoRef.current) return;
       const code = getApiErrorCode(err);
       if (code === ApiErrorCode.CONFLICT) {
-        setServerError(getApiErrorMessage(err, "Ya reportaste esta publicación"));
-      } else {
-        const msg = getUserMessage(err, "reportar");
-        console.error(msg, err);
-        setServerError(msg);
+        // Ya reportado: cierra el sub-modal y avisa al padre para deshabilitar el botón.
+        onFinish(false, true);
+        return;
       }
+      const msg = getUserMessage(err, "reportar");
+      console.error(msg, err);
+      setServerError(msg);
     }
   };
 

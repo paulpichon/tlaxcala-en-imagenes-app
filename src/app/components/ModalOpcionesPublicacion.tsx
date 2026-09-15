@@ -12,7 +12,7 @@ import { useState } from "react";
 import ToastGlobal from "./ToastGlobal";
 import EditarPosteoModal from "./posteo/EditarPosteoModal";
 import { apiDelete, apiPut, isNotFound, getUserMessage } from "@/lib/apiClient";
-import { FiLock, FiFlag } from "react-icons/fi";
+import { FiLock, FiFlag, FiEyeOff } from "react-icons/fi";
 import ModalReportePublicacion from "./reportes/ModalReportePublicacion";
 
 interface ModalOpcionesPublicacionProps extends PropsModalOpcionesPublicacion {
@@ -38,7 +38,8 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [showShareWarning, setShowShareWarning] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type?: "success" | "danger" | "creacion" } | null>(null);
+  const [reporteRechazado, setReporteRechazado] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type?: "success" | "danger" | "creacion" | "warning" } | null>(null);
 
   if (!isOpen || !selectedImage) return null;
 
@@ -47,12 +48,18 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
   const esFavoritoGlobal = favoritosMap[selectedImage._id] ?? selectedImage.isFavorito;
   const isPublicView = !user;
   const esSoloPerfil = selectedImage.visibilidad === "perfil";
+  const esOcultoModeracion = selectedImage.ocultoPorModeracion === true;
+  // Un posteo "Solo perfil" o "En revisión" nunca genera link de compartir.
+  const bloquearShare = esSoloPerfil || esOcultoModeracion;
+
+  const mensajeShareWarning = esSoloPerfil
+    ? 'Este posteo solo se puede ver dentro de TlaxApp porque está configurado como "Solo perfil".'
+    : 'Esta publicación está en revisión por moderación y no se puede compartir.';
 
   const handleShare = async () => {
     if (!selectedImage) return;
 
-    // Un posteo con visibilidad 'perfil' nunca genera link de compartir.
-    if (esSoloPerfil) {
+    if (bloquearShare) {
       setShowShareWarning(true);
       setTimeout(() => setShowShareWarning(false), 5000);
       return;
@@ -155,7 +162,7 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                         type="button"
                         className={`${perfil.btn_opciones_publicaciones}`}
                         onClick={handleShare}
-                        style={esSoloPerfil ? { opacity: 0.6 } : undefined}
+                        style={bloquearShare ? { opacity: 0.6 } : undefined}
                       >
                         {"share" in navigator
                           ? "Compartir publicación"
@@ -210,9 +217,17 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                         type="button"
                         className={`${perfil.btn_opciones_publicaciones} text-danger`}
                         onClick={() => setShowReportModal(true)}
+                        disabled={reporteRechazado}
+                        style={reporteRechazado ? { opacity: 0.6 } : undefined}
                       >
-                        <FiFlag className="me-1" size={14} style={{ verticalAlign: "-2px" }} />
-                        Reportar publicación
+                        {reporteRechazado ? (
+                          "Ya reportaste esta publicación"
+                        ) : (
+                          <>
+                            <FiFlag className="me-1" size={14} style={{ verticalAlign: "-2px" }} />
+                            Reportar publicación
+                          </>
+                        )}
                       </button>
                     </div>
                   </>
@@ -232,7 +247,7 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                         type="button"
                         className={`${perfil.btn_opciones_publicaciones}`}
                         onClick={handleShare}
-                        style={esSoloPerfil ? { opacity: 0.6 } : undefined}
+                        style={bloquearShare ? { opacity: 0.6 } : undefined}
                       >
                         {"share" in navigator
                           ? "Compartir publicación"
@@ -263,10 +278,12 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
                     color: "#856404",
                   }}
                 >
-                  <FiLock size={14} className="flex-shrink-0 mt-0.5" />
-                  <small>
-                    Este posteo solo se puede ver dentro de TlaxApp porque está configurado como "Solo perfil".
-                  </small>
+                  {esOcultoModeracion ? (
+                    <FiEyeOff size={14} className="flex-shrink-0 mt-0.5" />
+                  ) : (
+                    <FiLock size={14} className="flex-shrink-0 mt-0.5" />
+                  )}
+                  <small>{mensajeShareWarning}</small>
                   <button
                     type="button"
                     className="btn-close ms-auto"
@@ -349,8 +366,19 @@ const ModalOpcionesPublicacion: React.FC<ModalOpcionesPublicacionProps> = ({
         <ModalReportePublicacion
           isOpen={showReportModal}
           posteoId={selectedImage._id}
-          onFinish={(reported) => {
+          onFinish={(reported, conflict) => {
             setShowReportModal(false);
+
+            if (conflict) {
+              // 409: el usuario ya reportó este posteo. Deshabilitar el botón
+              // y mostrar aviso (el backend no expone isReportado en los GETs).
+              setReporteRechazado(true);
+              setToast({
+                message: "Ya reportaste esta publicación",
+                type: "warning",
+              });
+              return;
+            }
 
             if (reported) {
               // El toast de confirmación lo muestra el dueño de la lista
