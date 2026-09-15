@@ -8,6 +8,27 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [No publicado] — 2026-09-09 · Moderación de reportes (Fase 2) — adopción frontend
+
+Ciclo centrado en adoptar del backend de moderación (`/api/moderacion/**`, `SPECS-MODERACION-REPORTES.md`) el impacto de visibilidad y notificaciones en TlaxApp. El panel UI de moderación es un sistema aparte (iteración futura), así que este ciclo solo toca la experiencia del usuario final.
+
+### Añadido
+
+- Tipo `Posteo.ocultoPorModeracion?: boolean` (`types.ts`): posteo oculto globalmente por moderación; el backend solo lo expone al propio autor.
+- Badge "En revisión" para el autor en el grid del perfil (`PublicacionesUsuarioGrid`, clase `badge_en_revision` en `perfil.module.css`).
+- Banner "En revisión" al abrir un posteo oculto en `ImageModal` y en el detalle (`PosteoCard`, rama `isDetail`).
+- Bloqueo de compartir para posteos ocultos: `ModalOpcionesPublicacion` usa `bloquearShare = esSoloPerfil || ocultoPorModeracion` con warning inline dinámico (patrón reutilizado de "Solo perfil").
+- Render de la notificación de sistema `'posteo_eliminado_moderacion'`: `NotificacionItem` no antepone nombre de emisor (ícono `FiShield`), y `Notificaciones.tsx` no navega a un perfil si `urlUsuario` está vacío. Se endureció con optional-chaining el acceso a `emisor` (anti-crash si el backend manda la notificación sin identidad).
+- Deshabilitación del botón "Reportar" tras un `409` ("Ya reportaste esta publicación"): `ModalReportePublicacion` comunica `onFinish(false, true)` y `ModalOpcionesPublicacion` muestra el botón deshabilitado (estado local por sesión de UI; el backend no expone `isReportado` en los GETs).
+
+### Documentación
+
+- `AGENTS.md`: sección "Moderación de posteos (Fase 2) — impacto en el frontend".
+
+*Verificación: `pnpm build` exitoso. Pendiente fuera de código: matriz de pruebas con posteos ocultos reales contra el backend de desarrollo.*
+
+---
+
 ## [No publicado] — 2026-09-08 · Reportar publicaciones (Fase 1)
 
 Ciclo centrado en la adopción del endpoint `POST /api/reportes/:posteoId` (SPECS-REPORTES.md). Los usuarios autenticados pueden reportar publicaciones ajenas por 7 motivos predefinidos; el posteo reportado se oculta inmediatamente del feed y del perfil del autor para el reportante (sin eliminarse).

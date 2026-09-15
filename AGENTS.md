@@ -70,6 +70,18 @@ Copied from `.env.example`. Key vars: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_API_UR
 - **Toast post-navegación:** al reportar desde `/posteo/[id]` se persiste el flag `reporteExitoso` en `sessionStorage` (en `PosteoCard`) y se lee/limpia en `PerfilUsuarioContainer` (patrón establecido en `Formulario.tsx:33` de restablecer-password).
 - **Mensaje de confirmación:** centralizado en `MENSAJE_REPORTE_EXITOSO` (`src/lib/validaciones.ts`).
 
+## Moderación de posteos (Fase 2) — impacto en el frontend
+
+El backend de moderación está implementado (`/api/moderacion/**`, colección `Moderador`); el **panel UI de moderación es un sistema aparte** (fuera de este repo, iteración futura). El frontend de usuarios solo adopta el impacto de visibilidad y notificaciones:
+
+- **`Posteo.ocultoPorModeracion?: boolean`** (`types.ts`): posteo oculto **globalmente** por moderación. El backend solo lo expone al **propio autor** (feed/perfil ajeno/favoritos/likes/comentarios lo excluyen; link directo da `404` a no-autores).
+- **Badge "En revisión"** para el autor en: grid del perfil (`PublicacionesUsuarioGrid` + clase `badge_en_revision`), `ImageModal` y `PosteoCard` en detalle (banner amarillo `#fff3cd`). El autor llega por link directo; visitantes ven la página `not-found` existente (mensaje neutro, no revela moderación).
+- **Compartir bloqueado**: `ModalOpcionesPublicacion` usa `bloquearShare = esSoloPerfil || ocultoPorModeracion` — botón atenuado + warning inline dinámico. Los shares ya emitidos antes del ocultamiento quedan muertos por el backend (404 a no-autores).
+- **Notificación de sistema sin emisor**: `Notificacion.tipo` incluye `'posteo_eliminado_moderacion'`; `NotificacionItem` la renderiza **sin nombre de emisor** (ícono `FiShield` TlaxApp), y `Notificaciones.tsx` no navega a un perfil si `urlUsuario` viene vacío. La notificación es 100% sistema (backend, sin identidad asociada).
+- **Botón Reportar tras 409**: `ModalReportePublicacion` comunica `onFinish(false, true)` en conflicto; `ModalOpcionesPublicacion` deshabilita el botón con "Ya reportaste esta publicación" (el backend no expone `isReportado` en los GETs; estado local por sesión de UI).
+
+> **404 "esperable" del fetch de metadata (no es bug):** al abrir el detalle de un posteo oculto por moderación, `generateMetadata` en `src/app/posteo/[idposteo]/page.tsx` hace un `fetch` **anónimo** (sin cookies, necesario para el ISR `revalidate: 60` compartido por todos los visitantes). Para un posteo oculto, el backend responde `404 NotFoundError` (no-autor) y **lo registra en consola** — esto es correcto: la petición de metadata equivale a un visitante y no debe revelar existencia (spec §5). El fetch del contenido en `PosteoDetalle` sí va con sesión (`fetchWithAuth`), por lo que el **autor** ve el posteo y el banner sin problema. `generateMetadata` ya maneja `!res.ok` devolviendo metadata neutra sin index. Ocurre a lo sumo 1 vez por minuto por posteo (cache ISR). El ruido en consola del backend puede atenuarse allá (bajar nivel de log de `NotFoundError` en `GET /api/posteos/post/:id` para requests sin sesión).
+
 ## Error Handling
 
 - **All API calls must go through `src/lib/apiClient.ts`** (`apiGet`, `apiPost`, `apiPut`, `apiPatch`, `apiDelete`). Raw `fetch` is only allowed inside `fetchWithAuth`.
