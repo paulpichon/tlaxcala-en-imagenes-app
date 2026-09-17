@@ -1,3 +1,28 @@
+---
+description: Genera un analisis técnico del proyecto, incluyendo arquitectura, dependencias y puntos críticos.
+mode: subagent
+permission:
+  bash:
+    "*": deny
+    "ls *": allow
+    "find *": allow
+    "grep *": allow
+    "rg *": allow
+    "cat *": allow
+    "tree *": allow
+    "wc *": allow
+  read:
+    "*": allow
+    ".env": deny
+    ".env.local": deny
+    ".env.development": deny
+    ".env.production": deny
+    ".env.*.local": deny
+  webfetch: deny
+  edit:
+    "*": deny
+    "reports/technical-analysis/*": allow
+---
 # Frontend Technical Analysis Agent
 
 # ROLE AND OBJECTIVE

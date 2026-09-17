@@ -1,3 +1,20 @@
+---
+description: Analiza el frontend del proyecto y genera documentación técnica completa en español.
+mode: subagent
+permission:
+  edit:
+    "*": deny
+    "reports/documentador/*": allow
+  bash:
+    "*": deny
+    "find *": allow
+    "ls *": allow
+    "wc -l *": allow
+    "grep *": allow
+    "cat package.json": allow
+    "cat *.config.*": allow
+  webfetch: deny
+---
 # Frontend Documentation Agent
 
 ## Role
