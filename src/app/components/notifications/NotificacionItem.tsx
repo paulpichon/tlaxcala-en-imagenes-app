@@ -23,6 +23,11 @@ export default function NotificacionItem({ notif, onClick, onEliminar }: Props) 
 
   // Notificación de sistema (100% backend): sin identidad de emisor.
   // Ej.: 'posteo_eliminado_moderacion' (mensaje genérico, no se antepone nombre).
+  // CONTRATO: `emisor` puede llegar undefined y `referencia` puede llegar
+  // null/ausente (el cron de hard-delete borra el posteo referenciado pasado el
+  // plazo). Este render usa SOLO `mensaje`, `createdAt` y `notificacion_leida`.
+  // Si en el futuro se añade miniatura/preview, comprobar `notif.referencia?.public_id`
+  // con optional chaining y fallback, sin renderizar "undefined".
   const esSistema = notif.tipo === "posteo_eliminado_moderacion";
 
   const handleEliminar = async (e: React.MouseEvent) => {

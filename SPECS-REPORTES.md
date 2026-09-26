@@ -162,10 +162,10 @@ El backend **no** devuelve ningún campo tipo `isReportado` y no elimina el post
 
 ## 9. Fase 2 (implementada) — ver `SPECS-MODERACION-REPORTES.md`
 
-La moderación de reportes se implementó en la Fase 2 (colección `Moderador`, cola priorizada por score, ocultamiento global, eliminación con notificación anónima, cascada, recategorización y limpieza de huérfanos). Consultar [`SPECS-MODERACION-REPORTES.md`](SPECS-MODERACION-REPORTES.md) para el contrato completo del frontend de moderación.
+La moderación de reportes se implementó en la Fase 2 del **panel de administración** (`/api/v1/admin/moderacion`, identidad `Admin` con rol `MODERADOR`; el sistema legado `/api/moderacion` con colección `Moderador` fue eliminado), con cola priorizada por score, ocultamiento global, eliminación con notificación anónima, cascada, recategorización y limpieza de huérfanos. Consultar [`SPECS-MODERACION-REPORTES.md`](SPECS-MODERACION-REPORTES.md) para el contrato completo.
 
 **Impacto en el frontend de usuarios (Fase 1 intacto):**
 - `POST /api/reportes/:posteoId` sin cambios.
 - Ocultamiento personal (reportante) sin cambios.
 - Nuevo: un posteo puede estar **oculto globalmente por moderación** → solo el **autor** lo ve (feed/perfil ajeno/favoritos/likes/comentarios lo excluyen; el link directo da `404` a visitantes). El autor recibe `ocultoPorModeracion: true` en su grilla y detalle para mostrar el badge "En revisión".
-- Si una publicación es **eliminada por moderación**, el autor recibe notificación genérica (email + in-app) con la categoría del catálogo, sin mención del reporte ni del reportante.
+- Si una publicación es **eliminada por moderación**, el autor recibe notificación genérica (email + in-app) con la categoría del catálogo, sin mención del reporte ni del reportante. La notificación in-app (`Notificacion.tipo: 'posteo_eliminado_moderacion'`) llega **sin `emisor`** y con `referencia` que puede desaparecer (cron de hard-delete); el renderer de la web app la trata como notificación de sistema tolerante.

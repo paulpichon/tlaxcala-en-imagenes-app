@@ -1,8 +1,8 @@
-# SPECS — Moderación de Reportes de Publicaciones (Fase 2)
+# SPECS — Moderación de Reportes de Publicaciones (Panel de Administración)
 
-Especificación de la **Fase 2** de la función "Reportar una publicación". Contrato para el **futuro panel/frontend de moderación** (sistema de administración aparte que gestionará reportes de publicaciones, de usuarios, soporte, etc.). En esta fase el backend ya está listo; la moderación se opera vía API (Postman o el panel futuro).
+Contrato del módulo de moderación de reportes de publicaciones del **Panel de Administración** de TlaxApp. Reemplaza al sistema legado `/api/v1/admin/moderacion` (colección `Moderador` eliminada).
 
-> **Contexto:** la Fase 1 guardó los reportes y ocultó el posteo para el reportante. La Fase 2 agrega: identidad de moderador, cola de reportes **priorizada dinámicamente**, ocultamiento global de posteos, eliminación por moderación con notificación anónima al autor, recategorización y limpieza de reportes huérfanos.
+> **Contexto:** la Fase 1 guardó los reportes y ocultó el posteo para el reportante. La Fase 2 del panel implementa: identidad de administrador con rol `MODERADOR`, cola de reportes **priorizada dinámicamente**, ocultamiento global de posteos, eliminación por moderación con notificación anónima al autor, recategorización y limpieza de reportes huérfanos.
 
 ---
 
@@ -10,25 +10,28 @@ Especificación de la **Fase 2** de la función "Reportar una publicación". Con
 
 | Aspecto | Comportamiento |
 |---|---|
-| Base path | `/api/moderacion` |
-| Autenticación | `verificarTokenSesion` + `verificarModerador` (colección `Moderador`) |
-| Identidad moderador | Cuenta normal de TlaxApp promovida en la colección `Moderador` (sin tocar el modelo `Usuario`) |
+| Base path | `/api/v1/admin/moderacion` |
+| Autenticación | Sesión del panel (`adminAccessToken`) + `verificarPermisoAdmin(...)` |
+| Identidad moderador | Cuenta `Admin` con rol `MODERADOR` (separada del modelo `Usuario`) |
 | Cola de reportes | Solo `estatus: pendiente`, ordenada por **score dinámico** (gravedad + volumen + antigüedad) |
 | Ocultamiento global | Posteo invisible para **todos excepto su autor**; reversible; NO es `isDeleted` |
 | Eliminación por moderación | `isDeleted: true` + `deleteReason: 'moderation'` + notificación anónima al autor |
-| Cascada | Resolver/descartar un reporte aplica a **todos** los pendientes del mismo posteo |
+| Cascada | Resolver/descartar un reporte aplica a **todos** los pendientes del mismo posteo, con transición atómica; un solo ganador notifica |
 | Reportero | Se expone **solo** en moderación; jamás fuera de ella |
+| Rate limiting | `adminModeracionLecturaLimiter` (15 min / 300) y `adminModeracionEscrituraLimiter` (15 min / 60), clave `Admin._id` |
 | Anclar casos | Iteración posterior (fuera de esta spec) |
 
 ---
 
 ## 2. Identidad del moderador
 
-- **`models/Moderador.js`** (colección `moderadores`): `{ usuarioId → Usuario (unique), activo, agregadoPor, createdAt }`.
-- El moderador inicia sesión con su cuenta normal de TlaxApp (mismas cookies/JWT). El permiso vive en la colección, **no** en el token.
-- Promoción: `node --env-file=.env.development scripts/crear-moderador.js --correo=admin@tlaxapp.com` (o `--id=<mongoId>`). Requiere cuenta activa (`estatus: 1`, `email_validated: true`).
-- Desactivación: `Moderador.updateOne({ usuarioId }, { activo: false })` → pierde acceso al instante sin perder historial.
-- El middleware `verificarModerador` responde `403` si la cuenta no es moderador activo.
+- El sistema legado (`models/Moderador.js`, colección `moderadores`, middleware `verificarModerador`, script `crear-moderador.js`) fue eliminado.
+- El moderador opera con una cuenta `Admin` (modelo `admin/models/Admin.js`, colección `admins`) con rol `MODERADOR`.
+- Inicia sesión con el flujo de 2 pasos del panel (TOTP o código de respaldo) y recibe cookies `adminAccessToken` / `adminRefreshToken` con `path: '/api/v1/admin'`.
+- El permiso vive en `Admin.permisos` (snapshot por cuenta), **no** en el token. Quitar un permiso surte efecto inmediato.
+- Alta de moderadores: `node --env-file=.env.development admin/scripts/crear-admin.js --correo=mod@tlaxapp.com --rol=MODERADOR`.
+- Desactivación: `Admin.updateOne({ _id }, { activo: false })` → pierde acceso al instante sin perder historial.
+- El middleware `verificarPermisoAdmin(...)` responde `403` si la cuenta no tiene el permiso requerido.
 
 ---
 
@@ -75,17 +78,17 @@ score = (PRIORIDAD_MAX + 1 − prioridad) × PESO_CATEGORIA + volumen × PESO_VO
 2. Actualizar el enum `categoria` (+ `prioridad`) en `models/ReportePosteo.js`.
 3. Si cambiaron prioridades: **backfill** → `ReportePosteo.updateMany({ categoria: 'x' }, { $set: { prioridad: nueva } })`.
 4. Las rutas derivan las categorías válidas de forma automática (`Object.keys(CATEGORIAS_REPORTE)`); el score usa `PRIORIDAD_MAX` derivado (nada de literales).
-5. Calibración de pesos: editar `PESO_CATEGORIA` / `PESO_VOLUMEN` en `controllers/moderacion.js` — sin migración.
+5. Calibración de pesos: editar `PESO_CATEGORIA` / `PESO_VOLUMEN` en `admin/controllers/moderacion.js` — sin migración.
 
 ---
 
 ## 4. Contrato de la API
 
-Todos los endpoints requieren **sesión + moderador**. No hay rate limiter propio (acceso restringido por rol).
+Todos los endpoints requieren **sesión completa del panel + permiso**. Además aplican los limiters `adminModeracionLecturaLimiter` (lecturas) y `adminModeracionEscrituraLimiter` (escrituras), clave `Admin._id`, código `ADMIN_MODERACION_BLOCKED`.
 
-### 4.1 `GET /api/moderacion/reportes`
+### 4.1 `GET /api/v1/admin/moderacion/reportes`
 
-Cola de reportes pendientes paginada (`?page=&limite=`), ordenada por score desc + antigüedad asc.
+Cola de reportes pendientes paginada (`?page=&limite=`), ordenada por score desc + antigüedad asc. **Excluye** los reportes cuyo posteo está eliminado (`posteo.isDeleted: true`): no tiene sentido moderar un posteo que ya no existe.
 
 **Respuesta (`200`):** `responderPaginado` con `data[]`:
 
@@ -104,36 +107,51 @@ Cola de reportes pendientes paginada (`?page=&limite=`), ordenada por score desc
 }
 ```
 
-### 4.2 `GET /api/moderacion/reportes/:id`
+### 4.2 `GET /api/v1/admin/moderacion/reportes/:id`
 
 Detalle del reporte + `posteo`, `autorPosteo`, `reportero` y `otrosPendientes[]` (reportes pendientes del mismo posteo). Sirve cualquier `estatus`.
 
-### 4.3 `PUT /api/moderacion/reportes/:id/resolver`
+### 4.3 `PUT /api/v1/admin/moderacion/reportes/:id/resolver`
 
-Confirma violación. Efectos:
-1. Elimina el posteo: `isDeleted: true, deleteReason: 'moderation', deletedAt: now` (si aún existía).
-2. **Cascada**: todos los pendientes del posteo → `resuelto` (`resueltoPor`, `resueltoAt`).
-3. **Notifica al autor** (email + notificación in-app): mensaje genérico con la categoría del catálogo. **Sin mención de reportes ni reportantes.**
+Confirma violación. Efectos (dentro de una transacción `session.withTransaction`):
+1. **Claim atómico** del reporte `{ _id, estatus: 'pendiente', isDeleted: false }`; si no lo gana → `400`/`404`.
+2. Elimina el posteo: `isDeleted: true, deleteReason: 'moderation', deletedAt: now` (solo si aún estaba `isDeleted: false`; si una eliminación manual ganó la carrera, **no** se pisa `deleteReason`).
+3. **Cascada**: todos los pendientes del posteo → `resuelto` (`resueltoPorAdmin`, `resueltoAt`).
+4. **Notifica al autor** (email + notificación in-app) **después del commit**: mensaje genérico con la categoría del catálogo. **Sin mención de reportes ni reportantes.** Solo notifica la llamada que ganó la transición `isDeleted: false → true` (evita correos duplicados).
 
-`400` si el reporte ya fue atendido. `404` si no existe.
+> **Notificación in-app — contrato:** tipo `posteo_eliminado_moderacion`, llega **sin** el campo `emisor` (notificación de sistema: el `$lookup` de `GET /api/notificaciones` lo omite cuando `emisor: null`). El frontend la debe renderizar como **notificación de sistema**: logotipo de TlaxApp + `mensaje`, sin avatar ni link a perfil. `referencia` = posteo eliminado (`{ public_id, texto }` mientras el doc soft-deleted exista; puede **desaparecer** tras el hard-delete del cron → el renderer debe tolerarlo). La URL del logotipo/ícono del sistema es la misma que el backend usa como `ICONO_SISTEMA_TLAXAPP` (definida en `.env`); el frontend la consume desde su propio `.env` con el mismo valor.
 
-### 4.4 `PUT /api/moderacion/reportes/:id/descartar`
+`400` si el reporte ya fue atendido (incluye carreras entre moderadores). `404` si no existe.
 
-No confirma violación. Efectos:
-1. **Cascada**: pendientes del posteo → `descartado`.
-2. **Restauración global**: si el posteo estaba `ocultoPorModeracion` y **ya no quedan pendientes** → se restaura (`ocultoPorModeracion: false`). El ocultamiento **personal** de cada reportante no se revierte (decisión Fase 1).
+### 4.4 `PUT /api/v1/admin/moderacion/reportes/:id/descartar`
 
-### 4.5 `PUT /api/moderacion/reportes/:id/recategorizar`
+No confirma violación. Efectos (dentro de una transacción `session.withTransaction`):
+1. **Claim atómico** del reporte `{ _id, estatus: 'pendiente', isDeleted: false }`; si no lo gana → `400`/`404`.
+2. **Cascada**: pendientes del posteo → `descartado` (`resueltoPorAdmin`, `resueltoAt`).
+3. **Restauración global**: si el posteo estaba `ocultoPorModeracion` y **ya no quedan pendientes** → se restaura (`ocultoPorModeracion: false`). El conteo y la escritura comparten el snapshot transaccional, por lo que no puede quedar un posteo oculto sin pendientes. El ocultamiento **personal** de cada reportante no se revierte (decisión Fase 1).
 
-Body: `{ "categoria": "<slug válido>" }`. Actualiza `categoria` + recalcula `prioridad`. No cambia `estatus`. Requiere reporte `pendiente`.
+### 4.5 `PUT /api/v1/admin/moderacion/reportes/:id/recategorizar`
 
-### 4.6 `PUT /api/moderacion/posteos/:posteoId/ocultar`
+Body: `{ "categoria": "<slug válido>" }`. Actualiza `categoria` + recalcula `prioridad`. No cambia `estatus`. Requiere reporte `pendiente` (transición condicional atómica): si el reporte dejó de estar `pendiente` → `400` y **no** se altera su historial.
 
-Ocultamiento global preventivo: `ocultoPorModeracion: true, ocultadoPor, ocultadoAt`. No toca `isDeleted`, no notifica. `404` si el posteo no existe o está eliminado.
+### 4.6 `PUT /api/v1/admin/moderacion/posteos/:posteoId/ocultar`
 
-### 4.7 `PUT /api/moderacion/posteos/:posteoId/restaurar`
+Ocultamiento global preventivo: `ocultoPorModeracion: true, ocultadoPorAdmin: <Admin._id>, ocultadoAt`. No toca `isDeleted`, no notifica. `404` si el posteo no existe o está eliminado. (`ocultadoPor` quedó como campo legado de la etapa anterior —cuenta de TlaxApp— y ya no se escribe.)
 
-Reverse del ocultamiento: revierte los 3 campos. El posteo vuelve a ser visible para todos (salvo los ocultamientos personales por reportes de Fase 1).
+### 4.7 `PUT /api/v1/admin/moderacion/posteos/:posteoId/restaurar`
+
+Reverse del ocultamiento: revierte los 3 campos (`ocultoPorModeracion`, `ocultadoPorAdmin`, `ocultadoAt`). El posteo vuelve a ser visible para todos (salvo los ocultamientos personales por reportes de Fase 1). `ocultar`/`restaurar` usan una transición condicional atómica (`{ _id, isDeleted: false }`) vía `findOneAndUpdate`.
+
+### 4.8 Concurrencia y atomicidad
+
+Para evitar efectos parciales y notificaciones duplicadas cuando dos moderadores actúan a la vez:
+
+- **Transiciones condicionales**: los cambios de estado usan `findOneAndUpdate` con el estado esperado (`estatus: 'pendiente'`, `isDeleted: false`) y verifican el resultado. El helper `reclamarReportePendiente` concentra el claim y preserva el contrato `404`/`400`.
+- **Transacciones**: `resolver` (posteo + reportes) y `descartar` (reportes + conteo + restauración) corren en `session.withTransaction`, por lo que son "todo o nada". `withTransaction` reintenta `WriteConflict` y errores transitorios de forma automática.
+- **Efectos externos post-commit**: correo y notificación in-app se disparan únicamente después de confirmar la transacción y son *best-effort* (un fallo no revierte la moderación, como antes). Nunca se envían si la transacción aborta.
+- **Un solo ganador**: solo la llamada que gana la transición `isDeleted: false → true` notifica al autor.
+- **Carreras esperadas**: si dos moderadores atienden reportes del mismo posteo a la vez, la transacción perdedora reintenta y recibe `400` ("ya fue atendido"): **solo una** responde `200` y notifica. La cascada es idempotente y nunca hay doble notificación.
+- **Cola**: excluye reportes de posteos eliminados; el detalle (`GET /reportes/:id`) sigue sirviendo cualquier `estatus`.
 
 ---
 
@@ -156,10 +174,10 @@ Reverse del ocultamiento: revierte los 3 campos. El posteo vuelve a ser visible 
 
 | Modelo | Cambio |
 |---|---|
-| `Posteo` | `ocultoPorModeracion` (Boolean, default false), `ocultadoPor` (ref Usuario), `ocultadoAt` (Date) |
+| `Posteo` | `ocultoPorModeracion` (Boolean, default false), `ocultadoPor` (ref Usuario, legado), `ocultadoPorAdmin` (ref Admin), `ocultadoAt` (Date) |
 | `Posteo.deleteReason` | enum ampliado: `["manual", "accountDeletion", "moderation", null]` |
 | `Notificacion.tipo` | enum ampliado: `'posteo_eliminado_moderacion'` |
-| `ReportePosteo` | sin cambios (campos `estatus/resueltoPor/resueltoAt` ya listos en Fase 1) |
+| `ReportePosteo` | `resueltoPorAdmin` (ref Admin) agregado; `resueltoPor` (ref Usuario) es legado |
 
 ---
 

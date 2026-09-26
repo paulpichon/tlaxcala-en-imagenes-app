@@ -337,12 +337,19 @@ export interface Notificacion {
   mensaje: string;
   createdAt: string;
   notificacion_leida: boolean;
-  emisor: {
+  // Notificación de sistema (ej. 'posteo_eliminado_moderacion'): el backend OMITE
+  // `emisor` cuando es null (el $lookup de GET /api/notificaciones no lo resuelve).
+  // Por eso es opcional: el render debe usar optional chaining.
+  emisor?: {
     _id: UsuarioLogueado["_id"];
     nombre_completo: UsuarioLogueado["nombre_completo"];
     url: UsuarioLogueado["url"];
     imagen_perfil?: UsuarioLogueado["imagen_perfil"];
   };
+  // Posteo referenciado (Fase 2). El cron de hard-delete borra físicamente el
+  // posteo pasado el plazo, así que el $lookup del backend devuelve null/ausente.
+  // El render NUNCA debe asumir su presencia ni mostrar "undefined".
+  referencia?: { public_id?: string; texto?: string } | null;
 };
 // ======================================
 // 📦 Favoritos

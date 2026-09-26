@@ -10,7 +10,7 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ## [No publicado] — 2026-09-09 · Moderación de reportes (Fase 2) — adopción frontend
 
-Ciclo centrado en adoptar del backend de moderación (`/api/moderacion/**`, `SPECS-MODERACION-REPORTES.md`) el impacto de visibilidad y notificaciones en TlaxApp. El panel UI de moderación es un sistema aparte (iteración futura), así que este ciclo solo toca la experiencia del usuario final.
+Ciclo centrado en adoptar del backend de moderación el impacto de visibilidad y notificaciones en TlaxApp. La moderación vive en el **panel de administración** (`/api/v1/admin/moderacion`, identidad `Admin` con rol `MODERADOR`), un sistema aparte fuera de este repo; el sistema legado (`/api/moderacion`, colección `Moderador`, middleware `verificarModerador`) fue **eliminado**, así que este ciclo solo toca la experiencia del usuario final.
 
 ### Añadido
 
@@ -23,7 +23,14 @@ Ciclo centrado en adoptar del backend de moderación (`/api/moderacion/**`, `SPE
 
 ### Documentación
 
-- `AGENTS.md`: sección "Moderación de posteos (Fase 2) — impacto en el frontend".
+- `AGENTS.md`: sección "Moderación de posteos (Fase 2) — impacto en el frontend" (actualizada: la moderación migró al panel `/api/v1/admin/moderacion`; el sistema legado `/api/moderacion` fue eliminado).
+- `SPECS-REPORTES.md` §9: actualizado al contrato del panel y al renderer tolerante de la notificación de sistema.
+- `CHANGELOG.md`: corregida la referencia al backend de moderación (de `/api/moderacion/**` a `/api/v1/admin/moderacion`).
+
+### Corregido
+
+- `types.ts`: `Notificacion.emisor` ahora es opcional y se añadió `referencia?: { public_id?: string; texto?: string } | null` con el contrato documentado (el `$lookup` del backend omite `emisor` cuando es `null` y `referencia` puede desaparecer tras el hard-delete del cron).
+- `NotificacionItem.tsx`: documentado explícitamente el contrato tolerante (no asumir `emisor`/`referencia`; sin render de "undefined" si en el futuro se añade un preview del posteo).
 
 *Verificación: `pnpm build` exitoso. Pendiente fuera de código: matriz de pruebas con posteos ocultos reales contra el backend de desarrollo.*
 
