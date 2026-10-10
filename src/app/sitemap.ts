@@ -29,6 +29,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           url: `${baseUrl}/contacto`,
           priority: 0.3,
         },
+        {
+          url: `${baseUrl}/que-es-tlaxapp`,
+          priority: 0.5,
+        },
+        {
+          url: `${baseUrl}/legal/preguntas-frecuentes`,
+          priority: 0.3,
+        },
     ];
       
   } catch (error) {

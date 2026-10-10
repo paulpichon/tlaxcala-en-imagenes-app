@@ -8,6 +8,26 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [No publicado] — 2026-10-09 · Actualización de la información "¿Qué es TlaxApp?"
+
+Ciclo centrado en renovar la copia de la página `/que-es-tlaxapp` a partir de `QUE-ES-TLAXAPP.md` (nueva fuente de verdad del posicionamiento de la plataforma): una red social de Tlaxcala hecha por y para tlaxcaltecas —comunidad, fotos con ubicación y conexión local— sin prometer un directorio de negocios ni una guía turística. Se alinearon el FAQ y la sección de servicio de los Términos con el mismo posicionamiento, se reflejó el acceso anticipado por invitación vigente en producción y se saneó la documentación referenciada en el README.
+
+### Cambiado
+
+- `/que-es-tlaxapp`: contenido reescrito con la copia oficial — ¿Qué es TlaxApp?, Propósito, Misión, Visión, Objetivo (ahora antes de Valores), Valores (6 ítems), nueva sección "¿Qué puedes hacer en TlaxApp?" (9 funciones reales), ¿Qué problema resuelve?, ¿Para quién es TlaxApp?, nuevas secciones "Sobre negocios y turismo" (disclaimer honesto) y "Acceso" (anticipado por invitación, con el CTA existente). Fecha visible a Octubre 2026; se retiraron la lista vieja del Propósito y el box `alert-info`.
+- `/que-es-tlaxapp`: `metadata.description`, `keywords`, OG/Twitter y `description` del JSON-LD `AboutPage` alineados con el posicionamiento nuevo (sin "negocios locales"/"turismo" como promesa).
+- `/legal/preguntas-frecuentes`: respuesta de "¿Qué es TlaxApp?" con el posicionamiento nuevo; "¿Cómo creo una cuenta?" refleja el acceso anticipado por invitación; "¿Cómo puedo reportar contenido inapropiado?" corregido al flujo real (menú de opciones de la publicación, no "sección de ayuda y soporte"). Fecha a Octubre 2026.
+- `/legal/terminos-y-condiciones` §2 "Descripción del Servicio": reescrita con las funciones reales (fotos con ubicación municipio/localidad, visibilidad, seguir perfiles, likes/comentarios/favoritos, notificaciones, reportes); eliminadas funciones inexistentes (videos, mensajes, "comunidades y grupos de interés"). Fecha a Octubre 2026.
+- `sitemap.ts`: agregadas `/que-es-tlaxapp` (priority 0.5) y `/legal/preguntas-frecuentes` (0.3), ausentes del sitemap.
+
+### Documentación
+
+- `README.md`: sección Documentación apunta a los archivos reales (`QUE-ES-TLAXAPP.md`, `SPECS-*.md`, `api/API_REFERENCE_*.md`, `CHANGELOG.md`, `AGENTS.md`); antes referenciaba `DOCUMENTACION.md`, `API.md` y `DOCUMENTACION-BACKEND.md`, inexistentes en el repo. Añadida `/que-es-tlaxapp` a la tabla de rutas principales.
+
+*Verificación: `pnpm build` exitoso (26 páginas generadas, sin errores de TypeScript).*
+
+---
+
 ## [No publicado] — 2026-09-09 · Moderación de reportes (Fase 2) — adopción frontend
 
 Ciclo centrado en adoptar del backend de moderación el impacto de visibilidad y notificaciones en TlaxApp. La moderación vive en el **panel de administración** (`/api/v1/admin/moderacion`, identidad `Admin` con rol `MODERADOR`), un sistema aparte fuera de este repo; el sistema legado (`/api/moderacion`, colección `Moderador`, middleware `verificarModerador`) fue **eliminado**, así que este ciclo solo toca la experiencia del usuario final.

@@ -1,5 +1,6 @@
 // Página: ¿Qué es TlaxApp?
 // Página pública para explicar el propósito, misión y funcionamiento de la plataforma
+// Fuente de verdad de la copia visible: QUE-ES-TLAXAPP.md (raíz del repo)
 
 import { Metadata } from "next";
 import contacto from "@/app/ui/legal/PrivacidadTerminosCondiciones.module.css";
@@ -10,24 +11,23 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "¿Qué es TlaxApp?",
   description:
-    "TlaxApp es una red social dedicada a Tlaxcala para descubrir lugares, apoyar negocios locales y compartir experiencias. Conoce su misión, visión y propósito.",
+    "TlaxApp es la red social de Tlaxcala: comparte fotos con ubicación, descubre lo que pasa en el estado y conecta con su gente.",
   keywords: [
     "TlaxApp",
     "qué es TlaxApp",
     "red social Tlaxcala",
-    "lugares en Tlaxcala",
-    "turismo Tlaxcala",
-    "negocios locales Tlaxcala",
-    "descubrir Tlaxcala",
-    "plataforma Tlaxcala",
     "comunidad Tlaxcala",
+    "fotos de Tlaxcala",
+    "descubrir Tlaxcala",
+    "red social local",
+    "Tlaxcala",
   ],
   authors: [{ name: "TlaxApp" }],
 
   openGraph: {
     title: "¿Qué es TlaxApp?",
     description:
-      "Descubre qué es TlaxApp, la red social dedicada a compartir los mejores lugares, negocios y experiencias de Tlaxcala.",
+      "TlaxApp es la red social de Tlaxcala: comparte fotos con ubicación, descubre lo que pasa en el estado y conecta con su gente.",
     url: `${process.env.NEXT_PUBLIC_BASE_URL}/que-es-tlaxapp`,
     siteName: "TlaxApp",
     images: [
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "¿Qué es TlaxApp?",
     description:
-      "TlaxApp es una red social para descubrir y compartir los mejores lugares de Tlaxcala.",
+      "TlaxApp es la red social de Tlaxcala: comparte fotos con ubicación, descubre lo que pasa en el estado y conecta con su gente.",
     images: ["/assets/og-image.png"],
   },
 
@@ -73,7 +73,7 @@ export default function QueEsTlaxApp() {
     "@type": "AboutPage",
     name: "¿Qué es TlaxApp?",
     description:
-      "Información sobre TlaxApp, la red social dedicada a descubrir lugares, negocios y experiencias en Tlaxcala.",
+      "TlaxApp es la red social de Tlaxcala: comparte fotos con ubicación, descubre lo que pasa en el estado y conecta con su gente.",
     url: `${process.env.NEXT_PUBLIC_BASE_URL}/que-es-tlaxapp`,
     mainEntity: {
       "@type": "Organization",
@@ -117,11 +117,11 @@ export default function QueEsTlaxApp() {
 
           <div className="col-sm-12 col-md-10 col-lg-8">
             <div className={contacto.contenedor_formulario}>
-              
+
               <div className={contacto.contenedor_titulos}>
                 <h1 className={contacto.titulo}>¿Qué es TlaxApp?</h1>
                 <p className={contacto.fecha}>
-                  Última actualización: <strong>Marzo 2026</strong>
+                  Última actualización: <strong>Octubre 2026</strong>
                 </p>
               </div>
 
@@ -129,90 +129,105 @@ export default function QueEsTlaxApp() {
 
                 <h2>¿Qué es TlaxApp?</h2>
                 <p>
-                  <strong>TlaxApp</strong> es una red social dedicada a Tlaxcala donde
-                  las personas pueden compartir fotos, descubrir lugares,
-                  apoyar negocios locales y mostrar lo mejor del estado.
-                </p>
-
-                <p>
-                  TlaxApp es una plataforma digital que conecta a las personas
-                  con los lugares, experiencias y negocios de Tlaxcala a través
-                  de fotografías y contenido generado por la comunidad.
+                  <strong>TlaxApp</strong> es una red social de Tlaxcala: un espacio
+                  hecho por y para tlaxcaltecas donde compartes fotografías,
+                  descubres lo que pasa en el estado y conectas con su gente. Cada
+                  publicación puede llevar su ubicación —del municipio hasta la
+                  localidad— para que el contenido se quede anclado a Tlaxcala.
                 </p>
 
                 <h2>Propósito</h2>
                 <p>
-                  El propósito de TlaxApp es mostrar, promover y conectar todo lo
-                  que hace especial a Tlaxcala: sus lugares, su gente y sus negocios.
+                  Dar a Tlaxcala un espacio digital propio: mostrar, promover y
+                  conectar lo que hace especial al estado —sus lugares, su gente y
+                  lo que ocurre en él— a través de lo que la comunidad comparte.
                 </p>
-
-                <ul>
-                  <li>Descubrir nuevos lugares en Tlaxcala</li>
-                  <li>Dar visibilidad a negocios locales</li>
-                  <li>Compartir experiencias reales</li>
-                  <li>Promover el turismo local</li>
-                </ul>
 
                 <h2>Misión</h2>
                 <p>
-                  Conectar a las personas con los lugares y experiencias de
-                  Tlaxcala a través de una plataforma donde la comunidad comparte
-                  fotografías, recomendaciones y descubre lo mejor del estado.
+                  Conectar a las personas de Tlaxcala mediante fotografías y
+                  experiencias reales, creando una comunidad donde compartir lo
+                  local sea sencillo, cercano y útil.
                 </p>
 
                 <h2>Visión</h2>
                 <p>
-                  Convertir a TlaxApp en la plataforma digital más importante
-                  para descubrir Tlaxcala, impulsando el turismo local, la
-                  visibilidad de negocios y el orgullo por el estado.
+                  Ser la comunidad digital de referencia en Tlaxcala: el lugar
+                  donde locales y visitantes descubren el estado, y donde lo local
+                  gana visibilidad y orgullo.
+                </p>
+
+                <h2>Objetivo</h2>
+                <p>
+                  Construir y hacer crecer la comunidad digital más activa
+                  dedicada a Tlaxcala, sumando cada vez más personas que
+                  publiquen, descubran y participen.
                 </p>
 
                 <h2>Valores</h2>
                 <ul>
-                  <li><strong>Comunidad</strong> — La plataforma crece gracias a las personas</li>
-                  <li><strong>Orgullo por Tlaxcala</strong> — Promover cultura y lugares</li>
-                  <li><strong>Apoyo a negocios locales</strong></li>
-                  <li><strong>Autenticidad</strong> — Experiencias reales</li>
-                  <li><strong>Innovación digital</strong></li>
+                  <li><strong>Comunidad</strong> — la plataforma crece gracias a las personas.</li>
+                  <li><strong>Orgullo tlaxcalteca</strong> — celebrar la cultura, los lugares y la gente del estado.</li>
+                  <li><strong>Autenticidad</strong> — experiencias y fotos reales, no contenido artificial.</li>
+                  <li><strong>Cercanía local</strong> — todo gira en torno a Tlaxcala y su gente.</li>
+                  <li><strong>Respeto y convivencia</strong> — un espacio seguro, con moderación y reportes.</li>
+                  <li><strong>Apoyo a lo local</strong> — damos visibilidad a lo que ocurre y se produce en el estado.</li>
                 </ul>
 
-                <h2>Objetivo</h2>
-                <p>
-                  Crear la mayor comunidad digital dedicada a descubrir y
-                  compartir lugares en Tlaxcala.
-                </p>
+                <h2>¿Qué puedes hacer en TlaxApp?</h2>
+                <ul>
+                  <li><strong>Publicar fotos</strong> de Tlaxcala con una descripción breve.</li>
+                  <li><strong>Ubicar tus publicaciones</strong>: municipio y localidad (catálogo INEGI de los 60 municipios).</li>
+                  <li><strong>Elegir quién las ve</strong>: para todo el feed (<em>público</em>) o solo en tu perfil (<em>solo perfil</em>).</li>
+                  <li><strong>Seguir a otras personas</strong> y explorar sus perfiles.</li>
+                  <li><strong>Interactuar</strong>: dar <em>like</em>, comentar y guardar en <strong>favoritos</strong>.</li>
+                  <li><strong>Recibir notificaciones</strong> cuando alguien interactúa contigo (en la app y push).</li>
+                  <li><strong>Personalizar tu perfil</strong>: foto, nombre y datos.</li>
+                  <li><strong>Reportar contenido</strong> inapropiado para cuidar la comunidad.</li>
+                  <li><strong>Controlar tu cuenta y privacidad</strong>: editar o eliminar.</li>
+                </ul>
 
                 <h2>¿Qué problema resuelve?</h2>
                 <ul>
-                  <li>Muchas personas no saben qué lugares visitar en Tlaxcala</li>
-                  <li>Los negocios locales tienen poca visibilidad digital</li>
-                  <li>No existe una plataforma enfocada solo en Tlaxcala</li>
+                  <li>La información y el contenido sobre Tlaxcala están <strong>dispersos</strong> entre muchas plataformas.</li>
+                  <li>Lo local <strong>pierde visibilidad</strong> frente a lo nacional o global.</li>
+                  <li>No existía una <strong>red social enfocada solo en Tlaxcala</strong>.</li>
                 </ul>
-
-                <p className="alert alert-info">
-                  💡 TlaxApp permite descubrir lugares a través de fotos reales
-                  compartidas por la comunidad.
-                </p>
 
                 <h2>¿Para quién es TlaxApp?</h2>
                 <ul>
-                  <li>Personas que viven en Tlaxcala</li>
-                  <li>Turistas locales</li>
-                  <li>Negocios locales</li>
-                  <li>Creadores de contenido</li>
+                  <li>Personas que viven en Tlaxcala.</li>
+                  <li>Tlaxcaltecas fuera del estado.</li>
+                  <li>Visitantes y turistas.</li>
+                  <li>Negocios y creadores de contenido locales.</li>
                 </ul>
 
-                <h2>Únete a la comunidad</h2>
+                <h2>Sobre negocios y turismo</h2>
                 <p>
-                  TlaxApp está construido por la comunidad. Cada fotografía,
-                  recomendación y experiencia ayuda a mostrar lo mejor de
-                  Tlaxcala.
+                  TlaxApp no es (todavía) un directorio de negocios ni una guía
+                  turística con fichas de lugares. El valor para lo local nace de
+                  lo que <strong>la comunidad comparte</strong>: fotos y recomendaciones
+                  reales que, con el tiempo, ayudan a dar visibilidad a negocios,
+                  lugares y experiencias de Tlaxcala.
                 </p>
 
+                <h2>Acceso</h2>
+                <p>
+                  TlaxApp está creciendo. Actualmente funciona con{" "}
+                  <strong>acceso anticipado por invitación</strong>, con apertura
+                  progresiva al público. Únete a la lista para ser de los
+                  primeros.
+                </p>
                 <p>
                   <Link href="/" className="text-primary">
                     Registrarse para el acceso anticipado
                   </Link>
+                </p>
+
+                <h2>Únete a la comunidad</h2>
+                <p>
+                  TlaxApp lo construye la comunidad. Cada foto y cada
+                  recomendación ayuda a mostrar lo mejor de Tlaxcala.
                 </p>
 
               </div>

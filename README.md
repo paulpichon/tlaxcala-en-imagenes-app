@@ -34,9 +34,10 @@ Ver `.env` para valores actuales. Variables principales:
 
 ## Documentación
 
-- `DOCUMENTACION.md` — Documentación completa del frontend
-- `API.md` — Endpoints del backend
-- `DOCUMENTACION-BACKEND.md` — Documentación del backend
+- `QUE-ES-TLAXAPP.md` — Copia oficial de la página "¿Qué es TlaxApp?" (fuente de verdad)
+- `SPECS-*.md` — Especificaciones de funcionalidades (reportes, moderación, edición de posteos, visibilidad)
+- `api/API_REFERENCE_*.md` — Endpoints del backend
+- `CHANGELOG.md` — Historial de cambios del proyecto
 - `AGENTS.md` — Contexto para asistentes IA
 
 ## Rutas Principales
@@ -53,4 +54,5 @@ Ver `.env` para valores actuales. Variables principales:
 | `/notificaciones` | Centro notificaciones | Requiere login |
 | `/favoritos` | Publicaciones favoritas | Requiere login |
 | `/contacto` | Contacto | Pública |
+| `/que-es-tlaxapp` | Página informativa "¿Qué es TlaxApp?" | Pública |
 | `/legal/*` | Términos, privacidad, FAQ | Pública |
