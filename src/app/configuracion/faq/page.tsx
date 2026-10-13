@@ -11,6 +11,7 @@ import MenuPrincipal from '@/app/components/MenuPrincipal';
 import NuevosUsuariosRegistrados from '@/app/components/NuevosUsuariosRegistrados';
 import Publicidad from '@/app/components/Publicidad';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useState } from 'react';
 import { FiArrowLeft } from "react-icons/fi";
 
@@ -39,6 +40,10 @@ export default function PreguntasFrecuentes() {
     {
       question: "¿Cómo elimino una publicación?",
       answer: "En el menú de opciones de cada publicación puedes eliminarla si eres el propietario. Esta acción es permanente."
+    },
+    {
+      question: "¿Puedo usar TlaxApp para publicar noticias o reportajes?",
+      answer: "TlaxApp está enfocada en compartir fotografías, experiencias, lugares y contenido local de Tlaxcala. Por ahora no está pensada para la difusión de noticias o reportajes, aunque este enfoque podría ampliarse en el futuro."
     },
     {
       question: "¿Cómo reporto a un usuario?",
@@ -159,6 +164,14 @@ export default function PreguntasFrecuentes() {
                               </div>
                             );
                           })}
+
+                          <p className="text-muted small mt-3 mb-0 text-center">
+                            Para más detalles, consulta nuestros{" "}
+                            <Link href="/legal/terminos-y-condiciones" className="text-decoration-none">
+                              Términos y Condiciones
+                            </Link>
+                            .
+                          </p>
 
                         </div>
                       </div>

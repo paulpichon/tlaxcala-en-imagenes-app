@@ -84,7 +84,7 @@ export const metadata: Metadata = {
   other: {
     'document-type': 'legal',
     'document-category': 'terms-of-service',
-    'last-modified': '2026-01',
+    'last-modified': '2026-10',
     'language': 'es-MX',
     'effective-date': '2026-01',
   },
@@ -126,7 +126,7 @@ export default function TerminosCondicionesServicio() {
       '@type': 'Article',
       headline: 'Términos y Condiciones de Servicio de TlaxApp',
       datePublished: '2026-01-01',
-      dateModified: '2026-01-01',
+      dateModified: '2026-10-12',
       author: {
         '@type': 'Organization',
         name: 'TlaxApp',
@@ -253,6 +253,16 @@ export default function TerminosCondicionesServicio() {
                   <li>Recibir notificaciones sobre la interacción con su contenido</li>
                   <li>Reportar contenido inapropiado para cuidar la comunidad</li>
                 </ul>
+
+                <h3>2.1 Enfoque de contenido</h3>
+                <p>
+                  <strong>Enfoque de contenido.</strong> TlaxApp está pensada para compartir fotografías,
+                  experiencias, lugares y contenido local de Tlaxcala. Actualmente no está orientada
+                  a la difusión de noticias o reportajes periodísticos. Nos reservamos el derecho de
+                  moderar contenido que se aleje de este enfoque. Este criterio podrá evolucionar con
+                  el tiempo.
+                </p>
+
                 <p>
                   Nos reservamos el derecho de modificar, suspender o descontinuar cualquier aspecto 
                   de la Plataforma en cualquier momento, con o sin previo aviso.
