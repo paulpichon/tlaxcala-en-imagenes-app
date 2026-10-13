@@ -28,17 +28,17 @@ const faqs = [
   {
     question: "¿Qué es TlaxApp?",
     answer:
-      "TlaxApp es una red social enfocada en compartir y descubrir contenido relacionado con Tlaxcala, México. Los usuarios pueden publicar fotos, seguir perfiles y conectar con la comunidad local.",
+      "TlaxApp es la red social de Tlaxcala: un espacio hecho por y para tlaxcaltecas donde compartes fotografías, descubres lo que pasa en el estado y conectas con su gente. Cada publicación puede llevar su ubicación, del municipio hasta la localidad.",
   },
   {
     question: "¿Necesito crear una cuenta para usar TlaxApp?",
     answer:
-      "Puedes explorar algunas secciones públicas, pero para publicar contenido, comentar o seguir usuarios necesitas crear una cuenta verificada.",
+      "Puedes explorar las secciones públicas. Para publicar contenido, comentar o seguir usuarios necesitas crear una cuenta, que está disponible solo por invitación durante el acceso anticipado.",
   },
   {
     question: "¿Cómo creo una cuenta?",
     answer:
-      "Puedes registrarte desde la página de inicio usando tu correo electrónico. Recibirás un correo de verificación para activar tu cuenta.",
+      "Actualmente TlaxApp funciona con acceso anticipado por invitación. Regístrate en la lista de espera desde la página de inicio; cuando recibas tu invitación podrás crear tu cuenta con tu correo electrónico.",
   },
   {
     question: "Olvidé mi contraseña, ¿qué hago?",
@@ -48,7 +48,7 @@ const faqs = [
   {
     question: "¿Cómo puedo reportar contenido inapropiado?",
     answer:
-      "Puedes reportar publicaciones o usuarios desde la sección de ayuda y soporte. Nuestro equipo revisará cada caso conforme a nuestras políticas.",
+      "Con tu sesión iniciada, abre el menú de opciones de la publicación y selecciona 'Reportar publicación'. El equipo de moderación revisará cada caso conforme a nuestras políticas.",
   },
   {
     question: "¿Cómo elimino mi cuenta?",
@@ -202,7 +202,7 @@ export default function FAQPublica() {
                   Preguntas Frecuentes
                 </h1>
                 <p className={condiciones.fecha}>
-                  Última actualización: <strong>Enero 2026</strong>
+                  Última actualización: <strong>Octubre 2026</strong>
                 </p>
               </div>
 

@@ -1,40 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tlaxcala en Imágenes App (TlaxApp) — Coming Soon
 
-## Getting Started
+Página pública de acceso anticipado para TlaxApp: la red social de Tlaxcala.
+Durante esta etapa, los visitantes pueden conocer qué es TlaxApp y registrarse
+en la lista de espera para obtener una invitación.
 
-First, run the development server:
+## Stack
+
+- **Framework:** Next.js 16 (App Router), React 19, TypeScript 5
+- **UI:** Bootstrap 5.3, CSS Modules
+- **Formularios:** react-hook-form + Zod
+- **Paquetería:** pnpm
+
+## Comandos
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm dev      # Desarrollo
+pnpm build    # Build de producción
+pnpm start    # Servir build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Variables de entorno
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copia `.env.example` a `.env` y completa los valores:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Descripción |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | URL del backend (ej. `https://api.tlaxapp.com`) |
+| `NEXT_PUBLIC_BASE_URL` | URL pública del frontend (ej. `https://www.tlaxapp.com`) |
 
-## Learn More
+## Rutas principales
 
-To learn more about Next.js, take a look at the following resources:
+| Ruta | Descripción | Indexable |
+|---|---|---|
+| `/` | Landing con registro a acceso anticipado | Sí |
+| `/que-es-tlaxapp` | Información sobre TlaxApp | Sí |
+| `/contacto` | Contacto y soporte | Sí |
+| `/legal/politica-de-privacidad` | Política de privacidad | Sí |
+| `/legal/terminos-y-condiciones` | Términos y condiciones | Sí |
+| `/legal/preguntas-frecuentes` | Preguntas frecuentes | Sí |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Documentación
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `QUE-ES-TLAXAPP.md` — Copia oficial y fuente de verdad de la página "¿Qué es TlaxApp?"
+- `SPEC-early-access.md` — Especificación del endpoint de registro a la lista de acceso anticipado
 
-## Deploy on Vercel
+## Despliegue
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-## Estructura de este proyecto, visitar el siguiente link
-https://nextjs.org/docs/app/getting-started/project-structure#store-project-files-in-top-level-folders-inside-of-app
-https://nextjs.org/docs/app/getting-started/project-structure#split-project-files-by-feature-or-route
+Optimizado para Vercel con `pnpm`.

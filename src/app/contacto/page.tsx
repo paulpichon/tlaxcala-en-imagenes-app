@@ -116,7 +116,7 @@ export default function Contacto() {
       name: 'TlaxApp',
       alternateName: 'TlaxApp - Red Social de Tlaxcala',
       url: process.env.NEXT_PUBLIC_BASE_URL,
-      logo: `${process.env.NEXT_PUBLIC_BASE_URL}/assets/logo.png`,
+      logo: `${process.env.NEXT_PUBLIC_BASE_URL}/assets/og-image.png`,
       
       // Información de contacto estructurada
       contactPoint: [

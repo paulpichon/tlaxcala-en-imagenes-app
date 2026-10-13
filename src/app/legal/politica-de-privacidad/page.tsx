@@ -132,7 +132,7 @@ export default function PoliticaDePrivacidad() {
         name: 'TlaxApp',
         logo: {
           '@type': 'ImageObject',
-          url: `${process.env.NEXT_PUBLIC_BASE_URL}/assets/logo.png`,
+          url: `${process.env.NEXT_PUBLIC_BASE_URL}/assets/og-image.png`,
         },
       },
       // Indica que es un documento legal

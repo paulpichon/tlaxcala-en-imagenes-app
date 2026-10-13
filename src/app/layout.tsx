@@ -11,19 +11,21 @@ import './ui/fonts';
 // NuevosUsuariosProvider
 // metadatos
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"),
   title: {
     default: "TlaxApp",
     template: "%s | TlaxApp",
   },
   description:
-    "TlaxApp es la red social de Tlaxcala. Comparte fotos, descubre lugares, conecta con personas y vive Tlaxcala a través de su gente.",
+    "TlaxApp es la red social de Tlaxcala: comparte fotos con ubicación, descubre lo que pasa en el estado y conecta con su gente.",
   keywords: [
-    "Tlaxcala",
     "TlaxApp",
+    "Tlaxcala",
     "red social Tlaxcala",
-    "lugares de Tlaxcala",
-    "personas de Tlaxcala",
-    "turismo Tlaxcala",
+    "comunidad Tlaxcala",
+    "fotos de Tlaxcala",
+    "descubrir Tlaxcala",
+    "red social local",
   ],
   authors: [{ name: "TlaxApp" }],
   creator: "TlaxApp",
@@ -31,7 +33,7 @@ export const metadata: Metadata = {
     title: "TlaxApp | La red social de Tlaxcala",
     description:
       "Descubre Tlaxcala a través de fotos, historias y personas reales.",
-    url: `https://www.tlaxapp.com`,
+    url: `${process.env.NEXT_PUBLIC_BASE_URL}`,
     siteName: "TlaxApp",
     images: [
       {

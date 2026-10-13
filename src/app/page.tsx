@@ -125,7 +125,7 @@ export default function Home() {
           </p>
 
           <p className={styles.subtitle}>
-            TlaxApp está en acceso privado. Regístrate para obtener tu invitación y ser de los primeros en mapear el estado
+            TlaxApp está creciendo. Actualmente funciona con acceso anticipado por invitación, con apertura progresiva al público. Únete a la lista para ser de los primeros.
           </p>
 
           {/* INPUT */}

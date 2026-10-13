@@ -137,7 +137,7 @@ export default function TerminosCondicionesServicio() {
         name: 'TlaxApp',
         logo: {
           '@type': 'ImageObject',
-          url: `${process.env.NEXT_PUBLIC_BASE_URL}/assets/logo.png`,
+          url: `${process.env.NEXT_PUBLIC_BASE_URL}/assets/og-image.png`,
         },
       },
       // Indica que es un documento legal
@@ -216,7 +216,7 @@ export default function TerminosCondicionesServicio() {
               <div className={condiciones.contenedor_titulos}>
                 <h1 className={condiciones.titulo}>Términos y Condiciones de Servicio</h1>
                 <p className={condiciones.fecha}>
-                  Última actualización: <strong>Enero 2026</strong>
+                  Última actualización: <strong>Octubre 2026</strong>
                 </p>
               </div>
 
@@ -239,17 +239,19 @@ export default function TerminosCondicionesServicio() {
                 {/* Sección 2: Descripción del Servicio */}
                 <h2>2. Descripción del Servicio</h2>
                 <p>
-                  TlaxApp es una red social dedicada a la promoción, difusión y preservación del 
-                  patrimonio cultural, natural, social y turístico del estado de Tlaxcala, México. 
+                  TlaxApp es una red social de Tlaxcala, México: un espacio hecho por y para 
+                  tlaxcaltecas donde se comparten fotografías y experiencias del estado. 
                   Nuestra Plataforma permite a los usuarios:
                 </p>
                 <ul>
                   <li>Crear perfiles personales</li>
-                  <li>Publicar y compartir fotografías, videos y contenido relacionado con Tlaxcala</li>
-                  <li>Interactuar con otros usuarios mediante comentarios, reacciones y mensajes</li>
-                  <li>Descubrir contenido sobre lugares, eventos y cultura de Tlaxcala</li>
-                  <li>Participar en comunidades y grupos de interés</li>
-                  <li>Conectar con otros entusiastas de Tlaxcala</li>
+                  <li>Publicar y compartir fotografías relacionadas con Tlaxcala</li>
+                  <li>Ubicar sus publicaciones por municipio y localidad</li>
+                  <li>Elegir la visibilidad de sus publicaciones: todo el feed o solo su perfil</li>
+                  <li>Seguir perfiles y descubrir contenido de Tlaxcala</li>
+                  <li>Interactuar con otros usuarios mediante likes, comentarios y favoritos</li>
+                  <li>Recibir notificaciones sobre la interacción con su contenido</li>
+                  <li>Reportar contenido inapropiado para cuidar la comunidad</li>
                 </ul>
                 <p>
                   Nos reservamos el derecho de modificar, suspender o descontinuar cualquier aspecto 
