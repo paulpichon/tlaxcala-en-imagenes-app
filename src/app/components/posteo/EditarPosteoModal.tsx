@@ -22,6 +22,7 @@ import {
   type Operacion,
 } from "@/lib/apiClient";
 import { invalidarCatalogos } from "@/lib/catalogos";
+import styles from "@/app/ui/posteo/EditarPosteoModal.module.css";
 
 // Ubicación normalizada para comparar el formulario contra lo guardado en el posteo
 type SnapshotUbicacion = {
@@ -377,15 +378,14 @@ export default function EditarPosteoModal({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-75"
+            className={`position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-75 ${styles.overlay}`}
             style={{ zIndex: 2000 }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="bg-white rounded-4 p-4 shadow-lg"
-              style={{ maxWidth: 500, width: "90%" }}
+              className={`bg-white rounded-4 shadow-lg p-3 p-md-4 ${styles.modal}`}
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
@@ -401,155 +401,157 @@ export default function EditarPosteoModal({
                 ></button>
               </div>
 
-              {/* ====================== */}
-              {/* 📍 SECCIÓN UBICACIÓN   */}
-              {/* ====================== */}
+              <div className={styles.body}>
+                {/* ====================== */}
+                {/* 📍 SECCIÓN UBICACIÓN   */}
+                {/* ====================== */}
 
-              <div className="border rounded p-3 mb-3 bg-light">
-                <div className="d-flex flex-column align-items-center gap-2 mb-2">
-                  <h6 className="fw-bold mb-0">
-                    <FiMapPin size={18} style={{ color: "#EBCA9A" }} className="me-1" />
-                    Ubicación <small className="text-muted">(opcional)</small>
+                <div className="border rounded p-3 mb-3 bg-light">
+                  <div className="d-flex flex-column align-items-center gap-2 mb-2">
+                    <h6 className="fw-bold mb-0">
+                      <FiMapPin size={18} style={{ color: "#EBCA9A" }} className="me-1" />
+                      Ubicación <small className="text-muted">(opcional)</small>
+                    </h6>
+
+                    {/* Si no hay una ciudad seleccionada/detectada, mostrar botón de GPS */}
+                    {!ciudad && !loadingUbicacion && (
+                      <button
+                        onClick={detectarUbicacion}
+                        className="iconLocationBtn"
+                        title="Detectar ubicación automáticamente"
+                      >
+                        <FiNavigation size={16} />
+                        Detectar mi ubicación
+                      </button>
+                    )}
+
+                    {/* Si ya hay datos, mostrar botón de quitar */}
+                    {(ciudad || municipioId) && (
+                      <button
+                        onClick={eliminarUbicacion}
+                        className="btn btn-sm btn-outline-danger"
+                      >
+                        Quitar
+                      </button>
+                    )}
+                  </div>
+
+                  {loadingUbicacion && (
+                    <p className="small text-muted mb-0">Obteniendo ubicación…</p>
+                  )}
+
+                  {ciudad && (
+                    <div className="alert alert-success py-2 px-3 mb-2">
+                      <strong>{ciudad}</strong>, {estado}, {pais}
+                      {/* Sugerencia del reverse geocoding (informativa;
+                          la localidad vigente es la del select) */}
+                      {lat && lng && localidadCercana && (
+                        <span className="d-block small mt-1">
+                          📍 Cerca de <strong>{localidadCercana.nombre}</strong> (~{Math.round(localidadCercana.distancia_metros)} m)
+                        </span>
+                      )}
+                      <div className="small text-muted">
+                        {/* Lógica dinámica para el origen de la ubicación */}
+                        {lat && lng ? (
+                          <span className="text-success">✨ Detectada automáticamente</span>
+                        ) : (
+                          <span className="text-success">🖐️ Selección manual</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {ubicacionError && (
+                    <div className="alert alert-warning py-2 px-3 mb-2">
+                      No se pudo detectar la ubicación automáticamente
+                    </div>
+                  )}
+
+                  <ManualMunicipioSelector
+                    municipio={municipioId}
+                    localidadClave={localidad?.clave ?? null}
+                    onSelect={(id, data, localidadSel) => {
+                      // Cambiar de municipio abandona el GPS detectado.
+                      // Cambiar sólo la localidad conserva lat/lng (esExacta: true).
+                      if (id !== municipioId) {
+                        setLat(null);
+                        setLng(null);
+                      }
+                      setMunicipioId(id);
+                      setCiudad(data.ciudad);
+                      setEstado(data.estado);
+                      setPais(data.pais);
+                      setLocalidad(localidadSel);
+                    }}
+                  />
+                </div>
+
+                {/* ====================== */}
+                {/* 📝 SECCIÓN DESCRIPCIÓN */}
+                {/* ====================== */}
+
+                <div className="border rounded p-3 mb-3 bg-light">
+                  <h6 className="text-center fw-bold mb-2">
+                    <FiEdit3 size={18} style={{ color: "#EBCA9A" }} className="me-1" />
+                    Descripción <small className="text-muted">(opcional)</small>
                   </h6>
 
-                  {/* Si no hay una ciudad seleccionada/detectada, mostrar botón de GPS */}
-                  {!ciudad && !loadingUbicacion && (
-                    <button
-                      onClick={detectarUbicacion}
-                      className="iconLocationBtn"
-                      title="Detectar ubicación automáticamente"
-                    >
-                      <FiNavigation size={16} />
-                      Detectar mi ubicación
-                    </button>
-                  )}
+                  <textarea
+                    className="form-control"
+                    rows={4}
+                    maxLength={maxChars}
+                    value={texto}
+                    onChange={(e) => setTexto(e.target.value)}
+                    placeholder="Escribe algo..."
+                  />
 
-                  {/* Si ya hay datos, mostrar botón de quitar */}
-                  {(ciudad || municipioId) && (
-                    <button
-                      onClick={eliminarUbicacion}
-                      className="btn btn-sm btn-outline-danger"
-                    >
-                      Quitar
-                    </button>
-                  )}
+                  <div className="text-end small text-muted mt-1">
+                    {texto.length}/{maxChars}
+                  </div>
                 </div>
 
-                {loadingUbicacion && (
-                  <p className="small text-muted mb-0">Obteniendo ubicación…</p>
-                )}
+                {/* ====================== */}
+                {/* 🔐 SECCIÓN VISIBILIDAD   */}
+                {/* ====================== */}
 
-                {ciudad && (
-                  <div className="alert alert-success py-2 px-3 mb-2">
-                    <strong>{ciudad}</strong>, {estado}, {pais}
-                    {/* Sugerencia del reverse geocoding (informativa;
-                        la localidad vigente es la del select) */}
-                    {lat && lng && localidadCercana && (
-                      <span className="d-block small mt-1">
-                        📍 Cerca de <strong>{localidadCercana.nombre}</strong> (~{Math.round(localidadCercana.distancia_metros)} m)
-                      </span>
-                    )}
-                    <div className="small text-muted">
-                      {/* Lógica dinámica para el origen de la ubicación */}
-                      {lat && lng ? (
-                        <span className="text-success">✨ Detectada automáticamente</span>
-                      ) : (
-                        <span className="text-success">🖐️ Selección manual</span>
-                      )}
+                <div className="border rounded p-3 mb-3 bg-light">
+                  <h6 className="text-center fw-bold mb-3">
+                    <FiLock size={18} style={{ color: "#EBCA9A" }} className="me-1" />
+                    Visibilidad
+                  </h6>
+
+                  <div className="d-flex gap-3">
+                    {/* Público */}
+                    <div
+                      className={`p-3 rounded border flex-fill btn ${
+                        visibilidad === "publico" ? "border-primary bg-white shadow-sm" : "bg-light"
+                      }`}
+                      onClick={() => setVisibilidad("publico")}
+                    >
+                      <div className="fw-bold">Público</div>
+                      <small className="text-muted">
+                        Aparecerá en el inicio de todos los usuarios y en tu perfil.
+                      </small>
                     </div>
-                  </div>
-                )}
 
-                {ubicacionError && (
-                  <div className="alert alert-warning py-2 px-3 mb-2">
-                    No se pudo detectar la ubicación automáticamente
-                  </div>
-                )}
-
-                <ManualMunicipioSelector
-                  municipio={municipioId}
-                  localidadClave={localidad?.clave ?? null}
-                  onSelect={(id, data, localidadSel) => {
-                    // Cambiar de municipio abandona el GPS detectado.
-                    // Cambiar sólo la localidad conserva lat/lng (esExacta: true).
-                    if (id !== municipioId) {
-                      setLat(null);
-                      setLng(null);
-                    }
-                    setMunicipioId(id);
-                    setCiudad(data.ciudad);
-                    setEstado(data.estado);
-                    setPais(data.pais);
-                    setLocalidad(localidadSel);
-                  }}
-                />
-              </div>
-
-              {/* ====================== */}
-              {/* 📝 SECCIÓN DESCRIPCIÓN */}
-              {/* ====================== */}
-
-              <div className="border rounded p-3 mb-3 bg-light">
-                <h6 className="text-center fw-bold mb-2">
-                  <FiEdit3 size={18} style={{ color: "#EBCA9A" }} className="me-1" />
-                  Descripción <small className="text-muted">(opcional)</small>
-                </h6>
-
-                <textarea
-                  className="form-control"
-                  rows={4}
-                  maxLength={maxChars}
-                  value={texto}
-                  onChange={(e) => setTexto(e.target.value)}
-                  placeholder="Escribe algo..."
-                />
-
-                <div className="text-end small text-muted mt-1">
-                  {texto.length}/{maxChars}
-                </div>
-              </div>
-
-              {/* ====================== */}
-              {/* 🔐 SECCIÓN VISIBILIDAD   */}
-              {/* ====================== */}
-
-              <div className="border rounded p-3 mb-3 bg-light">
-                <h6 className="text-center fw-bold mb-3">
-                  <FiLock size={18} style={{ color: "#EBCA9A" }} className="me-1" />
-                  Visibilidad
-                </h6>
-
-                <div className="d-flex gap-3">
-                  {/* Público */}
-                  <div
-                    className={`p-3 rounded border flex-fill btn ${
-                      visibilidad === "publico" ? "border-primary bg-white shadow-sm" : "bg-light"
-                    }`}
-                    onClick={() => setVisibilidad("publico")}
-                  >
-                    <div className="fw-bold">Público</div>
-                    <small className="text-muted">
-                      Aparecerá en el inicio de todos los usuarios y en tu perfil.
-                    </small>
-                  </div>
-
-                  {/* Solo perfil */}
-                  <div
-                    className={`p-3 rounded border flex-fill btn ${
-                      visibilidad === "perfil" ? "border-primary bg-white shadow-sm" : "bg-light"
-                    }`}
-                    onClick={() => setVisibilidad("perfil")}
-                  >
-                    <div className="fw-bold">Solo perfil</div>
-                    <small className="text-muted">
-                      Solo se muestra en tu perfil; no aparece en el inicio.
-                    </small>
+                    {/* Solo perfil */}
+                    <div
+                      className={`p-3 rounded border flex-fill btn ${
+                        visibilidad === "perfil" ? "border-primary bg-white shadow-sm" : "bg-light"
+                      }`}
+                      onClick={() => setVisibilidad("perfil")}
+                    >
+                      <div className="fw-bold">Solo perfil</div>
+                      <small className="text-muted">
+                        Solo se muestra en tu perfil; no aparece en el inicio.
+                      </small>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* BOTONES */}
-              <div className="d-flex justify-content-end gap-2">
+              <div className="d-flex justify-content-end gap-2 pt-3">
                 <button
                   className="btn btn-secondary"
                   onClick={() => onClose(false)}
