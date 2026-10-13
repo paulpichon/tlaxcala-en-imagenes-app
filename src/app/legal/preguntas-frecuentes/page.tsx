@@ -31,6 +31,11 @@ const faqs = [
       "TlaxApp es la red social de Tlaxcala: un espacio hecho por y para tlaxcaltecas donde compartes fotografías, descubres lo que pasa en el estado y conectas con su gente. Cada publicación puede llevar su ubicación, del municipio hasta la localidad.",
   },
   {
+    question: "¿Puedo usar TlaxApp para publicar noticias o reportajes?",
+    answer:
+      "TlaxApp está enfocada en compartir fotografías, experiencias, lugares y contenido local de Tlaxcala. Por ahora no está pensada para la difusión de noticias o reportajes, aunque este enfoque podría ampliarse en el futuro.",
+  },
+  {
     question: "¿Necesito crear una cuenta para usar TlaxApp?",
     answer:
       "Puedes explorar las secciones públicas. Para publicar contenido, comentar o seguir usuarios necesitas crear una cuenta, que está disponible solo por invitación durante el acceso anticipado.",
