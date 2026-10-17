@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Posteo, LikeUsuario, ApiResponse } from "@/types/types";
 import perfil from "../../ui/perfil/perfil.module.css";
 import Image from "next/image";
-import { FiMoreHorizontal, FiX, FiSend, FiEyeOff } from "react-icons/fi";
+import { FiMoreHorizontal, FiX, FiSend, FiEyeOff, FiSmile } from "react-icons/fi";
 import ModalOpcionesPublicacion from "../ModalOpcionesPublicacion";
 import LikeButton from "../LikeButton";
 import ModalLikesUsuarios from "../ModalLikesUsuarios";
@@ -16,9 +16,11 @@ import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfil
 import { avatarMiniLoader, imageModalLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import { useComentarios } from "@/app/hooks/useComentarios";
 import ComentarioItem from "../ComentarioItem";
-import { comentarioSchema } from "@/lib/validaciones";
+import { comentarioSchema, MAX_TEXTO_COMENTARIO } from "@/lib/validaciones";
 import { formatearEtiquetaUbicacion } from "@/lib/etiquetaUbicacion";
 import ToastGlobal from "../ToastGlobal";
+import EmojiPicker from "../EmojiPicker";
+import { insertEmojiAtCursor } from "@/app/lib/emoji";
 
 interface PropsImageModal {
   isOpen: boolean;
@@ -113,6 +115,8 @@ const ImageModal: React.FC<PropsImageModal> = ({
   const [comentarioTexto, setComentarioTexto] = useState("");
   const [sendingComentario, setSendingComentario] = useState(false);
   const [toastComentario, setToastComentario] = useState<{ message: string; type: "success" | "danger" } | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const activeInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (isOpen && posteoActual?._id) {
@@ -335,30 +339,56 @@ const ImageModal: React.FC<PropsImageModal> = ({
               )}
 
               {posteoActual.comentariosActivos !== false && (
-                <div className="d-flex align-items-center bg-white px-3 py-2 border-top flex-shrink-0">
-                  <input
-                    className="form-control form-control-sm border-0 shadow-none"
-                    placeholder="Escribe un comentario..."
-                    maxLength={250}
-                    value={comentarioTexto}
-                    onChange={(e) => setComentarioTexto(e.target.value)}
-                    onKeyDown={handleKeyDownComentario}
-                    disabled={sendingComentario}
-                    style={{ fontSize: "0.85rem" }}
-                  />
-                  <button
-                    onClick={handleEnviarComentario}
-                    disabled={sendingComentario || !comentarioTexto.trim()}
-                    className="btn btn-sm"
-                    style={{ background: "none", border: "none", color: "#EBCA9A" }}
-                  >
-                    {sendingComentario ? (
-                      <span className="spinner-border spinner-border-sm" role="status" />
-                    ) : (
-                      <FiSend size={18} />
-                    )}
-                  </button>
-                </div>
+                <>
+                  <div className="d-flex align-items-center bg-white px-3 py-2 border-top flex-shrink-0">
+                    <input
+                      className="form-control form-control-sm border-0 shadow-none"
+                      placeholder="Escribe un comentario..."
+                      maxLength={MAX_TEXTO_COMENTARIO}
+                      value={comentarioTexto}
+                      onChange={(e) => setComentarioTexto(e.target.value)}
+                      onKeyDown={handleKeyDownComentario}
+                      onFocus={(e) => { activeInputRef.current = e.currentTarget; }}
+                      disabled={sendingComentario}
+                      style={{ fontSize: "0.85rem" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowEmojiPicker((v) => !v)}
+                      className="btn btn-sm"
+                      style={{ background: "none", border: "none", color: "#EBCA9A" }}
+                      aria-label="Abrir selector de emojis"
+                    >
+                      <FiSmile size={18} />
+                    </button>
+                    <button
+                      onClick={handleEnviarComentario}
+                      disabled={sendingComentario || !comentarioTexto.trim()}
+                      className="btn btn-sm"
+                      style={{ background: "none", border: "none", color: "#EBCA9A" }}
+                    >
+                      {sendingComentario ? (
+                        <span className="spinner-border spinner-border-sm" role="status" />
+                      ) : (
+                        <FiSend size={18} />
+                      )}
+                    </button>
+                  </div>
+                  <div className="bg-white px-3 pb-2">
+                    <EmojiPicker
+                      open={showEmojiPicker}
+                      onClose={() => setShowEmojiPicker(false)}
+                      onSelect={(emoji) =>
+                        insertEmojiAtCursor(
+                          emoji,
+                          activeInputRef.current,
+                          setComentarioTexto,
+                          MAX_TEXTO_COMENTARIO
+                        )
+                      }
+                    />
+                  </div>
+                </>
               )}
             </div>
           ) : (
@@ -457,30 +487,56 @@ const ImageModal: React.FC<PropsImageModal> = ({
                 )}
 
                 {posteoActual.comentariosActivos !== false && (
-                  <div className="d-flex align-items-center px-3 py-2 border-top">
-                    <input
-                      className="form-control form-control-sm border-0 shadow-none"
-                      placeholder="Escribe un comentario..."
-                      maxLength={250}
-                      value={comentarioTexto}
-                      onChange={(e) => setComentarioTexto(e.target.value)}
-                      onKeyDown={handleKeyDownComentario}
-                      disabled={sendingComentario}
-                      style={{ fontSize: "0.85rem" }}
-                    />
-                    <button
-                      onClick={handleEnviarComentario}
-                      disabled={sendingComentario || !comentarioTexto.trim()}
-                      className="btn btn-sm"
-                      style={{ background: "none", border: "none", color: "#EBCA9A" }}
-                    >
-                      {sendingComentario ? (
-                        <span className="spinner-border spinner-border-sm" role="status" />
-                      ) : (
-                        <FiSend size={18} />
-                      )}
-                    </button>
-                  </div>
+                  <>
+                    <div className="d-flex align-items-center px-3 py-2 border-top">
+                      <input
+                        className="form-control form-control-sm border-0 shadow-none"
+                        placeholder="Escribe un comentario..."
+                        maxLength={MAX_TEXTO_COMENTARIO}
+                        value={comentarioTexto}
+                        onChange={(e) => setComentarioTexto(e.target.value)}
+                        onKeyDown={handleKeyDownComentario}
+                        onFocus={(e) => { activeInputRef.current = e.currentTarget; }}
+                        disabled={sendingComentario}
+                        style={{ fontSize: "0.85rem" }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowEmojiPicker((v) => !v)}
+                        className="btn btn-sm"
+                        style={{ background: "none", border: "none", color: "#EBCA9A" }}
+                        aria-label="Abrir selector de emojis"
+                      >
+                        <FiSmile size={18} />
+                      </button>
+                      <button
+                        onClick={handleEnviarComentario}
+                        disabled={sendingComentario || !comentarioTexto.trim()}
+                        className="btn btn-sm"
+                        style={{ background: "none", border: "none", color: "#EBCA9A" }}
+                      >
+                        {sendingComentario ? (
+                          <span className="spinner-border spinner-border-sm" role="status" />
+                        ) : (
+                          <FiSend size={18} />
+                        )}
+                      </button>
+                    </div>
+                    <div className="px-3 pb-2">
+                      <EmojiPicker
+                        open={showEmojiPicker}
+                        onClose={() => setShowEmojiPicker(false)}
+                        onSelect={(emoji) =>
+                          insertEmojiAtCursor(
+                            emoji,
+                            activeInputRef.current,
+                            setComentarioTexto,
+                            MAX_TEXTO_COMENTARIO
+                          )
+                        }
+                      />
+                    </div>
+                  </>
                 )}
 
                 <div className={`px-3 py-2 ${posteoActual.comentariosActivos !== false ? "border-top" : ""}`}>

@@ -56,6 +56,21 @@ Copied from `.env.example`. Key vars: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_API_UR
 - Sharing: the share button is blocked for `visibilidad === 'perfil'` — `ModalOpcionesPublicacion` never generates a link and shows a small inline warning instead.
 - The `401` `AUTHENTICATION_ERROR` on `GET /api/posteos/post/:id` is handled in `PosteoDetalle` as "requires login" (screen with `Ir a login` action), not as a fatal error. `isUnauthorized()` in `apiClient.ts` matches both `UNAUTHORIZED` and `AUTHENTICATION_ERROR`.
 
+## Texto de posteos y comentarios
+
+- El backend es la **única fuente de validación de caracteres**. El frontend no usa regex de allow-list para `texto`; solo aplica `maxLength` UTF-16 y, en comentarios, `trim` + obligatoriedad.
+- Límites centralizados en `src/lib/validaciones.ts`:
+  - Posteos: `MAX_TEXTO_POSTEO = 500`.
+  - Comentarios: `MAX_TEXTO_COMENTARIO = 250`.
+- Los contadores usan `String.length` (unidades UTF-16), igual que `maxLength` nativo y el backend.
+- Se mantuvo `spamRegex` en `editarPosteoSchema` y `comentarioSchema` para bloquear URLs/frases de spam; no afecta caracteres permitidos.
+- Emoji picker:
+  - Componente propio ligero en `src/app/components/EmojiPicker.tsx` con lista curada y "recientes" en `localStorage`.
+  - Botón visible en todos los dispositivos; la lista curada permite insertar emojis sin depender del teclado nativo.
+  - Inserta el emoji en la posición del cursor respetando `maxLength`.
+  - Superficies con picker: `CrearPosteoModal`, `EditarPosteoModal`, `ComentariosSection`, `ComentariosModal` e `ImageModal` (mobile + desktop inputs).
+  - El hook `useIsMobile` ya no existe; la detección móvil que aún necesitan `useCrearPosteo` e `ImageModal` sigue siendo local.
+
 ## Reportes de publicación (Fase 1)
 
 - **Endpoint:** `POST /api/reportes/:posteoId` con body JSON `{ categoria, descripcion }`.

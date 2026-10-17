@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState, useRef } from "react";
-import { FiSend } from "react-icons/fi";
+import { FiSend, FiSmile } from "react-icons/fi";
 import { useComentarios } from "@/app/hooks/useComentarios";
-import { comentarioSchema } from "@/lib/validaciones";
+import { comentarioSchema, MAX_TEXTO_COMENTARIO } from "@/lib/validaciones";
 import ComentarioItem from "../ComentarioItem";
 import styles from "../../ui/posteos/ComentariosSection.module.css";
 import ToastGlobal from "../ToastGlobal";
+import EmojiPicker from "../EmojiPicker";
+import { insertEmojiAtCursor } from "@/app/lib/emoji";
 
 interface ComentariosSectionProps {
   postId: string;
@@ -34,6 +36,7 @@ export default function ComentariosSection({
   const [texto, setTexto] = useState("");
   const [sending, setSending] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "danger" } | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -133,13 +136,21 @@ export default function ComentariosSection({
             ref={inputRef}
             className={styles.inputField}
             rows={1}
-            maxLength={250}
+            maxLength={MAX_TEXTO_COMENTARIO}
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Escribe un comentario..."
             disabled={sending}
           />
+          <button
+            type="button"
+            onClick={() => setShowEmojiPicker((v) => !v)}
+            className={styles.sendBtn}
+            aria-label="Abrir selector de emojis"
+          >
+            <FiSmile size={18} />
+          </button>
           <button
             onClick={handleSend}
             disabled={sending || !texto.trim()}
@@ -153,6 +164,18 @@ export default function ComentariosSection({
             )}
           </button>
         </div>
+        <EmojiPicker
+          open={showEmojiPicker}
+          onClose={() => setShowEmojiPicker(false)}
+          onSelect={(emoji) =>
+            insertEmojiAtCursor(
+              emoji,
+              inputRef.current,
+              setTexto,
+              MAX_TEXTO_COMENTARIO
+            )
+          }
+        />
       </div>
 
       {toast && (

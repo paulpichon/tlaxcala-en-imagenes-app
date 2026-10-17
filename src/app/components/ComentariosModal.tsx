@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState, useRef } from "react";
-import { FiSend, FiMessageCircle } from "react-icons/fi";
+import { FiSend, FiMessageCircle, FiSmile } from "react-icons/fi";
 import { useComentarios } from "@/app/hooks/useComentarios";
-import { comentarioSchema } from "@/lib/validaciones";
+import { comentarioSchema, MAX_TEXTO_COMENTARIO } from "@/lib/validaciones";
 import ComentarioItem from "./ComentarioItem";
 import styles from "../ui/posteos/ComentariosModal.module.css";
 import ToastGlobal from "./ToastGlobal";
+import EmojiPicker from "./EmojiPicker";
+import { insertEmojiAtCursor } from "@/app/lib/emoji";
 
 interface ComentariosModalProps {
   isOpen: boolean;
@@ -37,6 +39,7 @@ export default function ComentariosModal({
   const [texto, setTexto] = useState("");
   const [sending, setSending] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "danger" } | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hasFetched = useRef(false);
 
@@ -167,32 +170,56 @@ export default function ComentariosModal({
             </div>
 
             {!desactivados && (
-              <div className={`${styles.comentariosInput} d-flex align-items-center p-3`}>
-                <textarea
-                  ref={inputRef}
-                  className="form-control border-0 shadow-none"
-                  rows={1}
-                  maxLength={250}
-                  value={texto}
-                  onChange={(e) => setTexto(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Escribe un comentario..."
-                  style={{ resize: "none", fontSize: "0.9rem" }}
-                  disabled={sending}
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={sending || !texto.trim()}
-                  className={styles.sendBtn}
-                  aria-label="Enviar comentario"
-                >
-                  {sending ? (
-                    <span className="spinner-border spinner-border-sm" role="status" />
-                  ) : (
-                    <FiSend size={20} />
-                  )}
-                </button>
-              </div>
+              <>
+                <div className={`${styles.comentariosInput} d-flex align-items-center p-3`}>
+                  <textarea
+                    ref={inputRef}
+                    className="form-control border-0 shadow-none"
+                    rows={1}
+                    maxLength={MAX_TEXTO_COMENTARIO}
+                    value={texto}
+                    onChange={(e) => setTexto(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Escribe un comentario..."
+                    style={{ resize: "none", fontSize: "0.9rem" }}
+                    disabled={sending}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowEmojiPicker((v) => !v)}
+                    className={styles.sendBtn}
+                    aria-label="Abrir selector de emojis"
+                  >
+                    <FiSmile size={20} />
+                  </button>
+                  <button
+                    onClick={handleSend}
+                    disabled={sending || !texto.trim()}
+                    className={styles.sendBtn}
+                    aria-label="Enviar comentario"
+                  >
+                    {sending ? (
+                      <span className="spinner-border spinner-border-sm" role="status" />
+                    ) : (
+                      <FiSend size={20} />
+                    )}
+                  </button>
+                </div>
+                <div className="px-3 pb-2">
+                  <EmojiPicker
+                    open={showEmojiPicker}
+                    onClose={() => setShowEmojiPicker(false)}
+                    onSelect={(emoji) =>
+                      insertEmojiAtCursor(
+                        emoji,
+                        inputRef.current,
+                        setTexto,
+                        MAX_TEXTO_COMENTARIO
+                      )
+                    }
+                  />
+                </div>
+              </>
             )}
           </div>
         </div>

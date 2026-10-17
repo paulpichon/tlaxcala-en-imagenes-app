@@ -8,6 +8,38 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [No publicado] — 2026-10-15 · Texto de posteos y comentarios — emojis y caracteres extendidos + emoji picker
+
+Ciclo centrado en adoptar el nuevo contrato del backend para el campo `texto` de posteos y comentarios: ahora se aceptan emojis, hashtags (`#`), menciones (`@`), comillas tipográficas, guion largo (`—`), elipsis (`…`), la `ü` y texto en otros alfabetos. El frontend elimina su regex restrictivo y deja al backend como la única fuente de validación de caracteres. Además se añade un selector de emojis propio para escritorio.
+
+### Añadido
+
+- Componente `EmojiPicker` (`src/app/components/EmojiPicker.tsx`) con lista curada de ~200 emojis, categorías y sección de "recientes" persistida en `localStorage`.
+- Módulo de datos y helper `insertEmojiAtCursor` en `src/app/lib/emoji.ts` para insertar emojis en la posición del cursor respetando `maxLength` UTF-16.
+- Botón de emoji en: `CrearPosteoModal`, `EditarPosteoModal`, `ComentariosSection`, `ComentariosModal` e `ImageModal` (mobile + desktop inputs). El picker está visible en todos los dispositivos.
+
+### Cambiado
+
+- `validaciones.ts`: eliminado el regex allow-list `[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ.,!?¡¿()\s-]` de `posteoBaseSchema`, `editarPosteoSchema` y `comentarioSchema`; el backend es ahora la fuente única de validación de caracteres.
+- `validaciones.ts`: límite de `texto` en posteos subido de 200 a 500 caracteres UTF-16 (`MAX_TEXTO_POSTEO = 500`); comentarios se mantienen en 250 (`MAX_TEXTO_COMENTARIO = 250`).
+- `CrearPosteoModal.tsx` y `EditarPosteoModal.tsx`: `maxLength` y contador actualizados a 500.
+- `ComentariosSection.tsx`, `ComentariosModal.tsx` e `ImageModal.tsx`: `maxLength` de comentarios usa la constante `MAX_TEXTO_COMENTARIO`.
+
+### Corregido
+
+- Error de consola `Encountered two children with the same key` provocado por emojis duplicados dentro de las categorías `objetos` (🎀, 🎊, 🎉) y `simbolos` (🏳️, 🏴, 🚩) en `src/app/lib/emoji.ts`: se eliminaron los duplicados y el grid ahora se renderiza con `Array.from(new Set(...))` como red de seguridad contra futuras repeticiones.
+- El botón de emoji ahora se muestra siempre (antes se ocultaba en móvil); se eliminó `src/app/hooks/useIsMobile.ts` y sus imports en los componentes que solo lo usaban para la condición del picker.
+
+### Documentación
+
+- `AGENTS.md`: nueva sección "Texto de posteos y comentarios".
+- `api/API_REFERENCE_2026-08-27.md`: actualizado el contrato de `texto` en `POST /api/posteos` y `PUT /api/posteos/:id` (regex Unicode, max 500, mensaje de error).
+- `README.md`: la sección Documentación ahora incluye specs en `SPECS/` además de `SPECS-*.md` raíz.
+
+*Verificación: `pnpm build` exitoso (Next.js 16.2.12 · Turbopack, compilación + TypeScript, 26 páginas generadas).*
+
+---
+
 ## [No publicado] — 2026-10-09 · Actualización de la información "¿Qué es TlaxApp?"
 
 Ciclo centrado en renovar la copia de la página `/que-es-tlaxapp` a partir de `QUE-ES-TLAXAPP.md` (nueva fuente de verdad del posicionamiento de la plataforma): una red social de Tlaxcala hecha por y para tlaxcaltecas —comunidad, fotos con ubicación y conexión local— sin prometer un directorio de negocios ni una guía turística. Se alinearon el FAQ y la sección de servicio de los Términos con el mismo posicionamiento, se reflejó el acceso anticipado por invitación vigente en producción y se saneó la documentación referenciada en el README.

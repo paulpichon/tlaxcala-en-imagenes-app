@@ -10,6 +10,12 @@ export const MAX_IMAGEN_MB = 8;
 export const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 export const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp"];
 
+// ======================================
+// 📝 Constantes de texto de posteos y comentarios
+// ======================================
+export const MAX_TEXTO_POSTEO = 500;
+export const MAX_TEXTO_COMENTARIO = 250;
+
 //* Esquema de validación para el formulario de registro
 export const usuarioSchema = z.object({
     nombre: z
@@ -62,10 +68,7 @@ export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>;
 export const posteoBaseSchema = z.object({
     texto: z
     .string()
-    .max(200, { message: "La descripción no puede superar los 200 caracteres" })
-    .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ.,!?¡¿()\s-]*$/, {
-      message: "La descripción contiene caracteres no permitidos",
-    })
+    .max(MAX_TEXTO_POSTEO, { message: "El texto no puede exceder 500 caracteres" })
     .optional(),
     file: z
         .instanceof(File)
@@ -104,11 +107,7 @@ export const editarPosteoSchema = z.object({
     .string()
     .trim()
     // .min(1, "El texto no puede estar vacío")
-    .max(200, "Máximo 200 caracteres")
-    // El regex permite strings vacíos por el '*' al final de la clase de caracteres
-    .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ.,!?¡¿()\s-]*$/, {
-      message: "La descripción contiene caracteres no permitidos",
-    })
+    .max(MAX_TEXTO_POSTEO, "El texto no puede exceder 500 caracteres")
     .optional() // Permite que sea undefined
     .or(z.literal("")) // Permite que sea un string vacío
     .refine((val) => {
@@ -147,10 +146,7 @@ export const comentarioSchema = z.object({
     .string()
     .trim()
     .min(1, "El comentario no puede estar vacío")
-    .max(250, "El comentario no puede exceder 250 caracteres")
-    .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ.,!?¡¿()\s-]*$/, {
-      message: "El comentario contiene caracteres no permitidos",
-    })
+    .max(MAX_TEXTO_COMENTARIO, "El comentario no puede exceder 250 caracteres")
     .refine((val) => !spamRegex.test(val), {
       message: "El comentario parece contener spam",
     }),

@@ -1,13 +1,13 @@
 // Funcion para editar un posteo
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import ToastGlobal from "../ToastGlobal";
 import { editarPosteoSchema, validarUbicacionPost } from "@/lib/validaciones";
 import { AnimatePresence, motion } from "framer-motion";
 import { ApiResponse, Posteo, SeleccionLocalidad, Visibilidad } from "@/types/types";
-import { FiEdit3, FiLock, FiMapPin, FiNavigation } from "react-icons/fi";
+import { FiEdit3, FiLock, FiMapPin, FiNavigation, FiSmile } from "react-icons/fi";
 import { useObtenerUbicacion } from "@/app/hooks/useObtenerUbicacion";
 import ManualMunicipioSelector from "../ManualMunicipioSelector";
 import {
@@ -22,6 +22,9 @@ import {
   type Operacion,
 } from "@/lib/apiClient";
 import { invalidarCatalogos } from "@/lib/catalogos";
+import { MAX_TEXTO_POSTEO } from "@/lib/validaciones";
+import EmojiPicker from "../EmojiPicker";
+import { insertEmojiAtCursor } from "@/app/lib/emoji";
 import styles from "@/app/ui/posteo/EditarPosteoModal.module.css";
 
 // Ubicación normalizada para comparar el formulario contra lo guardado en el posteo
@@ -128,6 +131,8 @@ export default function EditarPosteoModal({
   const [visibilidad, setVisibilidad] = useState<Visibilidad>(
     posteo?.visibilidad ?? "publico"
   );
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const {
     lat,
@@ -370,8 +375,8 @@ export default function EditarPosteoModal({
       setLoading(false);
     }
   };
-  // Maximmo de caracteres para la descripcion
-  const maxChars = 200;
+  // Máximo de caracteres para la descripción
+  const maxChars = MAX_TEXTO_POSTEO;
 
   return (
     <>
@@ -497,12 +502,36 @@ export default function EditarPosteoModal({
                   </h6>
 
                   <textarea
+                    ref={textareaRef}
                     className="form-control"
                     rows={4}
                     maxLength={maxChars}
                     value={texto}
                     onChange={(e) => setTexto(e.target.value)}
                     placeholder="Escribe algo..."
+                  />
+
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-link text-decoration-none p-0 mt-2 d-flex align-items-center gap-1"
+                    style={{ color: "#EBCA9A", fontSize: "0.85rem" }}
+                    onClick={() => setShowEmojiPicker((v) => !v)}
+                    aria-label="Abrir selector de emojis"
+                  >
+                    <FiSmile size={16} />
+                    Emoji
+                  </button>
+                  <EmojiPicker
+                    open={showEmojiPicker}
+                    onClose={() => setShowEmojiPicker(false)}
+                    onSelect={(emoji) =>
+                      insertEmojiAtCursor(
+                        emoji,
+                        textareaRef.current,
+                        setTexto,
+                        MAX_TEXTO_POSTEO
+                      )
+                    }
                   />
 
                   <div className="text-end small text-muted mt-1">

@@ -1,17 +1,22 @@
 'use client';
 
 import Image from "next/image";
-import { FiCamera, FiEdit3, FiImage, FiLock, FiMapPin, FiNavigation } from "react-icons/fi";
+import { FiCamera, FiEdit3, FiImage, FiLock, FiMapPin, FiNavigation, FiSmile } from "react-icons/fi";
 import { useCrearPosteo } from "../hooks/useCrearPosteo";
 import posteo from "../ui/posteos/CrearPosteoModal.module.css";
 import ToastGlobal from "./ToastGlobal";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CrearPosteoModalProps } from "@/types/types";
 import ManualMunicipioSelector from "./ManualMunicipioSelector";
+import { MAX_TEXTO_POSTEO } from "@/lib/validaciones";
+import EmojiPicker from "./EmojiPicker";
+import { insertEmojiAtCursor } from "../lib/emoji";
 
 export default function CrearPosteoModal({ show, onClose, onPostCreated }: CrearPosteoModalProps) {
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "danger" | "creacion">("creacion");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Hook con callback para el éxito
   const {
@@ -322,16 +327,40 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                       </h6>
 
                       <textarea
+                        ref={textareaRef}
                         className="form-control"
                         rows={3}
                         placeholder="Escribe una descripción..."
                         value={texto}
                         onChange={(e) => setTexto(e.target.value)}
-                        maxLength={200}
+                        maxLength={MAX_TEXTO_POSTEO}
+                      />
+
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-link text-decoration-none p-0 mt-2 d-flex align-items-center gap-1"
+                        style={{ color: "#EBCA9A", fontSize: "0.85rem" }}
+                        onClick={() => setShowEmojiPicker((v) => !v)}
+                        aria-label="Abrir selector de emojis"
+                      >
+                        <FiSmile size={16} />
+                        Emoji
+                      </button>
+                      <EmojiPicker
+                        open={showEmojiPicker}
+                        onClose={() => setShowEmojiPicker(false)}
+                        onSelect={(emoji) =>
+                          insertEmojiAtCursor(
+                            emoji,
+                            textareaRef.current,
+                            setTexto,
+                            MAX_TEXTO_POSTEO
+                          )
+                        }
                       />
 
                       <div className="text-end small text-muted mt-1">
-                        {texto.length}/200
+                        {texto.length}/{MAX_TEXTO_POSTEO}
                       </div>
                     </div>
 

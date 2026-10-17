@@ -1462,7 +1462,7 @@ credentials: include
 | Ubicación | Campo | Tipo | Requerido | Validación exacta |
 |---|---|---|---|---|
 | body (multipart) | `img` | file | Sí | Campo `img`, máximo 8 MB, extensiones/MIME permitidos (`routes/posteos.js`, `helpers/multer.js`) |
-| body | `texto` | string | No | Opcional, regex `^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ.,!?¡¿()\s-]*$` (`middlewares/validar-texto.js`) |
+| body | `texto` | string | No | Opcional, max 500 caracteres UTF-16; regex Unicode `^[\p{L}\p{N}\p{P}\p{S}\p{M}\p{Z}\t\n\r\u200D\uFE0F\uFE0E]*$/u` (`middlewares/validar-texto.js`) |
 | body | `posteo_publico` | string/boolean | No | Opcional, booleano |
 | body | `municipio` | string (MongoId) | No | Opcional, MongoId; debe existir en la colección Municipio si se envía con `localidadClave` |
 | body | `localidadClave` | string | No | Regex `^\d{4}$`; debe pertenecer al `municipio` indicado (`400 BAD_REQUEST` si no) |
@@ -1538,7 +1538,7 @@ true
 | 401/403 | Varios | Varios | Errores de token/sesión/origen | `middlewares/validar-jwt-cookies-sesion.js`, `middlewares/validar-origen.js` |
 | 400 | `BAD_REQUEST` | Bad Request | `No hay ninguna imagen para subir` / `El municipio indicado no existe` / `La localidad no pertenece al municipio seleccionado` | `middlewares/validar-imagen-posteo.js`, `controllers/posteos.js` — `resolverLocalidad` |
 | 400 | `FILE_ERROR` / `BAD_REQUEST` | File Upload Error / Bad Request | Errores de Multer (`LIMIT_FILE_SIZE`, etc.) | `middlewares/error-handler.js`, `middlewares/validar-imagen-posteo.js` |
-| 422 | `VALIDATION_FAILED` | Validation Failed | `El campo de texto contiene caracteres especiales no permitidos` / `El campo posteo_publico debe ser de tipo Boolean` / `La latitud/longitud debe ser un número` / `La clave de la localidad debe ser una clave INEGI de 4 digitos` | `middlewares/validar-texto.js`, `routes/posteos.js` + `middlewares/validar-campos.js` |
+| 422 | `VALIDATION_FAILED` | Validation Failed | `El campo de texto contiene caracteres no permitidos` / `El texto no puede exceder 500 caracteres` / `El campo posteo_publico debe ser de tipo Boolean` / `La latitud/longitud debe ser un número` / `La clave de la localidad debe ser una clave INEGI de 4 digitos` | `middlewares/validar-texto.js`, `routes/posteos.js` + `middlewares/validar-campos.js` |
 | 429 | `POSTEO_BLOCKED` | Rate Limit Exceeded | `Demasiadas publicaciones, intenta de nuevo más tarde` | `middlewares/rate-limiter.js` |
 | 500 | `INTERNAL_ERROR` | Internal Server Error | `Error interno al procesar la publicación` | `controllers/posteos.js` |
 
@@ -1574,7 +1574,7 @@ true
 | Ubicación | Campo | Tipo | Requerido | Validación exacta |
 |---|---|---|---|---|
 | params | `id` | string | Sí | MongoId válido |
-| body | `texto` | string | No | Opcional, regex permitido (`middlewares/validar-texto.js`) |
+| body | `texto` | string | No | Opcional, max 500 caracteres UTF-16; regex Unicode `^[\p{L}\p{N}\p{P}\p{S}\p{M}\p{Z}\t\n\r\u200D\uFE0F\uFE0E]*$/u` (`middlewares/validar-texto.js`) |
 | body | `posteo_publico` | string/boolean | No | Opcional, se convierte a booleano |
 | body | `municipio` | string (MongoId) | No | Opcional; `null`/`''`/`undefined` = "no tocar" la ubicación; si viene con `localidadClave` debe existir en la colección Municipio |
 | body | `localidadClave` | string | No | Regex `^\d{4}$`; debe pertenecer al `municipio` indicado (`400 BAD_REQUEST` si no) |
@@ -1625,7 +1625,7 @@ credentials: include
 |---|---|---|---|---|
 | 401/403 | Varios | Varios | Errores de token/sesión/origen | `middlewares/validar-jwt-cookies-sesion.js`, `middlewares/validar-origen.js` |
 | 400 | `BAD_REQUEST` | Bad Request | `El municipio indicado no existe` / `La localidad no pertenece al municipio seleccionado` | `controllers/posteos.js:26` / `:31` — `resolverLocalidad` |
-| 422 | `VALIDATION_FAILED` | Validation Failed | `El ID no es valido` / errores de texto / clave INEGI inválida | `routes/posteos.js` + `middlewares/validar-campos.js` |
+| 422 | `VALIDATION_FAILED` | Validation Failed | `El ID no es valido` / `El campo de texto contiene caracteres no permitidos` / `El texto no puede exceder 500 caracteres` / clave INEGI inválida | `routes/posteos.js` + `middlewares/validar-campos.js` |
 | 404 | `NOT_FOUND` | Resource Not Found | `El posteo con ID: ... ha sido eliminado` / `... no existe` | `helpers/validar-id-posteo.js` |
 | 403 | `FORBIDDEN` | Forbidden | `No tienes permiso para modificar este posteo.` | `controllers/posteos.js:452` |
 | 500 | `INTERNAL_ERROR` | Internal Server Error | `Hubo un error al actualizar el posteo. Verifica los datos enviados.` | `controllers/posteos.js:467` |
