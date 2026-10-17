@@ -52,20 +52,6 @@ export default function Publicidad() {
             background: "linear-gradient(transparent, rgba(0,0,0,0.7))"
           }}
         >
-          {/* <p className="text-white fw-semibold mb-2" style={{ fontSize: "15px" }}>
-            {anuncioActual.titulo}
-          </p> */}
-
-          {/* <button
-            className="btn btn-light btn-sm"
-            style={{
-              borderRadius: "20px",
-              padding: "4px 14px",
-              fontSize: "13px"
-            }}
-          >
-            Ver más
-          </button> */}
         </div>
       </div>
     </ Link>

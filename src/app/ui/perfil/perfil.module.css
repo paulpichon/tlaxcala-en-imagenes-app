@@ -153,7 +153,7 @@ a.btn_opciones_publicaciones {
     border-bottom: 1px solid rgb(127, 127, 127, 0.2);
 }
 /* ESTILSO BASE DEL BOTON SEGUIR/DEJAR DE SEGUIR DEL MODAL OPCIONES DE PUBLICACION */
-/* TODO: RECORDAR QUE SON ESTILOS DIFERENTES LOS BOTONES DE SEGUIR/DEJAR DE SEGUIR DEL MODAL DE OPCIONES COMO DEL BOTON DE LA PAGINA DEL PERFIL DE USUARIO */
+/* NOTA: los botones de seguir/dejar de seguir del modal de opciones tienen estilos intencionalmente diferentes a los del botón de la página de perfil */
 button.btn_opciones_publicaciones {
     font-family: 'Open Sans', sans-serif;
     background-color: transparent;

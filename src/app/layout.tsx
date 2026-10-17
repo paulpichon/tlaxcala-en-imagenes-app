@@ -8,7 +8,6 @@ import "./ui/globals.css";
 import type { Metadata, Viewport } from "next";
 // fonts google
 // Hay 2 formas de important las fuentes
-// import { open_sans, league_gothic } from './ui/fonts';
 import './ui/fonts';
 // NotificacionesProvider
 import { NotificacionesProvider } from '@/context/NotificacionesContext';

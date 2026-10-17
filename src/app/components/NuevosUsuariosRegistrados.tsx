@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-// import FollowButton from "@/components/FollowButton";
 import { useNuevosUsuarios } from "@/context/NuevosUsuariosContext";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 import { avatarMiniLoader } from "@/lib/cloudinary/cloudinaryLoader";

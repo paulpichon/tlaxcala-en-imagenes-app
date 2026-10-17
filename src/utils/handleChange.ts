@@ -19,5 +19,4 @@ const handleChange = (
             [e.target.name]: e.target.value // Actualiza la propiedad correspondiente
     });
 }
-// export
 export default handleChange;

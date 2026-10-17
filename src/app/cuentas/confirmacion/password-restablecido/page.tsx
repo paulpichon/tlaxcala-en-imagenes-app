@@ -4,7 +4,6 @@
 
 import { Metadata } from "next";
 import ConfirmacionPasswordRestablecidoClient from "../components/ConfirmacionPasswordRestablecidoClient";
-// import ConfirmacionPasswordRestablecidoClient from "./ConfirmacionPasswordRestablecidoClient";
 
 // ✅ Metadata optimizada para SEO
 // ⚠️ IMPORTANTE: Esta página NO debe ser indexada porque:

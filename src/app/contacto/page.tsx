@@ -294,27 +294,9 @@ export default function Contacto() {
                     </a>
                     {/* ☝️ Reemplazar con el email real cuando esté disponible */}
                   </li>
-                  {/* 
-                    Opcional: Descomentar cuando estén disponibles
-                    
-                  <li>
-                    <strong>WhatsApp:</strong>{" "}
-                    <a 
-                      href="https://wa.me/522461234567" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-primary"
-                    >
-                      +52 246 123 4567
-                    </a>
-                  </li>
-                  */}
                   <li>
                     <strong>Redes sociales:</strong> Síguenos en{" "}
                     <a href="https://www.instagram.com/tlaxapp" target="_blank" rel="noopener noreferrer">Instagram</a>
-                    {/* <a href="https://facebook.com/tlaxapp" target="_blank" rel="noopener noreferrer">Facebook</a>,{" "} */}
-                    {/* <a href="https://twitter.com/tlaxapp" target="_blank" rel="noopener noreferrer">Twitter</a>
-                    {" "}(las respuestas en redes sociales no son inmediatas) */}
                   </li>
                 </ul>
                 

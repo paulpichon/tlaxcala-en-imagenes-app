@@ -28,10 +28,8 @@ export function usePushNotifications() {
 
         if (existingSub) {
           setEstado("enabled");
-          // console.log("🔔 Ya existe una suscripción activa");
         } else {
           setEstado("disabled");
-          // console.log("🔕 No hay suscripción activa");
         }
       } catch (err) {
         console.error("Error verificando suscripción existente:", err);
