@@ -305,6 +305,11 @@ export default function PoliticaDePrivacidad() {
                   <li>Garantizar la seguridad de la cuenta</li>
                   <li>Mejorar el funcionamiento general de la Plataforma</li>
                   <li>Recordar preferencias de usuario</li>
+                  <li>
+                    Medir la efectividad de campañas de acceso anticipado
+                    (atribución de origen promocional) de forma agregada y sin
+                    identificar a la persona
+                  </li>
                 </ul>
                 <p>
                   Puedes configurar tu navegador para rechazar cookies, aunque esto

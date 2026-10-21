@@ -8,6 +8,7 @@ import type { Metadata, Viewport } from "next";
 // Hay 2 formas de important las fuentes
 // import { open_sans, league_gothic } from './ui/fonts';
 import './ui/fonts';
+import AttributionCapture from "./components/AttributionCapture";
 // NuevosUsuariosProvider
 // metadatos
 export const metadata: Metadata = {
@@ -78,6 +79,7 @@ export default function RootLayout({
     <html lang="es">
       <body>
         {children}
+        <AttributionCapture />
       </body>
     </html>
   );

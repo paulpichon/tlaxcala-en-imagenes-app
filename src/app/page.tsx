@@ -136,6 +136,7 @@ export default function Home() {
               value={input}
               onChange={(e) => handleChange(e.target.value)}
               readOnly={status === "blocked"}
+              maxLength={120}
               className={styles.input}
             />
 

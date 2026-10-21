@@ -7,6 +7,7 @@ export async function registerEarlyAccess(
     `${process.env.NEXT_PUBLIC_API_URL}/api/early-access`,
     {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ contacto }),
     },
