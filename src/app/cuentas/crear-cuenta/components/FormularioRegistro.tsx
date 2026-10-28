@@ -5,7 +5,7 @@ import crearCuenta from "../../../ui/cuentas/crear-cuenta/CrearCuenta.module.css
 import { useRouter } from "next/navigation";
 // Funcion para Crear usuario
 import { createUsuario } from '@/lib/actions';
-import { isApiError, isRateLimit, ApiErrorCode, getUserMessage, getValidationErrors } from "@/lib/apiClient";
+import { isApiError, isRateLimit, isDuplicateKey, ApiErrorCode, getUserMessage, getValidationErrors } from "@/lib/apiClient";
 // UseState, formEvent
 import { SubmitEvent, useState } from 'react';
 // interfaces, types
@@ -113,10 +113,15 @@ export function FormularioRegistro() {
         if (isRateLimit(err)) {
           setError(getUserMessage(err, 'registro'));
         } else if (code === ApiErrorCode.CONFLICT) {
-          handleAPIError({
-            message: "Este correo electrónico ya existe en nuestra base de datos",
-            field: "correo",
-          });
+          if (isDuplicateKey(err, 'correo')) {
+            handleAPIError({
+              message: "Este correo electrónico ya existe en nuestra base de datos",
+              field: "correo",
+            });
+          } else {
+            // Otro conflicto (no es un duplicado de correo): mostrar lo que diga el backend.
+            setError(getUserMessage(err, 'registro'));
+          }
         } else if (code === ApiErrorCode.VALIDATION_FAILED || code === ApiErrorCode.BAD_REQUEST) {
           const apiErrors = getValidationErrors(err);
           if (apiErrors && apiErrors.length > 0) {

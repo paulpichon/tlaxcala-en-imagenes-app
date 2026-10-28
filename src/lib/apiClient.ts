@@ -115,6 +115,32 @@ export function isRateLimit(err: unknown): boolean {
   return code === ApiErrorCode.RATE_LIMIT_EXCEEDED || code.endsWith('_BLOCKED');
 }
 
+/**
+ * Código que el backend coloca en `errors[]` cuando MongoDB rechaza un
+ * duplicado (E11000). **No** es un código de primer nivel: el `code` de la
+ * respuesta es `CONFLICT` y el detalle del duplicado viaja anidado.
+ */
+const CODIGO_DUPLICADO = 'DUPLICATE_KEY';
+
+/**
+ * Detecta un duplicado real (`409 CONFLICT` + `errors[].code === 'DUPLICATE_KEY'`).
+ *
+ * No basta con mirar `code === 'CONFLICT'`: el backend usa ese status para
+ * otros conflictos, y asumir "correo duplicado" mostraría un mensaje falso.
+ *
+ * @param field Campo opcional a comprobar (p. ej. `'correo'`, `'url'`).
+ */
+export function isDuplicateKey(err: unknown, field?: string): boolean {
+  if (!isApiError(err) || err.status !== 409) return false;
+  const errors = err.data?.errors;
+  if (!Array.isArray(errors)) return false;
+  return errors.some(
+    (e) =>
+      e?.code === CODIGO_DUPLICADO &&
+      (field === undefined || e.field === field)
+  );
+}
+
 export function getApiErrorMessage(
   err: unknown,
   fallback = 'Ocurrió un error inesperado. Intenta de nuevo.'

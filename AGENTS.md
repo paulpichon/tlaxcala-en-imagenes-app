@@ -19,6 +19,10 @@
 
 - Six React Context providers nested in `layout.tsx`: Auth, Notificaciones, Follow, NuevosUsuarios, Publicidad (plus FavoritoContext used elsewhere)
 - **Auth**: cookie-based JWT with automatic token refresh in `AuthContext.tsx`; `fetchWithAuth` wrapper included
+  - El refresh se serializa **entre pestañas** con un Web Lock (`tlaxapp:auth-refresh`) además del mutex en memoria: `/api/auth/refresh` rota el token y dos pestañas concurrentes dispararían el falso positivo de reuso (el backend revoca todas las sesiones).
+  - Solo un `401`/`403` del refresh cierra sesión. Un fallo de **red** (o `5xx`/`429`) conserva la sesión y expone `error`/`clearError` en el contexto.
+  - `logout()` limpia además las claves de `sessionStorage` ligadas a la sesión (`registroToken`, `passForgetToken`, `passwordResetSuccess`, `reporteExitoso`).
+  - Duplicados: usar `isDuplicateKey(err, field)` de `apiClient.ts` (`409` + `errors[].code === 'DUPLICATE_KEY'`); no basta con `code === 'CONFLICT'`.
 - Forms use `react-hook-form` + `@hookform/resolvers` + Zod 4 schemas in `src/lib/validaciones.ts`
 
 ## Images (Cloudinary)

@@ -1,0 +1,201 @@
+{
+  "$esquema": "Baseline de inventario de endpoints de TlaxApp. El agente sincronizador hace diff contra este archivo: nuevos/modificados/eliminados. Actualizar SIEMPRE desde el código (routes/ + admin/routes/ + middlewares), nunca a mano desde memoria.",
+  "$fuente": "Ruta de fuentes: routes/*.js, admin/routes/{index,influencers,moderacion}.js, middlewares/*, controllers/*, models/*, admin/*",
+  "actualizado": "2026-10-27",
+  "total": 80,
+  "convenciones": {
+    "auth": {
+      "público": "sin middleware de sesión (verificar si tiene token opcional)",
+      "usuario": "verificarTokenSesion (cookies accessToken/refreshToken httpOnly)",
+      "panel": "verificarSesionAdmin (cookies adminAccessToken/adminRefreshToken, path /api/v1/admin)",
+      "opcional": "verificarTokenSesionOpcional (sesión preferente, público sin ella)",
+      "sesion_o_preauth": "verificarSesionOPreAuth (sesión completa o preAuthToken en body; body tiene prioridad)"
+    },
+    "pagina": "query param canónico 'limite'; 'limit' aceptado como alias en TODO lo paginado",
+    "errores": "RFC 9457 via middlewares/error-handler.js; 429 con códigos propios de cada limiter"
+  },
+  "módulos": [
+    {
+      "modulo": "bienvenida",
+      "endpoints": [
+        { "metodo": "GET", "ruta": "/", "auth": "público", "notas": "JSON {name,status,auth,message}. Sin limiter." },
+        { "metodo": "GET", "ruta": "/api/health", "auth": "público", "limiter": "lecturaLimiter 15m/100", "notas": "{status:'ok',uptime,timestamp,version,db:{status}}" }
+      ]
+    },
+    {
+      "modulo": "auth",
+      "endpoints": [
+        { "metodo": "GET", "ruta": "/api/auth/verificar-correo/:token", "auth": "público", "limiter": "verificacionLimiter 15m/5", "notas": "JWT de verificación por URL (obligatorio pese a ser opcional en Express 5). 403 si ya verificada. 429 VERIFICATION_BLOCKED." },
+        { "metodo": "POST", "ruta": "/api/auth/reenviar-correo", "auth": "público", "limiter": "reenvioCorreoLimiter 5m/3", "body": { "token": "JWT de verificación (req)" }, "notas": "429 EMAIL_BLOCKED" },
+        { "metodo": "POST", "ruta": "/api/auth/login", "auth": "público", "limiter": "loginLimiter 15m/5 clave IP+correo", "body": { "correo": "email req", "password": "req" }, "notas": "Requiere estatus=1 y email_validated=true. Éxito: cookies httpOnly. 403 sin verificar/estado≠1. 429 LOGIN_BLOCKED." },
+        { "metodo": "POST", "ruta": "/api/auth/cuentas/password-olvidado", "auth": "público", "limiter": "recoveryLimiter 15m/3", "body": { "correo": "email req" }, "notas": "Respuesta genérica aunque el correo no exista" },
+        { "metodo": "POST", "ruta": "/api/auth/reenviar-correo-restablecer-password", "auth": "público", "limiter": "recoveryLimiter", "body": { "token": "JWT reset req" } },
+        { "metodo": "GET", "ruta": "/api/auth/cuentas/restablecer-password/validar-token-reset-password/:token", "auth": "público", "limiter": "recoveryLimiter", "notas": "Valida JWT de reset" },
+        { "metodo": "POST", "ruta": "/api/auth/cuentas/reestablecer-password/:token", "auth": "público", "limiter": "recoveryLimiter", "body": { "password": "min 8 req" }, "notas": "Token por URL" },
+        { "metodo": "POST", "ruta": "/api/auth/refresh", "auth": "público", "limiter": "refreshLimiter 15m/10", "notas": "Sin body; cookie refreshToken; rotación; 401 reuso→tokenVersion++" },
+        { "metodo": "POST", "ruta": "/api/auth/logout", "auth": "público (validarRefreshToken)", "notas": "Limpia cookies" },
+        { "metodo": "GET", "ruta": "/api/auth/me", "auth": "usuario" }
+      ]
+    },
+    {
+      "modulo": "usuarios",
+      "endpoints": [
+        { "metodo": "POST", "ruta": "/api/usuarios", "auth": "público", "limiter": "registroLimiter 1h/3", "body": { "nombre_completo": { "nombre": "1-60 regex req", "apellido": "req" }, "correo": "email único req", "password": "min 8 mayús+minús+número+especial req" }, "notas": "Auto-login (cookies). 409 DUPLICATE_KEY, 429 REGISTER_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/usuarios/:url", "auth": "usuario", "notas": "Perfil proyectado; url kebab-case con índice único + url_history" },
+        { "metodo": "PUT", "ruta": "/api/usuarios/update", "auth": "usuario", "body": { "nombre_completo": "opc parcial", "password": "opc min 8", "lugar_radicacion": "opc", "genero": "MASCULINO|FEMENINO|PREFIERO NO DECIR opc", "fecha_nacimiento": "opc date" }, "notas": "url se regenera solo si cambia nombre_completo; cooldown 30 días (429)" },
+        { "metodo": "DELETE", "ruta": "/api/usuarios/delete", "auth": "usuario", "notas": "Soft-delete en transacción + cascada; limpia cookies; ReportePosteo.deleteMany" },
+        { "metodo": "GET", "ruta": "/api/usuarios/registrados/nuevos-usuarios-registrados", "auth": "usuario", "notas": "Últimos 3" }
+      ]
+    },
+    {
+      "modulo": "uploads",
+      "endpoints": [
+        { "metodo": "PUT", "ruta": "/api/uploads/:coleccion", "auth": "usuario", "limiter": "imagenPerfilLimiter 15m/10", "body": { "img": "multipart form-data file req, 8MB, jpg/jpeg/png/webp" }, "notas": ":coleccion solo 'usuarios'. Cloudinary sin transformaciones. 429 IMAGEN_BLOCKED" }
+      ]
+    },
+    {
+      "modulo": "posteos",
+      "endpoints": [
+        { "metodo": "GET", "ruta": "/api/posteos", "auth": "usuario", "limiter": "lecturaLimiter", "query": { "page": "numérico opc", "limite": "def 15 opc", "municipio": "mongoid opc", "localidadClave": "INEGI 4 dígitos opc (requiere municipio)" }, "notas": "Feed visibilidad:'publico'; $nin reportados; $ne ocultos" },
+        { "metodo": "GET", "ruta": "/api/posteos/post/:id", "auth": "opcional", "limiter": "posteoPublicoLimiter 15m/100", "notas": "perfil sin sesión 401; oculto→404 si no autor; 429 POST_DETAIL_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/posteos/usuario/:idUsuario", "auth": "usuario", "query": { "page": "opc", "limite": "def 15" }, "notas": "dueño y visitantes ven publico+perfil; grilla proyecta public_id+visibilidad" },
+        { "metodo": "POST", "ruta": "/api/posteos", "auth": "usuario", "limiter": "posteoLimiter 15m/20", "body": { "img": "file req", "texto": "≤500 UTF-16 opc", "visibilidad": "publico|perfil def publico", "municipio": "mongoid opc", "localidadClave": "INEGI opc", "lat": "float opc (solo GPS)", "lng": "float opc" }, "notas": "Regla de Oro: municipio manual→coordinates null; GPS→redondeo 3 decimales. 429 POSTEO_BLOCKED" },
+        { "metodo": "PUT", "ruta": "/api/posteos/:id", "auth": "usuario", "body": { "texto": "≤500 opc", "visibilidad": "opc", "municipio": "opc", "localidadClave": "opc", "lat": "opc", "lng": "opc" }, "notas": "solo autor; multipart o JSON; null/'' = no tocado. 403/404" },
+        { "metodo": "DELETE", "ruta": "/api/posteos/:id/ubicacion", "auth": "usuario", "notas": "solo autor; quita ubicación" },
+        { "metodo": "DELETE", "ruta": "/api/posteos/:id", "auth": "usuario", "notas": "solo autor; soft delete deleteReason 'manual' + cascada" }
+      ]
+    },
+    {
+      "modulo": "comentarios",
+      "endpoints": [
+        { "metodo": "POST", "ruta": "/api/comentarios/:posteoId/comentarios", "auth": "usuario", "limiter": "comentarioLimiter 1m/10", "body": { "texto": "≤250 UTF-16 req no vacío tras trim" }, "notas": "regex comparte validar-texto.js con posteos. 403 desactivados, 429 COMENTARIO_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/comentarios/:posteoId/comentarios", "auth": "usuario", "query": { "page": "opc", "limite": "def 10 cap 100" } },
+        { "metodo": "GET", "ruta": "/api/comentarios/:posteoId/comentarios/count", "auth": "usuario" },
+        { "metodo": "DELETE", "ruta": "/api/comentarios/:comentarioId", "auth": "usuario", "notas": "soft delete; autor comentario o posteo. 400 ya eliminado, 403, 404" },
+        { "metodo": "PUT", "ruta": "/api/comentarios/:posteoId/comentarios/toggle", "auth": "usuario (dueño posteo)", "body": { "activar": "boolean estricto req" }, "notas": "403 no-dueño" }
+      ]
+    },
+    {
+      "modulo": "likes",
+      "endpoints": [
+        { "metodo": "POST", "ruta": "/api/likes/:id/like", "auth": "usuario", "notas": "toggle. 404" },
+        { "metodo": "GET", "ruta": "/api/likes/posteo/:id", "auth": "usuario" },
+        { "metodo": "GET", "ruta": "/api/likes/:id/likes/usuarios", "auth": "usuario" }
+      ]
+    },
+    {
+      "modulo": "favoritos",
+      "endpoints": [
+        { "metodo": "GET", "ruta": "/api/favoritos", "auth": "usuario", "query": { "page": "opc", "limite": "def 15" }, "notas": "$nin reportados" },
+        { "metodo": "POST", "ruta": "/api/favoritos/:posteoId", "auth": "usuario", "body": { "autorId": "mongoid req" }, "notas": "400 propio, 409 duplicado" },
+        { "metodo": "DELETE", "ruta": "/api/favoritos/:posteoId", "auth": "usuario", "notas": "404" }
+      ]
+    },
+    {
+      "modulo": "followers",
+      "endpoints": [
+        { "metodo": "POST", "ruta": "/api/followers/follow/:id", "auth": "usuario", "notas": "400 a sí mismo/ya seguido, 404" },
+        { "metodo": "DELETE", "ruta": "/api/followers/unfollow/:id", "auth": "usuario", "notas": "400 no seguido" },
+        { "metodo": "GET", "ruta": "/api/followers/usuario/lista-followers/:id", "auth": "usuario" },
+        { "metodo": "GET", "ruta": "/api/followers/usuario/lista-followings/:id", "auth": "usuario" }
+      ]
+    },
+    {
+      "modulo": "municipios",
+      "endpoints": [
+        { "metodo": "GET", "ruta": "/api/municipios", "auth": "usuario", "notas": "catálogo 60 municipios" },
+        { "metodo": "GET", "ruta": "/api/municipios/:claveMunicipio/localidades", "auth": "usuario", "notas": "clave 1-60; 404/400" }
+      ]
+    },
+    {
+      "modulo": "ubicacion",
+      "endpoints": [
+        { "metodo": "POST", "ruta": "/api/ubicacion/reverse", "auth": "usuario", "body": { "lat": "float req", "lng": "float req" }, "notas": "polígonos GeoJSON + haversine embedded. 404 fuera de cobertura" },
+        { "metodo": "GET", "ruta": "/api/ubicacion", "auth": "usuario", "notas": "mismo handler que municipios" }
+      ]
+    },
+    {
+      "modulo": "notificaciones",
+      "endpoints": [
+        { "metodo": "POST", "ruta": "/api/notificaciones/subscribe", "auth": "usuario", "body": { "subscription": "PushSubscriptionJSON req (endpoint+keys)", "userAgent": "opc" }, "notas": "400 inválida/sin endpoint, 404 usuario" },
+        { "metodo": "POST", "ruta": "/api/notificaciones/unsubscribe", "auth": "usuario", "body": { "endpoint": "req" } },
+        { "metodo": "GET", "ruta": "/api/notificaciones/vapidPublicKey", "auth": "usuario", "notas": "{publicKey}" },
+        { "metodo": "GET", "ruta": "/api/notificaciones", "auth": "usuario", "query": { "page": "opc", "limite": "def 20" } },
+        { "metodo": "PATCH", "ruta": "/api/notificaciones/marcar-notificacion-leida/:id", "auth": "usuario", "notas": "404" },
+        { "metodo": "GET", "ruta": "/api/notificaciones/nuevas-notificaciones", "auth": "usuario", "notas": "total no leídas" },
+        { "metodo": "DELETE", "ruta": "/api/notificaciones/eliminar-notificacion/:id", "auth": "usuario", "notas": "404, 400 id" }
+      ]
+    },
+    {
+      "modulo": "soporte",
+      "endpoints": [
+        { "metodo": "POST", "ruta": "/api/ayuda-soporte/envio-correo", "auth": "usuario", "limiter": "soporteLimiter 15m/5", "body": { "tipo_problema": "cuenta|publicacion|seguridad|reporte|otro req", "descripcion_problema_usuario": "15-1000 req" }, "notas": "texto escapado en email. 429 SOPORTE_BLOCKED" }
+      ]
+    },
+    {
+      "modulo": "reportes",
+      "endpoints": [
+        { "metodo": "POST", "ruta": "/api/reportes/:posteoId", "auth": "usuario", "limiter": "reporteLimiter 15m/10", "body": { "categoria": "enum 7 req", "descripcion": "≤200 opc (obligatoria si otro)" }, "notas": "anónimo; ocultamiento permanente en feed/perfil/favoritos ($nin). 409 propio/duplicado, 429 REPORTE_BLOCKED" }
+      ]
+    },
+    {
+      "modulo": "early-access",
+      "temporal": true,
+      "endpoints": [
+        { "metodo": "GET", "ruta": "/api/early-access/atribucion", "auth": "público", "limiter": "atribucionLimiter 1m/60 env", "query": { "ref": "código", "utm_source": "lista canónica", "utm_content": "lista canónica" }, "notas": "cookie early_access_atribucion 30d Path=/api/early-access; primer clic server-side; 204; UTM inválida→null sin bloquear ref" },
+        { "metodo": "POST", "ruta": "/api/early-access", "auth": "público", "limiter": "env EARLY_ACCESS_RATE_LIMIT_* (def 10m/5)", "body": { "contacto": "trim ≤120 req" }, "notas": "{ok,contacto,msg}; snapshot atribución si cookie válida e influencer activo. 409 duplicado, 429 EARLY_ACCESS_BLOCKED" }
+      ]
+    },
+    {
+      "modulo": "admin-auth",
+      "endpoints": [
+        { "metodo": "POST", "ruta": "/api/v1/admin/auth/login", "auth": "público", "limiter": "adminLoginLimiter 15m/5 IP+correo; bloqueo 5 fallos→30m", "body": { "correo": "email req", "password": "req" }, "notas": "Devuelve estado: password_cambio_requerido|totp_setup_requerido|mfa_required + preAuthToken (5 min, no abre rutas)" },
+        { "metodo": "POST", "ruta": "/api/v1/admin/auth/login/totp", "auth": "preAuthToken en body", "limiter": "adminTotpLimiter 5m/5", "body": { "preAuthToken": "req implícito", "codigo": "TOTP 6 o backup req" }, "notas": "Éxito: cookies del panel. 409 sin TOTP/password temporal pendiente" },
+        { "metodo": "POST", "ruta": "/api/v1/admin/auth/refresh", "auth": "público (cookie adminRefreshToken)", "limiter": "adminRefreshLimiter 15m/10", "notas": "401 reuso→revoca todo" },
+        { "metodo": "POST", "ruta": "/api/v1/admin/auth/logout", "auth": "público", "notas": "Limpia cookies respetando path" },
+        { "metodo": "GET", "ruta": "/api/v1/admin/auth/me", "auth": "panel", "notas": "Devuelve rol + permisos snapshot" },
+        { "metodo": "POST", "ruta": "/api/v1/admin/auth/cambiar-password", "auth": "sesion_o_preauth", "body": { "password_actual": "req", "password_nueva": "min 12 req" }, "notas": "tokenVersion++ revoca. 401/409 nueva=actual" }
+      ]
+    },
+    {
+      "modulo": "admin-totp",
+      "endpoints": [
+        { "metodo": "POST", "ruta": "/api/v1/admin/totp/setup", "auth": "sesion_o_preauth", "notas": "otplib v13 ventana ±60s. 409 ya configurado→reemitir" },
+        { "metodo": "POST", "ruta": "/api/v1/admin/totp/activate", "auth": "sesion_o_preauth", "limiter": "adminTotpLimiter", "body": { "codigo": "exactly 6 req" }, "notas": "Devuelve 10 hash sha256 de un solo uso" },
+        { "metodo": "POST", "ruta": "/api/v1/admin/totp/backup/regenerar", "auth": "sesion_o_preauth (sesión)", "limiter": "adminTotpLimiter", "body": { "password_actual": "req" } },
+        { "metodo": "POST", "ruta": "/api/v1/admin/totp/reemitir", "auth": "sesion_o_preauth (sesión)", "limiter": "adminTotpLimiter", "body": { "password_actual": "req", "backup_code": "req" }, "notas": "nuevo QR invalida TOTP previo" }
+      ]
+    },
+    {
+      "modulo": "admin-cuentas",
+      "endpoints": [
+        { "metodo": "POST", "ruta": "/api/v1/admin/cuentas", "auth": "panel + permiso cuentas:crear", "body": { "correo": "email req", "rol": "SUPERADMIN|MODERADOR req" }, "notas": "contraseña temporal una vez (nunca por correo). 409 correo, 403 rol" },
+        { "metodo": "GET", "ruta": "/api/v1/admin/cuentas", "auth": "panel + permiso cuentas:leer" },
+        { "metodo": "PATCH", "ruta": "/api/v1/admin/cuentas/:id", "auth": "panel + permiso cuentas:desactivar", "body": { "activo": "boolean req" }, "notas": "tokenVersion++. 409 propia cuenta, 404" }
+      ]
+    },
+    {
+      "modulo": "admin-moderacion",
+      "endpoints": [
+        { "metodo": "GET", "ruta": "/api/v1/admin/moderacion/reportes", "auth": "panel + moderacion:leer", "limiter": "adminModeracionLecturaLimiter 15m/300 clave Admin._id", "query": { "page": "1-10000 opc", "limite": "1-100 opc" }, "notas": "score (PRIORIDAD_MAX+1-prioridad)×1000+volumen×100 (volumen cap 10), tie createdAt asc; excluye posteos isDeleted" },
+        { "metodo": "GET", "ruta": "/api/v1/admin/moderacion/reportes/:id", "auth": "panel + moderacion:leer, lecturaLimiter", "notas": "404" },
+        { "metodo": "PUT", "ruta": "/api/v1/admin/moderacion/reportes/:id/resolver", "auth": "panel + moderacion:resolver", "limiter": "adminModeracionEscrituraLimiter 15m/60", "body": {}, "notas": "transacción: isDeleted del posteo + deleteReason moderation + cascada + notificación best-effort post-commit (solo el ganador)" },
+        { "metodo": "PUT", "ruta": "/api/v1/admin/moderacion/reportes/:id/descartar", "auth": "panel + moderacion:descartar, escrituraLimiter", "body": {}, "notas": "restaura ocultamiento solo si ocultadoPorReporteId != null" },
+        { "metodo": "PUT", "ruta": "/api/v1/admin/moderacion/reportes/:id/recategorizar", "auth": "panel + moderacion:recategorizar, escrituraLimiter", "body": { "categoria": "enum 7 req", "descripcion": "≤200 opc (req si otro)" }, "notas": "chequeo atómico en findOneAndUpdate. 422 sin descripción para otro" },
+        { "metodo": "PUT", "ruta": "/api/v1/admin/moderacion/posteos/:posteoId/ocultar", "auth": "panel + posteos:ocultar, escrituraLimiter", "body": { "reporteId": "mongoid opc" }, "notas": "ocultoPorModeracion; visible solo autor (404)" },
+        { "metodo": "PUT", "ruta": "/api/v1/admin/moderacion/posteos/:posteoId/restaurar", "auth": "panel + posteos:restaurar, escrituraLimiter", "body": {} }
+      ]
+    },
+    {
+      "modulo": "admin-influencers",
+      "temporal": true,
+      "endpoints": [
+        { "metodo": "GET", "ruta": "/api/v1/admin/influencers", "auth": "panel + influencers:leer", "limiter": "adminInfluencersLecturaLimiter 15m/300", "query": { "page": "opc", "limite": "opc" } },
+        { "metodo": "GET", "ruta": "/api/v1/admin/influencers/metricas", "auth": "panel + influencers:leer, lecturaLimiter", "query": { "desde": "ISO opc", "hasta": "ISO opc" }, "notas": "422 desde>hasta" },
+        { "metodo": "POST", "ruta": "/api/v1/admin/influencers", "auth": "panel + influencers:crear, escrituraLimiter 15m/60", "body": { "codigo": "3-32 [A-Z0-9-_] uppercase req", "nombre": "≤80 req", "activo": "bool opc", "notas": "≤200 opc" }, "notas": "creadoPor Admin._id. 409 código" },
+        { "metodo": "PATCH", "ruta": "/api/v1/admin/influencers/:id", "auth": "panel + influencers:editar, escrituraLimiter", "body": { "nombre": "≤80 opc", "activo": "bool opc", "notas": "≤200 opc, vacío→null" }, "notas": "≥1 campo req (422), actualizadoPor. 404" },
+        { "metodo": "DELETE", "ruta": "/api/v1/admin/influencers/:id", "auth": "panel + influencers:eliminar, escrituraLimiter", "notas": "isMongoId en :id. Eliminación física (conserva histórico Earlyaccess). Responde 200 { success, msg, data: { _id, codigo } }. Errores: 401/403/404/422/429." }
+      ]
+    }
+  ]
+}

@@ -8,7 +8,27 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
-## [No publicado] — 2026-10-15 · Texto de posteos y comentarios — emojis y caracteres extendidos + emoji picker
+## [No publicado] - 2026-10-28 — Sesión: refresh entre pestañas, errores de red y contratos de error
+
+Ciclo derivado de `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md` (cambios del backend del 2026-10-27). Sin cambios de rutas ni de formas de respuesta: se corrige el consumo de la sesión y de los códigos de error.
+
+### Corregido
+
+- **Refresh serializado entre pestañas** (`src/context/AuthContext.tsx`): `refreshToken` se ejecuta dentro de un Web Lock (`tlaxapp:auth-refresh`). `/api/auth/refresh` rota el token, y dos pestañas enviando el mismo token disparaban el falso positivo de reuso del backend, que revoca **todas** las sesiones. Dentro del lock se reintenta primero la petición original; si ya no devuelve `401`, otra pestaña renovó la cookie y no se hace un segundo refresh. Sin Web Locks, se conserva la deduplicación en memoria.
+- **Un fallo de red ya no cierra la sesión** (`src/context/AuthContext.tsx`): antes cualquier error del refresh limpiaba el usuario. Ahora solo un `401`/`403` del refresh cierra sesión; un corte de red (o un `5xx`/`429`) expone `error` en el contexto y conserva la sesión. La hidratación inicial (`GET /api/auth/me`) reintenta ante errores de red en lugar de redirigir al login.
+- **Logout limpia `sessionStorage`** (`src/context/AuthContext.tsx`): se eliminan `registroToken`, `passForgetToken`, `passwordResetSuccess` y `reporteExitoso` para que otro usuario en el mismo navegador no herede estado. No se tocan `lastPasswordRequest` ni `bloqueoReenvioCorreo` (temporizadores anti-abuso).
+- **Duplicados leídos de `errors[0].code`** (`src/lib/apiClient.ts` + `FormularioRegistro.tsx`): nuevo helper `isDuplicateKey(err, field)` que exige `409 CONFLICT` **y** `errors[].code === 'DUPLICATE_KEY'`. Un `CONFLICT` que no sea duplicado de correo ya no muestra "este correo ya existe"; se muestra el `detail` del backend.
+- **Icono por defecto de Web Push** (`public/sw.js`): el fallback apuntaba a `/icon-192x192.png`, que no existe en `public/`. Ahora usa `/assets/icono-tlaxapp-beige.png`, así las notificaciones sin `icon` (payload sin la clave) muestran una imagen.
+
+### Añadido
+
+- `IAuthContext.error` / `clearError` (`src/types/types.ts` y `AuthContext.tsx`) para informar fallos transitorios de sesión sin cerrarla.
+
+### Documentación
+
+- `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md`: §3.2 (Web Locks, errores de red), §3.4 (limpieza de `sessionStorage`), §4.1 (`INVALID_CURRENT_PASSWORD`), §5 (icono por defecto), §7 (H23 mitigado) y checklist actualizado.
+
+## [No publicado] - 2026-10-15 · Texto de posteos y comentarios — emojis y caracteres extendidos + emoji picker
 
 Ciclo centrado en adoptar el nuevo contrato del backend para el campo `texto` de posteos y comentarios: ahora se aceptan emojis, hashtags (`#`), menciones (`@`), comillas tipográficas, guion largo (`—`), elipsis (`…`), la `ü` y texto en otros alfabetos. El frontend elimina su regex restrictivo y deja al backend como la única fuente de validación de caracteres. Además se añade un selector de emojis propio para escritorio.
 

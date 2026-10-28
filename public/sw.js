@@ -2,7 +2,7 @@ self.addEventListener("push", (event) => {
     const data = event.data.json();
     const options = {
       body: data.body,
-      icon: data.icon || "/icon-192x192.png", // Icono predeterminado - se puede personalizar
+      icon: data.icon || "/assets/icono-tlaxapp-beige.png", // Icono por defecto (el backend puede omitir `icon`)
       data: { url: data.url },
     };
   

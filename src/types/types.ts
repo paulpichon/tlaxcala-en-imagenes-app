@@ -160,6 +160,12 @@ export interface PasswordConfirm extends UsuarioLogueado {
 export interface IAuthContext {
   user: UsuarioLogueado | null;
   loading: boolean;
+  /**
+   * Error transitorio de sesión (p. ej. no se pudo renovar por falta de red).
+   * No implica que la sesión esté cerrada.
+   */
+  error: string | null;
+  clearError: () => void;
   login: (user: UsuarioLogueado) => void;
   logout: () => void;
   fetchWithAuth: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
