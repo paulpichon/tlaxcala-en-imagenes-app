@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Comentario, ApiResponse, ApiResponsePaginado, ComentariosCountResponse } from "@/types/types";
+import { Comentario, ApiResponse, ApiResponsePaginado } from "@/types/types";
 import {
   apiGet,
   apiPost,
@@ -22,28 +22,9 @@ export function useComentarios(postId: string) {
 
   const clearError = useCallback(() => setError(null), []);
 
-  const fetchTotal = useCallback(async () => {
-    if (!postId) return;
-    try {
-      const data = await apiGet<ApiResponse<ComentariosCountResponse>>(
-        fetchWithAuth,
-        `/api/comentarios/${postId}/comentarios/count`
-      );
-      setTotal(data.data.count);
-    } catch (err) {
-      if (isNotFound(err)) {
-        console.warn("El posteo no existe al contar comentarios:", postId);
-      } else {
-        const msg = getUserMessage(err, 'cargar_comentarios');
-        console.error(msg, err);
-        setError(msg);
-      }
-    }
-  }, [postId, fetchWithAuth]);
-
-  useEffect(() => {
-    if (postId && user) fetchTotal();
-  }, [fetchTotal, postId, user]);
+  // El total NO se pide en el mount: llega con la lista paginada
+  // (`fetchComentarios` → `pagination.total`) solo cuando se abre el modal.
+  // Esto evita un GET /count por cada tarjeta del feed (causa del 429 READ_BLOCKED).
 
   const fetchComentarios = useCallback(async () => {
     if (!postId) return;
@@ -164,7 +145,6 @@ export function useComentarios(postId: string) {
     error,
     clearError,
     fetchComentarios,
-    fetchTotal,
     cargarMasComentarios,
     agregarComentario,
     eliminarComentario,

@@ -15,7 +15,6 @@ import posteoCard from "../ui/posteos/PosteoCard.module.css";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 import { avatarPerfilLoader, feedLoader, detalleLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import { formatearEtiquetaUbicacion } from "@/lib/etiquetaUbicacion";
-import { useComentarios } from "@/app/hooks/useComentarios";
 import ComentariosModal from "./ComentariosModal";
 import ComentariosSection from "./posteo/ComentariosSection";
 
@@ -31,7 +30,6 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
 
   const [posteoActual, setPosteoActual] = useState<Posteo>(post);
 
-  const { total: totalComentarios } = useComentarios(post._id);
   const [showComments, setShowComments] = useState(false);
 
   const isPublicView = !user;
@@ -94,9 +92,12 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
 
   const postImageLoader = isDetail ? detalleLoader : feedLoader;
 
-  const displayedCommentsCount = isPublicView
-    ? (posteoActual.comentariosCount ?? 0)
-    : totalComentarios;
+  // Total autoritativo del backend (feed y perfil ya lo envían); el fallback a
+  // comentariosCount protege la vista pública y endpoints que aún no lo envían.
+  // Nada de pedir /count por tarjeta: era la causa del 429 READ_BLOCKED.
+  const displayedCommentsCount = posteoActual.totalComentarios
+    ?? posteoActual.comentariosCount
+    ?? 0;
 
   const displayedLikesCount = posteoActual.likesCount ?? 0;
 

@@ -47,6 +47,7 @@ export interface Posteo {
   isFavorito: boolean;
   likesCount?: number;
   comentariosCount?: number;
+  totalComentarios?: number; // total autoritativo del backend (feed y perfil); elimina el count por tarjeta
   hasLiked?: boolean;
   comentariosActivos?: boolean;
   ocultoPorModeracion?: boolean; // true: oculto globalmente por moderación; solo el backend lo expone al propio autor

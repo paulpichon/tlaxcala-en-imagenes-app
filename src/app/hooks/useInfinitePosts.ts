@@ -15,9 +15,15 @@ export function useInfinitePosts(initialUrl: string) {
 
   const observerRef = useRef<HTMLDivElement | null>(null);
 
-  const fetchPosts = useCallback(async () => {
-    if (!nextUrl || loading || finished) return;
+  // Guard síncrono: `loading` (estado React) se actualiza async y el observer
+  // no se desconecta hasta el re-render, así que un scroll rápido podía llamar
+  // `fetchPosts` dos veces con el mismo `nextUrl` (página duplicada).
+  const fetchingRef = useRef(false);
 
+  const fetchPosts = useCallback(async () => {
+    if (!nextUrl || loading || finished || fetchingRef.current) return;
+
+    fetchingRef.current = true;
     setLoading(true);
 
     try {
@@ -38,6 +44,7 @@ export function useInfinitePosts(initialUrl: string) {
       console.error(msg, err);
       setError(msg);
     } finally {
+      fetchingRef.current = false;
       setLoading(false);
     }
   }, [nextUrl, loading, finished, fetchWithAuth]);

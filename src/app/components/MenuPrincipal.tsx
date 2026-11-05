@@ -19,7 +19,7 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
   const pathname = usePathname();
   const { handleLogout } = useLogout();
   const { user } = useAuth();
-  const { totalNoLeidas, refrescarNotificaciones } = useNotificaciones(); // 👈 desde el context
+  const { totalNoLeidas } = useNotificaciones(); // 👈 desde el context
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLLIElement>(null);
@@ -38,12 +38,8 @@ export default function MenuPrincipal({ onPostCreated }: Props) {
     { name: "Configuraciones", href: "/configuracion", icon: FiSliders },
   ];
 
-  // 🔁 Actualizar notificaciones cada cierto tiempo (opcional)
-  useEffect(() => {
-    if (!user) return;
-    const interval = setInterval(refrescarNotificaciones, 60000); // cada 1 min
-    return () => clearInterval(interval);
-  }, [user, refrescarNotificaciones]);
+  // Nota: el polling de notificaciones vive SOLO en NotificacionesContext.
+  // Este interval duplicaba las peticiones y disparaba el 429 del cubo de lectura.
 
   // Cerrar dropdown al hacer clic fuera
   useEffect(() => {

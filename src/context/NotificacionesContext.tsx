@@ -9,7 +9,7 @@ import {
   ReactNode,
 } from "react";
 import { useAuth } from "./AuthContext";
-import { apiGet, getUserMessage } from "@/lib/apiClient";
+import { apiGet, getUserMessage, isRateLimit } from "@/lib/apiClient";
 import { ApiResponse } from "@/types/types";
 
 interface NotificacionesContextType {
@@ -38,6 +38,13 @@ export function NotificacionesProvider({ children }: { children: ReactNode }) {
       );
       setTotalNoLeidas(data.data.totalNoLeidas || 0);
     } catch (err) {
+      // El 429 del polling es transitorio (se auto-resuelve al vencer la ventana
+      // del limiter) y ocurre en background: se degrada a warn para no dejar un
+      // error persistente en el contexto. El badge solo no se actualiza este ciclo.
+      if (isRateLimit(err)) {
+        console.warn("Polling de notificaciones limitado (429); reintenta en el próximo ciclo.", err);
+        return;
+      }
       const msg = getUserMessage(err, 'cargar_notificaciones');
       console.error(msg, err);
       setError(msg);

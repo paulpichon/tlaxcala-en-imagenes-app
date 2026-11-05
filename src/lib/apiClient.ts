@@ -34,6 +34,7 @@ export const ApiErrorCode = {
   REFRESH_BLOCKED: 'REFRESH_BLOCKED',
   POST_DETAIL_BLOCKED: 'POST_DETAIL_BLOCKED',
   REPORTE_BLOCKED: 'REPORTE_BLOCKED',
+  FLOOD_BLOCKED: 'FLOOD_BLOCKED',
 
   // Otros
   FILE_ERROR: 'FILE_ERROR',
@@ -214,6 +215,10 @@ export function getUserMessage(err: unknown, operacion: Operacion): string {
     return 'El recurso al que intentas acceder ya no existe o fue eliminado.';
   }
   if (isRateLimit(err)) {
+    // FLOOD_BLOCKED: límite por IP/red compartida, no por actividad del usuario.
+    if (isApiErrorCode(err, ApiErrorCode.FLOOD_BLOCKED)) {
+      return 'Demasiadas solicitudes desde tu red. Espera un momento e intenta de nuevo.';
+    }
     return 'Has hecho demasiadas solicitudes. Espera un momento e intenta de nuevo.';
   }
   if (isApiError(err)) {
