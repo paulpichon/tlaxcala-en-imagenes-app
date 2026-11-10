@@ -190,6 +190,7 @@ export type Operacion =
   | 'recuperar_password'
   | 'restablecer_password'
   | 'registro'
+  | 'reenviar_correo'
   | 'soporte'
   | 'eliminar_cuenta'
   | 'reportar'
@@ -218,6 +219,7 @@ const MENSAJES_POR_DEFECTO: Record<Operacion, string> = {
   recuperar_password: 'No se pudo procesar la solicitud. Intenta de nuevo.',
   restablecer_password: 'No se pudo restablecer la contraseña. Intenta de nuevo.',
   registro: 'No se pudo completar el registro. Intenta de nuevo.',
+  reenviar_correo: 'No se pudo reenviar el correo. Intenta de nuevo en unos minutos.',
   soporte: 'No se pudo enviar la solicitud de soporte. Intenta de nuevo.',
   eliminar_cuenta: 'No se pudo eliminar la cuenta. Intenta de nuevo.',
   reportar: 'No se pudo enviar el reporte. Intenta de nuevo.',

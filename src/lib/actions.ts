@@ -3,11 +3,14 @@ import {
   apiPost,
   apiGet,
   isApiError,
+  isApiErrorCode,
+  isForbidden,
   isRateLimit,
   isTokenExpired,
+  isUnauthorized,
   getUserMessage,
   ApiErrorCode,
-  ApiError,
+  type Operacion,
 } from "@/lib/apiClient";
 
 export function createUsuario(formData: IUsuarioData) {
@@ -34,29 +37,14 @@ export async function reenviarCorreo(token: string): Promise<ReenviarCorreoRespo
       cuentaVerificada: false,
     };
   } catch (error) {
-    if (!isApiError(error)) {
-      return { esExito: false, cuentaVerificada: false };
-    }
+    // Se decide siempre por code, nunca por detail.
+    // `cuentaVerificada: true` = estado terminal: el modal oculta el botón de reenvío.
 
-    const { data } = error as ApiError;
-    const code = data.code;
-    const detail = data.detail;
-
-    if (code === ApiErrorCode.UNAUTHORIZED && detail === "Correo no existe") {
-      return {
-        mensaje: "El correo no esta asociado a ninguna cuenta.",
-        esExito: false,
-        cuentaVerificada: true,
-      };
+    // 429: FLOOD_BLOCKED, EMAIL_BLOCKED o el cooldown de 5 min (RATE_LIMIT_EXCEEDED).
+    if (isRateLimit(error)) {
+      return { mensaje: mensajeLimiteReenvio(error, "reenviar_correo"), esExito: false, cuentaVerificada: false };
     }
-    if (code === ApiErrorCode.FORBIDDEN && detail === "Cuenta ya verificada") {
-      return {
-        mensaje: "Esta cuenta ya ha sido verificada.",
-        esExito: false,
-        cuentaVerificada: true,
-      };
-    }
-    // 401 TOKEN_EXPIRED (H6): se decide por code, nunca por detail.
+    // 401 TOKEN_EXPIRED (H6): el token de sesión del registro venció (1 h).
     if (isTokenExpired(error)) {
       return {
         mensaje: "El token ha expirado. Si no te llego el correo, contacta a soporte.",
@@ -64,12 +52,42 @@ export async function reenviarCorreo(token: string): Promise<ReenviarCorreoRespo
         cuentaVerificada: true,
       };
     }
-    // Cualquier 429 (EMAIL_BLOCKED, FLOOD_BLOCKED, …): getUserMessage distingue el techo por red.
-    if (isRateLimit(error)) {
-      return { mensaje: getUserMessage(error, "registro"), esExito: false, cuentaVerificada: false };
+    // 403 FORBIDDEN: en este endpoint solo lo produce "Cuenta ya verificada".
+    if (isForbidden(error)) {
+      return {
+        mensaje: "Esta cuenta ya ha sido verificada.",
+        esExito: false,
+        cuentaVerificada: true,
+      };
     }
-    return { esExito: false, cuentaVerificada: false };
+    // 401 UNAUTHORIZED: la cuenta ya no existe o el token es inválido (H6).
+    // En ambos casos no hay nada que reenviar.
+    if (isUnauthorized(error)) {
+      return {
+        mensaje: "No pudimos reenviar el correo. Si el problema persiste, contacta a soporte.",
+        esExito: false,
+        cuentaVerificada: true,
+      };
+    }
+    // Red caída, 5xx, validación…
+    return { mensaje: getUserMessage(error, "reenviar_correo"), esExito: false, cuentaVerificada: false };
   }
+}
+
+/**
+ * Mensaje para un 429 en los reenvíos de correo.
+ *
+ * - FLOOD_BLOCKED (techo por red): mensaje propio de `getUserMessage`.
+ * - Otro 429: se **muestra** el `detail` del backend porque trae el dato útil
+ *   ("Espera 3 minutos antes de reenviar el correo", "…intenta de nuevo en 15
+ *   minutos"). Solo se muestra; la decisión ya se tomó por code.
+ */
+function mensajeLimiteReenvio(error: unknown, operacion: Operacion): string {
+  if (isApiErrorCode(error, ApiErrorCode.FLOOD_BLOCKED)) {
+    return getUserMessage(error, operacion);
+  }
+  const detail = isApiError(error) ? error.data.detail : undefined;
+  return detail || getUserMessage(error, operacion);
 }
 
 export async function reenviarCorreoRestablecerPassword(
@@ -84,51 +102,23 @@ export async function reenviarCorreoRestablecerPassword(
       cuentaVerificada: false,
     };
   } catch (error) {
-    if (!isApiError(error)) {
-      return { esExito: false, cuentaVerificada: false };
-    }
-
-    const { data } = error as ApiError;
-    const code = data.code;
-    const detail = data.detail;
-
-    if (code === ApiErrorCode.UNAUTHORIZED && detail === "Correo no existe") {
-      return {
-        mensaje: "El correo no esta asociado a ninguna cuenta.",
-        esExito: false,
-        cuentaVerificada: true,
-      };
-    }
-    if (code === ApiErrorCode.FORBIDDEN && detail === "Cuenta no verificada") {
-      return {
-        mensaje: "Esta cuenta no ha sido verificada.",
-        esExito: false,
-        cuentaVerificada: true,
-      };
-    }
-    if (code === ApiErrorCode.FORBIDDEN && detail === "Cuenta no activada") {
-      return {
-        mensaje: "Esta cuenta esta desactivada, contactar a soporte.",
-        esExito: false,
-        cuentaVerificada: true,
-      };
-    }
-    if (code === ApiErrorCode.INTERNAL_ERROR && data.error === "jwt expired") {
-      return {
-        mensaje: "Reinicia el proceso para restablecer contraseña.",
-        esExito: false,
-        cuentaVerificada: true,
-      };
-    }
-    // Cualquier 429 (RECOVERY_BLOCKED, FLOOD_BLOCKED, …): getUserMessage distingue el techo por red.
+    // Anti-enumeración (O1): para un token inexistente, vencido o de una cuenta
+    // no elegible, el backend responde el mismo 200 genérico. Este endpoint no
+    // distingue "correo no existe" / "cuenta no verificada", y el frontend
+    // tampoco debe hacerlo. Solo quedan el 429 y el error genérico.
     if (isRateLimit(error)) {
       return {
-        mensaje: getUserMessage(error, "recuperar_password"),
+        mensaje: mensajeLimiteReenvio(error, "reenviar_correo"),
         esExito: false,
         cuentaVerificada: false,
       };
     }
-    return { esExito: false, cuentaVerificada: false };
+    // Red caída, 5xx, validación…
+    return {
+      mensaje: getUserMessage(error, "reenviar_correo"),
+      esExito: false,
+      cuentaVerificada: false,
+    };
   }
 }
 

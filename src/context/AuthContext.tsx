@@ -9,7 +9,7 @@ import {
   useRef,
 } from 'react';
 import { UsuarioLogueado, IAuthContext, ApiResponse } from '@/types/types';
-import { apiPost, apiGet, isApiError } from '@/lib/apiClient';
+import { apiPost, apiGet, isApiError, ApiErrorCode } from '@/lib/apiClient';
 
 const AuthContext = createContext<IAuthContext | undefined>(undefined);
 
@@ -22,6 +22,31 @@ const LOCK_REFRESH = 'tlaxapp:auth-refresh';
 
 /** Reintentos ante fallos de red (no ante respuestas HTTP de error). */
 const INTENTOS_RED = 3;
+
+/**
+ * Códigos de `401` que **no** son una sesión vencida y no deben disparar
+ * `renovarSesion()` (rotaría las cookies sin motivo).
+ * - `TOKEN_EXPIRED`: enlace de correo vencido (verificación / reset), H6.
+ */
+const CODIGOS_401_SIN_REFRESH: ReadonlySet<string> = new Set([ApiErrorCode.TOKEN_EXPIRED]);
+
+/**
+ * Lee el `code` de un 401 sin consumir el body original (usa `clone()`).
+ * Si el body no es JSON o no se puede leer, devuelve `undefined` y se sigue el
+ * flujo normal de renovación.
+ */
+async function codigoDe401(response: Response): Promise<string | undefined> {
+  if (!(response.headers.get('content-type') || '').includes('application/json')) {
+    return undefined;
+  }
+  try {
+    const body: unknown = await response.clone().json();
+    const code = (body as { code?: unknown } | null)?.code;
+    return typeof code === 'string' ? code : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 /**
  * Claves de `sessionStorage` que pertenecen a la sesión. Se limpian al cerrar
@@ -155,6 +180,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       const response = await fetchConReintentos(doFetch);
       if (response.status !== 401) return response;
+
+      // 401 que no es de sesión (p. ej. enlace de correo vencido): se devuelve
+      // tal cual, sin renovar. Se decide por code, nunca por detail.
+      const codigo = await codigoDe401(response);
+      if (codigo && CODIGOS_401_SIN_REFRESH.has(codigo)) return response;
 
       // 401: se asume access token vencido y se reintenta una sola vez.
       const resultado = await renovarSesion(doFetch);
