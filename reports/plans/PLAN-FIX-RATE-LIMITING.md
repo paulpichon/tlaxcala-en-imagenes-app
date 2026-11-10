@@ -1,8 +1,10 @@
 ---
 title: "Plan de ejecución: fix de rate limiting en el frontend"
 type: plan
-status: working
+status: completed
 created: "2026-11-05"
+completed: "2026-11-10"
+expires: "2027-02-08"
 branch: "Fix-demasiadas-solitudes"
 related: ["SPECS-FRONTEND-RATE-LIMITING.md"]
 ---
@@ -196,7 +198,7 @@ if (isRateLimit(err)) {
 
 - No cambiar URLs, payloads ni cookies.
 - No tocar `middlewares/rate-limiter.js` ni ningún archivo del backend (ese trabajo ya está en la rama del backend).
-- No modificar `SPECS-VISIBILIDAD-POSTEOS.md` ni `SPECS-EDICION-POSTEOS.md` (probablemente serán eliminados a corto plazo).
+- No modificar `SPECS-BACKEND-VISIBILIDAD-POSTEOS.md` ni `SPECS-BACKEND-EDICION-POSTEOS.md` *(nota original 2026-11-05: "probablemente serán eliminados a corto plazo" — **obsoleta**: ambos specs siguen vigentes y fueron consolidados en `SPECS/` el 2026-11-10; hoy la regla es no tocar specs vigentes sin aprobación).*
 
 ---
 

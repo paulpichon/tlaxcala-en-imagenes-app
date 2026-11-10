@@ -1,5 +1,8 @@
 # SPECS — Moderación de Reportes de Publicaciones (Panel de Administración)
 
+**Fecha:** 2026-09-25
+**Estado:** vigente.
+
 Contrato del módulo de moderación de reportes de publicaciones del **Panel de Administración** de TlaxApp. Reemplaza al sistema legado `/api/v1/admin/moderacion` (colección `Moderador` eliminada).
 
 > **Contexto:** la Fase 1 guardó los reportes y ocultó el posteo para el reportante. La Fase 2 del panel implementa: identidad de administrador con rol `MODERADOR`, cola de reportes **priorizada dinámicamente**, ocultamiento global de posteos, eliminación por moderación con notificación anónima al autor, recategorización y limpieza de reportes huérfanos.

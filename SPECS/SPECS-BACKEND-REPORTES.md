@@ -1,5 +1,8 @@
 # SPECS — Reportar una publicación
 
+**Fecha:** 2026-09-25
+**Estado:** vigente (Fase 1 y Fase 2 implementadas — ver §9).
+
 Especificación de la **Fase 1** de la función "Reportar una publicación". Contrato para que el frontend implemente el formulario de reporte, el mensaje de confirmación y el ocultamiento del posteo reportado.
 
 > **Contexto:** un usuario detecta una publicación que considera contraria a las normas de TlaxApp y la reporta. El reporte se guarda con un motivo predefinido y, como efecto inmediato, **la publicación desaparece de forma permanente para el usuario que reportó** (feed y perfil del autor). El autor del posteo **nunca** se entera de que fue reportado ni de quién lo hizo. La moderación (revisar, resolver o descartar reportes) es **Fase 2**, no implementada en el backend todavía.
@@ -160,9 +163,9 @@ El backend **no** devuelve ningún campo tipo `isReportado` y no elimina el post
 
 ---
 
-## 9. Fase 2 (implementada) — ver `SPECS-MODERACION-REPORTES.md`
+## 9. Fase 2 (implementada) — ver `SPECS-BACKEND-MODERACION-REPORTES.md`
 
-La moderación de reportes se implementó en la Fase 2 del **panel de administración** (`/api/v1/admin/moderacion`, identidad `Admin` con rol `MODERADOR`; el sistema legado `/api/moderacion` con colección `Moderador` fue eliminado), con cola priorizada por score, ocultamiento global, eliminación con notificación anónima, cascada, recategorización y limpieza de huérfanos. Consultar [`SPECS-MODERACION-REPORTES.md`](SPECS-MODERACION-REPORTES.md) para el contrato completo.
+La moderación de reportes se implementó en la Fase 2 del **panel de administración** (`/api/v1/admin/moderacion`, identidad `Admin` con rol `MODERADOR`; el sistema legado `/api/moderacion` con colección `Moderador` fue eliminado), con cola priorizada por score, ocultamiento global, eliminación con notificación anónima, cascada, recategorización y limpieza de huérfanos. Consultar [`SPECS-BACKEND-MODERACION-REPORTES.md`](SPECS-BACKEND-MODERACION-REPORTES.md) para el contrato completo.
 
 **Impacto en el frontend de usuarios (Fase 1 intacto):**
 - `POST /api/reportes/:posteoId` sin cambios.

@@ -1,5 +1,8 @@
 # SPECS — Edición de Posteos (validadores tolerantes + eliminación de ubicación)
 
+**Fecha:** 2026-08-27
+**Estado:** vigente.
+
 Especificación de los cambios en el backend relativos a la **edición de posteos** (`PUT /api/posteos/:id`) y a la **eliminación de la ubicación** de un posteo. Contrato antes/después para que el frontend adapte sus pantallas, flujos y manejo de errores.
 
 > **Contexto del problema resuelto:** al editar solo el texto de un posteo **sin ubicación**, el formulario enviaba `municipio: null, lat: null, lng: null` junto con el texto, y el backend respondía `422 VALIDATION_FAILED` porque los validadores de `lat`/`lng` no toleraban `null`/`''`. Además, el backend reconstruía el objeto `ubicacion` completo en cada edición, lo que podía borrar datos de ubicación guardados cuando el formulario hacía "eco" de campos vacíos.

@@ -35,7 +35,7 @@ Ver `.env` para valores actuales. Variables principales:
 ## Documentación
 
 - `QUE-ES-TLAXAPP.md` — Copia oficial de la página "¿Qué es TlaxApp?" (fuente de verdad)
-- `SPECS-*.md` y `SPECS/*.md` — Especificaciones de funcionalidades (reportes, moderación, edición de posteos, visibilidad, texto de posteos/comentarios)
+- `SPECS/` — Especificaciones de funcionalidades (reportes, moderación, edición de posteos, visibilidad, texto de posteos/comentarios)
 - `docs/api/` + `AGENTS.md` — Endpoints del backend (referencia completa del contrato)
 - `CHANGELOG.md` — Historial de cambios del proyecto
 - `AGENTS.md` — Contexto para asistentes IA

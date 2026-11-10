@@ -116,7 +116,7 @@ La moderación se opera **exclusivamente desde el panel de administración** (`/
 
 Sistema de documentación del proyecto. Dos zonas con roles distintos:
 
-- **Oficial / referencia** (vigente, nunca se auto-archiva ni auto-elimina): `README.md`, `CHANGELOG.md`, `AGENTS.md`, `QUE-ES-TLAXAPP.md`, `QUE-NO-ES-TLAXAPP.md`, `SPECS-*.md` + `SPECS/`, y **`docs/api/`** (referencia completa de endpoints del backend).
+- **Oficial / referencia** (vigente, nunca se auto-archiva ni auto-elimina): `README.md`, `CHANGELOG.md`, `AGENTS.md`, `QUE-ES-TLAXAPP.md`, `QUE-NO-ES-TLAXAPP.md`, `SPECS/`, y **`docs/api/`** (referencia completa de endpoints del backend).
 - **Trabajo** (`reports/`): documentos generados durante desarrollo (análisis, planes, auditorías, snapshots de `documentador`). Histórico archivado en `reports/archive/`.
 
 ### Dónde guardar documentos (agentes IA)
@@ -149,6 +149,6 @@ Opcionales: `completed`, `expires` (retención 90 d para plans, 180 d para anál
 
 - El registro canónico de cambios termina en `CHANGELOG.md`; los documentos de `reports/` son evidencia/complemento.
 - `docs/api/` es la única fuente de verdad del contrato del backend. No generan reemplazos de esa referencia salvo solicitud del humano.
-- Un hallazgo estable que afecte contratos va a `AGENTS.md` o un `SPECS-*` vigente (con aprobación humana), no queda solo en un reporte.
+- Un hallazgo estable que afecta contratos va a `AGENTS.md` o a un spec vigente de `SPECS/` (con aprobación humana), no queda solo en un reporte.
 - Snapshots de `documentador`: como máximo 2 vigentes + archivadas en `reports/archive/documentador/` (con revisión humana al archivar).
 - Antes de reanalizar un tema, consultar `reports/archive/` y la corrida más reciente de `reports/` — puede que ya esté estudiado.

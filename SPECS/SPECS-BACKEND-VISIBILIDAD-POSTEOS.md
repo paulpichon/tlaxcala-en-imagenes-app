@@ -1,5 +1,8 @@
 # SPECS — Visibilidad de Posteos (`posteo_publico` → `visibilidad`)
 
+**Fecha:** 2026-08-28
+**Estado:** vigente (transición completada; `posteo_publico` deprecated).
+
 Especificación de los cambios en el backend relativos a la **visibilidad de posteos**. Contrato antes/después para que el frontend adapte sus pantallas, flujos, el botón **compartir** y el manejo del error `401`.
 
 > **Contexto del problema resuelto:** el campo booleano `posteo_publico` no distinguía entre "aparecer en el feed" y "quién puede ver el posteo". Ahora se reemplaza por el enum `visibilidad` (`'publico'` | `'perfil'`), extensible en el futuro (`'seguidores'`, `'solo yo'`, etc.), y un posteo con `visibilidad: 'perfil'` ya **no puede abrirse por link directo sin sesión** (devuelve `401`).
@@ -201,4 +204,4 @@ Cuando un visitante **sin sesión** abra un link de un posteo `perfil` (p. ej. d
 | `routes/posteos.js` | Validación `visibilidad` `isIn(['publico','perfil'])` en POST y PUT; `posteo_publico` sigue validado como Boolean (DEPRECATED) |
 | `controllers/favoritos.js` | `$project` incluye `visibilidad` y `posteo_publico` calculado |
 | `scripts/migrar-visibilidad-posteos.js` | Migración idempotente de datos existentes |
-| `AGENTS.md`, `README.md`, `CHANGELOG.md`, `SPECS-EDICION-POSTEOS.md` | Documentación sincronizada |
+| `AGENTS.md`, `README.md`, `CHANGELOG.md`, `SPECS-BACKEND-EDICION-POSTEOS.md` | Documentación sincronizada |
