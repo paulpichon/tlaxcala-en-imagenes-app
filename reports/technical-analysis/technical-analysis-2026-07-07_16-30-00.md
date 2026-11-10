@@ -1,4 +1,9 @@
 ---
+title: "Informe de Auditoría Técnica — frontend TlaxApp"
+type: technical-analysis
+status: completed
+created: "2026-07-07"
+expires: "2027-01-04"
 Fecha y hora de la auditoría: 2026-07-07 16:30:00
 Alcance analizado: Auditoría completa del frontend
 ---
