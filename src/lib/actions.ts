@@ -4,6 +4,7 @@ import {
   apiGet,
   isApiError,
   isRateLimit,
+  isTokenExpired,
   getUserMessage,
   ApiErrorCode,
   ApiError,
@@ -55,7 +56,8 @@ export async function reenviarCorreo(token: string): Promise<ReenviarCorreoRespo
         cuentaVerificada: true,
       };
     }
-    if (code === ApiErrorCode.INTERNAL_ERROR && data.error === "jwt expired") {
+    // 401 TOKEN_EXPIRED (H6): se decide por code, nunca por detail.
+    if (isTokenExpired(error)) {
       return {
         mensaje: "El token ha expirado. Si no te llego el correo, contacta a soporte.",
         esExito: false,
@@ -147,30 +149,9 @@ export interface ValidacionTokenReset {
    * tampoco se trata como inválido (no se ofrece "Solicitar nuevo enlace").
    */
   error: boolean;
+  /** true ante `401 TOKEN_EXPIRED`: el enlace venció (distinto de "no válido"). */
+  expirado: boolean;
   mensaje: string | null;
-}
-
-/**
- * PUENTE TEMPORAL — el backend (`validarTokenRestablecerPassword`) envuelve los
- * errores de `jsonwebtoken` en `InternalError(error.message)`, así que un enlace
- * expirado o con firma inválida llega como `500 INTERNAL_ERROR` con
- * `detail: "jwt expired" | "invalid signature" | "jwt malformed" | …`.
- * Sin esta excepción, el caso más común (enlace de más de 1 h) se mostraría
- * como error genérico en vez de "enlace no válido".
- *
- * Es la única comparación de texto permitida aquí y debe eliminarse cuando el
- * backend responda `401` para tokens JWT inválidos/expirados.
- */
-const DETALLE_ERROR_JWT = /^(jwt |invalid (signature|token|algorithm))/i;
-
-function esTokenJwtRechazado(err: unknown): boolean {
-  return (
-    isApiError(err) &&
-    err.status === 500 &&
-    err.data.code === ApiErrorCode.INTERNAL_ERROR &&
-    typeof err.data.detail === "string" &&
-    DETALLE_ERROR_JWT.test(err.data.detail)
-  );
 }
 
 /**
@@ -183,12 +164,15 @@ function esTokenJwtRechazado(err: unknown): boolean {
  * pediría uno nuevo y el backend invalidaría el enlace que seguía vigente.
  * Por la misma razón, un fallo de red o un 5xx tampoco lo es (`error: true`).
  *
- * Clasificación:
+ * Clasificación (siempre por status/code, nunca por `detail`):
  * - 2xx                         → `valid` según `data.valid`
  * - 429                         → `rateLimited`
- * - 4xx (400/401/403/404…)      → enlace inválido
- * - 500 por JWT rechazado       → enlace inválido (puente, ver `esTokenJwtRechazado`)
- * - otro 5xx / red / no-JSON    → `error`
+ * - 401 TOKEN_EXPIRED           → `expirado` (H6)
+ * - otro 4xx (401 UNAUTHORIZED, 400, 403, 404…) → enlace inválido
+ * - 5xx / red / no-JSON         → `error`
+ *
+ * Usa `fetch` directo (no `fetchWithAuth`): estos 401 son del enlace, no de la
+ * sesión, y nunca deben disparar `renovarSesion()`.
  */
 export async function validarTokenRestablecerPassword(
   token: string
@@ -204,6 +188,7 @@ export async function validarTokenRestablecerPassword(
       valid: res.data?.valid === true,
       rateLimited: false,
       error: false,
+      expirado: false,
       mensaje: null,
     };
   } catch (error) {
@@ -212,16 +197,17 @@ export async function validarTokenRestablecerPassword(
         valid: false,
         rateLimited: true,
         error: false,
+        expirado: false,
         mensaje: getUserMessage(error, "restablecer_password"),
       };
     }
 
-    const esInvalido =
-      esTokenJwtRechazado(error) ||
-      (isApiError(error) && error.status >= 400 && error.status < 500);
+    if (isTokenExpired(error)) {
+      return { valid: false, rateLimited: false, error: false, expirado: true, mensaje: null };
+    }
 
-    if (esInvalido) {
-      return { valid: false, rateLimited: false, error: false, mensaje: null };
+    if (isApiError(error) && error.status >= 400 && error.status < 500) {
+      return { valid: false, rateLimited: false, error: false, expirado: false, mensaje: null };
     }
 
     // Red caída, 5xx o respuesta no-JSON (p. ej. 502 HTML del proxy).
@@ -230,6 +216,7 @@ export async function validarTokenRestablecerPassword(
       valid: false,
       rateLimited: false,
       error: true,
+      expirado: false,
       mensaje: "No pudimos comprobar tu enlace. Revisa tu conexión e intenta de nuevo.",
     };
   }

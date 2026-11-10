@@ -14,6 +14,9 @@ export const ApiErrorCode = {
   BAD_REQUEST: 'BAD_REQUEST',
   UNAUTHORIZED: 'UNAUTHORIZED',
   AUTHENTICATION_ERROR: 'AUTHENTICATION_ERROR',
+  // 401 de un enlace de correo vencido (verificación / reset). No es sesión:
+  // nunca debe disparar renovarSesion().
+  TOKEN_EXPIRED: 'TOKEN_EXPIRED',
   FORBIDDEN: 'FORBIDDEN',
   NOT_FOUND: 'NOT_FOUND',
   CONFLICT: 'CONFLICT',
@@ -96,6 +99,16 @@ export function isUnauthorized(err: unknown): boolean {
     code === ApiErrorCode.UNAUTHORIZED ||
     code === ApiErrorCode.AUTHENTICATION_ERROR
   );
+}
+
+/**
+ * Enlace de correo vencido (`401 TOKEN_EXPIRED`): verificar-correo,
+ * validar-token-reset-password, reestablecer-password y reenviar-correo.
+ * Un token con firma inválida o mal formado es `401 UNAUTHORIZED` (`isUnauthorized`).
+ * Ninguno de los dos es una sesión expirada: no llamar a `renovarSesion()`.
+ */
+export function isTokenExpired(err: unknown): boolean {
+  return isApiErrorCode(err, ApiErrorCode.TOKEN_EXPIRED);
 }
 
 export function isForbidden(err: unknown): boolean {

@@ -5,6 +5,9 @@
 // y no en el Server Component de la página: si la hiciera el servidor de Next,
 // el backend vería la IP del servidor y el techo por IP (flujoTokenIpLimiter,
 // 60/15 min) lo compartirían todos los usuarios (H5 en el backend).
+//
+// Los 401 de este flujo (TOKEN_EXPIRED / UNAUTHORIZED) son del enlace, no de la
+// sesión: se llama con fetch directo y nunca se dispara renovarSesion().
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -89,6 +92,37 @@ export default function ValidarTokenReset({ token }: { token: string }) {
     );
   }
 
+  // ⌛ 401 TOKEN_EXPIRED: el enlace venció; aquí sí se ofrece pedir uno nuevo.
+  if (resultado.expirado) {
+    return (
+      <div className="text-center mt-5">
+        <h2>Este enlace expiró</h2>
+        <p className="text-muted mt-3">
+          Por seguridad, los enlaces para cambiar contraseña solo funcionan
+          durante 1 hora. Solicita uno nuevo para continuar.
+        </p>
+
+        <Link
+          className="btn btn-primary mt-3"
+          href="/cuentas/login/password-olvidado"
+          aria-label="Solicitar nuevo enlace para restablecer contraseña"
+        >
+          Solicitar nuevo enlace
+        </Link>
+
+        <p className="mt-3">
+          <Link
+            className="text-decoration-none text-secondary"
+            href="/cuentas/login"
+            aria-label="Volver a iniciar sesión"
+          >
+            ← Volver a iniciar sesión
+          </Link>
+        </p>
+      </div>
+    );
+  }
+
   // ✅ Token válido: formulario de nueva contraseña
   if (resultado.valid) {
     return (
@@ -107,7 +141,7 @@ export default function ValidarTokenReset({ token }: { token: string }) {
     );
   }
 
-  // ❌ Token inválido o expirado
+  // ❌ 401 UNAUTHORIZED (firma inválida, mal formado, ya usado) u otro 4xx
   return (
     <div className="text-center mt-5">
       <h2>Este enlace ya no es válido</h2>

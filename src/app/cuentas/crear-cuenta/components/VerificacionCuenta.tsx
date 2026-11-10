@@ -9,10 +9,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import cuentaVerificada from "@/app/ui/cuentas/crear-cuenta/cuenta-verificada/CuentaVerificada.module.css";
-import { apiGet, getUserMessage, isRateLimit, isUnauthorized } from "@/lib/apiClient";
+import { apiGet, getUserMessage, isRateLimit, isTokenExpired, isUnauthorized } from "@/lib/apiClient";
 
 type ResultadoVerificacion =
   | { estado: "verificada" }
+  | { estado: "expirado" }
   | { estado: "invalido" }
   | { estado: "limite"; mensaje: string }
   | { estado: "error" };
@@ -23,6 +24,8 @@ type ResultadoVerificacion =
 // sola petición; se libera al terminar para que recargar vuelva a intentarlo.
 const verificacionesEnCurso = new Map<string, Promise<ResultadoVerificacion>>();
 
+// Se decide siempre por `code`, nunca por `detail` (H6). Los 401 son del enlace,
+// no de la sesión: fetch directo, nunca renovarSesion().
 function verificarCorreo(token: string): Promise<ResultadoVerificacion> {
   const enCurso = verificacionesEnCurso.get(token);
   if (enCurso) return enCurso;
@@ -38,8 +41,11 @@ function verificarCorreo(token: string): Promise<ResultadoVerificacion> {
       if (isRateLimit(error)) {
         return { estado: "limite", mensaje: getUserMessage(error, "registro") };
       }
-      console.error("Error verificando cuenta:", error);
+      // 401 TOKEN_EXPIRED: enlace vencido.
+      if (isTokenExpired(error)) return { estado: "expirado" };
+      // 401 UNAUTHORIZED: firma inválida, mal formado o ya usado.
       if (isUnauthorized(error)) return { estado: "invalido" };
+      console.error("Error verificando cuenta:", error);
       return { estado: "error" };
     })
     .finally(() => {
@@ -140,7 +146,47 @@ export default function VerificacionCuenta({ token }: { token: string }) {
     );
   }
 
-  // ❌ Token inválido o expirado
+  // ⌛ 401 TOKEN_EXPIRED: el enlace venció. No hay reenvío self-service fuera de
+  // la pestaña del registro (registroToken vive en su sessionStorage y también
+  // vence en 1 h), así que el enlace nuevo se pide a soporte.
+  if (resultado.estado === "expirado") {
+    return (
+      <div className={cuentaVerificada.contenedor_formulario}>
+        <div className={cuentaVerificada.contenedor_titulos}>
+          <h2>Este enlace expiró</h2>
+
+          <p>
+            Por seguridad, los enlaces de verificación solo funcionan durante
+            1 hora. Tu cuenta aún no está verificada.
+          </p>
+
+          <div className="mt-4">
+            <p className="mb-3">Solicita un enlace nuevo para verificar tu cuenta:</p>
+
+            <Link
+              href="/contacto"
+              className={cuentaVerificada.boton_login}
+              aria-label="Solicitar un nuevo enlace de verificación a soporte"
+            >
+              Solicitar nuevo enlace
+            </Link>
+
+            <p className="text-muted small mt-3">
+              <Link
+                className={cuentaVerificada.link_inciar_sesion}
+                href="/cuentas/login"
+                aria-label="Volver a inicio de sesión"
+              >
+                Volver a inicio de sesión
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ❌ 401 UNAUTHORIZED: firma inválida, mal formado o ya usado
   if (resultado.estado === "invalido") {
     return (
       <div className={cuentaVerificada.contenedor_formulario}>
@@ -156,7 +202,6 @@ export default function VerificacionCuenta({ token }: { token: string }) {
             <p className="mb-2"><strong>Posibles causas:</strong></p>
             <ul className="mb-0 text-start small">
               <li>El enlace ya fue usado anteriormente</li>
-              <li>Han pasado más de 24 horas desde que se envió</li>
               <li>El enlace está incompleto o fue modificado</li>
             </ul>
           </div>
