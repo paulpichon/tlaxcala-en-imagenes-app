@@ -18,7 +18,7 @@
 >
 > **Revisión 2026-10-27 (corrección de auth).** Se auditó el sistema de sesiones contra el código y se aplicaron tres cambios: (a) `ACCESS_TOKEN_EXPIRY` pasa a tener default `1h` en código; (b) el `maxAge` de todas las cookies de sesión se deriva del `exp` del JWT (`helpers/vigencia-cookie.js`), de modo que token y cookie no pueden desincronizarse, tampoco en el panel; (c) el icono de Web Push de comentarios ya no cae en un path relativo. Las filas de la tabla de autenticación, los hallazgos H22–H24, I1 e I4 y el archivo `comentarios.md` reflejan el estado nuevo. Los riesgos H22–H24 se **documentan sin corregir** por decisión explícita.
 >
-> **Delta frente al inventario base** (`reports/api/inventario-endpoints.json`, 80 entradas): se contrastaron método y ruta de los 80 endpoints contra el código. **Sin diferencias de método ni de ruta** (80/80). No se volvió a diffear cada campo del JSON; donde el JSON difiere del código en detalle, se indica en el archivo de dominio correspondiente (por ejemplo, `GET /api/health` devuelve más campos que los listados en el JSON).
+> **Delta frente al inventario base** (`inventario-endpoints.json`, 80 entradas): se contrastaron método y ruta de los 80 endpoints contra el código. **Sin diferencias de método ni de ruta** (80/80). No se volvió a diffear cada campo del JSON; donde el JSON difiere del código en detalle, se indica en el archivo de dominio correspondiente (por ejemplo, `GET /api/health` devuelve más campos que los listados en el JSON).
 
 ---
 
@@ -429,7 +429,7 @@ Leyenda de auth: **Público**, **Usuario** (`verificarTokenSesion`), **Opcional*
 
 ### Totales
 
-- **Endpoints documentados: 80** (red social 55 · panel 25). Coinciden con las 80 entradas de `reports/api/inventario-endpoints.json`, método y ruta.
+- **Endpoints documentados: 80** (red social 55 · panel 25). Coinciden con las 80 entradas de `inventario-endpoints.json`, método y ruta.
 - **Archivos de dominio: 18**, más este índice.
 - **Método:** cada endpoint se trazó desde `routes/` o `admin/routes/` hasta su controlador, validadores, middlewares, modelo y helpers, y las citas de línea se tomaron de esos archivos. **No se levantó el servidor** (requiere MongoDB, Cloudinary y SMTP): todos los ejemplos son **[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]**.
 - **Pruebas de librería ejecutadas con Node** (scripts temporales, sin tocar código fuente): `validator` 13.15.35 (`isBoolean` y `isInt`) y lectura de `node_modules/cors/lib/index.js`.

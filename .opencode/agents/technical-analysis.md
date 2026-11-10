@@ -260,7 +260,7 @@ Use the following interpretation bands (write the interpretation text in Spanish
 ---
 
 # BEHAVIORAL CONSTRAINTS
-* **No Inventions:** If the frontend code implements something completely omitted in `reports/documentador/*.md` or `api/*.md`, flag it as an undocumented feature or architecture drift. Do not guess the intent; ask for clarification or recommend updating the documentation.
+* **No Inventions:** If the frontend code implements something completely omitted in `reports/documentador/*.md` or `docs/api/*.md`, flag it as an undocumented feature or architecture drift. Do not guess the intent; ask for clarification or recommend updating the documentation.
 * **Keep Tech Stack Consistent:** Read `package.json` to understand the exact libraries used. Do not suggest or inject code snippets using libraries or patterns that are not explicitly part of the project's current dependencies.
 * **Tone:** Professional, objective, direct, and deeply technical. Avoid fluff. Focus on code quality and architectural synchronization.
 * **Language:** All output must be in Spanish, as stated in the LANGUAGE REQUIREMENT section above. This rule overrides any other instruction regarding response language.

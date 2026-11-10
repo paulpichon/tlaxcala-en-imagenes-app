@@ -4,15 +4,15 @@
 **Audiencia:** equipo frontend de la app (red social) y del panel de administración.
 **Estado:** vigente. Sin breaking changes: rutas, métodos, bodies y formas de respuesta no cambiaron.
 
-Este documento resume lo que el frontend debe saber de los cambios recientes en el backend y recomendaciones para consumir la sesión de forma segura. El contrato detallado de cada endpoint vive en `reports/api/README.md` (índice) y en los archivos de dominio de `reports/api/`.
+Este documento resume lo que el frontend debe saber de los cambios recientes en el backend y recomendaciones para consumir la sesión de forma segura. El contrato detallado de cada endpoint vive en `docs/api/README.md` (índice) y en los archivos de dominio de `docs/api/`.
 
 ---
 
 ## 1. Fuente de verdad de la API
 
-- Documentación vigente: `reports/api/README.md` y los archivos por dominio (`auth.md`, `usuarios.md`, `posteos.md`, `admin-auth-totp.md`, etc.).
-- `reports/api/API_REFERENCE_ADMIN_2026-09-15.md` está **SUPERSEDIDO**. No lo usen como referencia: sus cifras de cookies del panel (10 min / 4 h) ya no son exactas.
-- Los ejemplos de request/response de `reports/api/` están construidos a partir del esquema y **no se ejecutaron contra un servidor real**. Ante una duda, prevalece el comportamiento observado en el entorno de desarrollo.
+- Documentación vigente: `docs/api/README.md` y los archivos por dominio (`auth.md`, `usuarios.md`, `posteos.md`, `admin-auth-totp.md`, etc.).
+- `API_REFERENCE_ADMIN_2026-09-15.md` (antes en `reports/api/`, eliminado del repo) está **SUPERSEDIDO**. No lo usen como referencia: sus cifras de cookies del panel (10 min / 4 h) ya no son exactas.
+- Los ejemplos de request/response de `docs/api/` están construidos a partir del esquema y **no se ejecutaron contra un servidor real**. Ante una duda, prevalece el comportamiento observado en el entorno de desarrollo.
 
 ## 2. Contrato de error de duplicados (409)
 
@@ -125,7 +125,7 @@ Reintentar la petición original una sola vez tras `renovarSesion()`. Si el refr
 
 ## 7. Riesgos conocidos (documentados, aún no corregidos)
 
-Estos comportamientos existen hoy. Están registrados en `AGENTS.md` (§ *Known session gaps*) y en `reports/api/README.md` (H22–H24). Corregirlos se hará en un cambio aparte, pero el frontend debe contemplarlos:
+Estos comportamientos existen hoy. Están registrados en `AGENTS.md` (§ *Known session gaps*) y en `docs/api/README.md` (H22–H24). Corregirlos se hará en un cambio aparte, pero el frontend debe contemplarlos:
 
 - **H22** — Sesiones de más de 30 días (usuarios) o 12 h (panel) pierden su registro de refresh: el siguiente refresh devuelve "Sesión comprometida". Tratarlo como cualquier `401` de sesión (login).
 - **H23** — Refresh concurrente: **mitigado en el frontend** con Web Locks entre pestañas y deduplicación en memoria (§3.2). El backend sigue sin ventana de gracia, así que un cliente que no implemente el lock todavía puede provocar el falso positivo de reuso.
@@ -141,7 +141,7 @@ Estos comportamientos existen hoy. Están registrados en `AGENTS.md` (§ *Known 
 - [x] Limpiar estado local al hacer logout.
 - [x] Renderer de Web Push: tolerar ausencia de `icon`.
 - [x] No hardcodear vidas de cookies ni asumir `15m`/`10m`/`4h`.
-- [ ] Usar `reports/api/README.md` como referencia; ignorar `API_REFERENCE_ADMIN_2026-09-15.md`.
+- [ ] Usar `docs/api/README.md` como referencia; ignorar `API_REFERENCE_ADMIN_2026-09-15.md` (eliminado, ver §1).
 - [ ] Verificar la cookie de atribución `SameSite=Lax` en el dominio real de la landing.
 - [x] No refrescar la sesión ante `401 INVALID_CURRENT_PASSWORD` (panel).
 
@@ -149,5 +149,5 @@ Estos comportamientos existen hoy. Están registrados en `AGENTS.md` (§ *Known 
 
 ## Historial de este documento
 
-- **2026-10-27** — Versión inicial. Derivada de la corrección de sesiones (`helpers/vigencia-cookie.js`, `helpers/tokensUtils.js`, `controllers/comentarios.js`) y de la documentación nueva de `reports/api/`.
+- **2026-10-27** — Versión inicial. Derivada de la corrección de sesiones (`helpers/vigencia-cookie.js`, `helpers/tokensUtils.js`, `controllers/comentarios.js`) y de la documentación nueva de `docs/api/` (antes en `reports/api/`).
 - **2026-10-28** — Implementación en ambos frontends: Web Locks para el refresh entre pestañas, manejo de errores de red sin cerrar sesión, `INVALID_CURRENT_PASSWORD` como código propio del `401` de contraseña actual, lectura de `errors[0].code` para duplicados, icono por defecto del service worker y limpieza de `sessionStorage` en logout.
