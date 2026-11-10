@@ -13,7 +13,7 @@ import { HeaderPrincipalTei } from "@/app/components/HeaderPrincipalTei";
 import FooterMain from "../../../components/FooterMain";
 // Función API para enviar el correo de restablecer password
 import { envioCorreoRestablecerPassword } from "@/lib/actions";
-import { isApiError, isRateLimit, ApiErrorCode, getUserMessage } from "@/lib/apiClient";
+import { isApiError, isRateLimit, isApiErrorCode, ApiErrorCode, getUserMessage } from "@/lib/apiClient";
 // Validación de correo electrónico desde usuarioSchema usando un .pick()
 import { correoSchema } from "@/lib/validaciones";
 import Link from "next/link";
@@ -21,6 +21,15 @@ import Link from "next/link";
 // Constante: Tiempo de espera entre solicitudes (5 minutos)
 // Previene abuso del sistema de recuperación de contraseñas
 const FIVE_MINUTES_MS = 5 * 60 * 1000;
+// RECOVERY_BLOCKED: ambos cubos de password-olvidado (IP + correo, 3/15 min, y
+// el techo por IP de H2, 10/15 min) usan ventana de 15 minutos.
+const FIFTEEN_MINUTES_MS = 15 * 60 * 1000;
+// localStorage: guarda el instante (ms) en que se desbloquea el botón.
+const CLAVE_BLOQUEO = "lastPasswordRequest";
+
+const guardarBloqueo = (duracionMs: number) => {
+	localStorage.setItem(CLAVE_BLOQUEO, (Date.now() + duracionMs).toString());
+};
 
 /**
  * Componente Cliente principal de Password Olvidado
@@ -67,17 +76,18 @@ export default function PasswordOlvidadaClient() {
 	useEffect(() => {
 		// localStorage para guardar la fecha de la última solicitud
 		// Verificar si ya se ha enviado un correo en los últimos 5 minutos
-		const lastRequest = localStorage.getItem("lastPasswordRequest");
-		if (lastRequest) {
-			const tiempoPasado = Date.now() - Number(lastRequest);
-			const restante = FIVE_MINUTES_MS - tiempoPasado;
+		const desbloqueo = localStorage.getItem(CLAVE_BLOQUEO);
+		if (desbloqueo) {
+			const restante = Number(desbloqueo) - Date.now();
 
-			if (restante > 0) {
+			// Tope de seguridad: un valor corrupto o en el futuro lejano no deja
+			// el botón bloqueado más de la ventana máxima.
+			if (restante > 0 && restante <= FIFTEEN_MINUTES_MS) {
 				// Aún está dentro del período de bloqueo
 				iniciarContador(Math.floor(restante / 1000));
 			} else {
-				// El bloqueo ya expiró, limpiar localStorage
-				localStorage.removeItem("lastPasswordRequest");
+				// El bloqueo ya expiró (o el valor no es válido), limpiar localStorage
+				localStorage.removeItem(CLAVE_BLOQUEO);
 			}
 		}
 	}, []);
@@ -100,7 +110,7 @@ export default function PasswordOlvidadaClient() {
 					// Contador llegó a 0
 					clearInterval(interval);
 					setBotonDeshabilitado(false);
-					localStorage.removeItem("lastPasswordRequest");
+					localStorage.removeItem(CLAVE_BLOQUEO);
 					return null;
 				}
 			});
@@ -138,16 +148,20 @@ export default function PasswordOlvidadaClient() {
 
 			sessionStorage.setItem('passForgetToken', data.data.token);
 
-			localStorage.setItem("lastPasswordRequest", Date.now().toString());
+			guardarBloqueo(FIVE_MINUTES_MS);
 
 			router.push(`/cuentas/confirmacion/correo-enviado-restablecer-password`);
 		} catch (err) {
 			if (isApiError(err)) {
 				const code = err.data?.code;
 				if (isRateLimit(err)) {
-					setError("Espera 5 minutos antes de poder reenviar el correo.");
-					localStorage.setItem("lastPasswordRequest", Date.now().toString());
-					iniciarContador(FIVE_MINUTES_MS / 1000);
+					// RECOVERY_BLOCKED → ventana de 15 min; otro 429 → 5 min (cooldown previo).
+					const bloqueoMs = isApiErrorCode(err, ApiErrorCode.RECOVERY_BLOCKED)
+						? FIFTEEN_MINUTES_MS
+						: FIVE_MINUTES_MS;
+					setError(getUserMessage(err, 'recuperar_password'));
+					guardarBloqueo(bloqueoMs);
+					iniciarContador(bloqueoMs / 1000);
 				} else if (code === ApiErrorCode.VALIDATION_FAILED) {
 					setError(getUserMessage(err, 'recuperar_password'));
 				} else {
