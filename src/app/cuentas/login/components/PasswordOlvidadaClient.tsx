@@ -24,11 +24,17 @@ const FIVE_MINUTES_MS = 5 * 60 * 1000;
 // RECOVERY_BLOCKED: ambos cubos de password-olvidado (IP + correo, 3/15 min, y
 // el techo por IP de H2, 10/15 min) usan ventana de 15 minutos.
 const FIFTEEN_MINUTES_MS = 15 * 60 * 1000;
-// localStorage: guarda el instante (ms) en que se desbloquea el botón.
+// localStorage: guarda el instante (ms) en que se desbloquea el botón y el
+// motivo, con formato "<ms>" (enviado) o "<ms>|limite" (429).
 const CLAVE_BLOQUEO = "lastPasswordRequest";
+const SUFIJO_LIMITE = "|limite";
 
-const guardarBloqueo = (duracionMs: number) => {
-	localStorage.setItem(CLAVE_BLOQUEO, (Date.now() + duracionMs).toString());
+// 'enviado': ya se pidió un correo (cooldown normal). 'limite': el backend respondió 429.
+type MotivoBloqueo = "enviado" | "limite";
+
+const guardarBloqueo = (duracionMs: number, motivo: MotivoBloqueo) => {
+	const desbloqueo = (Date.now() + duracionMs).toString();
+	localStorage.setItem(CLAVE_BLOQUEO, motivo === "limite" ? desbloqueo + SUFIJO_LIMITE : desbloqueo);
 };
 
 /**
@@ -70,6 +76,7 @@ export default function PasswordOlvidadaClient() {
 	// Estados del rate limiting (control de spam)
 	const [botonDeshabilitado, setBotonDeshabilitado] = useState(false);
 	const [tiempoRestante, setTiempoRestante] = useState<number | null>(null);
+	const [motivoBloqueo, setMotivoBloqueo] = useState<MotivoBloqueo>("enviado");
 
 	// Effect: Verificar si hay un bloqueo activo al cargar la página
 	// Restaura el contador si el usuario recarga la página durante el bloqueo
@@ -78,12 +85,13 @@ export default function PasswordOlvidadaClient() {
 		// Verificar si ya se ha enviado un correo en los últimos 5 minutos
 		const desbloqueo = localStorage.getItem(CLAVE_BLOQUEO);
 		if (desbloqueo) {
-			const restante = Number(desbloqueo) - Date.now();
+			const restante = parseInt(desbloqueo, 10) - Date.now();
 
 			// Tope de seguridad: un valor corrupto o en el futuro lejano no deja
 			// el botón bloqueado más de la ventana máxima.
 			if (restante > 0 && restante <= FIFTEEN_MINUTES_MS) {
 				// Aún está dentro del período de bloqueo
+				setMotivoBloqueo(desbloqueo.endsWith(SUFIJO_LIMITE) ? "limite" : "enviado");
 				iniciarContador(Math.floor(restante / 1000));
 			} else {
 				// El bloqueo ya expiró (o el valor no es válido), limpiar localStorage
@@ -148,7 +156,7 @@ export default function PasswordOlvidadaClient() {
 
 			sessionStorage.setItem('passForgetToken', data.data.token);
 
-			guardarBloqueo(FIVE_MINUTES_MS);
+			guardarBloqueo(FIVE_MINUTES_MS, "enviado");
 
 			router.push(`/cuentas/confirmacion/correo-enviado-restablecer-password`);
 		} catch (err) {
@@ -160,7 +168,8 @@ export default function PasswordOlvidadaClient() {
 						? FIFTEEN_MINUTES_MS
 						: FIVE_MINUTES_MS;
 					setError(getUserMessage(err, 'recuperar_password'));
-					guardarBloqueo(bloqueoMs);
+					guardarBloqueo(bloqueoMs, "limite");
+					setMotivoBloqueo("limite");
 					iniciarContador(bloqueoMs / 1000);
 				} else if (code === ApiErrorCode.VALIDATION_FAILED) {
 					setError(getUserMessage(err, 'recuperar_password'));
@@ -250,7 +259,9 @@ export default function PasswordOlvidadaClient() {
 									{cargando
 										? "Enviando..."
 										: botonDeshabilitado
-										? "Correo enviado"
+										? motivoBloqueo === "limite"
+											? "Demasiados intentos"
+											: "Correo enviado"
 										: "Recuperar contraseña"}
 								</button>
 

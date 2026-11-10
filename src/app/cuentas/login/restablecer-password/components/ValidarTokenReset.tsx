@@ -15,6 +15,8 @@ import { validarTokenRestablecerPassword, type ValidacionTokenReset } from "@/li
 export default function ValidarTokenReset({ token }: { token: string }) {
   // null = validando
   const [resultado, setResultado] = useState<ValidacionTokenReset | null>(null);
+  // Se incrementa con "Intentar de nuevo" (reintento manual, nunca automático).
+  const [intento, setIntento] = useState(0);
 
   useEffect(() => {
     let cancelado = false;
@@ -25,7 +27,7 @@ export default function ValidarTokenReset({ token }: { token: string }) {
     return () => {
       cancelado = true;
     };
-  }, [token]);
+  }, [token, intento]);
 
   // ⏳ Validando el enlace
   if (!resultado) {
@@ -47,6 +49,33 @@ export default function ValidarTokenReset({ token }: { token: string }) {
         <p className="text-muted">
           Tu enlace sigue siendo válido: vuelve a abrirlo en unos minutos.
         </p>
+        <p className="mt-3">
+          <Link
+            className="text-decoration-none text-secondary"
+            href="/cuentas/login"
+            aria-label="Volver a iniciar sesión"
+          >
+            ← Volver a iniciar sesión
+          </Link>
+        </p>
+      </div>
+    );
+  }
+
+  // ⚠️ Red / 5xx: no se sabe si el enlace es válido. Tampoco se ofrece
+  // "Solicitar nuevo enlace" (invalidaría el enlace si sigue vigente).
+  if (resultado.error) {
+    return (
+      <div className="text-center mt-5" role="alert">
+        <h2>No pudimos comprobar tu enlace</h2>
+        <p className="text-muted mt-3">{resultado.mensaje}</p>
+        <button
+          type="button"
+          className="btn btn-primary mt-3"
+          onClick={() => setIntento((n) => n + 1)}
+        >
+          Intentar de nuevo
+        </button>
         <p className="mt-3">
           <Link
             className="text-decoration-none text-secondary"
