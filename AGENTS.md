@@ -48,7 +48,7 @@ Copied from `.env.example`. Key vars: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_API_UR
 - Viewport locks `userScalable: false` (mobile-first)
 - Route groups: `(perfil)/[url]` for user profiles
 - No test infrastructure at all
-- Reports directory (`reports/`) is empty — used by OpenCode subagents
+- Documentation management: see section `## Gestión documental` below
 - Existing OpenCode subagents: `documentador` (writes to `reports/documentador/`), `technical-analysis` (writes to `reports/technical-analysis/`)
 
 ## Posteo visibility (`visibilidad`)
@@ -111,3 +111,44 @@ La moderación se opera **exclusivamente desde el panel de administración** (`/
 - **Never use `data.status` from the response body to decide if a request failed.** The source of truth is `res.ok`, handled inside `handleApiResponse`.
 - Data-fetching hooks and contexts should expose `{ error: string | null; clearError: () => void }` so UI components can display failures consistently.
 - Anti-enumeration endpoints (e.g. password recovery) return a generic 200 message on purpose; do not add frontend checks that reveal whether an email/account exists.
+
+## Gestión documental
+
+Sistema de documentación del proyecto. Dos zonas con roles distintos:
+
+- **Oficial / referencia** (vigente, nunca se auto-archiva ni auto-elimina): `README.md`, `CHANGELOG.md`, `AGENTS.md`, `QUE-ES-TLAXAPP.md`, `QUE-NO-ES-TLAXAPP.md`, `SPECS-*.md` + `SPECS/`, y **`docs/api/`** (referencia completa de endpoints del backend).
+- **Trabajo** (`reports/`): documentos generados durante desarrollo (análisis, planes, auditorías, snapshots de `documentador`). Histórico archivado en `reports/archive/`.
+
+### Dónde guardar documentos (agentes IA)
+
+| Tipo de documento | Ubicación | Nombre |
+|---|---|---|
+| Plan de implementación / fix | `reports/plans/` | `YYYY-MM-DD-plan-{tema}.md` |
+| Code review | `reports/code-reviews/` | `YYYY-MM-DD-code-review-{tema}.md` |
+| Bug investigation | `reports/bug-investigations/` | `YYYY-MM-DD-bug-{tema}.md` |
+| Hallazgos de análisis puntuales | subcarpeta de `reports/` existente (ej. `technical-analysis/`) | `YYYY-MM-DD-{tipo}-{tema}.md` |
+| Especificación vigente (contrato estable) | `SPECS/` | `SPECS-FRONTEND-{tema}.md` con `Fecha` y `Estado` en el cuerpo — **requiere aprobación humana** |
+
+- Nunca escribir a la raíz del repo ni modificar documentación oficial sin autorización explícita del humano.
+- No eliminar ni sobrescribir documentos existentes: crear uno nuevo (agregar fecha) o actualizar `status` del front matter. Archivar/eliminar requiere autorización explícita.
+
+### Front matter obligatorio (documentos de `reports/`, excluye `docs/api/` y los subagentes de OpenCode que ya definieron su propio formato)
+
+```yaml
+---
+title: "Título descriptivo"
+type: plan            # plan | code-review | technical-analysis | bug-investigation | feature-spec | dependency-auditor
+status: working       # working → completed → archived
+created: "YYYY-MM-DD"
+---
+```
+
+Opcionales: `completed`, `expires` (retención 90 d para plans, 180 d para análisis), `related`, `branch`.
+
+### Reglas de vigencia
+
+- El registro canónico de cambios termina en `CHANGELOG.md`; los documentos de `reports/` son evidencia/complemento.
+- `docs/api/` es la única fuente de verdad del contrato del backend. No generan reemplazos de esa referencia salvo solicitud del humano.
+- Un hallazgo estable que afecte contratos va a `AGENTS.md` o un `SPECS-*` vigente (con aprobación humana), no queda solo en un reporte.
+- Snapshots de `documentador`: como máximo 2 vigentes + archivadas en `reports/archive/documentador/` (con revisión humana al archivar).
+- Antes de reanalizar un tema, consultar `reports/archive/` y la corrida más reciente de `reports/` — puede que ya esté estudiado.
