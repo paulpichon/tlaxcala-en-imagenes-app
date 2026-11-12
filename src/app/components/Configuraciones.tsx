@@ -43,7 +43,16 @@ export default function Configuraciones() {
                   </Link>
                 </li>
                 <li className="list-group-item p-0">
-                  <Link 
+                  <Link
+                    className="d-flex align-items-center justify-content-between p-3 text-decoration-none text-dark"
+                    href="/configuracion/cambiar-password"
+                  >
+                    <span>Cambiar contraseña</span>
+                    <span className="material-symbols-outlined text-secondary"><FiChevronRight size={18} /></span>
+                  </Link>
+                </li>
+                <li className="list-group-item p-0">
+                  <Link
                     className="d-flex align-items-center justify-content-between p-3 text-decoration-none text-dark"
                     href="/configuracion/eliminar-cuenta"
                   >

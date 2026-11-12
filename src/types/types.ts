@@ -325,8 +325,6 @@ export interface FormDataEditarPerfil {
   claveMunicipio: string;
   nombreMunicipio: string;
   genero: string;
-  password: string;
-  confirmPassword: string;
   url: string;
   fecha_nacimiento: string;
   nombreEntidad: string;

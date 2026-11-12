@@ -199,6 +199,7 @@ export type Operacion =
   | 'reenviar_correo'
   | 'soporte'
   | 'eliminar_cuenta'
+  | 'cambiar_password'
   | 'reportar'
   | 'default';
 
@@ -228,6 +229,7 @@ const MENSAJES_POR_DEFECTO: Record<Operacion, string> = {
   reenviar_correo: 'No se pudo reenviar el correo. Intenta de nuevo en unos minutos.',
   soporte: 'No se pudo enviar la solicitud de soporte. Intenta de nuevo.',
   eliminar_cuenta: 'No se pudo eliminar la cuenta. Intenta de nuevo.',
+  cambiar_password: 'No se pudo cambiar la contraseña. Intenta de nuevo.',
   reportar: 'No se pudo enviar el reporte. Intenta de nuevo.',
   default: 'Ocurrió un error inesperado. Intenta de nuevo.',
 };

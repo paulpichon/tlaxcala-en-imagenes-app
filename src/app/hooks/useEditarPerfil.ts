@@ -8,8 +8,7 @@ import { Municipio, UsuarioLogueado, ApiResponse } from '@/types/types';
 import { apiGet, apiPut, getUserMessage, isApiError, getApiErrorMessage } from '@/lib/apiClient';
 import { validarNombre, REGEX_NOMBRE } from '@/lib/validaciones';
 
-export const perfilSchema = z
-  .object({
+export const perfilSchema = z.object({
     nombre: z
       .string()
       .trim()
@@ -34,30 +33,7 @@ export const perfilSchema = z
     genero: z.enum(['MASCULINO', 'FEMENINO', 'PREFIERO NO DECIR'], {
       error: () => ({ message: 'Debe seleccionar un género' }),
     }),
-    password: z
-      .string()
-      .optional()
-      .refine((val) => !val || val.length >= 8, 'La contraseña debe tener al menos 8 caracteres')
-      .refine((val) => !val || /[A-Z]/.test(val), 'Debe contener al menos una mayúscula')
-      .refine((val) => !val || /[a-z]/.test(val), 'Debe contener al menos una minúscula')
-      .refine((val) => !val || /[0-9]/.test(val), 'Debe contener al menos un número')
-      .refine(
-        (val) => !val || /[!@#$%^&*(),.?":{}|<>\-+=\[\]_]/.test(val),
-        'Debe contener al menos un carácter especial (!@#$%^&*...)'
-      ),
-    confirmPassword: z.string().optional(),
-  })
-  .refine(
-    (data) => {
-      if (!data.password) return true;
-      if (!data.confirmPassword) return false;
-      return data.password === data.confirmPassword;
-    },
-    {
-      message: 'Debes confirmar la nueva contraseña',
-      path: ['confirmPassword'],
-    }
-  );
+  });
 
 export function useEditarPerfil() {
   const { user, fetchWithAuth, updateUser } = useAuth();
@@ -69,8 +45,6 @@ export function useEditarPerfil() {
     claveMunicipio: String(user?.lugar_radicacion?.claveMunicipio || ''), // 👈 fuerza a string
     nombreMunicipio: user?.lugar_radicacion?.nombreMunicipio || '',
     genero: user?.genero || '',
-    password: '',
-    confirmPassword: '',
     url: user?.url || '',
     fecha_nacimiento: user?.fecha_nacimiento?.split('T')[0] || '',
     nombreEntidad: user?.lugar_radicacion?.nombreEntidad || 'Tlaxcala',
@@ -133,41 +107,6 @@ export function useEditarPerfil() {
       return setErrors((prev) => ({ ...prev, claveMunicipio: '' }));
     }
 
-    if (name === 'password') {
-      setFormData((prev) => ({
-        ...prev,
-        password: value,
-        confirmPassword: value ? prev.confirmPassword : '',
-      }));
-      if (value === '') {
-        setErrors((prev) => ({ ...prev, password: '', confirmPassword: '' }));
-        return;
-      }
-      // Validación en tiempo real de complejidad
-      const newErrors: Record<string, string> = {};
-      if (value.length < 8) {
-        newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
-      } else if (!/[A-Z]/.test(value)) {
-        newErrors.password = 'Debe contener al menos una mayúscula';
-      } else if (!/[a-z]/.test(value)) {
-        newErrors.password = 'Debe contener al menos una minúscula';
-      } else if (!/[0-9]/.test(value)) {
-        newErrors.password = 'Debe contener al menos un número';
-      } else if (!/[!@#$%^&*(),.?":{}|<>\-+=\[\]_]/.test(value)) {
-        newErrors.password = 'Debe contener al menos un carácter especial (!@#$%^&*...)';
-      }
-      setErrors((prev) => ({ ...prev, password: newErrors.password || '' }));
-      return;
-    }
-
-    if (name === 'confirmPassword') {
-      setFormData((prev) => ({ ...prev, confirmPassword: value }));
-      if (formData.password && value && value !== formData.password)
-        setErrors((prev) => ({ ...prev, confirmPassword: 'Las contraseñas no coinciden' }));
-      else setErrors((prev) => ({ ...prev, confirmPassword: '' }));
-      return;
-    }
-
     if (name === 'nombre' || name === 'apellido') {
       setFormData((prev) => ({ ...prev, [name]: value }));
       const errorMsg = validarNombre(value);
@@ -220,7 +159,6 @@ export function useEditarPerfil() {
 
       const body = {
         nombre_completo: { nombre: formData.nombre, apellido: formData.apellido },
-        password: formData.password || undefined,
         lugar_radicacion: {
           claveEntidad: 29,
           nombreEntidad: 'Tlaxcala',
@@ -245,8 +183,6 @@ export function useEditarPerfil() {
           url: nuevaUrl,
           nombre: data.data.usuario.nombre_completo.nombre,
           apellido: data.data.usuario.nombre_completo.apellido,
-          password: '',
-          confirmPassword: '',
         }));
         setToast({
           message: `Tu URL de perfil cambió de @${urlAnterior} a @${nuevaUrl}. La URL anterior (@${urlAnterior}) redirige automáticamente, pero te recomendamos actualizar tus enlaces compartidos.`,
@@ -260,7 +196,6 @@ export function useEditarPerfil() {
         });
       } else {
         setToast({ message: 'Perfil actualizado correctamente', type: 'success' });
-        setFormData((prev) => ({ ...prev, password: '', confirmPassword: '' }));
       }
     } catch (error) {
       if (error instanceof z.ZodError) {

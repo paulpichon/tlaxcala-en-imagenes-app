@@ -64,6 +64,26 @@ export const resetPasswordSchema = passwordSchema.extend({
 // Restablecer contraseña
 export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>;
 
+// Cambio de contraseña (PUT /api/usuarios/password). Misma complejidad que el
+// registro para la nueva; la actual solo debe existir (no se valida su formato).
+export const MAX_PASSWORD = 128;
+export const cambiarPasswordSchema = z
+	.object({
+		passwordActual: z
+			.string()
+			.min(1, { message: "Ingresa tu contraseña actual" })
+			.max(MAX_PASSWORD, { message: `Máximo ${MAX_PASSWORD} caracteres` }),
+		passwordNueva: usuarioSchema.shape.password.max(MAX_PASSWORD, {
+			message: `Máximo ${MAX_PASSWORD} caracteres`,
+		}),
+		confirmPassword: z.string().min(1, { message: "Confirma tu nueva contraseña" }),
+	})
+	.refine((data) => data.passwordNueva === data.confirmPassword, {
+		message: "Las contraseñas no coinciden",
+		path: ["confirmPassword"],
+	});
+export type CambiarPasswordSchema = z.infer<typeof cambiarPasswordSchema>;
+
 // Esquema base sin refine
 export const posteoBaseSchema = z.object({
     texto: z
