@@ -17,7 +17,12 @@ export const ApiErrorCode = {
   // 401 de un enlace de correo vencido (verificación / reset). No es sesión:
   // nunca debe disparar renovarSesion().
   TOKEN_EXPIRED: 'TOKEN_EXPIRED',
+  // 401 de contraseña actual incorrecta (cambio de contraseña / borrado de
+  // cuenta). No es sesión vencida: nunca debe disparar renovarSesion().
+  INVALID_CURRENT_PASSWORD: 'INVALID_CURRENT_PASSWORD',
   FORBIDDEN: 'FORBIDDEN',
+  // 403 por cuenta restringida (estatus 2 o 3). Se decide por code, no por detail.
+  ACCOUNT_RESTRICTED: 'ACCOUNT_RESTRICTED',
   NOT_FOUND: 'NOT_FOUND',
   CONFLICT: 'CONFLICT',
   VALIDATION_FAILED: 'VALIDATION_FAILED',
@@ -39,6 +44,7 @@ export const ApiErrorCode = {
   POST_DETAIL_BLOCKED: 'POST_DETAIL_BLOCKED',
   REPORTE_BLOCKED: 'REPORTE_BLOCKED',
   FLOOD_BLOCKED: 'FLOOD_BLOCKED',
+  PASSWORD_BLOCKED: 'PASSWORD_BLOCKED',
 
   // Otros
   FILE_ERROR: 'FILE_ERROR',

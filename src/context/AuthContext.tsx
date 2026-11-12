@@ -27,8 +27,13 @@ const INTENTOS_RED = 3;
  * Códigos de `401` que **no** son una sesión vencida y no deben disparar
  * `renovarSesion()` (rotaría las cookies sin motivo).
  * - `TOKEN_EXPIRED`: enlace de correo vencido (verificación / reset), H6.
+ * - `INVALID_CURRENT_PASSWORD`: contraseña actual incorrecta (cambio de
+ *   contraseña / borrado de cuenta); refrescar gastaría `refreshLimiter`.
  */
-const CODIGOS_401_SIN_REFRESH: ReadonlySet<string> = new Set([ApiErrorCode.TOKEN_EXPIRED]);
+const CODIGOS_401_SIN_REFRESH: ReadonlySet<string> = new Set([
+  ApiErrorCode.TOKEN_EXPIRED,
+  ApiErrorCode.INVALID_CURRENT_PASSWORD,
+]);
 
 /**
  * Lee el `code` de un 401 sin consumir el body original (usa `clone()`).
