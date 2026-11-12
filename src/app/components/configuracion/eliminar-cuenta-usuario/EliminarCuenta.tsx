@@ -4,27 +4,49 @@ import { useState } from "react";
 import { FiArrowLeft, FiAlertTriangle } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { apiDelete, isApiError, getUserMessage } from "@/lib/apiClient";
+import {
+  apiDelete,
+  isApiError,
+  isApiErrorCode,
+  isForbidden,
+  isRateLimit,
+  isValidationFailed,
+  getValidationErrors,
+  getUserMessage,
+  ApiErrorCode,
+} from "@/lib/apiClient";
+
+const MAX_PASSWORD = 128;
 
 export default function EliminarCuenta() {
   const router = useRouter();
   const { fetchWithAuth, logout } = useAuth();
   const [confirmacion, setConfirmacion] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [eliminada, setEliminada] = useState(false);
   const [mensaje, setMensaje] = useState("");
+  const [errorPassword, setErrorPassword] = useState("");
+
+  const puedeEliminar =
+    confirmacion === "ELIMINAR" && password.length > 0 && !loading && !eliminada;
 
   const eliminarCuenta = async () => {
-    if (confirmacion !== "ELIMINAR") return;
+    if (!puedeEliminar) return;
 
     setLoading(true);
     setMensaje("");
+    setErrorPassword("");
 
     try {
       const data = await apiDelete<{ msg: string }>(
         fetchWithAuth,
-        '/api/usuarios/delete'
+        '/api/usuarios/delete',
+        { passwordActual: password }
       );
 
+      setEliminada(true);
+      setPassword("");
       setMensaje(data.msg);
 
       // Esperar un momento y cerrar sesión
@@ -34,11 +56,30 @@ export default function EliminarCuenta() {
       }, 2000);
 
     } catch (error) {
-      const mensajeError = isApiError(error)
-        ? getUserMessage(error, 'eliminar_cuenta')
-        : "Ocurrió un error al eliminar tu cuenta.";
-
-      setMensaje(mensajeError);
+      // Se decide siempre por code, nunca por detail.
+      if (isApiErrorCode(error, ApiErrorCode.INVALID_CURRENT_PASSWORD)) {
+        setErrorPassword("La contraseña es incorrecta.");
+      } else if (isValidationFailed(error)) {
+        const campo = getValidationErrors(error)?.find(
+          (e) => e.field === "passwordActual"
+        );
+        if (campo) setErrorPassword(campo.message);
+        else setMensaje(getUserMessage(error, 'eliminar_cuenta'));
+      } else if (isRateLimit(error)) {
+        setMensaje(
+          isApiErrorCode(error, ApiErrorCode.PASSWORD_BLOCKED)
+            ? "Demasiados intentos con contraseña incorrecta. Espera unos minutos e intenta de nuevo."
+            : getUserMessage(error, 'eliminar_cuenta')
+        );
+      } else if (isForbidden(error)) {
+        setMensaje("Tu sesión ya no es válida. Inicia sesión de nuevo para eliminar tu cuenta.");
+      } else {
+        setMensaje(
+          isApiError(error)
+            ? getUserMessage(error, 'eliminar_cuenta')
+            : "Ocurrió un error al eliminar tu cuenta."
+        );
+      }
     }
      finally {
       setLoading(false);
@@ -85,14 +126,34 @@ export default function EliminarCuenta() {
 
             <input
               type="text"
-              className="form-control text-center mb-4"
+              className="form-control text-center mb-3"
               value={confirmacion}
               onChange={(e) => setConfirmacion(e.target.value)}
               placeholder="Escribe ELIMINAR"
+              disabled={loading || eliminada}
             />
 
+            <p className="fw-semibold mb-2">Ingresa tu contraseña actual</p>
+
+            <input
+              type="password"
+              className={`form-control text-center ${errorPassword ? "is-invalid" : "mb-4"}`}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (errorPassword) setErrorPassword("");
+              }}
+              placeholder="Contraseña actual"
+              autoComplete="current-password"
+              maxLength={MAX_PASSWORD}
+              disabled={loading || eliminada}
+            />
+            {errorPassword && (
+              <div className="invalid-feedback d-block mb-4">{errorPassword}</div>
+            )}
+
             <button
-              disabled={confirmacion !== "ELIMINAR" || loading}
+              disabled={!puedeEliminar}
               onClick={eliminarCuenta}
               className="btn btn-danger w-100 py-2 fw-bold"
             >
@@ -100,7 +161,11 @@ export default function EliminarCuenta() {
             </button>
 
             {mensaje && (
-              <p className="mt-3 text-center fw-semibold text-danger">
+              <p
+                className={`mt-3 text-center fw-semibold ${
+                  eliminada ? "text-success" : "text-danger"
+                }`}
+              >
                 {mensaje}
               </p>
             )}

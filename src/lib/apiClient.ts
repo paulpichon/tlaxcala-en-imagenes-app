@@ -356,11 +356,15 @@ export async function apiPatch<T>(
 export async function apiDelete<T>(
   fetchFn: FetchFunction,
   path: string,
-  init?: Omit<RequestInit, 'method'>
+  body?: unknown,
+  init?: Omit<RequestInit, 'method' | 'body'>
 ): Promise<T> {
   const res = await fetchFn(apiUrl(path), {
     method: 'DELETE',
     credentials: 'include',
+    ...(body === undefined
+      ? {}
+      : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
     ...init,
   });
   return handleApiResponse<T>(res);
