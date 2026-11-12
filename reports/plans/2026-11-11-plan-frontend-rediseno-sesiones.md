@@ -22,6 +22,7 @@ Leyenda: `pendiente` · `en curso` · `hecho (fecha)` · `desplegado (fecha)`. S
 | F4 | `pedirRefresh()`: un `409` del refresh no es fallo de red ni sesión inválida; esperar ~300 ms y reintentar la petición original una sola vez | `src/context/AuthContext.tsx` | Ola 1 (antes de E3b) | hecho (2026-11-11) · desplegado (2026-11-11) |
 | F2 | Pantalla «Cambiar contraseña» (actual / nueva / confirmar) que llama a `PUT /api/usuarios/password`; quitar `password` y `confirmPassword` del perfil | nueva ruta bajo `src/app/configuracion/`, `PerfilForm.tsx`, `useEditarPerfil.ts`, `Configuraciones.tsx` | Ola 2 (con E1b; antes de E1b2) | hecho (2026-11-12) |
 | F3 | `EliminarCuenta.tsx`: campo de contraseña; `apiDelete` acepta body | `EliminarCuenta.tsx`, `apiClient.ts` | Ola 2 (con E1c) | hecho (2026-11-12) |
+| F8 | Revocación inmediata de sesiones: `401 SESSION_REVOKED` sin refresh, mensaje en el login y revalidación al volver a la pestaña. Detalle en `2026-11-12-plan-revocacion-inmediata-sesiones.md` (requiere decisión y cambio previo en el backend) | `apiClient.ts`, `AuthContext.tsx`, `FormularioLogin.tsx` | Ola 2.5 (antes de la Ola 3 y de F6) | pendiente |
 | F5 | `403 ACCOUNT_RESTRICTED`: cerrar sesión local, mostrar «cuenta restringida» y no entrar en el ciclo de refresh; mensaje en el login | `AuthContext.tsx`, `FormularioLogin.tsx` | Ola 3 (con E4) | pendiente |
 | F6 | «Sesiones activas» en Configuración → Cuenta: lista, cerrar una, cerrar otras (pide contraseña) | nueva ruta bajo `src/app/configuracion/`, `Configuraciones.tsx` | Ola 4 (con E6) | pendiente |
 | F7 | Actualizar `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md` (copia local), `AGENTS.md` (sección Auth) y `CHANGELOG.md` | `SPECS/`, `AGENTS.md`, `CHANGELOG.md` | Ola 4 (con E8) | pendiente |
@@ -73,3 +74,27 @@ Leyenda: `pendiente` · `en curso` · `hecho (fecha)` · `desplegado (fecha)`. S
 ## Verificación
 
 No hay tests, linter ni typecheck propios (ver `AGENTS.md`). Cada tarea se valida con `pnpm build` (incluye tipos) y una prueba manual contra el backend en desarrollo, descrita en el commit.
+
+## Pruebas manuales de la Ola 2 (F2 y F3)
+
+Contra el backend de desarrollo con E1b y E1c. Marcar cada una al ejecutarla; al terminar todas, hacer push y pasar F2 y F3 a `desplegado`.
+
+### F2 — cambiar contraseña (`/configuracion/cambiar-password`)
+- [x] Éxito: aparece el aviso con el número de sesiones cerradas y la sesión actual sigue activa (probado 2026-11-12).
+- [ ] Contraseña actual incorrecta: error en el campo, sin llamada a `/api/auth/refresh` en Network y sin cerrar sesión.
+- [ ] Nueva igual a la actual: mensaje en el campo de contraseña nueva (`422 SAME_AS_CURRENT`).
+- [ ] Nueva que incumple la complejidad o confirmación distinta: errores del formulario sin enviar la petición.
+- [ ] Cinco intentos fallidos seguidos: mensaje de límite (`PASSWORD_BLOCKED`).
+- [ ] Borrar la cookie `refreshToken` con el access vivo y enviar: mensaje de iniciar sesión de nuevo (`403 FORBIDDEN`).
+- [ ] Perfil: guardar cambios en `/configuracion/editar-perfil` y comprobar en Network que `PUT /api/usuarios/update` no incluye `password`.
+- [ ] El perfil ya no muestra campos de contraseña y existe el enlace «Cambiar contraseña» en Configuración → Cuenta.
+
+### F3 — eliminar cuenta (`/configuracion/eliminar-cuenta`)
+- [ ] Sin escribir `ELIMINAR` o sin contraseña, el botón está deshabilitado.
+- [ ] Contraseña incorrecta: error en el campo, sin refresh y sin cerrar sesión; la cuenta sigue intacta.
+- [ ] Cinco intentos fallidos: mensaje de límite. Este cubo se comparte con F2: los fallos de una pantalla cuentan en la otra.
+- [ ] Contraseña correcta: mensaje de éxito en verde, `logout()` y redirección a `/login` a los 2 s. Usar una cuenta de prueba, el borrado es irreversible.
+- [ ] Verificar en la base de datos que se borraron todas las sesiones del usuario.
+
+### Orden de despliegue
+- F2 antes de E1b2 del backend; F3 antes o junto con E1c.
