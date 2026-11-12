@@ -19,7 +19,7 @@ Leyenda: `pendiente` · `en curso` · `hecho (fecha)`. Se actualiza en el mismo 
 | ID | Tarea | Archivos | Se despliega con | Estado |
 |---|---|---|---|---|
 | F1 | Añadir `INVALID_CURRENT_PASSWORD` a `CODIGOS_401_SIN_REFRESH` y a `ApiErrorCode` (también `ACCOUNT_RESTRICTED`, `PASSWORD_BLOCKED`) | `src/context/AuthContext.tsx`, `src/lib/apiClient.ts` | Ola 1 (antes de E1b y E3) | hecho (2026-11-11) |
-| F4 | `pedirRefresh()`: un `409` del refresh no es fallo de red ni sesión inválida; esperar ~300 ms y reintentar la petición original una sola vez | `src/context/AuthContext.tsx` | Ola 1 (antes de E3b) | pendiente |
+| F4 | `pedirRefresh()`: un `409` del refresh no es fallo de red ni sesión inválida; esperar ~300 ms y reintentar la petición original una sola vez | `src/context/AuthContext.tsx` | Ola 1 (antes de E3b) | hecho (2026-11-11) |
 | F2 | Pantalla «Cambiar contraseña» (actual / nueva / confirmar) que llama a `PUT /api/usuarios/password`; quitar `password` y `confirmPassword` del perfil | nueva ruta bajo `src/app/configuracion/`, `PerfilForm.tsx`, `useEditarPerfil.ts`, `Configuraciones.tsx` | Ola 2 (con E1b; antes de E1b2) | pendiente |
 | F3 | `EliminarCuenta.tsx`: campo de contraseña; `apiDelete` acepta body | `EliminarCuenta.tsx`, `apiClient.ts` | Ola 2 (con E1c) | pendiente |
 | F5 | `403 ACCOUNT_RESTRICTED`: cerrar sesión local, mostrar «cuenta restringida» y no entrar en el ciclo de refresh; mensaje en el login | `AuthContext.tsx`, `FormularioLogin.tsx` | Ola 3 (con E4) | pendiente |

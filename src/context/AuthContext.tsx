@@ -89,12 +89,21 @@ const esperar = (ms: number) => new Promise<void>((resolve) => setTimeout(resolv
  */
 const esErrorDeRed = (err: unknown) => !isApiError(err);
 
+/** Espera tras un `409` del refresh antes de reintentar la petición original. */
+const ESPERA_CARRERA_MS = 300;
+
+/** `carrera`: `409` del refresh; otra solicitud ya renovó la sesión (gracia de 30 s). */
+type EstadoPedido = EstadoRefresh | 'carrera';
+
 /** Pide un refresh. Distingue el rechazo de sesión de un fallo transitorio. */
-async function pedirRefresh(): Promise<EstadoRefresh> {
+async function pedirRefresh(): Promise<EstadoPedido> {
   try {
     await apiPost(fetch, '/api/auth/refresh');
     return 'ok';
   } catch (err) {
+    // 409 = carrera legítima: otra solicitud ya rotó la sesión y el backend no
+    // emite cookies nuevas en esta respuesta. No es red ni sesión inválida.
+    if (isApiError(err) && err.status === 409) return 'carrera';
     // 401 = refresh expirado, sin registro o reuso detectado.
     // 403 = token no registrado (firma inválida).
     if (isApiError(err) && (err.status === 401 || err.status === 403)) {
@@ -162,7 +171,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           if (respuesta.status !== 401) return { estado: 'ok', response: respuesta };
         }
 
-        const estado = await pedirRefresh();
+        let estado = await pedirRefresh();
+
+        if (estado === 'carrera') {
+          // Otra solicitud ya renovó: esperar a que sus cookies se asienten y
+          // reintentar la petición original una sola vez con ellas.
+          await esperar(ESPERA_CARRERA_MS);
+          if (!reintentar) return { estado: 'ok' };
+
+          const respuesta = await fetchConReintentos(reintentar);
+          if (respuesta.status !== 401) return { estado: 'ok', response: respuesta };
+
+          // Sigue en 401: un único refresh más. Un segundo 409 consecutivo se
+          // trata como error (no se cierra sesión ni se encadenan reintentos).
+          estado = await pedirRefresh();
+          if (estado === 'carrera') return { estado: 'error' };
+        }
+
         if (estado !== 'ok') return { estado };
 
         if (reintentar) {
