@@ -102,4 +102,4 @@ Contra el backend de desarrollo con E1b y E1c. Ejecutadas el 2026-11-12: todas d
 ### Hallazgo (2026-11-12): no se puede cerrar sesión sin cookie `refreshToken`
 - `POST /api/auth/logout` exige la cookie `refreshToken` (`validarRefreshToken`) y responde `401` sin ella. Esa respuesta no limpia la cookie `accessToken` (httpOnly, el frontend no puede borrarla).
 - El `logout()` del frontend limpia el estado local y parece cerrar la sesión, pero al recargar `/api/auth/me` acepta el `accessToken` vivo y vuelve a `/inicio`.
-- Es un fallo de contrato del backend, no corregible solo en el frontend. Se registra como E1d (backend) en `2026-11-12-plan-revocacion-inmediata-sesiones.md`.
+- Es un fallo de contrato del backend, no corregible solo en el frontend. **Resuelto con E1d (backend, desplegado y verificado el 2026-11-12):** el logout limpia ambas cookies sin `refreshToken` y `/api/auth/me` responde `401` tras recargar. Se registró como E1d (backend) en `2026-11-12-plan-revocacion-inmediata-sesiones.md`.

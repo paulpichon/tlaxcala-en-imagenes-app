@@ -56,7 +56,7 @@ F8a–F8c no tienen efecto hasta que el backend emita `SESSION_REVOKED` (E4). El
 
 ## Criterios de aceptación
 
-- **E1d:** con el access token vivo y sin cookie `refreshToken`, «Cerrar sesión» limpia ambas cookies; al recargar, `/api/auth/me` responde `401` y se llega al login.
+- [x] **E1d** (verificado en el entorno desplegado, 2026-11-12): con el access token vivo y sin cookie `refreshToken`, «Cerrar sesión» limpia ambas cookies; al recargar, `/api/auth/me` responde `401` y se llega al login.
 - **E4 + F8 (ola 3):** con dos navegadores, al cambiar la contraseña en uno, el otro recibe `401 SESSION_REVOKED` en su siguiente petición (o al volver a la pestaña) y queda en el login sin tocar cookies. La sesión que cambió la contraseña sigue activa.
 - `SESSION_REVOKED` no llama a `/api/auth/refresh` ni gasta `refreshLimiter`.
 - Un fallo de red o `5xx` en la revalidación no cierra la sesión.
