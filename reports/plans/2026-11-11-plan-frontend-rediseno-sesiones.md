@@ -77,24 +77,29 @@ No hay tests, linter ni typecheck propios (ver `AGENTS.md`). Cada tarea se valid
 
 ## Pruebas manuales de la Ola 2 (F2 y F3)
 
-Contra el backend de desarrollo con E1b y E1c. Marcar cada una al ejecutarla; al terminar todas, hacer push y pasar F2 y F3 a `desplegado`.
+Contra el backend de desarrollo con E1b y E1c. Ejecutadas el 2026-11-12: todas dieron el resultado esperado, salvo el hallazgo indicado; al terminar todas, hacer push y pasar F2 y F3 a `desplegado`.
 
 ### F2 — cambiar contraseña (`/configuracion/cambiar-password`)
 - [x] Éxito: aparece el aviso con el número de sesiones cerradas y la sesión actual sigue activa (probado 2026-11-12).
-- [ ] Contraseña actual incorrecta: error en el campo, sin llamada a `/api/auth/refresh` en Network y sin cerrar sesión.
-- [ ] Nueva igual a la actual: mensaje en el campo de contraseña nueva (`422 SAME_AS_CURRENT`).
-- [ ] Nueva que incumple la complejidad o confirmación distinta: errores del formulario sin enviar la petición.
-- [ ] Cinco intentos fallidos seguidos: mensaje de límite (`PASSWORD_BLOCKED`).
-- [ ] Borrar la cookie `refreshToken` con el access vivo y enviar: mensaje de iniciar sesión de nuevo (`403 FORBIDDEN`).
-- [ ] Perfil: guardar cambios en `/configuracion/editar-perfil` y comprobar en Network que `PUT /api/usuarios/update` no incluye `password`.
-- [ ] El perfil ya no muestra campos de contraseña y existe el enlace «Cambiar contraseña» en Configuración → Cuenta.
+- [x] Contraseña actual incorrecta: error en el campo, sin llamada a `/api/auth/refresh` en Network y sin cerrar sesión.
+- [x] Nueva igual a la actual: mensaje en el campo de contraseña nueva (`422 SAME_AS_CURRENT`).
+- [x] Nueva que incumple la complejidad o confirmación distinta: errores del formulario sin enviar la petición.
+- [x] Cinco intentos fallidos seguidos: mensaje de límite (`PASSWORD_BLOCKED`).
+- [x] Borrar la cookie `refreshToken` con el access vivo y enviar: mensaje de iniciar sesión de nuevo (`403 FORBIDDEN`). **Hallazgo:** el mensaje sale bien, pero no hay forma de cerrar la sesión (ver «Hallazgo» abajo y F8d).
+- [x] Perfil: guardar cambios en `/configuracion/editar-perfil` y comprobar en Network que `PUT /api/usuarios/update` no incluye `password`.
+- [x] El perfil ya no muestra campos de contraseña y existe el enlace «Cambiar contraseña» en Configuración → Cuenta.
 
 ### F3 — eliminar cuenta (`/configuracion/eliminar-cuenta`)
-- [ ] Sin escribir `ELIMINAR` o sin contraseña, el botón está deshabilitado.
-- [ ] Contraseña incorrecta: error en el campo, sin refresh y sin cerrar sesión; la cuenta sigue intacta.
-- [ ] Cinco intentos fallidos: mensaje de límite. Este cubo se comparte con F2: los fallos de una pantalla cuentan en la otra.
-- [ ] Contraseña correcta: mensaje de éxito en verde, `logout()` y redirección a `/login` a los 2 s. Usar una cuenta de prueba, el borrado es irreversible.
-- [ ] Verificar en la base de datos que se borraron todas las sesiones del usuario.
+- [x] Sin escribir `ELIMINAR` o sin contraseña, el botón está deshabilitado.
+- [x] Contraseña incorrecta: error en el campo, sin refresh y sin cerrar sesión; la cuenta sigue intacta.
+- [x] Cinco intentos fallidos: mensaje de límite. Este cubo se comparte con F2: los fallos de una pantalla cuentan en la otra.
+- [x] Contraseña correcta: mensaje de éxito en verde, `logout()` y redirección a `/login` a los 2 s. Usar una cuenta de prueba, el borrado es irreversible.
+- [x] Verificar en la base de datos que se borraron todas las sesiones del usuario.
 
 ### Orden de despliegue
 - F2 antes de E1b2 del backend; F3 antes o junto con E1c.
+
+### Hallazgo (2026-11-12): no se puede cerrar sesión sin cookie `refreshToken`
+- `POST /api/auth/logout` exige la cookie `refreshToken` (`validarRefreshToken`) y responde `401` sin ella. Esa respuesta no limpia la cookie `accessToken` (httpOnly, el frontend no puede borrarla).
+- El `logout()` del frontend limpia el estado local y parece cerrar la sesión, pero al recargar `/api/auth/me` acepta el `accessToken` vivo y vuelve a `/inicio`.
+- Es un fallo de contrato del backend, no corregible solo en el frontend. Se registra como F8d en `2026-11-12-plan-revocacion-inmediata-sesiones.md`.

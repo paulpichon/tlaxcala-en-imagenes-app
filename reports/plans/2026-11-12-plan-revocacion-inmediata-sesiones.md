@@ -25,6 +25,14 @@ El cambio de contraseña revoca los **refresh tokens** en la base de datos, pero
 
 Esto afecta igual a F6 (cerrar una sesión concreta u «otras» desde Sesiones activas): sin este cambio, la sesión «cerrada» seguiría activa hasta que expire su access token.
 
+## Hallazgo relacionado: logout sin cookie `refreshToken` (2026-11-12)
+
+Al borrar la cookie `refreshToken` con el access token vivo:
+- F2 y F3 muestran correctamente «Tu sesión ya no es válida…» (`403 FORBIDDEN`).
+- Pero cerrar sesión no funciona: `POST /api/auth/logout` exige `refreshToken` y responde `401`, sin limpiar la cookie `accessToken`. El estado local se limpia, y al recargar `/api/auth/me` acepta el access token y devuelve al usuario a `/inicio`.
+- Contexto: `docs/api/auth.md` indica que el access token dura hasta 1 h con la configuración por defecto y que el logout no lo invalida (hallazgo H24).
+- El logout de administración (`/api/v1/admin/auth/logout`) ya funciona sin sesión y usa la cookie solo si existe; es el modelo a seguir.
+
 ## Objetivo
 
 Que una sesión revocada (por cambio de contraseña, por «cerrar sesión» desde otro dispositivo o por F6) deje de funcionar de forma definitiva en un tiempo acotado y corto, y que el frontend la cierre y avise al usuario.
@@ -46,6 +54,7 @@ Que una sesión revocada (por cambio de contraseña, por «cerrar sesión» desd
 |---|---|---|
 | F8a | Añadir `SESSION_REVOKED` a `ApiErrorCode` y a `CODIGOS_401_SIN_REFRESH`: ese `401` no intenta refresh, cierra la sesión local de inmediato (misma lógica que F1). | `src/lib/apiClient.ts`, `src/context/AuthContext.tsx` |
 | F8b | Al cerrar por `SESSION_REVOKED`, redirigir al login con un mensaje claro («Tu sesión se cerró porque se cambió la contraseña o se cerró desde otro dispositivo»). Decidir por `code`, nunca por `detail`. | `AuthContext.tsx`, `FormularioLogin.tsx` |
+| F8d | Backend (prerrequisito): `POST /api/auth/logout` debe funcionar sin cookie `refreshToken` (sin `validarRefreshToken`): borrar el hash si la cookie existe y **siempre** limpiar `accessToken` y `refreshToken`. El frontend no necesita cambios. Tras desplegarlo, repetir la prueba de borrar `refreshToken` y cerrar sesión. | backend (`controllers/auth.js`, `routes/auth.js`) | — |
 | F8c | Revalidar la sesión al volver a la pestaña (`visibilitychange`) con una llamada ligera autenticada, para que una pestaña en segundo plano no espere a la siguiente acción del usuario. Respetar el Web Lock y los límites de refresh. | `AuthContext.tsx` |
 
 ## Criterios de aceptación
@@ -54,6 +63,7 @@ Que una sesión revocada (por cambio de contraseña, por «cerrar sesión» desd
 - El `401 SESSION_REVOKED` no llama a `/api/auth/refresh` ni gasta `refreshLimiter`.
 - La sesión que cambió la contraseña sigue activa.
 - Un fallo de red o `5xx` en la revalidación no cierra la sesión.
+- Con el access token vivo y sin cookie `refreshToken`, «Cerrar sesión» limpia ambas cookies y al recargar se llega al login (F8d).
 
 ## Dependencias y orden
 
