@@ -76,13 +76,15 @@ Que una sesión revocada (por cambio de contraseña, por «cerrar sesión» desd
 2. **Claim `sid`** en el access token y **`401 SESSION_REVOKED`** cuando la sesión ya no existe en `usertokens`.
 3. **F8d:** `POST /api/auth/logout` funciona sin cookie `refreshToken` y siempre limpia ambas cookies.
 
-### Propuesta pendiente de confirmar
+### Confirmado (2026-11-12)
 - Los access tokens emitidos antes del despliegue no traen `sid`: el backend los acepta hasta que expiren (máx. 1 h) para no cerrar la sesión a todos los usuarios al desplegar. Los tokens nuevos sí validan `sid`.
 
 ### Orden de implementación
 1. Backend F8d (independiente, puede salir primero).
 2. Backend: `sid` en el JWT + validación con caché de 15 s + `SESSION_REVOKED`. Invalidar la entrada del caché al revocar una sesión (cambio de contraseña, logout, F6) para que el proceso que revoca no espere los 15 s.
 3. Frontend F8a–F8c.
+
+Texto listo para copiar al backend: `2026-11-12-texto-specs-sesiones-revocacion-inmediata.md`.
 
 ## Dónde documentar
 - Backend: `docs/specs/SPECS-SESIONES.md` (contrato), su plan de implementación y `docs/api/auth.md` (logout, `SESSION_REVOKED`, nota H24).
