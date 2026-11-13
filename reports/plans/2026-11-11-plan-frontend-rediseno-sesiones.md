@@ -22,7 +22,7 @@ Leyenda: `pendiente` · `en curso` · `hecho (fecha)` · `desplegado (fecha)`. S
 | F4 | `pedirRefresh()`: un `409` del refresh no es fallo de red ni sesión inválida; esperar ~300 ms y reintentar la petición original una sola vez | `src/context/AuthContext.tsx` | Ola 1 (antes de E3b) | hecho (2026-11-11) · desplegado (2026-11-11) |
 | F2 | Pantalla «Cambiar contraseña» (actual / nueva / confirmar) que llama a `PUT /api/usuarios/password`; quitar `password` y `confirmPassword` del perfil | nueva ruta bajo `src/app/configuracion/`, `PerfilForm.tsx`, `useEditarPerfil.ts`, `Configuraciones.tsx` | Ola 2 (con E1b; antes de E1b2) | hecho (2026-11-12) · desplegado (2026-11-12) |
 | F3 | `EliminarCuenta.tsx`: campo de contraseña; `apiDelete` acepta body | `EliminarCuenta.tsx`, `apiClient.ts` | Ola 2 (con E1c) | hecho (2026-11-12) · desplegado (2026-11-12) |
-| F8 | Revocación inmediata de sesiones: `401 SESSION_REVOKED` sin refresh, mensaje en el login y revalidación al volver a la pestaña. Detalle en `2026-11-12-plan-revocacion-inmediata-sesiones.md` (requiere decisión y cambio previo en el backend) | `apiClient.ts`, `AuthContext.tsx`, `FormularioLogin.tsx` | Ola 2.5 (antes de la Ola 3 y de F6) | pendiente |
+| F8 | Revocación inmediata: `401 SESSION_REVOKED` sin refresh, mensaje en el login y revalidación al volver a la pestaña (F8a–F8c). El backend lo entrega con E3+E4; antes sale E1d (logout sin `refreshToken`), sin cambios en el frontend. Detalle en `2026-11-12-plan-revocacion-inmediata-sesiones.md` | `apiClient.ts`, `AuthContext.tsx`, `FormularioLogin.tsx` | Ola 3 (con E4, junto a F5) | pendiente |
 | F5 | `403 ACCOUNT_RESTRICTED`: cerrar sesión local, mostrar «cuenta restringida» y no entrar en el ciclo de refresh; mensaje en el login | `AuthContext.tsx`, `FormularioLogin.tsx` | Ola 3 (con E4) | pendiente |
 | F6 | «Sesiones activas» en Configuración → Cuenta: lista, cerrar una, cerrar otras (pide contraseña) | nueva ruta bajo `src/app/configuracion/`, `Configuraciones.tsx` | Ola 4 (con E6) | pendiente |
 | F7 | Actualizar `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md` (copia local), `AGENTS.md` (sección Auth) y `CHANGELOG.md` | `SPECS/`, `AGENTS.md`, `CHANGELOG.md` | Ola 4 (con E8) | pendiente |
@@ -85,7 +85,7 @@ Contra el backend de desarrollo con E1b y E1c. Ejecutadas el 2026-11-12: todas d
 - [x] Nueva igual a la actual: mensaje en el campo de contraseña nueva (`422 SAME_AS_CURRENT`).
 - [x] Nueva que incumple la complejidad o confirmación distinta: errores del formulario sin enviar la petición.
 - [x] Cinco intentos fallidos seguidos: mensaje de límite (`PASSWORD_BLOCKED`).
-- [x] Borrar la cookie `refreshToken` con el access vivo y enviar: mensaje de iniciar sesión de nuevo (`403 FORBIDDEN`). **Hallazgo:** el mensaje sale bien, pero no hay forma de cerrar la sesión (ver «Hallazgo» abajo y F8d).
+- [x] Borrar la cookie `refreshToken` con el access vivo y enviar: mensaje de iniciar sesión de nuevo (`403 FORBIDDEN`). **Hallazgo:** el mensaje sale bien, pero no hay forma de cerrar la sesión (ver «Hallazgo» abajo y E1d).
 - [x] Perfil: guardar cambios en `/configuracion/editar-perfil` y comprobar en Network que `PUT /api/usuarios/update` no incluye `password`.
 - [x] El perfil ya no muestra campos de contraseña y existe el enlace «Cambiar contraseña» en Configuración → Cuenta.
 
@@ -102,4 +102,4 @@ Contra el backend de desarrollo con E1b y E1c. Ejecutadas el 2026-11-12: todas d
 ### Hallazgo (2026-11-12): no se puede cerrar sesión sin cookie `refreshToken`
 - `POST /api/auth/logout` exige la cookie `refreshToken` (`validarRefreshToken`) y responde `401` sin ella. Esa respuesta no limpia la cookie `accessToken` (httpOnly, el frontend no puede borrarla).
 - El `logout()` del frontend limpia el estado local y parece cerrar la sesión, pero al recargar `/api/auth/me` acepta el `accessToken` vivo y vuelve a `/inicio`.
-- Es un fallo de contrato del backend, no corregible solo en el frontend. Se registra como F8d en `2026-11-12-plan-revocacion-inmediata-sesiones.md`.
+- Es un fallo de contrato del backend, no corregible solo en el frontend. Se registra como E1d (backend) en `2026-11-12-plan-revocacion-inmediata-sesiones.md`.

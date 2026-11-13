@@ -1,14 +1,17 @@
 ---
 title: "Texto para SPECS-SESIONES.md - revocación inmediata de sesión (F8)"
 type: plan
-status: working
+status: completed
+completed: "2026-11-12"
 created: "2026-11-12"
 expires: "2027-02-10"
 related: "Plan: reports/plans/2026-11-12-plan-revocacion-inmediata-sesiones.md. Destino: backend docs/specs/SPECS-SESIONES.md (repo login-autenticacion)."
 branch: desarrollo
 ---
 
-# Texto para copiar a `SPECS-SESIONES.md`
+# Texto para copiar a `SPECS-SESIONES.md` — REEMPLAZADO
+
+> **Reemplazado el 2026-11-12.** Este borrador proponía un caché de 15 s y aceptar tokens sin `sid`, lo que duplica E3/E4 y contradice la decisión 1 del backend. La versión vigente ya está escrita en el backend (`SPECS-SESIONES.md` §4.2, §4.4 y decisiones I, J, K). Se conserva solo como historial; no copiar.
 
 > Borrador redactado desde el frontend. El número de sección y las referencias a archivos del backend se ajustan al copiarlo. Cuando se implemente, actualizar también `docs/api/auth.md` (logout, `SESSION_REVOKED`, nota H24).
 

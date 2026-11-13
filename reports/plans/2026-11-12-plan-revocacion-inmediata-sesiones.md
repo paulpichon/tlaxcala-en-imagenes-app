@@ -1,94 +1,67 @@
 ---
-title: "Plan - revocación inmediata de sesiones (F8, pendiente)"
+title: "Plan - revocación inmediata de sesiones (F8 y E1d)"
 type: plan
 status: working
 created: "2026-11-12"
 expires: "2027-02-10"
-related: "Frontend: reports/plans/2026-11-11-plan-frontend-rediseno-sesiones.md. Backend (repo login-autenticacion): docs/specs/SPECS-SESIONES.md. Este documento debe copiarse o enlazarse allí porque el repo del backend no está en este equipo."
+related: "Frontend: reports/plans/2026-11-11-plan-frontend-rediseno-sesiones.md. Backend (C:\Users\paul1\Documents\Backend\login-autenticacion): docs/specs/SPECS-SESIONES.md (§4.2, §4.4, decisiones I-K) y engineering/working/implementation-plans/2026-11-11-plan-implementacion-rediseno-sesiones.md (E1d, E4)."
 branch: desarrollo
 ---
 
-# Revocación inmediata de sesiones — PENDIENTE
+# Revocación inmediata de sesiones — F8 (frontend) y E1d (backend)
 
-Estado: **pendiente** · No iniciada · Requiere decisión de diseño del backend.
+Estado: **pendiente**. Reconciliado con el diseño del backend el 2026-11-12: **no se adelanta una solución parcial**; la revocación inmediata se entrega con E3 + E4 (ola 3).
 
 ## Problema observado (2026-11-12, entorno local)
 
-Con dos sesiones abiertas (Edge normal y Edge privado), se cambió la contraseña en la sesión privada:
+Con dos sesiones (Edge normal y Edge privado), al cambiar la contraseña en la privada:
 
-- La respuesta de `PUT /api/usuarios/password` informó `sesionesCerradas` correctamente y `usertokens` quedó con una sola sesión viva.
-- Aun así, la sesión del navegador normal **siguió funcionando**. Solo se cerró al borrar la cookie `accessToken` a mano, porque entonces el siguiente request intentó `/api/auth/refresh` y el refresh token ya estaba revocado.
+- `PUT /api/usuarios/password` informó `sesionesCerradas` y `usertokens` quedó con una sola fila viva.
+- La sesión del navegador normal **siguió funcionando**; solo se cerró al borrar la cookie `accessToken` a mano.
 
-## Causa
+**Causa:** se revocan los refresh tokens, pero el `accessToken` (JWT, hasta 1 h) de las otras sesiones sigue siendo válido por firma. Hoy `verificarTokenSesion` no consulta `usertokens` (hallazgo H24 de `docs/api/auth.md`). El frontend no puede enterarse. Es el comportamiento esperado **antes de E4**.
 
-El cambio de contraseña revoca los **refresh tokens** en la base de datos, pero el `accessToken` (JWT) de las otras sesiones sigue siendo válido por firma hasta que expire. `verificarTokenSesion` no consulta `usertokens` en cada petición, y el frontend no tiene forma de enterarse de la revocación. Es una limitación del diseño actual, no un bug del frontend.
+## Segundo hallazgo: logout sin cookie `refreshToken`
 
-Esto afecta igual a F6 (cerrar una sesión concreta u «otras» desde Sesiones activas): sin este cambio, la sesión «cerrada» seguiría activa hasta que expire su access token.
+Con el access token vivo y la cookie `refreshToken` borrada:
 
-## Hallazgo relacionado: logout sin cookie `refreshToken` (2026-11-12)
+- F2 y F3 muestran bien «Tu sesión ya no es válida…» (`403 FORBIDDEN`).
+- Cerrar sesión no funciona: `POST /api/auth/logout` exige `refreshToken` y responde `401` sin limpiar la cookie `accessToken` (httpOnly). El estado local se limpia, pero al recargar `/api/auth/me` acepta el access token y devuelve al usuario a `/inicio`.
 
-Al borrar la cookie `refreshToken` con el access token vivo:
-- F2 y F3 muestran correctamente «Tu sesión ya no es válida…» (`403 FORBIDDEN`).
-- Pero cerrar sesión no funciona: `POST /api/auth/logout` exige `refreshToken` y responde `401`, sin limpiar la cookie `accessToken`. El estado local se limpia, y al recargar `/api/auth/me` acepta el access token y devuelve al usuario a `/inicio`.
-- Contexto: `docs/api/auth.md` indica que el access token dura hasta 1 h con la configuración por defecto y que el logout no lo invalida (hallazgo H24).
-- El logout de administración (`/api/v1/admin/auth/logout`) ya funciona sin sesión y usa la cookie solo si existe; es el modelo a seguir.
+## Decisión (2026-11-12): reconciliación con el backend
 
-## Objetivo
+El `SPECS-SESIONES.md` del backend ya diseña la revocación inmediata: E3 pone `sid` en el access token y E4 lo valida contra `UserToken` en cada petición, sin caché y con re-login forzado (decisión 1, §7). Un adelanto con caché de 15 s y tokens sin `sid` aceptados 1 h duplicaría el trabajo en los mismos middlewares y contradiría la decisión 1. Por eso:
 
-Que una sesión revocada (por cambio de contraseña, por «cerrar sesión» desde otro dispositivo o por F6) deje de funcionar de forma definitiva en un tiempo acotado y corto, y que el frontend la cierre y avise al usuario.
+1. **Se descartan** la ventana de 15 s, el caché en memoria y la aceptación de tokens sin `sid`. (Quedaron propuestos y confirmados antes de ver el diseño completo del backend; se retiran.)
+2. **Hasta la ola 3** se acepta la ventana de hasta 1 h del access token.
+3. **Se mantiene** `SESSION_REVOKED` como código del `401` (decisión I del backend). Se emite cuando falta `sid`, la sesión no existe o venció; también para tokens anteriores al rediseño.
+4. **E1d (backend, sale antes de la ola 3):** logout sin cookie `refreshToken` (decisión J). No requiere cambios en el frontend.
 
-## Propuesta
+## Tareas
 
-### Backend (decisión y trabajo pendientes; repo `login-autenticacion`)
+### Backend (repo `login-autenticacion`)
+| ID | Tarea | Ola | Estado |
+|---|---|---|---|
+| E1d | `POST /api/auth/logout` sin `validarRefreshToken`: borra la fila solo si identifica la sesión y siempre responde `200` limpiando `accessToken` y `refreshToken` | 2.5 | pendiente |
+| E4 | Responder `401 SESSION_REVOKED` en lugar del `401` genérico | 3 | pendiente (ya documentado) |
 
-1. **Validar la sesión en cada petición autenticada** (opción recomendada).
-   - El access token incluye el identificador de sesión (`sid`, o `jti` si ya existe).
-   - `verificarTokenSesion` comprueba que esa sesión siga viva en `usertokens`.
-   - Si no existe, responde `401` con `code: 'SESSION_REVOKED'`.
-   - Para limitar el costo, caché en memoria con TTL corto (10–30 s). Ese TTL pasa a ser la ventana máxima de revocación; documentarlo en `SPECS-SESIONES.md`.
-2. Alternativas descartadas por ahora: acortar solo el TTL del access token (reduce la ventana pero no la elimina y aumenta los refresh, límite 10 / 15 min) y notificación en tiempo real por SSE/websocket (demasiada infraestructura).
-
-### Frontend (F8)
-
+### Frontend (F8, se despliega con E4 en la ola 3, junto a F5)
 | Paso | Detalle | Archivos |
 |---|---|---|
-| F8a | Añadir `SESSION_REVOKED` a `ApiErrorCode` y a `CODIGOS_401_SIN_REFRESH`: ese `401` no intenta refresh, cierra la sesión local de inmediato (misma lógica que F1). | `src/lib/apiClient.ts`, `src/context/AuthContext.tsx` |
-| F8b | Al cerrar por `SESSION_REVOKED`, redirigir al login con un mensaje claro («Tu sesión se cerró porque se cambió la contraseña o se cerró desde otro dispositivo»). Decidir por `code`, nunca por `detail`. | `AuthContext.tsx`, `FormularioLogin.tsx` |
-| F8d | Backend (prerrequisito): `POST /api/auth/logout` debe funcionar sin cookie `refreshToken` (sin `validarRefreshToken`): borrar el hash si la cookie existe y **siempre** limpiar `accessToken` y `refreshToken`. El frontend no necesita cambios. Tras desplegarlo, repetir la prueba de borrar `refreshToken` y cerrar sesión. | backend (`controllers/auth.js`, `routes/auth.js`) | — |
-| F8c | Revalidar la sesión al volver a la pestaña (`visibilitychange`) con una llamada ligera autenticada, para que una pestaña en segundo plano no espere a la siguiente acción del usuario. Respetar el Web Lock y los límites de refresh. | `AuthContext.tsx` |
+| F8a | Añadir `SESSION_REVOKED` a `ApiErrorCode` y a `CODIGOS_401_SIN_REFRESH`: ese `401` no intenta refresh y cierra la sesión local de inmediato (misma lógica que F1). | `src/lib/apiClient.ts`, `src/context/AuthContext.tsx` |
+| F8b | Al cerrar por `SESSION_REVOKED`, mostrar en el login un mensaje claro («Tu sesión se cerró porque se cambió la contraseña o se cerró desde otro dispositivo»). Decidir por `code`, nunca por `detail`. Comparte mecanismo con el mensaje de F5. | `AuthContext.tsx`, `FormularioLogin.tsx` |
+| F8c | Revalidar la sesión al volver a la pestaña (`visibilitychange`) con una llamada ligera autenticada, para que una pestaña en segundo plano no espere a la siguiente acción. Respetar el Web Lock y los límites de refresh. | `AuthContext.tsx` |
+
+F8a–F8c no tienen efecto hasta que el backend emita `SESSION_REVOKED` (E4). El frontend nuevo es seguro con un backend viejo.
 
 ## Criterios de aceptación
 
-- Con dos navegadores abiertos, al cambiar la contraseña en uno, el otro queda en el login en menos de la ventana acordada (TTL del caché) tras su siguiente petición o al volver a la pestaña, sin tocar cookies.
-- El `401 SESSION_REVOKED` no llama a `/api/auth/refresh` ni gasta `refreshLimiter`.
-- La sesión que cambió la contraseña sigue activa.
+- **E1d:** con el access token vivo y sin cookie `refreshToken`, «Cerrar sesión» limpia ambas cookies; al recargar, `/api/auth/me` responde `401` y se llega al login.
+- **E4 + F8 (ola 3):** con dos navegadores, al cambiar la contraseña en uno, el otro recibe `401 SESSION_REVOKED` en su siguiente petición (o al volver a la pestaña) y queda en el login sin tocar cookies. La sesión que cambió la contraseña sigue activa.
+- `SESSION_REVOKED` no llama a `/api/auth/refresh` ni gasta `refreshLimiter`.
 - Un fallo de red o `5xx` en la revalidación no cierra la sesión.
-- Con el access token vivo y sin cookie `refreshToken`, «Cerrar sesión» limpia ambas cookies y al recargar se llega al login (F8d).
 
-## Dependencias y orden
+## Dónde está documentado
 
-- Backend primero: el frontend (F8a–F8c) no tiene efecto hasta que el backend emita `SESSION_REVOKED`. El orden inverso es seguro: un backend viejo nunca envía ese código.
-- Conviene resolverlo antes de la Ola 4 (F6), que depende del mismo comportamiento.
-
-## Decisiones tomadas (2026-11-12)
-
-1. **Ventana de revocación: 15 segundos.** TTL del caché en memoria de sesiones vivas en el backend; es lo máximo que tarda en cerrarse una sesión revocada.
-2. **Claim `sid`** en el access token y **`401 SESSION_REVOKED`** cuando la sesión ya no existe en `usertokens`.
-3. **F8d:** `POST /api/auth/logout` funciona sin cookie `refreshToken` y siempre limpia ambas cookies.
-
-### Confirmado (2026-11-12)
-- Los access tokens emitidos antes del despliegue no traen `sid`: el backend los acepta hasta que expiren (máx. 1 h) para no cerrar la sesión a todos los usuarios al desplegar. Los tokens nuevos sí validan `sid`.
-
-### Orden de implementación
-1. Backend F8d (independiente, puede salir primero).
-2. Backend: `sid` en el JWT + validación con caché de 15 s + `SESSION_REVOKED`. Invalidar la entrada del caché al revocar una sesión (cambio de contraseña, logout, F6) para que el proceso que revoca no espere los 15 s.
-3. Frontend F8a–F8c.
-
-Texto listo para copiar al backend: `2026-11-12-texto-specs-sesiones-revocacion-inmediata.md`.
-
-## Dónde documentar
-- Backend: `docs/specs/SPECS-SESIONES.md` (contrato), su plan de implementación y `docs/api/auth.md` (logout, `SESSION_REVOKED`, nota H24).
-- Frontend: este plan ahora; al terminar, `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md`, `AGENTS.md` y `CHANGELOG.md` dentro de F7 (requiere autorización explícita del humano). `docs/api/` se refresca desde el backend.
-
-## Pendiente de decidir
-- Si se añade como ola propia (Ola 2.5, ya registrada en el plan principal) o dentro de la Ola 3 / Ola 4.
+- Backend (ya escrito en la rama `sesiones-revocacion-inmediata`, commit `90deeb8`): `SPECS-SESIONES.md` (§4.2, §4.4, decisiones I, J, K y §11) y el plan de implementación (E1d, E4, F8, ola 2.5, riesgos).
+- Frontend: este plan. Al terminar, `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md`, `AGENTS.md` y `CHANGELOG.md` dentro de F7 (requiere autorización explícita del humano).
