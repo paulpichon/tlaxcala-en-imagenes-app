@@ -70,9 +70,23 @@ Que una sesión revocada (por cambio de contraseña, por «cerrar sesión» desd
 - Backend primero: el frontend (F8a–F8c) no tiene efecto hasta que el backend emita `SESSION_REVOKED`. El orden inverso es seguro: un backend viejo nunca envía ese código.
 - Conviene resolverlo antes de la Ola 4 (F6), que depende del mismo comportamiento.
 
-## Pendiente de decidir
+## Decisiones tomadas (2026-11-12)
 
-- TTL del caché de sesiones en el backend (ventana máxima aceptable).
-- Nombre definitivo del código (`SESSION_REVOKED`) y del claim (`sid` / `jti`).
-- Si se añade como ola propia o dentro de la Ola 3 / Ola 4.
-- Documentar el resultado en `AGENTS.md` y `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md` (requiere autorización explícita del humano).
+1. **Ventana de revocación: 15 segundos.** TTL del caché en memoria de sesiones vivas en el backend; es lo máximo que tarda en cerrarse una sesión revocada.
+2. **Claim `sid`** en el access token y **`401 SESSION_REVOKED`** cuando la sesión ya no existe en `usertokens`.
+3. **F8d:** `POST /api/auth/logout` funciona sin cookie `refreshToken` y siempre limpia ambas cookies.
+
+### Propuesta pendiente de confirmar
+- Los access tokens emitidos antes del despliegue no traen `sid`: el backend los acepta hasta que expiren (máx. 1 h) para no cerrar la sesión a todos los usuarios al desplegar. Los tokens nuevos sí validan `sid`.
+
+### Orden de implementación
+1. Backend F8d (independiente, puede salir primero).
+2. Backend: `sid` en el JWT + validación con caché de 15 s + `SESSION_REVOKED`. Invalidar la entrada del caché al revocar una sesión (cambio de contraseña, logout, F6) para que el proceso que revoca no espere los 15 s.
+3. Frontend F8a–F8c.
+
+## Dónde documentar
+- Backend: `docs/specs/SPECS-SESIONES.md` (contrato), su plan de implementación y `docs/api/auth.md` (logout, `SESSION_REVOKED`, nota H24).
+- Frontend: este plan ahora; al terminar, `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md`, `AGENTS.md` y `CHANGELOG.md` dentro de F7 (requiere autorización explícita del humano). `docs/api/` se refresca desde el backend.
+
+## Pendiente de decidir
+- Si se añade como ola propia (Ola 2.5, ya registrada en el plan principal) o dentro de la Ola 3 / Ola 4.
