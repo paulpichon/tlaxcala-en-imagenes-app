@@ -69,6 +69,18 @@ button.boton_registrarse {
     margin-bottom: 1rem;
 }
 
+/* Aviso de sesión cerrada por el servidor (SESSION_REVOKED / ACCOUNT_RESTRICTED) */
+.aviso_sesion {
+    font-size: 0.9rem;
+    color: #664d03;
+    background-color: #fff3cd;
+    border: 1px solid #ffe69c;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
 /*Hover boton*/
 button.boton_registrarse:hover {
     background-color: #EBCA9A;

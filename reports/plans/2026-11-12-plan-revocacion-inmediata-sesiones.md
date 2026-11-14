@@ -10,7 +10,7 @@ branch: desarrollo
 
 # Revocación inmediata de sesiones — F8 (frontend) y E1d (backend)
 
-Estado: **pendiente**. Reconciliado con el diseño del backend el 2026-11-12: **no se adelanta una solución parcial**; la revocación inmediata se entrega con E3 + E4 (ola 3).
+Estado: **F8 implementado y probado (2026-11-13), sin desplegar**: sale con el deploy de la ola 3 (E7). Pruebas manuales en `2026-11-11-plan-frontend-rediseno-sesiones.md`, «Implementación de F8 y F5». Reconciliado con el diseño del backend el 2026-11-12: **no se adelanta una solución parcial**; la revocación inmediata se entrega con E3 + E4 (ola 3).
 
 ## Problema observado (2026-11-12, entorno local)
 
@@ -42,10 +42,10 @@ El `SPECS-SESIONES.md` del backend ya diseña la revocación inmediata: E3 pone 
 ### Backend (repo `login-autenticacion`)
 | ID | Tarea | Ola | Estado |
 |---|---|---|---|
-| E1d | `POST /api/auth/logout` sin `validarRefreshToken`: borra la fila solo si identifica la sesión y siempre responde `200` limpiando `accessToken` y `refreshToken` | 2.5 | pendiente |
-| E4 | Responder `401 SESSION_REVOKED` en lugar del `401` genérico | 3 | pendiente (ya documentado) |
+| E1d | `POST /api/auth/logout` sin `validarRefreshToken`: borra la fila solo si identifica la sesión y siempre responde `200` limpiando `accessToken` y `refreshToken` | 2.5 | hecho (2026-11-12) · desplegado (2026-11-12) |
+| E4 | Responder `401 SESSION_REVOKED` en lugar del `401` genérico | 3 | hecho en la rama de la ola 3 (2026-11-13, `a398f7b`) · sin desplegar |
 
-### Frontend (F8, se despliega con E4 en la ola 3, junto a F5)
+### Frontend (F8, se despliega con E4 en la ola 3, junto a F5) — hecho (2026-11-13) · sin desplegar
 | Paso | Detalle | Archivos |
 |---|---|---|
 | F8a | Añadir `SESSION_REVOKED` a `ApiErrorCode` y a `CODIGOS_401_SIN_REFRESH`: ese `401` no intenta refresh y cierra la sesión local de inmediato (misma lógica que F1). | `src/lib/apiClient.ts`, `src/context/AuthContext.tsx` |
@@ -59,7 +59,9 @@ F8a–F8c no tienen efecto hasta que el backend emita `SESSION_REVOKED` (E4). El
 - [x] **E1d** (verificado en el entorno desplegado, 2026-11-12): con el access token vivo y sin cookie `refreshToken`, «Cerrar sesión» limpia ambas cookies; al recargar, `/api/auth/me` responde `401` y se llega al login.
 - **E4 + F8 (ola 3):** con dos navegadores, al cambiar la contraseña en uno, el otro recibe `401 SESSION_REVOKED` en su siguiente petición (o al volver a la pestaña) y queda en el login sin tocar cookies. La sesión que cambió la contraseña sigue activa.
 - `SESSION_REVOKED` no llama a `/api/auth/refresh` ni gasta `refreshLimiter`.
-- Un fallo de red o `5xx` en la revalidación no cierra la sesión.
+- Un fallo de red o `5xx` en la revalidación no cierra la sesión. Desde E4 el backend responde `500` (no `401`) si falla la base de datos al validar la sesión, así que este caso sí puede llegar.
+
+Contrato completo de E4 para el frontend (tabla de códigos y los dos cambios de contrato): sección «Cambios de contrato del backend en la ola 3» de `2026-11-11-plan-frontend-rediseno-sesiones.md`.
 
 ## Dónde está documentado
 

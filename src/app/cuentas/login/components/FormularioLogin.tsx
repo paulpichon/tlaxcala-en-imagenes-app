@@ -5,15 +5,23 @@ import loginEstilos from "../../../ui/cuentas/login/login.module.css";
 import { useState } from 'react';
 import { z } from 'zod';
 import { apiPost, isApiError, isRateLimit, ApiErrorCode, getUserMessage } from '@/lib/apiClient';
-import { UsuarioLogueado, ApiResponse } from '@/types/types';
+import { UsuarioLogueado, ApiResponse, MotivoCierreSesion } from '@/types/types';
 
 const schema = z.object({
     correo: z.string().email('Correo inválido'),
     password: z.string().min(1, 'La contraseña es obligatoria'),
 });
 
+/** Mensajes del cierre de sesión decidido por el backend (F8b / F5), por `code`. */
+const MENSAJES_CIERRE_SESION: Record<MotivoCierreSesion, string> = {
+    sesion_revocada:
+        'Tu sesión terminó. Puede deberse a un cambio de contraseña, a que se cerró desde otro dispositivo o a una actualización de seguridad. Inicia sesión de nuevo.',
+    cuenta_restringida:
+        'Tu cuenta está restringida y no puedes usarla por ahora. Si crees que es un error, contacta a soporte.',
+};
+
 export default function FormularioLogin() {
-    const { login } = useAuth();
+    const { login, motivoCierreSesion } = useAuth();
     const router = useRouter();
 
     const [formData, setFormData] = useState({ correo: '', password: '' });
@@ -81,6 +89,13 @@ export default function FormularioLogin() {
         onSubmit={handleSubmit}
         noValidate
       >
+        {/* Aviso de sesión cerrada por el servidor */}
+        {motivoCierreSesion && (
+          <p className={loginEstilos.aviso_sesion} role="status">
+            {MENSAJES_CIERRE_SESION[motivoCierreSesion]}
+          </p>
+        )}
+
         {/* Correo */}
         <div className={loginEstilos.contenedor_inputs_login}>
           <label htmlFor="correo" className={loginEstilos.label}>

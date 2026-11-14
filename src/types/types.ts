@@ -157,6 +157,13 @@ export interface UsuarioPerfil extends UsuarioLogueado {
 export interface PasswordConfirm extends UsuarioLogueado {
   confirmPassword: string;
 }
+/**
+ * Motivo por el que el backend cerró la sesión (se decide por `code`):
+ * - `sesion_revocada`: `401 SESSION_REVOKED` (cambio de contraseña, cierre desde
+ *   otro dispositivo, sesión vencida o anterior al rediseño).
+ * - `cuenta_restringida`: `403 ACCOUNT_RESTRICTED` (estatus 2 o 3).
+ */
+export type MotivoCierreSesion = 'sesion_revocada' | 'cuenta_restringida';
 // Tipo de datos para el contexto de autenticación
 export interface IAuthContext {
   user: UsuarioLogueado | null;
@@ -167,6 +174,9 @@ export interface IAuthContext {
    */
   error: string | null;
   clearError: () => void;
+  /** Motivo del último cierre de sesión forzado por el backend, para el login. */
+  motivoCierreSesion: MotivoCierreSesion | null;
+  clearMotivoCierreSesion: () => void;
   login: (user: UsuarioLogueado) => void;
   logout: () => void;
   fetchWithAuth: (input: RequestInfo, init?: RequestInit) => Promise<Response>;

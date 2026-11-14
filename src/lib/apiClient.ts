@@ -20,6 +20,9 @@ export const ApiErrorCode = {
   // 401 de contraseña actual incorrecta (cambio de contraseña / borrado de
   // cuenta). No es sesión vencida: nunca debe disparar renovarSesion().
   INVALID_CURRENT_PASSWORD: 'INVALID_CURRENT_PASSWORD',
+  // 401 de sesión cerrada, revocada o vencida (o token anterior al rediseño).
+  // No se renueva: cierra la sesión local de inmediato (F8).
+  SESSION_REVOKED: 'SESSION_REVOKED',
   FORBIDDEN: 'FORBIDDEN',
   // 403 por cuenta restringida (estatus 2 o 3). Se decide por code, no por detail.
   ACCOUNT_RESTRICTED: 'ACCOUNT_RESTRICTED',
