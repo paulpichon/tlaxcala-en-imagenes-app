@@ -84,6 +84,16 @@ export const cambiarPasswordSchema = z
 	});
 export type CambiarPasswordSchema = z.infer<typeof cambiarPasswordSchema>;
 
+// Cerrar todas las demás sesiones (DELETE /api/auth/sesiones/otras, step-up).
+// La contraseña actual solo debe existir; no se valida su formato.
+export const cerrarOtrasSesionesSchema = z.object({
+	passwordActual: z
+		.string()
+		.min(1, { message: "Ingresa tu contraseña actual" })
+		.max(MAX_PASSWORD, { message: `Máximo ${MAX_PASSWORD} caracteres` }),
+});
+export type CerrarOtrasSesionesSchema = z.infer<typeof cerrarOtrasSesionesSchema>;
+
 // Esquema base sin refine
 export const posteoBaseSchema = z.object({
     texto: z

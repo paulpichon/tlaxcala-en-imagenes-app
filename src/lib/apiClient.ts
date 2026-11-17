@@ -48,6 +48,8 @@ export const ApiErrorCode = {
   REPORTE_BLOCKED: 'REPORTE_BLOCKED',
   FLOOD_BLOCKED: 'FLOOD_BLOCKED',
   PASSWORD_BLOCKED: 'PASSWORD_BLOCKED',
+  // 30 / 15 min por usuario, compartido por los endpoints de sesiones activas (E6).
+  SESIONES_BLOCKED: 'SESIONES_BLOCKED',
 
   // Otros
   FILE_ERROR: 'FILE_ERROR',
@@ -204,6 +206,9 @@ export type Operacion =
   | 'eliminar_cuenta'
   | 'cambiar_password'
   | 'reportar'
+  | 'cargar_sesiones'
+  | 'cerrar_sesion'
+  | 'cerrar_otras_sesiones'
   | 'default';
 
 const MENSAJES_POR_DEFECTO: Record<Operacion, string> = {
@@ -234,6 +239,9 @@ const MENSAJES_POR_DEFECTO: Record<Operacion, string> = {
   eliminar_cuenta: 'No se pudo eliminar la cuenta. Intenta de nuevo.',
   cambiar_password: 'No se pudo cambiar la contraseña. Intenta de nuevo.',
   reportar: 'No se pudo enviar el reporte. Intenta de nuevo.',
+  cargar_sesiones: 'No se pudieron cargar tus sesiones activas. Intenta de nuevo.',
+  cerrar_sesion: 'No se pudo cerrar la sesión. Intenta de nuevo.',
+  cerrar_otras_sesiones: 'No se pudieron cerrar las demás sesiones. Intenta de nuevo.',
   default: 'Ocurrió un error inesperado. Intenta de nuevo.',
 };
 

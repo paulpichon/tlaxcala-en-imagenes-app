@@ -24,7 +24,7 @@ Leyenda: `pendiente` · `en curso` · `hecho (fecha)` · `desplegado (fecha)`. S
 | F3 | `EliminarCuenta.tsx`: campo de contraseña; `apiDelete` acepta body | `EliminarCuenta.tsx`, `apiClient.ts` | Ola 2 (con E1c) | hecho (2026-11-12) · desplegado (2026-11-12) |
 | F8 | Revocación inmediata: `401 SESSION_REVOKED` sin refresh, mensaje en el login y revalidación al volver a la pestaña (F8a–F8c). El backend lo entrega con E3+E4; antes sale E1d (logout sin `refreshToken`), sin cambios en el frontend. Detalle en `2026-11-12-plan-revocacion-inmediata-sesiones.md` | `apiClient.ts`, `AuthContext.tsx`, `FormularioLogin.tsx` | Ola 3 (con E4, junto a F5) | hecho (2026-11-13) · probado (2026-11-13) · desplegado (2026-11-13, con la ola 3) |
 | F5 | `403 ACCOUNT_RESTRICTED`: cerrar sesión local, mostrar «cuenta restringida» y no entrar en el ciclo de refresh; mensaje en el login | `AuthContext.tsx`, `FormularioLogin.tsx` | Ola 3 (con E4) | hecho (2026-11-13) · probado (2026-11-13) · desplegado (2026-11-13, con la ola 3) |
-| F6 | «Sesiones activas» en Configuración → Cuenta: lista, cerrar una, cerrar otras (pide contraseña) | nueva ruta bajo `src/app/configuracion/`, `Configuraciones.tsx` | Ola 4 (con E6) | pendiente |
+| F6 | «Sesiones activas» en Configuración → Cuenta: lista, cerrar una, cerrar otras (pide contraseña) | nueva ruta bajo `src/app/configuracion/`, `Configuraciones.tsx`; `ApiErrorCode.SESIONES_BLOCKED` | Ola 4 (con E6; contrato listo en el backend, `1f9b243`, ver «Contrato de E6») | hecho (2026-11-17) · probado (2026-11-17) · sin desplegar (sale con E6) |
 | F7 | Actualizar `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md` (copia local), `AGENTS.md` (sección Auth) y `CHANGELOG.md` | `SPECS/`, `AGENTS.md`, `CHANGELOG.md` | Ola 4 (con E8) | pendiente |
 
 > `SPECS/` y `AGENTS.md` son documentación oficial: F7 requiere autorización explícita del humano antes de editarlos.
@@ -70,6 +70,112 @@ Leyenda: `pendiente` · `en curso` · `hecho (fecha)` · `desplegado (fecha)`. S
 ### F6 — sesiones activas
 - `GET /api/auth/sesiones`, `DELETE /api/auth/sesiones/:sessionId`, `DELETE /api/auth/sesiones/otras` (esta pide `passwordActual`).
 - Mostrar dispositivo, IP enmascarada, última actividad y cuál es la sesión actual (`esActual`).
+
+## F6 — preparación (2026-11-17)
+
+### Estado del backend
+- **E6** está hecho en el commit `1f9b243` y **E5a** en `fa9352a`, los dos el 2026-11-17. Están en la rama local `Feat-ola4-E5a-E6-E8` del backend, **sin push ni despliegue**. F6 se desarrolla contra el backend local con esa rama.
+- E5a no cambia el contrato para el frontend: solo registra señales de riesgo en `/refresh`.
+- Fuente del contrato: backend `SPECS-SESIONES.md` §6 («Implementado en E6») y las decisiones L, M y N (§10); código en `controllers/sesiones.js` y `routes/auth.js`.
+
+### Contrato
+Ver «Contrato de E6 — sesiones activas» más abajo; no se repite aquí.
+
+### Diseño propuesto
+1. **Tipos y cliente**
+   - `types.ts`: añadir `SesionActiva`.
+   - `apiClient.ts`: añadir `ApiErrorCode.SESIONES_BLOCKED`. `isRateLimit` ya lo cubre por el sufijo `_BLOCKED`.
+   - `apiClient.ts`: añadir las `Operacion` `cargar_sesiones`, `cerrar_sesion` y `cerrar_otras_sesiones` con sus mensajes por defecto.
+2. **Validación**: en `validaciones.ts`, añadir `cerrarOtrasSesionesSchema`, que reutiliza la regla de `passwordActual` (obligatoria, máx. `MAX_PASSWORD`, sin validar formato).
+3. **Hook** `src/app/hooks/useSesionesActivas.ts`, con este retorno: `{ sesiones, loading, error, clearError, recargar, cerrarSesion(id), cerrarOtras(passwordActual) }` (convención de `AGENTS.md`).
+   - Carga una vez al montar, sin recargar al volver a la pestaña. Así no se gasta el cupo de 30 / 15 min.
+   - Recarga solo después de una acción, o con el botón «Reintentar» si hubo error.
+4. **Componente** `src/app/components/configuracion/sesiones-activas/SesionesActivas.tsx`, con el mismo esqueleto visual que `CambiarPassword.tsx` (header con flecha atrás y tarjeta blanca).
+   - **Lista**: la sesión actual va primero, con la insignia «Este dispositivo». Cada fila muestra `deviceName ?? "Dispositivo desconocido"`, la IP enmascarada (si existe) y «Última actividad» formateada con `date-fns` + locale `es`, como en `NotificacionItem`.
+   - **Cerrar una sesión** (solo en las no actuales): botón «Cerrar sesión» con confirmación. Con `200` se quita de la lista y se muestra un aviso. Con `404`, la sesión ya no existía: se quita igual y se recarga, sin error fatal.
+   - **Sesión actual**: no lleva botón de cierre. Para salir se usa el «Cerrar sesión» normal. Así se evita duplicar `logout()` y el estado local queda coherente.
+   - **Cerrar todas las demás**: visible solo si hay más de una sesión. Abre un formulario con «Contraseña actual» (ojo mostrar/ocultar, `autoComplete="current-password"`). Con éxito muestra «Se cerraron N sesiones» y recarga.
+   - Errores del formulario:
+     - `INVALID_CURRENT_PASSWORD`: mensaje en el campo.
+     - `422`: errores de validación en el campo.
+     - `PASSWORD_BLOCKED`: mensaje de límite de contraseña, igual que en F2 y F3.
+     - `SESIONES_BLOCKED` o `FLOOD_BLOCKED`: `getUserMessage`.
+   - Lista vacía (no debería ocurrir, porque la actual siempre existe) o error de carga: mensaje + «Reintentar».
+5. **Ruta**: `src/app/configuracion/sesiones/page.tsx` (metadata `noindex`, layout de tres columnas como `cambiar-password/page.tsx`) y `layout.tsx` con `ProtectedRoute`.
+6. **Menú**: en `Configuraciones.tsx`, sección Cuenta, añadir «Sesiones activas» entre «Cambiar contraseña» y «Eliminar cuenta».
+
+### Implementación (2026-11-17)
+- Archivos nuevos:
+  - `src/app/hooks/useSesionesActivas.ts`
+  - `src/app/components/configuracion/sesiones-activas/SesionesActivas.tsx`
+  - `src/app/configuracion/sesiones/page.tsx` y `layout.tsx`
+- Archivos modificados: `apiClient.ts`, `types.ts`, `validaciones.ts` y `Configuraciones.tsx`.
+- Ajustes respecto al diseño:
+  - Tras «Cerrar todas las demás», la lista se filtra localmente a la sesión actual en lugar de recargarse. Ahorra una petición del cupo de 30 / 15 min y el resultado es el mismo.
+  - La confirmación para cerrar una sesión va dentro de la misma fila («¿Cerrar esta sesión? Sí, cerrar / Cancelar»), sin `window.confirm`.
+- Un `429` HTML de Cloudflare llega sin `code`: cae en `getUserMessage` y muestra el mensaje por defecto de la operación.
+
+### Criterios de aceptación / pruebas manuales (contra el backend local con E6) — ejecutadas el 2026-11-17, todas con el resultado esperado
+- [x] Con dos navegadores, la lista muestra las dos sesiones. La actual tiene la insignia, aparece primero y no tiene botón de cierre.
+- [x] Cerrar la otra sesión: desaparece de la lista. El otro navegador, en su siguiente acción o al volver a la pestaña, queda en el login con el aviso (F8).
+- [x] Cerrar una sesión que ya se cerró desde otro lado (`404`): se quita de la lista, sin error fatal.
+- [x] «Cerrar todas las demás» con una contraseña incorrecta: error en el campo, sin `POST /api/auth/refresh` en Network y sin cerrar nada.
+- [x] Con la contraseña correcta: aviso con N y la sesión actual sigue activa.
+- [x] **Decisión M**:
+  - Cambiar la contraseña (F2) y luego cerrar las demás sesiones en la misma ventana de 15 min no debe estorbar el uso normal.
+  - Tras 5 fallos entre F2, F3 y F6, se muestra bien el `429 PASSWORD_BLOCKED` en esta pantalla.
+  - Resultado (2026-11-17): el cubo compartido no estorbó el uso normal y el `429 PASSWORD_BLOCKED` se mostró bien. Falta cerrar la decisión M en el backend (`SPECS-SESIONES.md` §10).
+- [x] Abrir la pantalla varias veces no agota `SESIONES_BLOCKED` con un uso normal. Si se agota, se ve el mensaje de límite.
+- [x] `pnpm build` en verde.
+
+### Despliegue
+- F6 sale **con E6 o después**. Un backend sin E6 responde `404` en `GET /api/auth/sesiones` y la pantalla mostraría el error de carga.
+- El orden contrario sí es seguro: E6 sin F6 no rompe nada.
+- **Contrato implementado en el backend (E6, commit `1f9b243`, 2026-11-17; sin desplegar).** Ver «Contrato de E6» más abajo.
+- Aceptación adicional (decisión M del backend, **pendiente de verificar con F6**): cambiar la contraseña y luego «cerrar otras sesiones» en la misma ventana de 15 min no debe chocar con el límite en el uso normal, y un `429 PASSWORD_BLOCKED` en esta pantalla se muestra como mensaje de límite. Informar al backend el resultado para confirmar o ajustar la decisión.
+
+## Contrato de E6 — sesiones activas (backend, 2026-11-17)
+
+Implementado en el backend (commit `1f9b243`), **sin desplegar**: sale con la ola 4 junto con F6. Fuente: backend `docs/specs/SPECS-SESIONES.md` §6 («Implementado en E6») y decisiones L, M y N de §10. Todos exigen sesión (cookies con `credentials: 'include'`); decidir siempre por `code`.
+
+**`GET /api/auth/sesiones`** → `200`
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "sessionId": "550e8400-e29b-41d4-a716-446655440000",
+      "deviceName": "Chrome en Windows",
+      "paisUltimo": null,
+      "ipUltima": "187.162.x.x",
+      "lastUsed": "2026-11-17T20:00:00.000Z",
+      "esActual": true
+    }
+  ]
+}
+```
+
+- Orden: `lastUsed` descendente. Solo sesiones vigentes del usuario.
+- `deviceName` puede ser `null`. `paisUltimo` es siempre `null` por ahora (país diferido): no mostrarlo o tratarlo como opcional.
+- `ipUltima`: IPv4 `a.b.x.x`; IPv6 `2806:2f0:x:x:x:x:x:x`; `null` si no hay IP válida. Nunca llega la IP completa.
+- `lastUsed`: si la sesión no tiene, el backend manda su fecha de creación (decisión N); siempre es una fecha ISO.
+
+**`DELETE /api/auth/sesiones/:sessionId`** → `200 { success, msg: "Sesión cerrada" }`
+- `sessionId` debe ser UUID v4; si no → `422 VALIDATION_FAILED`.
+- Ajena, vencida o inexistente → `404 NOT_FOUND` (refrescar la lista).
+- Si es la sesión actual (`esActual: true`) equivale a logout: el backend borra la fila y limpia ambas cookies. El frontend debe cerrar la sesión local como en `logout()`. Recomendado: no ofrecer «cerrar» en la actual o pedir confirmación.
+- La sesión cerrada recibe `401 SESSION_REVOKED` en su siguiente petición (F8 ya lo cubre).
+
+**`DELETE /api/auth/sesiones/otras`** — body `{ passwordActual }` (usa `apiDelete` con body, como F3) → `200 { success, msg: "Sesiones cerradas", data: { cerradas: <número> } }`
+- `passwordActual`: obligatoria, texto, máx. 128 → si falta o es inválida, `422`.
+- Incorrecta → `401 INVALID_CURRENT_PASSWORD` (ya en `CODIGOS_401_SIN_REFRESH` por F1): mensaje en el campo, no cierra nada.
+- La sesión actual sigue activa; mostrar cuántas se cerraron.
+
+**Rate limiting**
+- `429 SESIONES_BLOCKED`: 30 operaciones / 15 min por usuario, compartido por los tres endpoints (decisión L).
+- `429 PASSWORD_BLOCKED`: `/otras` comparte el cubo de 5 / 15 min con «Cambiar contraseña» (F2) y «Eliminar cuenta» (F3) (decisión M, a verificar con F6).
+- También puede llegar `FLOOD_BLOCKED` (límite por IP) o el `429` HTML de Cloudflare (tratarlo como genérico).
 
 ## Cambios de contrato del backend en la ola 3 (E4, 2026-11-13)
 

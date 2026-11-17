@@ -153,6 +153,22 @@ export interface UsuarioPerfil extends UsuarioLogueado {
   totalSeguidos: number;
   isFollowing: boolean; // Si el usuario actual sigue a este usuario
 }
+/**
+ * Sesión activa del usuario (`GET /api/auth/sesiones`, E6).
+ * - `deviceName`: p. ej. «Chrome en Windows»; puede faltar.
+ * - `paisUltimo`: siempre `null` en v1 (país diferido); no se muestra.
+ * - `ipUltima`: ya enmascarada por el backend (`a.b.x.x`) o `null`.
+ * - `lastUsed`: fecha ISO (si falta, el backend manda la de creación).
+ * - `esActual`: la sesión de este navegador.
+ */
+export interface SesionActiva {
+  sessionId: string;
+  deviceName: string | null;
+  paisUltimo: string | null;
+  ipUltima: string | null;
+  lastUsed: string | null;
+  esActual: boolean;
+}
 // Password
 export interface PasswordConfirm extends UsuarioLogueado {
   confirmPassword: string;
