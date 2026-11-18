@@ -24,7 +24,7 @@ Leyenda: `pendiente` · `en curso` · `hecho (fecha)` · `desplegado (fecha)`. S
 | F3 | `EliminarCuenta.tsx`: campo de contraseña; `apiDelete` acepta body | `EliminarCuenta.tsx`, `apiClient.ts` | Ola 2 (con E1c) | hecho (2026-11-12) · desplegado (2026-11-12) |
 | F8 | Revocación inmediata: `401 SESSION_REVOKED` sin refresh, mensaje en el login y revalidación al volver a la pestaña (F8a–F8c). El backend lo entrega con E3+E4; antes sale E1d (logout sin `refreshToken`), sin cambios en el frontend. Detalle en `2026-11-12-plan-revocacion-inmediata-sesiones.md` | `apiClient.ts`, `AuthContext.tsx`, `FormularioLogin.tsx` | Ola 3 (con E4, junto a F5) | hecho (2026-11-13) · probado (2026-11-13) · desplegado (2026-11-13, con la ola 3) |
 | F5 | `403 ACCOUNT_RESTRICTED`: cerrar sesión local, mostrar «cuenta restringida» y no entrar en el ciclo de refresh; mensaje en el login | `AuthContext.tsx`, `FormularioLogin.tsx` | Ola 3 (con E4) | hecho (2026-11-13) · probado (2026-11-13) · desplegado (2026-11-13, con la ola 3) |
-| F6 | «Sesiones activas» en Configuración → Cuenta: lista, cerrar una, cerrar otras (pide contraseña) | nueva ruta bajo `src/app/configuracion/`, `Configuraciones.tsx`; `ApiErrorCode.SESIONES_BLOCKED` | Ola 4 (con E6; contrato listo en el backend, `1f9b243`, ver «Contrato de E6») | hecho (2026-11-17) · probado (2026-11-17) · sin desplegar (sale con E6) |
+| F6 | «Sesiones activas» en Configuración → Cuenta: lista, cerrar una, cerrar otras (pide contraseña) | nueva ruta bajo `src/app/configuracion/`, `Configuraciones.tsx`; `ApiErrorCode.SESIONES_BLOCKED` | Ola 4 (con E6; contrato listo en el backend, `1f9b243`, ver «Contrato de E6») | hecho (2026-11-17, `b1b4483`) · probado (2026-11-17) · desplegado (2026-11-17, con E5a y E6) |
 | F7 | Actualizar `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md` (copia local), `AGENTS.md` (sección Auth) y `CHANGELOG.md` | `SPECS/`, `AGENTS.md`, `CHANGELOG.md` | Ola 4 (con E8) | pendiente |
 
 > `SPECS/` y `AGENTS.md` son documentación oficial: F7 requiere autorización explícita del humano antes de editarlos.
@@ -131,12 +131,12 @@ Ver «Contrato de E6 — sesiones activas» más abajo; no se repite aquí.
 ### Despliegue
 - F6 sale **con E6 o después**. Un backend sin E6 responde `404` en `GET /api/auth/sesiones` y la pantalla mostraría el error de carga.
 - El orden contrario sí es seguro: E6 sin F6 no rompe nada.
-- **Contrato implementado en el backend (E6, commit `1f9b243`, 2026-11-17; sin desplegar).** Ver «Contrato de E6» más abajo.
-- Aceptación adicional (decisión M del backend, **pendiente de verificar con F6**): cambiar la contraseña y luego «cerrar otras sesiones» en la misma ventana de 15 min no debe chocar con el límite en el uso normal, y un `429 PASSWORD_BLOCKED` en esta pantalla se muestra como mensaje de límite. Informar al backend el resultado para confirmar o ajustar la decisión.
+- **Desplegado el 2026-11-17:** F6 junto con E5a y E6 del backend (contrato de E6 en el commit `1f9b243`). Ver «Contrato de E6» más abajo.
+- Decisión M del backend: **verificada con F6 el 2026-11-17** (ver los criterios de aceptación de arriba). El backend ya la marcó como «Aprobado y verificado» en `SPECS-SESIONES.md` §10.
 
 ## Contrato de E6 — sesiones activas (backend, 2026-11-17)
 
-Implementado en el backend (commit `1f9b243`), **sin desplegar**: sale con la ola 4 junto con F6. Fuente: backend `docs/specs/SPECS-SESIONES.md` §6 («Implementado en E6») y decisiones L, M y N de §10. Todos exigen sesión (cookies con `credentials: 'include'`); decidir siempre por `code`.
+Implementado en el backend (commit `1f9b243`), **desplegado el 2026-11-17** con la ola 4, junto con F6. Fuente: backend `docs/specs/SPECS-SESIONES.md` §6 («Implementado en E6») y decisiones L, M y N de §10. Todos exigen sesión (cookies con `credentials: 'include'`); decidir siempre por `code`.
 
 **`GET /api/auth/sesiones`** → `200`
 
