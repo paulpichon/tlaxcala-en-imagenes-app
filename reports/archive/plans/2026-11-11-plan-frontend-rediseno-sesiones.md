@@ -1,11 +1,12 @@
 ---
 title: "Plan frontend - rediseño de sesiones (Fase E del backend)"
 type: plan
-status: completed
+status: archived
+archived: "2026-11-17"
 completed: "2026-11-17"
 created: "2026-11-11"
 expires: "2027-02-09"
-related: "Backend: docs/specs/SPECS-SESIONES.md y engineering/working/implementation-plans/2026-11-11-plan-implementacion-rediseno-sesiones.md"
+related: "Backend: docs/specs/SPECS-SESIONES.md y engineering/archive/2026-11-11-plan-implementacion-rediseno-sesiones.md"
 branch: desarrollo
 ---
 

@@ -1,7 +1,8 @@
 ---
 title: "Plan de ejecución: fix de rate limiting en el frontend"
 type: plan
-status: completed
+status: archived
+archived: "2026-11-17"
 created: "2026-11-05"
 completed: "2026-11-10"
 expires: "2027-02-08"

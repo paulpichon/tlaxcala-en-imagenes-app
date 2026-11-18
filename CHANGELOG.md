@@ -10,7 +10,7 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ## 2026-11-11 a 2026-11-17 · Rediseño de sesiones (Fase E del backend, F1–F8)
 
-Contrapartida frontend del rediseño de sesiones del backend (`SPECS-SESIONES.md`). Se desplegó en producción en cuatro olas coordinadas con el backend; la última (F6) el 2026-11-17. Plan: `reports/plans/2026-11-11-plan-frontend-rediseno-sesiones.md`. Contrato: `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md` §3.
+Contrapartida frontend del rediseño de sesiones del backend (`SPECS-SESIONES.md`). Se desplegó en producción en cuatro olas coordinadas con el backend; la última (F6) el 2026-11-17. Plan (archivado): `reports/archive/plans/2026-11-11-plan-frontend-rediseno-sesiones.md`. Contrato: `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md` §3.
 
 ### Añadido
 
@@ -47,7 +47,50 @@ Contrapartida frontend del rediseño de sesiones del backend (`SPECS-SESIONES.md
   - Se sincronizó con la versión E8 del backend: §3 reescrita y H22–H24 y H3 resueltos.
   - Se conservaron las notas «En la app» (F7).
 - `AGENTS.md`: sección Auth actualizada con el modelo de sesiones nuevo (F7).
-- Planes en `reports/plans/` (`2026-11-11-plan-frontend-rediseno-sesiones.md` y `2026-11-12-plan-revocacion-inmediata-sesiones.md`), con las pruebas manuales de cada ola.
+- Planes del ciclo, con las pruebas manuales de cada ola: `2026-11-11-plan-frontend-rediseno-sesiones.md` y `2026-11-12-plan-revocacion-inmediata-sesiones.md`. Se archivaron el 2026-11-17 en `reports/archive/plans/`, junto con el borrador reemplazado `2026-11-12-texto-specs-sesiones-revocacion-inmediata.md`.
+
+---
+
+## 2026-11-05 a 2026-11-10 · Rate limiting, enlaces de correo y reorganización documental
+
+Ciclo de corrección de `429` falsos y de los flujos de enlaces de correo (verificación de cuenta y restablecer contraseña), más la reorganización de la documentación del repo. Plan (archivado): `reports/archive/plans/PLAN-FIX-RATE-LIMITING.md`.
+
+### Corregido
+
+- **`429 READ_BLOCKED` en el feed** (`36a4fce`):
+  - `PosteoCard` usa el `totalComentarios` del backend y `useComentarios` ya no pide `/count` al montar. Eso evitaba 2 `GET /count` por tarjeta.
+  - Se quitó el `setInterval` duplicado de notificaciones en `MenuPrincipal`, y el `429` del polling de notificaciones ya no muestra error.
+  - `useInfinitePosts` tiene un guard con `useRef` contra el doble fetch del observer.
+  - Nuevo `ApiErrorCode.FLOOD_BLOCKED` con un mensaje propio («demasiadas solicitudes desde tu red»).
+- **Verificar correo y validar el token de reset ahora se hacen desde el navegador** (H5, `d6faaf8`):
+  - Antes eran Server Components y el backend veía la IP del servidor de Next, así que todos los usuarios compartían el techo por IP (`flujoTokenIpLimiter`).
+  - Nuevos Client Components `VerificacionCuenta` y `ValidarTokenReset`, con estados de carga, éxito, límite, inválido y error.
+  - Un `429` al validar el token ya no se muestra como «enlace inválido».
+  - `PasswordOlvidadaClient` aplica un cooldown de 15 min ante `RECOVERY_BLOCKED`.
+  - Nuevo `ApiErrorCode.VERIFICATION_BLOCKED`.
+- **Errores de red o `5xx` al validar el enlace de reset** (`7863bcd`):
+  - Ya no se tratan como enlace inválido: la pantalla «No pudimos comprobar tu enlace» ofrece reintentar.
+  - Con bloqueo por `429`, el botón dice «Demasiados intentos» y el motivo sobrevive a una recarga.
+- **Enlace vencido frente a enlace inválido** (H6, `0b5f27c`):
+  - El backend responde `401 TOKEN_EXPIRED` o `401 UNAUTHORIZED` en lugar de `500`.
+  - Nuevo helper `isTokenExpired()`.
+  - Pantallas «Este enlace expiró» (con opción de pedir uno nuevo) separadas de «enlace no válido». Se decide siempre por `code`.
+- **Reenvíos de correo decididos por `code`** (`aeffda1`):
+  - Se quitaron las ramas por `detail` que el backend ya no produce (anti-enumeración).
+  - Vuelve a mostrarse el `detail` del `429` («Espera N minutos…»).
+  - La red caída o un `5xx` ya no dejan el modal sin mensaje (operación `reenviar_correo`).
+  - `fetchWithAuth` devuelve un `401 TOKEN_EXPIRED` sin llamar a `renovarSesion()`.
+
+### Documentación
+
+- **Referencia de la API:** pasó de `reports/api/` a `docs/api/`, conservando el historial (`9f51c90`).
+- **`AGENTS.md`:** nueva sección «Gestión documental» (`e568d85`).
+- **Ciclo de vida en `reports/`** (`8ca921b`):
+  - Front matter de ciclo de vida en `reports/`.
+  - Se versionó el plan de rate limiting y se archivaron las corridas viejas de `documentador`.
+- **`SPECS/`** (`9595449`):
+  - Los cuatro SPECS de la raíz se consolidaron en `SPECS/` como `SPECS-BACKEND-*`.
+  - El plan de rate limiting quedó `completed`.
 
 ---
 

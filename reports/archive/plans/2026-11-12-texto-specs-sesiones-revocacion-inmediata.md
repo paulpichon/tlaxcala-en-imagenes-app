@@ -1,11 +1,12 @@
 ---
 title: "Texto para SPECS-SESIONES.md - revocación inmediata de sesión (F8)"
 type: plan
-status: completed
+status: archived
+archived: "2026-11-17"
 completed: "2026-11-12"
 created: "2026-11-12"
 expires: "2027-02-10"
-related: "Plan: reports/plans/2026-11-12-plan-revocacion-inmediata-sesiones.md. Destino: backend docs/specs/SPECS-SESIONES.md (repo login-autenticacion)."
+related: "Plan: reports/archive/plans/2026-11-12-plan-revocacion-inmediata-sesiones.md. Destino: backend docs/specs/SPECS-SESIONES.md (repo login-autenticacion)."
 branch: desarrollo
 ---
 

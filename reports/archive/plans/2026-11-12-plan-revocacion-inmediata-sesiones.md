@@ -1,11 +1,12 @@
 ---
 title: "Plan - revocación inmediata de sesiones (F8 y E1d)"
 type: plan
-status: completed
+status: archived
+archived: "2026-11-17"
 completed: "2026-11-13"
 created: "2026-11-12"
 expires: "2027-02-10"
-related: "Frontend: reports/plans/2026-11-11-plan-frontend-rediseno-sesiones.md. Backend (C:\Users\paul1\Documents\Backend\login-autenticacion): docs/specs/SPECS-SESIONES.md (§4.2, §4.4, decisiones I-K) y engineering/working/implementation-plans/2026-11-11-plan-implementacion-rediseno-sesiones.md (E1d, E4)."
+related: "Frontend: reports/archive/plans/2026-11-11-plan-frontend-rediseno-sesiones.md. Backend (C:\Users\paul1\Documents\Backend\login-autenticacion): docs/specs/SPECS-SESIONES.md (§4.2, §4.4, decisiones I-K) y engineering/archive/2026-11-11-plan-implementacion-rediseno-sesiones.md (E1d, E4)."
 branch: desarrollo
 ---
 
