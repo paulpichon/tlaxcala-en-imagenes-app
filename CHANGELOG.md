@@ -8,6 +8,49 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [No publicado] - 2026-11-11 a 2026-11-17 — Rediseño de sesiones (Fase E del backend, F1–F8)
+
+Contrapartida frontend del rediseño de sesiones del backend (`SPECS-SESIONES.md`). Se desplegó en cuatro olas coordinadas con el backend. Plan: `reports/plans/2026-11-11-plan-frontend-rediseno-sesiones.md`. Contrato: `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md` §3.
+
+### Añadido
+
+- **Pantalla «Cambiar contraseña»** (`/configuracion/cambiar-password`, F2, `e51cece`):
+  - Campos de contraseña actual, nueva y confirmación. Llama a `PUT /api/usuarios/password`.
+  - Al terminar avisa cuántas otras sesiones se cerraron.
+  - Errores por `code`: `INVALID_CURRENT_PASSWORD`, `SAME_AS_CURRENT` y `PASSWORD_BLOCKED`.
+- **Pantalla «Sesiones activas»** (`/configuracion/sesiones`, F6, `b1b4483`):
+  - Lista de dispositivos con IP enmascarada y última actividad. La sesión actual va primero, con la insignia «Este dispositivo».
+  - Permite cerrar una sesión o todas las demás (pide la contraseña actual).
+  - Hook `useSesionesActivas`, tipo `SesionActiva`, `ApiErrorCode.SESIONES_BLOCKED` y `cerrarOtrasSesionesSchema`.
+- **Aviso en el login tras un cierre forzado** (F8 / F5, `eb4b135`): el aviso amarillo explica si la sesión se cerró desde otro dispositivo o por cambio de contraseña (`sesion_revocada`) o si la cuenta está restringida (`cuenta_restringida`). El motivo vive en `sessionStorage` (`motivoCierreSesion`) y se muestra una sola vez.
+- **Revalidación al volver a la pestaña** (F8c): `GET /api/auth/me` vía `fetchWithAuth`, como máximo una vez cada 30 s, para que una pestaña en segundo plano detecte la revocación.
+- **Nuevos `ApiErrorCode`:** `INVALID_CURRENT_PASSWORD`, `ACCOUNT_RESTRICTED`, `PASSWORD_BLOCKED` (F1, `d92e3a8`), `SESSION_REVOKED` (F8) y `SESIONES_BLOCKED` (F6).
+
+### Cambiado
+
+- **El perfil ya no edita la contraseña** (F2): `PerfilForm` y `useEditarPerfil` dejaron de enviar `password` a `PUT /api/usuarios/update`. Esa ruta ahora responde `422 USE_PASSWORD_ENDPOINT`.
+- **Eliminar cuenta pide la contraseña actual** (F3, `7452b0b`): `DELETE /api/usuarios/delete` con `{ passwordActual }`, además de la confirmación escrita `ELIMINAR`. `apiDelete` acepta body.
+- **Configuración → Cuenta:** nuevas entradas «Cambiar contraseña» y «Sesiones activas».
+
+### Corregido
+
+- **Una contraseña actual incorrecta ya no dispara un refresh** (F1, `d92e3a8`). Antes, `INVALID_CURRENT_PASSWORD` entraba al ciclo de refresh, rotaba las cookies y gastaba `refreshLimiter`. Ahora está en `CODIGOS_401_SIN_REFRESH`.
+- **Un `409` en `/api/auth/refresh` ya no se ve como «problema de conexión»** (F4, `5850264`). Ahora se trata como una carrera legítima (otra petición ya renovó): se espera y se reintenta una vez.
+- **La revocación de sesión se aplica de inmediato** (F8 / F5, `eb4b135`):
+  - `401 SESSION_REVOKED` y `403 ACCOUNT_RESTRICTED` cierran la sesión local sin intentar un refresh.
+  - Además se llama a `POST /api/auth/logout` para borrar las cookies httpOnly, así el aviso no se repite en cada recarga.
+  - Un `5xx` en `/api/auth/me` al montar (incluido el `500` del backend por fallo de BD) ya no deja al usuario sin sesión: se reintenta y se muestra el mensaje de conexión.
+
+### Documentación
+
+- `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md`:
+  - Se sincronizó con la versión E8 del backend: §3 reescrita y H22–H24 y H3 resueltos.
+  - Se conservaron las notas «En la app» (F7).
+- `AGENTS.md`: sección Auth actualizada con el modelo de sesiones nuevo (F7).
+- Planes en `reports/plans/` (`2026-11-11-plan-frontend-rediseno-sesiones.md` y `2026-11-12-plan-revocacion-inmediata-sesiones.md`), con las pruebas manuales de cada ola.
+
+---
+
 ## [No publicado] - 2026-10-28 — Sesión: refresh entre pestañas, errores de red y contratos de error
 
 Ciclo derivado de `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md` (cambios del backend del 2026-10-27). Sin cambios de rutas ni de formas de respuesta: se corrige el consumo de la sesión y de los códigos de error.

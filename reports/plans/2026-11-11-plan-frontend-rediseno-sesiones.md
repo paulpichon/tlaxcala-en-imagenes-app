@@ -1,7 +1,8 @@
 ---
 title: "Plan frontend - rediseño de sesiones (Fase E del backend)"
 type: plan
-status: working
+status: completed
+completed: "2026-11-17"
 created: "2026-11-11"
 expires: "2027-02-09"
 related: "Backend: docs/specs/SPECS-SESIONES.md y engineering/working/implementation-plans/2026-11-11-plan-implementacion-rediseno-sesiones.md"
@@ -25,7 +26,7 @@ Leyenda: `pendiente` · `en curso` · `hecho (fecha)` · `desplegado (fecha)`. S
 | F8 | Revocación inmediata: `401 SESSION_REVOKED` sin refresh, mensaje en el login y revalidación al volver a la pestaña (F8a–F8c). El backend lo entrega con E3+E4; antes sale E1d (logout sin `refreshToken`), sin cambios en el frontend. Detalle en `2026-11-12-plan-revocacion-inmediata-sesiones.md` | `apiClient.ts`, `AuthContext.tsx`, `FormularioLogin.tsx` | Ola 3 (con E4, junto a F5) | hecho (2026-11-13) · probado (2026-11-13) · desplegado (2026-11-13, con la ola 3) |
 | F5 | `403 ACCOUNT_RESTRICTED`: cerrar sesión local, mostrar «cuenta restringida» y no entrar en el ciclo de refresh; mensaje en el login | `AuthContext.tsx`, `FormularioLogin.tsx` | Ola 3 (con E4) | hecho (2026-11-13) · probado (2026-11-13) · desplegado (2026-11-13, con la ola 3) |
 | F6 | «Sesiones activas» en Configuración → Cuenta: lista, cerrar una, cerrar otras (pide contraseña) | nueva ruta bajo `src/app/configuracion/`, `Configuraciones.tsx`; `ApiErrorCode.SESIONES_BLOCKED` | Ola 4 (con E6; contrato listo en el backend, `1f9b243`, ver «Contrato de E6») | hecho (2026-11-17, `b1b4483`) · probado (2026-11-17) · desplegado (2026-11-17, con E5a y E6) |
-| F7 | Actualizar `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md` (copia local), `AGENTS.md` (sección Auth) y `CHANGELOG.md` | `SPECS/`, `AGENTS.md`, `CHANGELOG.md` | Ola 4 (con E8) | pendiente |
+| F7 | Actualizar `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md` (copia local), `AGENTS.md` (sección Auth) y `CHANGELOG.md` | `SPECS/`, `AGENTS.md`, `CHANGELOG.md` | Ola 4 (con E8) | hecho (2026-11-17) · autorizado por el humano |
 
 > `SPECS/` y `AGENTS.md` son documentación oficial: F7 requiere autorización explícita del humano antes de editarlos.
 

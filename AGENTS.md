@@ -19,9 +19,30 @@
 
 - Six React Context providers nested in `layout.tsx`: Auth, Notificaciones, Follow, NuevosUsuarios, Publicidad (plus FavoritoContext used elsewhere)
 - **Auth**: cookie-based JWT with automatic token refresh in `AuthContext.tsx`; `fetchWithAuth` wrapper included
-  - El refresh se serializa **entre pestañas** con un Web Lock (`tlaxapp:auth-refresh`) además del mutex en memoria: `/api/auth/refresh` rota el token y dos pestañas concurrentes dispararían el falso positivo de reuso (el backend revoca todas las sesiones).
-  - Solo un `401`/`403` del refresh cierra sesión. Un fallo de **red** (o `5xx`/`429`) conserva la sesión y expone `error`/`clearError` en el contexto.
-  - `logout()` limpia además las claves de `sessionStorage` ligadas a la sesión (`registroToken`, `passForgetToken`, `passwordResetSuccess`, `reporteExitoso`).
+  - **Modelo de sesiones (rediseño Fase E, desplegado 2026-11-17):**
+    - Cada login crea una sesión en el servidor (`sid` en los tokens) y cada request la valida.
+    - Cerrar una sesión corta su access token al instante.
+    - La sesión dura como máximo 90 días.
+    - Contrato completo: `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md` §3. Decidir siempre por `code`, nunca por `detail`.
+  - **Refresh:**
+    - Se serializa entre pestañas con un Web Lock (`tlaxapp:auth-refresh`), además del mutex en memoria, para no gastar `refreshLimiter` (10 / 15 min).
+    - Un `409` del refresh significa que otra petición ya renovó (gracia de 30 s): se espera y se reintenta una vez (F4).
+    - Ya no existe la «sesión comprometida» que revocaba todas las sesiones.
+  - **Códigos sin refresh** (`CODIGOS_401_SIN_REFRESH`): `TOKEN_EXPIRED`, `INVALID_CURRENT_PASSWORD` y `SESSION_REVOKED`.
+  - **Cierre forzado:**
+    - `401 SESSION_REVOKED` o `403 ACCOUNT_RESTRICTED` en cualquier respuesta (incluido el refresh) → `cerrarSesionPorMotivo`.
+    - Esa función limpia el estado, guarda `motivoCierreSesion` en `sessionStorage` (el login lo muestra una vez) y llama a `POST /api/auth/logout`, sin esperar el resultado, para borrar las cookies httpOnly.
+    - Al volver a la pestaña se revalida con `GET /api/auth/me`, como máximo una vez cada 30 s.
+  - **Qué nunca cierra la sesión:** un fallo de **red**, un `5xx` (incluido el `500` por fallo de BD al validar la sesión) o un `429`. Se conserva la sesión y se expone `error`/`clearError` en el contexto. Solo `401`/`403` del refresh o los códigos de cierre forzado cierran sesión.
+  - **`logout()`:** limpia además las claves de `sessionStorage` ligadas a la sesión (`registroToken`, `passForgetToken`, `passwordResetSuccess`, `reporteExitoso`, `motivoCierreSesion`).
+  - **Step-up con `passwordActual`:**
+    - Pantallas: cambiar contraseña (`PUT /api/usuarios/password`, `/configuracion/cambiar-password`), eliminar cuenta (`DELETE /api/usuarios/delete`) y cerrar las demás sesiones (`DELETE /api/auth/sesiones/otras`).
+    - Las tres comparten el límite `429 PASSWORD_BLOCKED` (5 / 15 min).
+    - `PUT /api/usuarios/update` ya no acepta `password`.
+  - **Sesiones activas** (`/configuracion/sesiones`, `useSesionesActivas`):
+    - `GET /api/auth/sesiones` y `DELETE /api/auth/sesiones/:sessionId` (un `404` = ya cerrada, no es error).
+    - Cupo `429 SESIONES_BLOCKED` de 30 / 15 min: la lista se carga solo al montar o tras una acción.
+    - La sesión actual no tiene botón de cierre: se usa el logout normal.
   - Duplicados: usar `isDuplicateKey(err, field)` de `apiClient.ts` (`409` + `errors[].code === 'DUPLICATE_KEY'`); no basta con `code === 'CONFLICT'`.
 - Forms use `react-hook-form` + `@hookform/resolvers` + Zod 4 schemas in `src/lib/validaciones.ts`
 
