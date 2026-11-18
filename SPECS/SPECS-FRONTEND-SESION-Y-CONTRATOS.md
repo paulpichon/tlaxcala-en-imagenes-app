@@ -137,7 +137,7 @@ Límites: `429 SESIONES_BLOCKED` (30 / 15 min por usuario, compartido por los tr
 
 ### 4.1 `401 INVALID_CURRENT_PASSWORD` en el panel
 
-`POST /api/v1/admin/auth/cambiar-password`, `POST /api/v1/admin/auth/totp/regenerar-backups` y `POST /api/v1/admin/auth/totp/reemitir` responden `401` con `code: 'INVALID_CURRENT_PASSWORD'` cuando la contraseña actual no coincide. **No** debe disparar un refresh. El interceptor del panel exceptúa este código (`isInvalidCurrentPassword()` en `src/lib/api/error-utils.ts`); no comparar `detail`. La app aplica la misma regla a sus propios endpoints (§3.3).
+`POST /api/v1/admin/auth/cambiar-password`, `POST /api/v1/admin/totp/backup/regenerar` y `POST /api/v1/admin/totp/reemitir` responden `401` con `code: 'INVALID_CURRENT_PASSWORD'` cuando la contraseña actual no coincide. **No** debe disparar un refresh. El interceptor del panel exceptúa este código (`isInvalidCurrentPassword()` en `src/lib/api/error-utils.ts`); no comparar `detail`. La app aplica la misma regla a sus propios endpoints (§3.3).
 
 ## 5. Notificaciones Web Push
 

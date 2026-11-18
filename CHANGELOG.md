@@ -8,9 +8,9 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
-## [No publicado] - 2026-11-11 a 2026-11-17 — Rediseño de sesiones (Fase E del backend, F1–F8)
+## 2026-11-11 a 2026-11-17 · Rediseño de sesiones (Fase E del backend, F1–F8)
 
-Contrapartida frontend del rediseño de sesiones del backend (`SPECS-SESIONES.md`). Se desplegó en cuatro olas coordinadas con el backend. Plan: `reports/plans/2026-11-11-plan-frontend-rediseno-sesiones.md`. Contrato: `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md` §3.
+Contrapartida frontend del rediseño de sesiones del backend (`SPECS-SESIONES.md`). Se desplegó en producción en cuatro olas coordinadas con el backend; la última (F6) el 2026-11-17. Plan: `reports/plans/2026-11-11-plan-frontend-rediseno-sesiones.md`. Contrato: `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md` §3.
 
 ### Añadido
 
