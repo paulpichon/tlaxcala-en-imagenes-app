@@ -90,6 +90,13 @@ export default function ListaNotificaciones() {
                           notif={notif}
                           onClick={(id, urlUsuario) => {
                             marcarComoLeida(id);
+                            // Comentario: abre el posteo comentado. Si el posteo ya no
+                            // existe (referencia null), no navega.
+                            if (notif.tipo === "comentario") {
+                              const posteoId = notif.referencia?._id;
+                              if (posteoId) router.push(`/posteo/${posteoId}`);
+                              return;
+                            }
                             // Notificación de sistema (sin emisor): no navegar a un perfil.
                             if (urlUsuario) router.push(`/${urlUsuario}`);
                           }}

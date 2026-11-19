@@ -380,7 +380,8 @@ export interface Notificacion {
   // Posteo referenciado (Fase 2). El cron de hard-delete borra físicamente el
   // posteo pasado el plazo, así que el $lookup del backend devuelve null/ausente.
   // El render NUNCA debe asumir su presencia ni mostrar "undefined".
-  referencia?: { public_id?: string; texto?: string } | null;
+  // `_id` es el id del posteo (lo usa el tipo 'comentario' para abrir /posteo/:id).
+  referencia?: { _id?: string; public_id?: string; texto?: string } | null;
 };
 // ======================================
 // 📦 Favoritos
