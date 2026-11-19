@@ -8,6 +8,17 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## 2026-11-18 · Polling y manejo de 429 (topes por IP del backend)
+
+Plan: `reports/plans/2026-11-18-plan-polling-y-429-rate-limiting.md`. Contrapartida frontend de los topes por IP (NAT/CGNAT) del backend.
+
+### Cambiado
+
+- **Notificaciones:** el polling se pausa con la pestaña oculta y hace un fetch al volver (`NotificacionesContext`). Antes corría siempre.
+- **Nuevos usuarios:** polling de 60 s a 3 min (`NuevosUsuariosContext`).
+- **Ambos contextos respetan el 429:** tras un `429` no vuelven a consultar hasta la espera indicada por `Retry-After` o `RateLimit-Reset` (acotada a 15 min; 30 s si el header no viene). El intervalo lleva jitter de ±10 %.
+- **`ApiError`** expone `retryAfterMs` (solo en `429`), leído en `handleApiResponse`. Utilidad nueva en `src/lib/polling.ts`.
+
 ## 2026-11-11 a 2026-11-17 · Rediseño de sesiones (Fase E del backend, F1–F8)
 
 Contrapartida frontend del rediseño de sesiones del backend (`SPECS-SESIONES.md`). Se desplegó en producción en cuatro olas coordinadas con el backend; la última (F6) el 2026-11-17. Plan (archivado): `reports/archive/plans/2026-11-11-plan-frontend-rediseno-sesiones.md`. Contrato: `SPECS/SPECS-FRONTEND-SESION-Y-CONTRATOS.md` §3.
