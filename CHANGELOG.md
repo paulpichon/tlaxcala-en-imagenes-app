@@ -8,6 +8,15 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## 2026-11-19 · Notificaciones: service worker y comentarios
+
+Plan de seguimiento: `reports/plans/2026-11-18-plan-notificaciones-backend.md`. Contrapartida frontend de las Fases 1 y 2 del rediseño de notificaciones del backend (`eca1e44`, pendiente de deploy al momento de escribir esto).
+
+### Cambiado
+
+- **Service worker** (`public/sw.js`, `2ab094b`): adopta el payload estándar (`tag` con `renotify`, `badge`, `data.tipo`). Muestra la notificación aunque el payload sea inválido o vacío (requisito de iOS), solo abre `url` del mismo origen y reutiliza la ventana abierta al hacer click.
+- **`/notificaciones`** (`5da0349`): una notificación de tipo `comentario` abre el posteo comentado (`/posteo/<referencia._id>`). Si el posteo ya no existe, solo se marca como leída. `Notificacion.referencia` tipa `_id`.
+
 ## 2026-11-18 · Polling y manejo de 429 (topes por IP del backend)
 
 Plan: `reports/plans/2026-11-18-plan-polling-y-429-rate-limiting.md`. Contrapartida frontend de los topes por IP (NAT/CGNAT) del backend.

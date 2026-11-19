@@ -122,6 +122,18 @@ La moderación se opera **exclusivamente desde el panel de administración** (`/
 
 > **404 "esperable" del fetch de metadata (no es bug):** al abrir el detalle de un posteo oculto por moderación, `generateMetadata` en `src/app/posteo/[idposteo]/page.tsx` hace un `fetch` **anónimo** (sin cookies, necesario para el ISR `revalidate: 60` compartido por todos los visitantes). Para un posteo oculto, el backend responde `404 NotFoundError` (no-autor) y **lo registra en consola** — esto es correcto: la petición de metadata equivale a un visitante y no debe revelar existencia (spec §5). El fetch del contenido en `PosteoDetalle` sí va con sesión (`fetchWithAuth`), por lo que el **autor** ve el posteo y el banner sin problema. `generateMetadata` ya maneja `!res.ok` devolviendo metadata neutra sin index. Ocurre a lo sumo 1 vez por minuto por posteo (cache ISR). El ruido en consola del backend puede atenuarse allá (bajar nivel de log de `NotFoundError` en `GET /api/posteos/post/:id` para requests sin sesión).
 
+## Notificaciones (push y `/notificaciones`)
+
+Seguimiento del rediseño del backend: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
+
+- **Service worker** (`public/sw.js`): payload estándar del backend `{ title, body, icon, badge, tag, url, data: { tipo, ... } }` (`url` va en el nivel raíz).
+  - Llama a `showNotification` en **cada** push, aunque el payload venga vacío o inválido: iOS revoca la suscripción si recibe pushes silenciosos. No añadir ramas que omitan la notificación.
+  - `tag` reemplaza la notificación anterior con el mismo tag (`renotify: true`). `icon` por defecto: asset local `/assets/icono-tlaxapp-beige.png`.
+  - `url` solo se abre si es del mismo origen (si no, la raíz). `notificationclick` reutiliza una ventana abierta (`focus` + `navigate`) antes de abrir otra.
+- **Tipos en `/notificaciones`:** `follow` navega al perfil del emisor; `comentario` navega a `/posteo/<referencia._id>` (si `referencia` es `null` solo se marca como leída); `posteo_eliminado_moderacion` no navega (ver Moderación). `like`, `nueva_publicacion`, `reporte_*` y `sistema` aún no se renderizan (Fases 3 y 6 del backend).
+- **Suscripción:** `POST /api/notificaciones/subscribe` es idempotente (mismo `endpoint` actualiza y reactiva `notificaciones_activadas`); máximo 10 dispositivos por usuario. Si `notificaciones_activadas` llega en `false`, mostrar el botón de activar.
+- **Pendiente:** flujo de activación en iOS (PWA instalada, `requestPermission` dentro del click, estados `no_soportado → instalar_pwa → permiso_pendiente → bloqueado → activo`). Guía en el plan de seguimiento.
+
 ## Error Handling
 
 - **All API calls must go through `src/lib/apiClient.ts`** (`apiGet`, `apiPost`, `apiPut`, `apiPatch`, `apiDelete`). Raw `fetch` is only allowed inside `fetchWithAuth`.
