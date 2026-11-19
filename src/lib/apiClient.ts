@@ -77,13 +77,34 @@ export interface ApiErrorData {
 export class ApiError extends Error {
   status: number;
   data: ApiErrorData;
+  /**
+   * Espera indicada por el servidor en un 429 (`Retry-After` o `RateLimit-Reset`,
+   * en segundos, convertidos a ms). `undefined` si el header no viene o la
+   * respuesta no es 429.
+   */
+  retryAfterMs?: number;
 
-  constructor(status: number, data: ApiErrorData) {
+  constructor(status: number, data: ApiErrorData, retryAfterMs?: number) {
     super(String(data.detail ?? data.error ?? data.message ?? 'Error desconocido'));
     this.name = 'ApiError';
     this.status = status;
     this.data = data;
+    this.retryAfterMs = retryAfterMs;
   }
+}
+
+/**
+ * Lee la espera de un 429 desde los headers. `Retry-After` tiene prioridad sobre
+ * `RateLimit-Reset`. Ambos llegan en segundos enteros (express-rate-limit 8).
+ * Solo se considera en 429: los demás estados pueden traer `RateLimit-*` sin
+ * significar bloqueo.
+ */
+function leerEsperaMs(res: Response): number | undefined {
+  if (res.status !== 429) return undefined;
+  const valor = res.headers.get('Retry-After') ?? res.headers.get('RateLimit-Reset');
+  if (valor === null || valor.trim() === '') return undefined;
+  const segundos = Number(valor);
+  return Number.isFinite(segundos) && segundos >= 0 ? segundos * 1000 : undefined;
 }
 
 export function isApiError(err: unknown): err is ApiError {
@@ -280,14 +301,16 @@ export async function handleApiResponse<T>(res: Response): Promise<T> {
   const contentType = res.headers.get('content-type') || '';
 
   if (!contentType.includes('application/json')) {
-    throw new ApiError(res.status, {
-      msg: `Respuesta inesperada del servidor (${res.status})`,
-    });
+    throw new ApiError(
+      res.status,
+      { msg: `Respuesta inesperada del servidor (${res.status})` },
+      leerEsperaMs(res)
+    );
   }
 
   const data = await res.json();
   if (!res.ok) {
-    throw new ApiError(res.status, data);
+    throw new ApiError(res.status, data, leerEsperaMs(res));
   }
   return data as T;
 }
