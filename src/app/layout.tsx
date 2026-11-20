@@ -61,6 +61,15 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  // PWA en iOS (requisito de Web Push): icono de pantalla de inicio y modo web app.
+  icons: {
+    apple: "/assets/icono-tlaxapp-beige.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "TlaxApp",
+    statusBarStyle: "default",
+  },
 };
 
 
