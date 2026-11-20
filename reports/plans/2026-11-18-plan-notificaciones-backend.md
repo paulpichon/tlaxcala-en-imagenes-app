@@ -75,6 +75,10 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 
 - 2026-11-19: Fase 7 implementada en el backend (pendiente de desplegar). Ver «Fase 7: contrato».
 
+- 2026-11-19: backend y frontend de la Fase 7 desplegados. Probado en producción en un iPhone: se instala la PWA, se activan las notificaciones y funcionan. Fase 7 completada; queda como opcional consumir `/estado` y la lista de dispositivos.
+
+- 2026-11-20: pantallas de arranque de iOS, `apple-touch-icon` con fondo blanco e iconos 192/512/maskable del manifest. Revisados por el usuario.
+
 ## Fase 7: contrato para el frontend
 
 - **`GET /api/notificaciones/vapidPublicKey`** ya **no requiere sesión**: se puede pedir al cargar la pantalla, antes del click. Respuesta igual: `data.key`.
@@ -96,7 +100,8 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 
 **Pendiente (opcional, no bloquea el despliegue del backend):**
 - Consumir `GET /estado` (reconciliar con `endpointHash`) y mostrar la lista de dispositivos con `DELETE /dispositivos/:id`. Hoy no se usan estos endpoints; el flujo de activación no depende de ellos.
-- Icono del manifest en 192 y 512 px para que Chrome ofrezca instalar la app (en iOS basta el icono de Apple).
+
+**Hecho tras la prueba en iPhone (2026-11-20):** iOS mostraba solo blanco al abrir la PWA porque ignora el manifest para la pantalla de arranque. Se añadieron 22 imágenes de arranque (`public/assets/splash/`, lista en `src/lib/pwa.ts`), un `apple-touch-icon` de 180×180 con fondo blanco (el PNG transparente se veía sobre negro) y los iconos 192, 512 y maskable del manifest (`public/assets/pwa/`). Solo orientación vertical; un modelo nuevo de iPhone o iPad requiere una fila en `src/lib/pwa.ts` y su PNG.
 
 **Dependencias:** el frontend actual funciona con el backend desplegado o sin desplegar la Fase 7 (el `data.id` extra de `subscribe` se ignora y `vapidPublicKey` sigue aceptando la petición con sesión). El orden de despliegue es indiferente.
 

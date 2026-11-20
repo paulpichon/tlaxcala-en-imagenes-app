@@ -8,6 +8,19 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## 2026-11-20 · PWA en iOS: pantallas de arranque e iconos
+
+Seguimiento de la prueba en iPhone de la activación de notificaciones (todo el flujo funciona). Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
+
+### Añadido
+
+- **Pantallas de arranque de iOS** (`934df31`): 22 imágenes en `public/assets/splash/` (logo beige sobre blanco, solo vertical), declaradas con `appleWebApp.startupImage` desde `src/lib/pwa.ts`. iOS ignora el manifest en el arranque y antes mostraba solo blanco.
+- **Iconos del manifest** 192, 512 y maskable (`public/assets/pwa/`) para que Android ofrezca instalar la app con su pantalla de arranque.
+
+### Cambiado
+
+- **Icono de pantalla de inicio de iOS:** `apple-touch-icon` de 180×180 con fondo blanco opaco; el PNG transparente anterior se veía sobre fondo negro.
+
 ## 2026-11-19 · Notificaciones: service worker, comentarios y activación en iOS
 
 Plan de seguimiento: `reports/plans/2026-11-18-plan-notificaciones-backend.md`. Contrapartida frontend de las Fases 1, 2 y 7 del rediseño de notificaciones del backend.
