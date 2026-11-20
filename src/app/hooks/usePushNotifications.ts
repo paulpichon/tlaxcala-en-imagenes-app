@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { apiGet, apiPost, getUserMessage } from "@/lib/apiClient";
-import { ApiResponse } from "@/types/types";
+import { apiDelete, apiGet, apiPost, getUserMessage, isNotFound } from "@/lib/apiClient";
+import { hashEndpoint } from "@/lib/dispositivos";
+import { ApiResponse, DispositivoPush } from "@/types/types";
 
 /**
  * Estados de la activación de Web Push (ver plan de notificaciones, Fase 7):
@@ -30,6 +31,9 @@ export function usePushNotifications() {
   const [esIOS, setEsIOS] = useState(false);
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dispositivos, setDispositivos] = useState<DispositivoPush[]>([]);
+  const [cargandoDispositivos, setCargandoDispositivos] = useState(true);
+  const [errorDispositivos, setErrorDispositivos] = useState<string | null>(null);
 
   // Registro del SW y clave VAPID se preparan ANTES del click: iOS exige que
   // `requestPermission` se llame casi directamente dentro del gesto del usuario.
@@ -50,6 +54,67 @@ export function usePushNotifications() {
   }, []);
 
   /**
+   * Carga `GET /estado` y marca cuál dispositivo es el de este navegador
+   * comparando `SHA-256(endpoint)` con `endpointHash`. Devuelve `null` si falla.
+   * No hace polling: se llama al abrir la pantalla y tras cada acción.
+   */
+  const cargarEstado = useCallback(
+    async (hashLocal: string | null): Promise<DispositivoPush[] | null> => {
+      try {
+        const resp = await apiGet<
+          ApiResponse<{ activadas: boolean; dispositivos: Omit<DispositivoPush, "esEste">[] }>
+        >(fetchRef.current, "/api/notificaciones/estado");
+        const lista = Array.isArray(resp.data?.dispositivos) ? resp.data.dispositivos : [];
+        const conMarca = lista.map((d) => ({
+          ...d,
+          esEste: hashLocal !== null && d.endpointHash === hashLocal,
+        }));
+        setDispositivos(conMarca);
+        setErrorDispositivos(null);
+        return conMarca;
+      } catch (err) {
+        console.warn("No se pudo cargar el estado de las notificaciones:", err);
+        setErrorDispositivos(getUserMessage(err, "cargar_dispositivos"));
+        return null;
+      } finally {
+        setCargandoDispositivos(false);
+      }
+    },
+    []
+  );
+
+  /** Recarga la lista usando la suscripción local actual (si existe). */
+  const recargarDispositivos = useCallback(async () => {
+    const suscripcion = await registroRef.current?.pushManager.getSubscription();
+    const hash = suscripcion ? await hashEndpoint(suscripcion.endpoint) : null;
+    await cargarEstado(hash);
+  }, [cargarEstado]);
+
+  /**
+   * Reconciliación (Fase 7): si hay suscripción local y el backend no la tiene,
+   * se repite `POST /subscribe` (idempotente) y se recarga. Si `/estado` falla
+   * (p. ej. backend sin la Fase 7), se mantiene el comportamiento anterior:
+   * repetir el `POST` a ciegas.
+   */
+  const reconciliar = useCallback(
+    async (suscripcion: PushSubscription) => {
+      const hash = await hashEndpoint(suscripcion.endpoint);
+      const lista = await cargarEstado(hash);
+      const registrada = lista !== null && hash !== null && lista.some((d) => d.esEste);
+      if (registrada) return;
+      try {
+        await apiPost(fetchRef.current, "/api/notificaciones/subscribe", {
+          subscription: suscripcion,
+        });
+        if (lista !== null) await cargarEstado(hash);
+      } catch (err) {
+        console.warn("No se pudo refrescar la suscripción:", err);
+      }
+    },
+    [cargarEstado]
+  );
+
+  /**
    * Detección inicial: soporte → permiso → suscripción existente.
    */
   useEffect(() => {
@@ -63,11 +128,13 @@ export function usePushNotifications() {
       // iOS en pestaña de Safari: PushManager no existe; hay que instalar la PWA.
       if (ios && !estaInstalada()) {
         setEstado("instalar_pwa");
+        cargarEstado(null);
         return;
       }
 
       if (!soportaPush()) {
         setEstado("no_soportado");
+        cargarEstado(null);
         return;
       }
 
@@ -81,6 +148,7 @@ export function usePushNotifications() {
 
         if (Notification.permission === "denied") {
           setEstado("bloqueado");
+          cargarEstado(null);
           return;
         }
 
@@ -89,13 +157,12 @@ export function usePushNotifications() {
 
         if (Notification.permission === "granted" && suscripcion) {
           setEstado("activo");
-          // `subscribe` es idempotente: refresca claves/lastUsedAt y reactiva
+          // Reconcilia con `/estado`; `subscribe` es idempotente y reactiva
           // `notificaciones_activadas` si el backend había perdido la suscripción.
-          apiPost(fetchRef.current, "/api/notificaciones/subscribe", {
-            subscription: suscripcion,
-          }).catch((err) => console.warn("No se pudo refrescar la suscripción:", err));
+          reconciliar(suscripcion);
         } else {
           setEstado("permiso_pendiente");
+          cargarEstado(null);
           // Precarga de la clave VAPID (best-effort; si falla se pide en el click).
           obtenerClave().catch(() => {});
         }
@@ -103,6 +170,7 @@ export function usePushNotifications() {
         if (cancelado) return;
         console.error("Error inicializando notificaciones push:", err);
         setEstado("no_soportado");
+        cargarEstado(null);
       }
     }
 
@@ -110,7 +178,7 @@ export function usePushNotifications() {
     return () => {
       cancelado = true;
     };
-  }, [user, obtenerClave]);
+  }, [user, obtenerClave, cargarEstado, reconciliar]);
 
   /**
    * Si el usuario habilita el permiso desde los ajustes del sistema y vuelve a
@@ -165,6 +233,7 @@ export function usePushNotifications() {
       }
 
       setEstado("activo");
+      recargarDispositivos().catch(() => {});
 
       // 4️⃣ Confirmación (best-effort). `new Notification()` no existe en móviles:
       // se usa el SW. Un fallo aquí no debe invalidar la activación.
@@ -185,7 +254,7 @@ export function usePushNotifications() {
       enCursoRef.current = false;
       setProcesando(false);
     }
-  }, [estado, obtenerClave]);
+  }, [estado, obtenerClave, recargarDispositivos]);
 
   /**
    * 🚫 Desactivar notificaciones (solo en este dispositivo).
@@ -213,6 +282,7 @@ export function usePushNotifications() {
 
       // El permiso sigue concedido: reactivar no vuelve a mostrar el diálogo.
       setEstado("permiso_pendiente");
+      recargarDispositivos().catch(() => {});
       return true;
     } catch (err) {
       console.error("Error desactivando notificaciones:", err);
@@ -222,8 +292,30 @@ export function usePushNotifications() {
       enCursoRef.current = false;
       setProcesando(false);
     }
+  }, [recargarDispositivos]);
+
+  /**
+   * Desactiva otro dispositivo (`DELETE /dispositivos/:id`). Un `404` significa
+   * que ya no existía: se trata como éxito. Devuelve `true` si ya no está activo.
+   */
+  const cerrarDispositivo = useCallback(async (id: string): Promise<boolean> => {
+    setErrorDispositivos(null);
+    try {
+      await apiDelete(
+        fetchRef.current,
+        `/api/notificaciones/dispositivos/${encodeURIComponent(id)}`
+      );
+    } catch (err) {
+      if (!isNotFound(err)) {
+        setErrorDispositivos(getUserMessage(err, "cerrar_dispositivo"));
+        return false;
+      }
+    }
+    setDispositivos((prev) => prev.filter((d) => d.id !== id));
+    return true;
   }, []);
 
+  const clearErrorDispositivos = useCallback(() => setErrorDispositivos(null), []);
   const clearError = useCallback(() => setError(null), []);
 
   return {
@@ -234,6 +326,11 @@ export function usePushNotifications() {
     clearError,
     activarNotificaciones,
     desactivarNotificaciones,
+    dispositivos,
+    cargandoDispositivos,
+    errorDispositivos,
+    clearErrorDispositivos,
+    cerrarDispositivo,
   };
 }
 

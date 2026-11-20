@@ -169,6 +169,19 @@ export interface SesionActiva {
   lastUsed: string | null;
   esActual: boolean;
 }
+/**
+ * Dispositivo con push registrado (`GET /api/notificaciones/estado`, Fase 7).
+ * El backend no envía `endpoint` ni claves: solo `endpointHash` (SHA-256 hex del
+ * endpoint) para reconocer el dispositivo actual. `esEste` lo calcula el frontend.
+ */
+export interface DispositivoPush {
+  id: string;
+  userAgent: string | null;
+  creadoAt: string | null;
+  ultimoUso: string | null;
+  endpointHash: string;
+  esEste: boolean;
+}
 // Password
 export interface PasswordConfirm extends UsuarioLogueado {
   confirmPassword: string;

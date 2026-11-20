@@ -219,6 +219,8 @@ export type Operacion =
   | 'actualizar_imagen_perfil'
   | 'obtener_ubicacion'
   | 'notificaciones_push'
+  | 'cargar_dispositivos'
+  | 'cerrar_dispositivo'
   | 'recuperar_password'
   | 'restablecer_password'
   | 'registro'
@@ -252,6 +254,8 @@ const MENSAJES_POR_DEFECTO: Record<Operacion, string> = {
   actualizar_imagen_perfil: 'No se pudo actualizar la imagen de perfil. Intenta de nuevo.',
   obtener_ubicacion: 'No se pudo obtener la ubicación automáticamente.',
   notificaciones_push: 'No se pudieron activar las notificaciones. Intenta de nuevo.',
+  cargar_dispositivos: 'No se pudieron cargar tus dispositivos con notificaciones.',
+  cerrar_dispositivo: 'No se pudo desactivar el dispositivo. Intenta de nuevo.',
   recuperar_password: 'No se pudo procesar la solicitud. Intenta de nuevo.',
   restablecer_password: 'No se pudo restablecer la contraseña. Intenta de nuevo.',
   registro: 'No se pudo completar el registro. Intenta de nuevo.',

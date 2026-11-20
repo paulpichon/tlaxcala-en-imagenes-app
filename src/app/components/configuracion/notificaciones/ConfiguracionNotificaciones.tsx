@@ -2,12 +2,23 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FiArrowLeft, FiBell, FiBellOff } from "react-icons/fi";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
+import { FiArrowLeft, FiBell, FiBellOff, FiMonitor, FiSmartphone } from "react-icons/fi";
 import { usePushNotifications } from "@/app/hooks/usePushNotifications";
+import { describirUserAgent } from "@/lib/dispositivos";
+import type { DispositivoPush } from "@/types/types";
 import ToastGlobal from "../../ToastGlobal";
 import notificacionesdStyles from "@/app/ui/configuracion/notificaciones/Notificaciones.module.css"
 
 type ToastState = { message: string; type?: "success" | "danger" | "warning" };
+
+function ultimoUso(d: DispositivoPush): string {
+  const iso = d.ultimoUso ?? d.creadoAt;
+  const fecha = iso ? new Date(iso) : null;
+  if (!fecha || Number.isNaN(fecha.getTime())) return "Sin actividad registrada";
+  return `Último uso ${formatDistanceToNow(fecha, { addSuffix: true, locale: es })}`;
+}
 
 export default function ConfiguracionNotificaciones() {
   const router = useRouter();
@@ -19,9 +30,24 @@ export default function ConfiguracionNotificaciones() {
     clearError,
     activarNotificaciones,
     desactivarNotificaciones,
+    dispositivos,
+    cargandoDispositivos,
+    errorDispositivos,
+    clearErrorDispositivos,
+    cerrarDispositivo,
   } = usePushNotifications();
 
   const [toast, setToast] = useState<ToastState>({ message: "", type: undefined });
+  const [confirmandoId, setConfirmandoId] = useState<string | null>(null);
+  const [cerrandoId, setCerrandoId] = useState<string | null>(null);
+
+  const onCerrarDispositivo = async (id: string) => {
+    setCerrandoId(id);
+    const ok = await cerrarDispositivo(id);
+    setCerrandoId(null);
+    setConfirmandoId(null);
+    if (ok) setToast({ message: "Dispositivo desactivado.", type: "success" });
+  };
 
   // IMPORTANTE (iOS): este handler debe llamar a `activarNotificaciones` de forma
   // directa; no anteponer `await`s ni mover la llamada a un useEffect.
@@ -170,6 +196,84 @@ export default function ConfiguracionNotificaciones() {
               </div>
             )}
           </div>
+
+          {/* Dispositivos con notificaciones registrados en el backend */}
+          {!cargandoDispositivos && (dispositivos.length > 0 || errorDispositivos) && (
+            <div className="bg-white shadow-sm rounded-4 p-4 border mt-3">
+              <h6 className="fw-bold mb-1">Dispositivos con notificaciones</h6>
+              <p className="text-secondary small mb-3">
+                Dispositivos que reciben avisos de tu cuenta. Desactiva los que ya no uses.
+              </p>
+
+              {errorDispositivos && (
+                <div className="alert alert-danger p-2 small" role="alert">
+                  {errorDispositivos}
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-dark ms-2"
+                    onClick={clearErrorDispositivos}
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              )}
+
+              <ul className="list-group list-group-flush">
+                {dispositivos.map((d) => {
+                  const { nombre, movil } = describirUserAgent(d.userAgent);
+                  const Icono = movil ? FiSmartphone : FiMonitor;
+                  const confirmando = confirmandoId === d.id;
+                  const cerrando = cerrandoId === d.id;
+                  return (
+                    <li key={d.id} className="list-group-item px-0 py-3">
+                      <div className="d-flex align-items-start gap-3">
+                        <Icono size={22} className="text-secondary flex-shrink-0 mt-1" aria-hidden />
+                        <div className="flex-grow-1 text-start">
+                          <div className="d-flex align-items-center flex-wrap gap-2">
+                            <span className="fw-semibold">{nombre}</span>
+                            {d.esEste && <span className="badge text-bg-success">Este dispositivo</span>}
+                          </div>
+                          <div className="small text-secondary">{ultimoUso(d)}</div>
+
+                          {!d.esEste && confirmando && (
+                            <div className="d-flex align-items-center flex-wrap gap-2 mt-2">
+                              <span className="small">¿Desactivar este dispositivo?</span>
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-danger"
+                                disabled={cerrando}
+                                onClick={() => onCerrarDispositivo(d.id)}
+                              >
+                                {cerrando ? "Desactivando..." : "Sí, desactivar"}
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-outline-secondary"
+                                disabled={cerrando}
+                                onClick={() => setConfirmandoId(null)}
+                              >
+                                Cancelar
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        {!d.esEste && !confirmando && (
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-danger flex-shrink-0"
+                            disabled={cerrandoId !== null}
+                            onClick={() => setConfirmandoId(d.id)}
+                          >
+                            Desactivar
+                          </button>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>
