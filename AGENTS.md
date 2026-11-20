@@ -137,13 +137,14 @@ Seguimiento del rediseño del backend: `reports/plans/2026-11-18-plan-notificaci
   - El SW se registra y la clave VAPID se precarga **al abrir la pantalla**; dentro del click, `Notification.requestPermission()` es la **primera operación asíncrona** (iOS la ignora tras `await`s largos o en un `useEffect`). No reordenar.
   - Si `POST /subscribe` falla, se hace `subscription.unsubscribe()`. La confirmación usa `registration.showNotification` (`new Notification()` no existe en móviles).
   - Con permiso `denied` no se puede volver a pedir: se muestran instrucciones (Ajustes > Notificaciones > TlaxApp en iOS).
-  - Al abrir la pantalla con suscripción local se repite `POST /subscribe` (idempotente) para restaurar el registro del backend.
+  - Al abrir la pantalla se pide `GET /api/notificaciones/estado` y se reconcilia con `SHA-256(endpoint)` contra `dispositivos[].endpointHash` (`hashEndpoint` en `src/lib/dispositivos.ts`). Si hay suscripción local y el backend no la tiene, se repite `POST /subscribe` (idempotente); si `/estado` falla se repite a ciegas. Sin polling: solo al montar y tras cada acción.
+  - Lista «Dispositivos con notificaciones» en `ConfiguracionNotificaciones`: el dispositivo actual (`esEste`) se gestiona con el interruptor; los demás se cierran con `DELETE /api/notificaciones/dispositivos/:id` (`404` = ya cerrado).
 - **PWA en iOS** (`src/lib/pwa.ts`, `public/assets/splash/`, `public/assets/pwa/`):
   - iOS **ignora** `background_color` y los iconos del manifest al abrir la PWA; sin una imagen `apple-touch-startup-image` que coincida exactamente con la pantalla, muestra solo blanco. Hay 22 imágenes (logo beige sobre blanco, solo vertical) declaradas con `appleWebApp.startupImage`. Un modelo nuevo de iPhone/iPad (o el modo horizontal) cae en blanco: añadir su fila en `src/lib/pwa.ts` y su PNG de `ancho*dpr` × `alto*dpr`.
   - `apple-touch-icon` de 180×180 **opaco** con fondo blanco (el PNG transparente se veía sobre negro). El manifest declara iconos 192, 512 y maskable para Android.
   - Los PNG se generan con `sharp` a partir de `icono-tlaxapp-beige.png`; `sharp` no es dependencia directa, así que el script no vive en el repo. Si cambia el logo hay que regenerarlos. iOS guarda estos recursos al instalar: para verlos hay que quitar la app de inicio y volver a añadirla.
 - **Verificado en iPhone** (2026-11-19/20): instalar la PWA, activar, y recibir push de seguir y comentar funcionan.
-- **Pendiente:** consumir `GET /api/notificaciones/estado` (reconciliar con `SHA-256(endpoint)` contra `dispositivos[].endpointHash`) y mostrar la lista de dispositivos con `DELETE /api/notificaciones/dispositivos/:id` (backend de la Fase 7 desplegado, ver plan de seguimiento).
+- **Pendiente:** Fases 3 a 6 y 8 del backend (likes agrupados, preferencias, acciones masivas, tipos nuevos); ver plan de seguimiento.
 
 ## Error Handling
 

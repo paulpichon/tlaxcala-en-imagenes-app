@@ -8,6 +8,17 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## 2026-11-20 · Notificaciones: estado y lista de dispositivos (Fase 7)
+
+Cierra la tarea opcional de la Fase 7 del backend. Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
+
+### Añadido
+
+- **Reconciliación con `GET /api/notificaciones/estado`** (`usePushNotifications`): se calcula `SHA-256(endpoint)` (`hashEndpoint`, `src/lib/dispositivos.ts`) y se compara con `dispositivos[].endpointHash`. Si el navegador tiene suscripción y el backend no, se repite `POST /subscribe`. Si `/estado` falla, se conserva el `POST` a ciegas de antes.
+- **Lista «Dispositivos con notificaciones»** en `/configuracion/notificaciones` con «Este dispositivo» y botón **Desactivar** (con confirmación) para los demás, vía `DELETE /api/notificaciones/dispositivos/:id` (`404` = ya cerrado, no es error).
+- Tipo `DispositivoPush`, operaciones `cargar_dispositivos` / `cerrar_dispositivo` en `apiClient.ts` y `describirUserAgent` para nombres legibles.
+- `/estado` se pide solo al abrir la pantalla y tras activar, desactivar o cerrar un dispositivo (sin polling).
+
 ## 2026-11-20 · PWA en iOS: pantallas de arranque e iconos
 
 Seguimiento de la prueba en iPhone de la activación de notificaciones (todo el flujo funciona). Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.

@@ -14,7 +14,7 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 | 4 | Preferencias por tipo y canal; límite de correos | Pendiente | Pantalla de preferencias en `/configuracion/notificaciones` (`GET/PUT /api/notificaciones/preferencias`). |
 | 5 | Marcar todas leídas, borrar todas, filtro por tipo, limpieza de viejas | Pendiente | Botones y filtro en `/notificaciones`. |
 | 6 | Tipos nuevos: `reporte_resuelto`, `reporte_descartado`, `nueva_publicacion`, `sistema` | Pendiente | Renderizar los tipos nuevos; los de `sistema` no tienen emisor. |
-| 7 | `GET /api/notificaciones/estado`, dispositivos, `subscribe` idempotente | **Backend implementado (2026-11-19), listo para desplegar.** Frontend: arreglo de iOS commiteado (`af4a5c6`), sin desplegar ni probar en iPhone; falta consumir `/estado` y la lista de dispositivos (opcional) | Flujo de activación y arreglo de iOS (ver «Estado del frontend en la Fase 7» y «Fase 7: contrato»). |
+| 7 | `GET /api/notificaciones/estado`, dispositivos, `subscribe` idempotente | **Hecha y desplegada (2026-11-19).** Frontend: activación en iOS probada en iPhone; `/estado`, reconciliación y lista de dispositivos implementados (2026-11-20, pendiente de probar en producción) | Flujo de activación y arreglo de iOS (ver «Estado del frontend en la Fase 7» y «Fase 7: contrato»). |
 | 8 | Documentación, Postman, `SPECS-FRONTEND-NOTIFICACIONES.md` | Pendiente | Contrato final. |
 
 ## Tipos de notificación (contrato actual y previsto)
@@ -79,6 +79,8 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 
 - 2026-11-20: pantallas de arranque de iOS, `apple-touch-icon` con fondo blanco e iconos 192/512/maskable del manifest. Revisados por el usuario.
 
+- 2026-11-20: frontend consume `/estado`, reconcilia con `endpointHash` y muestra la lista de dispositivos con cierre remoto.
+
 ## Fase 7: contrato para el frontend
 
 - **`GET /api/notificaciones/vapidPublicKey`** ya **no requiere sesión**: se puede pedir al cargar la pantalla, antes del click. Respuesta igual: `data.key`.
@@ -98,8 +100,7 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 - PWA: `manifest.ts` (`display: standalone`), `appleWebApp` e icono de Apple en `layout.tsx`.
 - Reconciliación: si hay suscripción local, repite `POST /subscribe` (idempotente) al abrir la pantalla.
 
-**Pendiente (opcional, no bloquea el despliegue del backend):**
-- Consumir `GET /estado` (reconciliar con `endpointHash`) y mostrar la lista de dispositivos con `DELETE /dispositivos/:id`. Hoy no se usan estos endpoints; el flujo de activación no depende de ellos.
+**Hecho (2026-11-20, sin commitear aún):** `GET /estado` con reconciliación por `endpointHash` (`hashEndpoint`, `src/lib/dispositivos.ts`) y lista de dispositivos con `DELETE /dispositivos/:id` en `ConfiguracionNotificaciones`. `/estado` solo se pide al montar y tras cada acción. Si falla, se mantiene el `POST /subscribe` a ciegas. Pendiente: probar en producción (activar en dos dispositivos y cerrar uno desde el otro).
 
 **Hecho tras la prueba en iPhone (2026-11-20):** iOS mostraba solo blanco al abrir la PWA porque ignora el manifest para la pantalla de arranque. Se añadieron 22 imágenes de arranque (`public/assets/splash/`, lista en `src/lib/pwa.ts`), un `apple-touch-icon` de 180×180 con fondo blanco (el PNG transparente se veía sobre negro) y los iconos 192, 512 y maskable del manifest (`public/assets/pwa/`). Solo orientación vertical; un modelo nuevo de iPhone o iPad requiere una fila en `src/lib/pwa.ts` y su PNG.
 
