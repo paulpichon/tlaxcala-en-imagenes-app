@@ -15,6 +15,8 @@ import { NotificacionesProvider } from '@/context/NotificacionesContext';
 import { NuevosUsuariosProvider } from '@/context/NuevosUsuariosContext';
 import { PublicidadProvider } from '@/context/PublicidadContext';
 import { FollowProvider } from '@/context/FollowContext';
+// Recursos de PWA para iOS (iconos y pantallas de arranque)
+import { ICONO_APPLE_TOUCH, IMAGENES_ARRANQUE_IOS } from '@/lib/pwa';
 // metadatos
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"),
@@ -63,12 +65,13 @@ export const metadata: Metadata = {
   },
   // PWA en iOS (requisito de Web Push): icono de pantalla de inicio y modo web app.
   icons: {
-    apple: "/assets/icono-tlaxapp-beige.png",
+    apple: ICONO_APPLE_TOUCH, // 180×180 con fondo blanco (el PNG transparente se veía sobre negro)
   },
   appleWebApp: {
     capable: true,
     title: "TlaxApp",
     statusBarStyle: "default",
+    startupImage: IMAGENES_ARRANQUE_IOS, // pantalla de arranque (iOS ignora el manifest)
   },
 };
 

@@ -18,12 +18,16 @@ export default function manifest(): MetadataRoute.Manifest {
     display: "standalone",
     background_color: "#FFFFFF",
     theme_color: "#EBCA9A",
+    // Con 192 y 512 px Chrome/Android ofrece instalar la app y arma su pantalla
+    // de arranque con `background_color` + icono. iOS usa `src/lib/pwa.ts`.
     icons: [
+      { src: "/assets/pwa/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/assets/pwa/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
       {
-        src: "/assets/icono-tlaxapp-beige.png",
-        sizes: "500x500",
+        src: "/assets/pwa/icon-maskable-512.png",
+        sizes: "512x512",
         type: "image/png",
-        purpose: "any",
+        purpose: "maskable",
       },
     ],
   };
