@@ -8,11 +8,21 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
-## 2026-11-19 · Notificaciones: service worker y comentarios
+## 2026-11-19 · Notificaciones: service worker, comentarios y activación en iOS
 
-Plan de seguimiento: `reports/plans/2026-11-18-plan-notificaciones-backend.md`. Contrapartida frontend de las Fases 1 y 2 del rediseño de notificaciones del backend (`eca1e44`, pendiente de deploy al momento de escribir esto).
+Plan de seguimiento: `reports/plans/2026-11-18-plan-notificaciones-backend.md`. Contrapartida frontend de las Fases 1, 2 y 7 del rediseño de notificaciones del backend.
+
+### Añadido
+
+- **Web app manifest** (`src/app/manifest.ts`, `af4a5c6`): `display: standalone`, necesario para que la PWA instalada en iOS (16.4+) pueda recibir push. `layout.tsx` añade el icono de Apple y `appleWebApp`.
 
 ### Cambiado
+
+- **Activación de notificaciones push** (`usePushNotifications`, `ConfiguracionNotificaciones`, `af4a5c6`):
+  - Nuevos estados `no_soportado`, `instalar_pwa`, `permiso_pendiente`, `bloqueado` y `activo`, con instrucciones para instalar la PWA y para desbloquear el permiso.
+  - El SW y la clave VAPID se precargan; `requestPermission` es la primera operación asíncrona del click (requisito de iOS).
+  - Si `POST /subscribe` falla, se deshace la suscripción local. Al abrir la pantalla se repite `subscribe` (idempotente) para restaurar el registro.
+  - La confirmación usa `registration.showNotification` en lugar de `new Notification()`, que lanzaba `Illegal constructor` en móviles y dejaba al usuario suscrito con un error. Los toasts reflejan el resultado real.
 
 - **Service worker** (`public/sw.js`, `2ab094b`): adopta el payload estándar (`tag` con `renotify`, `badge`, `data.tipo`). Muestra la notificación aunque el payload sea inválido o vacío (requisito de iOS), solo abre `url` del mismo origen y reutiliza la ventana abierta al hacer click.
 - **`/notificaciones`** (`5da0349`): una notificación de tipo `comentario` abre el posteo comentado (`/posteo/<referencia._id>`). Si el posteo ya no existe, solo se marca como leída. `Notificacion.referencia` tipa `_id`.

@@ -132,7 +132,13 @@ Seguimiento del rediseño del backend: `reports/plans/2026-11-18-plan-notificaci
   - `url` solo se abre si es del mismo origen (si no, la raíz). `notificationclick` reutiliza una ventana abierta (`focus` + `navigate`) antes de abrir otra.
 - **Tipos en `/notificaciones`:** `follow` navega al perfil del emisor; `comentario` navega a `/posteo/<referencia._id>` (si `referencia` es `null` solo se marca como leída); `posteo_eliminado_moderacion` no navega (ver Moderación). `like`, `nueva_publicacion`, `reporte_*` y `sistema` aún no se renderizan (Fases 3 y 6 del backend).
 - **Suscripción:** `POST /api/notificaciones/subscribe` es idempotente (mismo `endpoint` actualiza y reactiva `notificaciones_activadas`); máximo 10 dispositivos por usuario. Si `notificaciones_activadas` llega en `false`, mostrar el botón de activar.
-- **Pendiente:** flujo de activación en iOS (PWA instalada, `requestPermission` dentro del click, estados `no_soportado → instalar_pwa → permiso_pendiente → bloqueado → activo`). Guía en el plan de seguimiento.
+- **Activación** (`usePushNotifications` + `ConfiguracionNotificaciones`, `af4a5c6`): estados `cargando`, `no_soportado`, `instalar_pwa`, `permiso_pendiente`, `bloqueado` y `activo`.
+  - Web Push en iOS solo funciona con la **PWA instalada** (iOS 16.4+); por eso existe `src/app/manifest.ts` (`display: standalone`) y `appleWebApp`/icono de Apple en `layout.tsx`. En una pestaña de Safari `PushManager` no existe.
+  - El SW se registra y la clave VAPID se precarga **al abrir la pantalla**; dentro del click, `Notification.requestPermission()` es la **primera operación asíncrona** (iOS la ignora tras `await`s largos o en un `useEffect`). No reordenar.
+  - Si `POST /subscribe` falla, se hace `subscription.unsubscribe()`. La confirmación usa `registration.showNotification` (`new Notification()` no existe en móviles).
+  - Con permiso `denied` no se puede volver a pedir: se muestran instrucciones (Ajustes > Notificaciones > TlaxApp en iOS).
+  - Al abrir la pantalla con suscripción local se repite `POST /subscribe` (idempotente) para restaurar el registro del backend.
+- **Pendiente:** consumir `GET /api/notificaciones/estado` (reconciliar con `SHA-256(endpoint)` contra `dispositivos[].endpointHash`) y mostrar la lista de dispositivos con `DELETE /api/notificaciones/dispositivos/:id` (backend de la Fase 7 listo, ver plan de seguimiento); iconos del manifest en 192 y 512 px; prueba en un iPhone con la PWA instalada.
 
 ## Error Handling
 

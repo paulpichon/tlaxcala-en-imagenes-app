@@ -8,13 +8,13 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 | Fase | Qué hace el backend | Estado | Impacto en el frontend |
 |---|---|---|---|
 | 0 | Corrige bugs críticos: el cron borraba las suscripciones push cada domingo; el filtro borraba suscripciones válidas; `subscribe` idempotente | **Hecha y desplegada (2026-11-18)** | Ninguno obligatorio (ver abajo). Los usuarios dejarán de perder el push. |
-| 1 | Servicio central `notificar()` (BD + push + correo) | **Núcleo hecho (2026-11-19), sin deploy** | Ninguno. Payload de push estandarizado (`title`, `body`, `icon`, `badge`, `tag`, `url`, `data.tipo`); el service worker debe usar `tag` y `data.tipo`. |
-| 2 | Seguir envía correo; comentar crea notificación en `/notificaciones`; moderación envía push | **Hecha en backend (2026-11-19), sin deploy** | Renderizar el tipo `comentario` en `/notificaciones`. |
+| 1 | Servicio central `notificar()` (BD + push + correo) | **Hecha y desplegada (2026-11-19).** Los tres productores (seguir, comentar, moderación) ya lo usan. Deuda en backend: tests de integración con BD | Ninguno. Payload de push estandarizado (`title`, `body`, `icon`, `badge`, `tag`, `url`, `data.tipo`); el service worker debe usar `tag` y `data.tipo`. |
+| 2 | Seguir envía correo; comentar crea notificación en `/notificaciones`; moderación envía push | **Hecha y desplegada (2026-11-19); seguir, comentar y moderación probados en producción** | Renderizar el tipo `comentario` en `/notificaciones`. |
 | 3 | Likes: notificación agrupada por posteo + push con `tag` (sin correo) | Pendiente | Renderizar el tipo `like` con contador ("X y N más"). |
 | 4 | Preferencias por tipo y canal; límite de correos | Pendiente | Pantalla de preferencias en `/configuracion/notificaciones` (`GET/PUT /api/notificaciones/preferencias`). |
 | 5 | Marcar todas leídas, borrar todas, filtro por tipo, limpieza de viejas | Pendiente | Botones y filtro en `/notificaciones`. |
 | 6 | Tipos nuevos: `reporte_resuelto`, `reporte_descartado`, `nueva_publicacion`, `sistema` | Pendiente | Renderizar los tipos nuevos; los de `sistema` no tienen emisor. |
-| 7 | `GET /api/notificaciones/estado`, dispositivos, `subscribe` idempotente | Pendiente | Flujo de activación y arreglo de iOS (ver abajo). |
+| 7 | `GET /api/notificaciones/estado`, dispositivos, `subscribe` idempotente | **Backend implementado (2026-11-19), listo para desplegar.** Frontend: arreglo de iOS commiteado (`af4a5c6`), sin desplegar ni probar en iPhone; falta consumir `/estado` y la lista de dispositivos (opcional) | Flujo de activación y arreglo de iOS (ver «Estado del frontend en la Fase 7» y «Fase 7: contrato»). |
 | 8 | Documentación, Postman, `SPECS-FRONTEND-NOTIFICACIONES.md` | Pendiente | Contrato final. |
 
 ## Tipos de notificación (contrato actual y previsto)
@@ -22,7 +22,7 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 | Tipo | Hoy en `/notificaciones` | Previsto |
 |---|---|---|
 | `follow` | Sí | Sin cambio |
-| `comentario` | Sí (render y navegación hechos; se activa al desplegar la Fase 2 del backend) | Fase 2 |
+| `comentario` | Sí (render y navegación; probado en producción) | Hecho (Fase 2) |
 | `like` | No | Fase 3 (agrupado) |
 | `posteo_eliminado_moderacion` | Sí (sin emisor) | Sin cambio; se añade push |
 | `reporte_resuelto` / `reporte_descartado` | No | Fase 6 |
@@ -64,7 +64,41 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 
 - 2026-11-18: plan creado.
 - 2026-11-18: Fase 0 implementada en el backend y desplegada.
-- 2026-11-19: Fase 2 (y núcleo de la Fase 1) implementada en el backend (319/319 tests), pendiente de deploy. Ver la sección «Fase 2» sobre el contrato.
+- 2026-11-19: Fase 2 (y núcleo de la Fase 1) implementada en el backend (319/319 tests). Ver la sección «Fase 2» sobre el contrato.
+- 2026-11-19: backend y frontend desplegados; seguir, comentar y moderación probados en producción (render del tipo `comentario`, correos y push al autor del posteo eliminado OK).
+
+- 2026-11-19: Fase 1 marcada como completada en el backend (commit `7aa9ff5`); sin cambios de contrato para el frontend.
+
+- 2026-11-19: los correos de notificación (seguir, comentar, eliminación por moderación) pasan a salir desde `notificaciones@tlaxapp.com` en lugar de `verificar@`. Sin impacto en el frontend; solo cambia el remitente que ven los usuarios. Probado en producción, funciona.
+
+- 2026-11-19: verificado en el backend el punto del icono del push: el avatar del emisor sí se usa como `icon` (`secure_url` se guarda en BD y el push se arma en el backend, así que no importa que la API no lo envíe al frontend). Sin acción en el frontend. Si algún avatar no aparece en producción, el arreglo es del backend (transformar la URL de Cloudinary a 192×192 PNG); está descrito en «Nota: tamaño del icono del push» del plan del backend.
+
+- 2026-11-19: Fase 7 implementada en el backend (pendiente de desplegar). Ver «Fase 7: contrato».
+
+## Fase 7: contrato para el frontend
+
+- **`GET /api/notificaciones/vapidPublicKey`** ya **no requiere sesión**: se puede pedir al cargar la pantalla, antes del click. Respuesta igual: `data.key`.
+- **`GET /api/notificaciones/estado`** (con sesión): `data = { activadas: boolean, dispositivos: [{ id, userAgent, creadoAt, ultimoUso, endpointHash }] }`, del más reciente al más antiguo. `activadas` es `true` solo si hay al menos un dispositivo. No trae `endpoint` ni claves. **`preferencias` se añadirá en la Fase 4.**
+- **Reconciliación**: calcular `SHA-256` hexadecimal (minúsculas) del `subscription.endpoint` del navegador, p. ej. con `crypto.subtle.digest('SHA-256', new TextEncoder().encode(endpoint))`, y compararlo con `dispositivos[].endpointHash`. Casos: hay suscripción local y está en BD → `activo`; hay local pero no en BD → volver a llamar `POST /subscribe` (es idempotente); en BD pero no local (otro dispositivo) → mostrarlo en la lista de dispositivos.
+- **`POST /api/notificaciones/subscribe`**: la respuesta ahora incluye `data: { id }` (id del dispositivo). Sigue siendo idempotente; el resto del contrato no cambia.
+- **`DELETE /api/notificaciones/dispositivos/:id`** (con sesión): cierra un dispositivo. `200` ok; `404` si no existe o no es del usuario; `422` si el `id` no es válido. Si era el último, `activadas` pasa a `false`.
+- El resto de la guía de activación en iOS (sección «Activación en iOS») sigue vigente y es trabajo del frontend.
+
+### Estado del frontend en la Fase 7 (revisado 2026-11-19)
+
+**Implementado y commiteado en `af4a5c6` (`usePushNotifications.ts`, `ConfiguracionNotificaciones.tsx`, `layout.tsx`, `manifest.ts`); pendiente de despliegue y de prueba en un iPhone con la PWA instalada (requiere HTTPS). Quien ya tenía TlaxApp en la pantalla de inicio debe quitarla y volver a añadirla para que iOS lea el manifest:**
+- `requestPermission` es la primera operación asíncrona del click; el registro del SW y la clave VAPID se precargan antes (puntos 1, 2 y 5 de la guía).
+- Confirmación con `registro.showNotification` (best-effort) en lugar de `new Notification()`; el icono usa `/assets/icono-tlaxapp-beige.png`.
+- `unsubscribe()` local si falla `POST /subscribe` (punto 6).
+- Estados `cargando`, `no_soportado`, `instalar_pwa`, `permiso_pendiente`, `bloqueado` y `activo`, con instrucciones para instalar la PWA y para desbloquear el permiso; sale de `bloqueado` al volver de Ajustes (puntos 3 y 7).
+- PWA: `manifest.ts` (`display: standalone`), `appleWebApp` e icono de Apple en `layout.tsx`.
+- Reconciliación: si hay suscripción local, repite `POST /subscribe` (idempotente) al abrir la pantalla.
+
+**Pendiente (opcional, no bloquea el despliegue del backend):**
+- Consumir `GET /estado` (reconciliar con `endpointHash`) y mostrar la lista de dispositivos con `DELETE /dispositivos/:id`. Hoy no se usan estos endpoints; el flujo de activación no depende de ellos.
+- Icono del manifest en 192 y 512 px para que Chrome ofrezca instalar la app (en iOS basta el icono de Apple).
+
+**Dependencias:** el frontend actual funciona con el backend desplegado o sin desplegar la Fase 7 (el `data.id` extra de `subscribe` se ignora y `vapidPublicKey` sigue aceptando la petición con sesión). El orden de despliegue es indiferente.
 
 ## Fase 2: qué cambia para el frontend
 
@@ -79,4 +113,4 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 
 - `public/sw.js` (commit `2ab094b`): usa `tag` (+ `renotify`), `badge` y `data.tipo`; muestra siempre la notificación aunque el payload venga vacío o inválido; solo abre `url` del mismo origen; reutiliza la ventana abierta en `notificationclick`.
 - `/notificaciones`: el click en una notificación `comentario` abre `/posteo/<referencia._id>`; si `referencia` es `null`, solo la marca como leída. `Notificacion.referencia` tipa `_id`. El texto «comentó tu publicación» ya se renderiza con el nombre del emisor.
-- Pendiente: probar de extremo a extremo cuando la Fase 2 se despliegue en el backend.
+- Probado de extremo a extremo en producción tras desplegar la Fase 2 (ver Historial).
