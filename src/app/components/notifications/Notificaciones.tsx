@@ -67,25 +67,28 @@ export default function ListaNotificaciones() {
   // conservan el encabezado y los chips.
   if (loading && filtro === null && notificaciones.length === 0)
     return (
-      <div className="d-flex justify-content-center align-items-center vh-100">
+      <div className="d-flex justify-content-center py-5">
         <Spinner />
       </div>
     );
 
+  // Sin contenedor con altura fija ni `overflow` propio: el scroll es siempre el de la
+  // página (una sola barra). El encabezado queda «pegado» bajo el HeaderSuperior (56 px,
+  // z-index 1020 de `sticky-top`); `pb-5` evita que el menú inferior fijo tape el final
+  // de la lista en móvil.
   return (
-    <div className="d-flex flex-column vh-100 bg-light">
-      <main className="flex-grow-1 overflow-auto">
-        <header className="bg-white border-bottom shadow-sm">
-          <div className="container">
-            <div className="d-flex align-items-center justify-content-center py-3">
-              <h1 className="h4 mb-0 fw-bold">Notificaciones</h1>
-              <div style={{ width: '32px' }}></div>
-            </div>
-          </div>
-        </header>
-
-        <div className="container-fluid pt-3">
-          <div className="d-flex flex-wrap gap-2" role="group" aria-label="Filtrar por tipo">
+    <div className="bg-light pb-5 pb-md-0">
+      <main>
+        <header
+          className="bg-white border-bottom shadow-sm"
+          style={{ position: "sticky", top: 56, zIndex: 1010 }}
+        >
+          <h1 className="h5 mb-0 fw-bold text-center py-2">Notificaciones</h1>
+          <div
+            className="d-flex flex-wrap justify-content-center gap-2 px-3 pb-2"
+            role="group"
+            aria-label="Filtrar por tipo"
+          >
             {FILTROS.map((f) => (
               <button
                 key={f.etiqueta}
@@ -101,8 +104,10 @@ export default function ListaNotificaciones() {
               </button>
             ))}
           </div>
+        </header>
 
-          <div className="d-flex flex-wrap align-items-center gap-2 mt-3">
+        <div className="container-fluid pt-3">
+          <div className="d-flex flex-wrap align-items-center gap-2">
             {confirmandoBorrado ? (
               <>
                 <span className="small">
