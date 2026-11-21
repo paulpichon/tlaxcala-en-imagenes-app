@@ -369,15 +369,16 @@ export interface FormDataEditarPerfil {
   nombreEntidad: string;
   claveEntidad: number;
 }
+export type TipoNotificacion =
+  | "follow"
+  | "like"
+  | "comentario"
+  | "nueva_publicacion"
+  | "posteo_eliminado_moderacion";
 // Iterface para las notificaciones
 export interface Notificacion {
   _id: string;
-  tipo:
-    | "follow"
-    | "like"
-    | "comentario"
-    | "nueva_publicacion"
-    | "posteo_eliminado_moderacion";
+  tipo: TipoNotificacion;
   mensaje: string;
   createdAt: string;
   notificacion_leida: boolean;

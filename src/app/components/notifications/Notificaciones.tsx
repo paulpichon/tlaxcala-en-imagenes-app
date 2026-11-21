@@ -1,10 +1,20 @@
 "use client";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { isToday, isThisWeek, isThisMonth } from "date-fns";
 import { Notificacion } from "@/types/types";
-import { useNotifications } from "@/app/hooks/useNotifications";
+import { useNotifications, FiltroNotificaciones } from "@/app/hooks/useNotifications";
 import Spinner from "../spinner";
 import NotificacionItem from "./NotificacionItem";
+
+// `like` y `nueva_publicacion` aún no se renderizan (Fases 3 y 6 del backend): se
+// añaden aquí cuando existan.
+const FILTROS: { valor: FiltroNotificaciones; etiqueta: string }[] = [
+  { valor: null, etiqueta: "Todas" },
+  { valor: "follow", etiqueta: "Seguidores" },
+  { valor: "comentario", etiqueta: "Comentarios" },
+  { valor: "posteo_eliminado_moderacion", etiqueta: "Moderación" },
+];
 
 export default function ListaNotificaciones() {
   const router = useRouter();
@@ -20,7 +30,19 @@ export default function ListaNotificaciones() {
     marcarComoLeida,
     eliminarNotificacion,
     setLoadingMore,
+    filtro,
+    procesandoMasivo,
+    cambiarFiltro,
+    marcarTodasLeidas,
+    eliminarTodas,
   } = useNotifications();
+
+  const [confirmandoBorrado, setConfirmandoBorrado] = useState(false);
+
+  const onEliminarTodas = async () => {
+    await eliminarTodas();
+    setConfirmandoBorrado(false);
+  };
 
   const agruparPorFecha = (notificaciones: Notificacion[]) => {
     const grupos: Record<string, Notificacion[]> = {
@@ -41,7 +63,9 @@ export default function ListaNotificaciones() {
 
   const grupos = agruparPorFecha(notificaciones);
 
-  if (loading)
+  // Spinner de pantalla completa solo en la carga inicial; al cambiar de filtro se
+  // conservan el encabezado y los chips.
+  if (loading && filtro === null && notificaciones.length === 0)
     return (
       <div className="d-flex justify-content-center align-items-center vh-100">
         <Spinner />
@@ -60,6 +84,70 @@ export default function ListaNotificaciones() {
           </div>
         </header>
 
+        <div className="container-fluid pt-3">
+          <div className="d-flex flex-wrap gap-2" role="group" aria-label="Filtrar por tipo">
+            {FILTROS.map((f) => (
+              <button
+                key={f.etiqueta}
+                type="button"
+                className={`btn btn-sm rounded-pill ${
+                  filtro === f.valor ? "btn-dark" : "btn-outline-secondary"
+                }`}
+                aria-pressed={filtro === f.valor}
+                disabled={procesandoMasivo}
+                onClick={() => cambiarFiltro(f.valor)}
+              >
+                {f.etiqueta}
+              </button>
+            ))}
+          </div>
+
+          <div className="d-flex flex-wrap align-items-center gap-2 mt-3">
+            {confirmandoBorrado ? (
+              <>
+                <span className="small">
+                  ¿Eliminar <strong>todas</strong> tus notificaciones? No se puede deshacer.
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-danger"
+                  disabled={procesandoMasivo}
+                  onClick={onEliminarTodas}
+                >
+                  {procesandoMasivo ? "Eliminando..." : "Sí, eliminar"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  disabled={procesandoMasivo}
+                  onClick={() => setConfirmandoBorrado(false)}
+                >
+                  Cancelar
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  disabled={procesandoMasivo || notificaciones.every((n) => n.notificacion_leida)}
+                  onClick={marcarTodasLeidas}
+                >
+                  Marcar todas como leídas
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-danger"
+                  disabled={procesandoMasivo || (notificaciones.length === 0 && filtro === null)}
+                  onClick={() => setConfirmandoBorrado(true)}
+                >
+                  Eliminar todas
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
         {error && (
           <div className="alert alert-danger mx-3 mt-3" role="alert">
             {error}
@@ -75,8 +163,16 @@ export default function ListaNotificaciones() {
 
         <div className="container-fluid py-4">
           <div className="d-flex flex-column gap-3">
-          {notificaciones.length === 0 ? (
-            <p className="text-center text-muted">Aún no tienes notificaciones.</p>
+          {loading ? (
+            <div className="d-flex justify-content-center py-4">
+              <Spinner />
+            </div>
+          ) : notificaciones.length === 0 ? (
+            <p className="text-center text-muted">
+              {filtro === null
+                ? "Aún no tienes notificaciones."
+                : "No tienes notificaciones de este tipo."}
+            </p>
           ) : (
             <>
               {Object.entries(grupos).map(([titulo, notifs]) =>
