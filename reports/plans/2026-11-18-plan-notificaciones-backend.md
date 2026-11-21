@@ -12,7 +12,7 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 | 2 | Seguir envía correo; comentar crea notificación en `/notificaciones`; moderación envía push | **Hecha y desplegada (2026-11-19); seguir, comentar y moderación probados en producción** | Renderizar el tipo `comentario` en `/notificaciones`. |
 | 3 | Likes: notificación agrupada por posteo + push con `tag` (sin correo) | Pendiente | Renderizar el tipo `like` con contador ("X y N más"). |
 | 4 | Preferencias por tipo y canal; límite de correos | Pendiente | Pantalla de preferencias en `/configuracion/notificaciones` (`GET/PUT /api/notificaciones/preferencias`). |
-| 5 | Marcar todas leídas, borrar todas, filtro por tipo, limpieza de viejas | **Implementada en el backend (2026-11-20), pendiente de desplegar** | Botones y filtro en `/notificaciones` (ver «Fase 5: contrato»). |
+| 5 | Marcar todas leídas, borrar todas, filtro por tipo, limpieza de viejas | **Implementada en el backend (2026-11-20), pendiente de desplegar** | Botones y filtro en `/notificaciones` (ver «Fase 5: contrato»). Frontend implementado (2026-11-20), pendiente de probar con el backend desplegado. |
 | 6 | Tipos nuevos: `reporte_resuelto`, `reporte_descartado`, `nueva_publicacion`, `sistema` | Pendiente | Renderizar los tipos nuevos; los de `sistema` no tienen emisor. |
 | 7 | `GET /api/notificaciones/estado`, dispositivos, `subscribe` idempotente | **Hecha y desplegada (2026-11-19).** Frontend: activación en iOS probada en iPhone; `/estado`, reconciliación y lista de dispositivos implementados (2026-11-20, probado en producción) | Flujo de activación y arreglo de iOS (ver «Estado del frontend en la Fase 7» y «Fase 7: contrato»). |
 | 8 | Documentación, Postman, `SPECS-FRONTEND-NOTIFICACIONES.md` | Pendiente | Contrato final. |
@@ -79,7 +79,9 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 
 - 2026-11-20: pantallas de arranque de iOS, `apple-touch-icon` con fondo blanco e iconos 192/512/maskable del manifest. Revisados por el usuario.
 
-- 2026-11-20: Fase 5 implementada en el backend (pendiente de desplegar). Ver «Fase 5: contrato para el frontend».
+- 2026-11-20: Fase 5 implementada en el backend (pendiente de desplegar); tras su code review, `limite` tiene tope de 100 y `next`/`prev` conservan `tipo`.
+
+- 2026-11-20 (previo): Fase 5 implementada en el backend (pendiente de desplegar). Ver «Fase 5: contrato para el frontend».
 
 - 2026-11-20: frontend consume `/estado`, reconcilia con `endpointHash` y muestra la lista de dispositivos con cierre remoto.
 
@@ -89,10 +91,18 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 
 - **`PATCH /api/notificaciones/marcar-todas-leidas`** (sin body): `data: { actualizadas }`. Tras la respuesta, poner el contador de no leídas en 0.
 - **`DELETE /api/notificaciones`** (sin body): soft delete de todas; `data: { eliminadas }`. Pedir confirmación antes (no es reversible desde la app).
-- **`GET /api/notificaciones?tipo=<tipo>`**: filtro opcional (`follow`, `like`, `comentario`, `nueva_publicacion`, `posteo_eliminado_moderacion`). Un valor inválido da `422`. Combina con `page`/`limite`.
+- **`GET /api/notificaciones?tipo=<tipo>`**: filtro opcional (`follow`, `like`, `comentario`, `nueva_publicacion`, `posteo_eliminado_moderacion`). Un valor inválido da `422`. Combina con `page`/`limite`; `pagination.next`/`prev` conservan `tipo`. `limite` tiene tope de 100 (un valor mayor se recorta a 100).
 - **`DELETE /api/notificaciones/eliminar-notificacion/:id`**: mismo contrato; ahora es soft delete y un id ya eliminado da `404` (tratarlo como éxito en la UI).
 - **Retención:** el backend borra físicamente las leídas a los 90 días, las no leídas a los 180 y las eliminadas a los 30. Las notificaciones muy antiguas desaparecen de `/notificaciones` sin aviso.
 - Sin cuenta de no leídas por tipo (opcional, no implementado).
+
+### Hecho en el frontend (2026-11-20, sin probar con el backend desplegado)
+
+- `useNotifications` + `Notificaciones.tsx`: botones «Marcar todas como leídas» y «Eliminar todas» (confirmación inline), chips de filtro (Todas, Seguidores, Comentarios, Moderación) y `404` al eliminar una = éxito.
+- El filtro reinicia la paginación, «Ver más» lo conserva y se descartan respuestas obsoletas. Las acciones masivas aplican a todas las notificaciones, no solo al filtro.
+- Los chips de `like` y `nueva_publicacion` se añaden cuando se rendericen (Fases 3 y 6).
+- **No desplegar el frontend antes que el backend de la Fase 5:** los endpoints nuevos darían `404`.
+- Pendiente: probar con el backend desplegado (marcar todas, borrar todas, filtrar y paginar con filtro).
 
 ## Fase 7: contrato para el frontend
 

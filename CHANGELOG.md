@@ -8,6 +8,20 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## 2026-11-20 · Notificaciones: acciones masivas y filtro por tipo (Fase 5)
+
+Requiere el backend de la Fase 5 desplegado (los endpoints nuevos dan `404` antes). Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
+
+### Añadido
+
+- **Marcar todas como leídas** (`PATCH /api/notificaciones/marcar-todas-leidas`) y **Eliminar todas** (`DELETE /api/notificaciones`, con confirmación inline) en `/notificaciones`. Ambas ponen `totalNoLeidas` en 0 y actúan sobre todas, no solo sobre el filtro activo.
+- **Filtro por tipo** (`GET /api/notificaciones?tipo=`): Todas, Seguidores, Comentarios y Moderación. Cambiarlo reinicia la paginación; «Ver más» conserva el filtro y se descartan respuestas obsoletas. `like` y `nueva_publicacion` se añadirán al renderizarse (Fases 3 y 6).
+- Tipo `TipoNotificacion` y operaciones `marcar_todas_leidas` / `eliminar_todas_notificaciones`.
+
+### Cambiado
+
+- **Eliminar una notificación:** un `404` (ya eliminada, ahora soft delete) se trata como éxito y no muestra error.
+
 ## 2026-11-20 · Notificaciones: estado y lista de dispositivos (Fase 7)
 
 Cierra la tarea opcional de la Fase 7 del backend. Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.

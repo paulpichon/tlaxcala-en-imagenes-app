@@ -131,6 +131,7 @@ Seguimiento del rediseño del backend: `reports/plans/2026-11-18-plan-notificaci
   - `tag` reemplaza la notificación anterior con el mismo tag (`renotify: true`). `icon` por defecto: asset local `/assets/icono-tlaxapp-beige.png`.
   - `url` solo se abre si es del mismo origen (si no, la raíz). `notificationclick` reutiliza una ventana abierta (`focus` + `navigate`) antes de abrir otra.
 - **Tipos en `/notificaciones`:** `follow` navega al perfil del emisor; `comentario` navega a `/posteo/<referencia._id>` (si `referencia` es `null` solo se marca como leída); `posteo_eliminado_moderacion` no navega (ver Moderación). `like`, `nueva_publicacion`, `reporte_*` y `sistema` aún no se renderizan (Fases 3 y 6 del backend).
+- **Acciones en `/notificaciones`** (`useNotifications`, Fase 5): «Marcar todas como leídas» (`PATCH /marcar-todas-leidas`), «Eliminar todas» (`DELETE /api/notificaciones`, con confirmación; no se deshace desde la app) y filtro por tipo (`?tipo=`). Las acciones masivas aplican a todas, no solo al filtro. Eliminar una es soft delete: un `404` cuenta como éxito. El backend borra físicamente las leídas a los 90 días, las no leídas a los 180 y las eliminadas a los 30, así que las muy antiguas desaparecen sin aviso.
 - **Suscripción:** `POST /api/notificaciones/subscribe` es idempotente (mismo `endpoint` actualiza y reactiva `notificaciones_activadas`); máximo 10 dispositivos por usuario. Si `notificaciones_activadas` llega en `false`, mostrar el botón de activar.
 - **Activación** (`usePushNotifications` + `ConfiguracionNotificaciones`, `af4a5c6`): estados `cargando`, `no_soportado`, `instalar_pwa`, `permiso_pendiente`, `bloqueado` y `activo`.
   - Web Push en iOS solo funciona con la **PWA instalada** (iOS 16.4+); por eso existe `src/app/manifest.ts` (`display: standalone`) y `appleWebApp`/icono de Apple en `layout.tsx`. En una pestaña de Safari `PushManager` no existe.
@@ -144,7 +145,7 @@ Seguimiento del rediseño del backend: `reports/plans/2026-11-18-plan-notificaci
   - `apple-touch-icon` de 180×180 **opaco** con fondo blanco (el PNG transparente se veía sobre negro). El manifest declara iconos 192, 512 y maskable para Android.
   - Los PNG se generan con `sharp` a partir de `icono-tlaxapp-beige.png`; `sharp` no es dependencia directa, así que el script no vive en el repo. Si cambia el logo hay que regenerarlos. iOS guarda estos recursos al instalar: para verlos hay que quitar la app de inicio y volver a añadirla.
 - **Verificado en iPhone** (2026-11-19/20): instalar la PWA, activar, y recibir push de seguir y comentar funcionan.
-- **Pendiente:** Fases 3 a 6 y 8 del backend (likes agrupados, preferencias, acciones masivas, tipos nuevos); ver plan de seguimiento.
+- **Pendiente:** Fases 3, 4, 6 y 8 del backend (likes agrupados, preferencias, tipos nuevos, contrato final); ver plan de seguimiento.
 
 ## Error Handling
 
