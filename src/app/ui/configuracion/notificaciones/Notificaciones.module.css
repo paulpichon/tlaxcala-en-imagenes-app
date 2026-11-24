@@ -7,3 +7,8 @@
 .icono_notificaciones {
     color: #EBCA9A;
 }
+/* Columna de cada canal (Push / Correo) en las preferencias */
+.columna_canal {
+    width: 64px;
+    flex-shrink: 0;
+}

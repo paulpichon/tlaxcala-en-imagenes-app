@@ -6,12 +6,29 @@ import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { FiArrowLeft, FiBell, FiBellOff, FiMonitor, FiSmartphone } from "react-icons/fi";
 import { usePushNotifications } from "@/app/hooks/usePushNotifications";
+import { usePreferenciasNotificaciones } from "@/app/hooks/usePreferenciasNotificaciones";
 import { describirUserAgent } from "@/lib/dispositivos";
-import type { DispositivoPush } from "@/types/types";
+import type { CanalNotificacion, DispositivoPush } from "@/types/types";
 import ToastGlobal from "../../ToastGlobal";
 import notificacionesdStyles from "@/app/ui/configuracion/notificaciones/Notificaciones.module.css"
 
 type ToastState = { message: string; type?: "success" | "danger" | "warning" };
+
+/**
+ * Tipos con interruptor. Solo se listan los que el backend ya produce: `like`
+ * (Fase 3), `nueva_publicacion` y `sistema` (Fase 6) se añaden al implementarse
+ * para no ofrecer un ajuste que aún no tiene efecto. Moderación no se lista: no
+ * se puede silenciar.
+ */
+const TIPOS_PREFERENCIA: { tipo: "follow" | "comentario"; etiqueta: string }[] = [
+  { tipo: "follow", etiqueta: "Nuevos seguidores" },
+  { tipo: "comentario", etiqueta: "Comentarios en tus publicaciones" },
+];
+
+const CANALES: { canal: CanalNotificacion; etiqueta: string }[] = [
+  { canal: "push", etiqueta: "Push" },
+  { canal: "correo", etiqueta: "Correo" },
+];
 
 function ultimoUso(d: DispositivoPush): string {
   const iso = d.ultimoUso ?? d.creadoAt;
@@ -36,6 +53,15 @@ export default function ConfiguracionNotificaciones() {
     clearErrorDispositivos,
     cerrarDispositivo,
   } = usePushNotifications();
+  const {
+    preferencias,
+    cargando: cargandoPreferencias,
+    disponible: preferenciasDisponibles,
+    guardando: guardandoPreferencia,
+    error: errorPreferencias,
+    clearError: clearErrorPreferencias,
+    cambiarPreferencia,
+  } = usePreferenciasNotificaciones();
 
   const [toast, setToast] = useState<ToastState>({ message: "", type: undefined });
   const [confirmandoId, setConfirmandoId] = useState<string | null>(null);
@@ -70,7 +96,7 @@ export default function ConfiguracionNotificaciones() {
   const puedeAlternar = estado === "permiso_pendiente" || estado === "activo";
 
   return (
-    <div className="d-flex flex-column bg-light vh-100">
+    <div className="d-flex flex-column bg-light min-vh-100">
       {/* Toast de estado */}
       {toast.message && (
         <ToastGlobal
@@ -80,8 +106,12 @@ export default function ConfiguracionNotificaciones() {
         />
       )}
 
-      {/* Header superior */}
-      <div className="bg-white border-bottom p-3">
+      {/* Header superior: queda «pegado» bajo el HeaderSuperior (56 px, z-index 1020
+          de `sticky-top`), mismo patrón que /notificaciones. */}
+      <div
+        className="bg-white border-bottom p-3"
+        style={{ position: "sticky", top: 56, zIndex: 1010 }}
+      >
         <div className="d-flex align-items-center justify-content-between">
           <button
             onClick={() => router.back()}
@@ -196,6 +226,80 @@ export default function ConfiguracionNotificaciones() {
               </div>
             )}
           </div>
+
+          {/* Preferencias por tipo y canal (Fase 4). Se oculta si el backend aún no la tiene. */}
+          {preferenciasDisponibles && (
+            <div className="bg-white shadow-sm rounded-4 p-4 border mt-3">
+              <h6 className="fw-bold mb-1">Qué te avisamos</h6>
+              <p className="text-secondary small mb-3">
+                Elige por qué medio quieres enterarte de cada cosa. En la sección
+                Notificaciones de la app siempre verás todo.
+              </p>
+
+              {errorPreferencias && (
+                <div className="alert alert-danger p-2 small" role="alert">
+                  {errorPreferencias}
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-dark ms-2"
+                    onClick={clearErrorPreferencias}
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              )}
+
+              {cargandoPreferencias && (
+                <p className="text-muted small mb-0">Cargando tus preferencias…</p>
+              )}
+
+              {preferencias && (
+                <>
+                  <div className="d-flex align-items-center pb-2 border-bottom small text-secondary fw-semibold">
+                    <span className="flex-grow-1">Aviso</span>
+                    {CANALES.map(({ canal, etiqueta }) => (
+                      <span
+                        key={canal}
+                        className={`text-center ${notificacionesdStyles.columna_canal}`}
+                      >
+                        {etiqueta}
+                      </span>
+                    ))}
+                  </div>
+
+                  <ul className="list-unstyled mb-0">
+                    {TIPOS_PREFERENCIA.map(({ tipo, etiqueta }) => (
+                      <li key={tipo} className="d-flex align-items-center py-3 border-bottom">
+                        <span className="flex-grow-1 pe-2">{etiqueta}</span>
+                        {CANALES.map(({ canal, etiqueta: etiquetaCanal }) => (
+                          <div
+                            key={canal}
+                            className={`form-check form-switch d-flex justify-content-center m-0 p-0 ${notificacionesdStyles.columna_canal}`}
+                          >
+                            <input
+                              className={`form-check-input m-0 ${notificacionesdStyles.check_notificaciones}`}
+                              type="checkbox"
+                              role="switch"
+                              aria-label={`${etiquetaCanal}: ${etiqueta}`}
+                              checked={preferencias[canal][tipo]}
+                              disabled={guardandoPreferencia}
+                              onChange={(e) => cambiarPreferencia(canal, tipo, e.target.checked)}
+                            />
+                          </div>
+                        ))}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <p className="text-secondary small mt-3 mb-0">
+                    Los avisos push solo llegan a los dispositivos donde activaste las
+                    notificaciones. Los avisos sobre la moderación de tus publicaciones
+                    siempre se envían.
+                  </p>
+                </>
+              )}
+            </div>
+          )}
 
           {/* Dispositivos con notificaciones registrados en el backend */}
           {!cargandoDispositivos && (dispositivos.length > 0 || errorDispositivos) && (

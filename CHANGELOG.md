@@ -8,6 +8,20 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## 2026-11-23 · Notificaciones: preferencias por tipo y canal (Fase 4)
+
+Funciona con o sin el backend de la Fase 4 desplegado: antes del despliegue la sección no aparece. Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
+
+### Añadido
+
+- **Tarjeta «Qué te avisamos»** en `/configuracion/notificaciones` (`e221723`): interruptores Push y Correo para nuevos seguidores y comentarios, sobre `GET`/`PUT /api/notificaciones/preferencias`. El cambio se guarda al instante, se revierte si falla, y un texto aclara que los avisos de moderación siempre se envían.
+- Hook `usePreferenciasNotificaciones`, tipos `PreferenciasNotificaciones` / `CanalNotificacion` y operaciones `cargar_preferencias` / `guardar_preferencias`.
+
+### Corregido
+
+- **Pantallas de configuración** (`a508e66`): notificaciones, sesiones activas, cambiar contraseña, eliminar cuenta y ayuda usaban `vh-100`, y el contenido que pasaba del alto de la ventana se salía del fondo y del borde de la columna central. Ahora usan `min-vh-100`.
+- **Título fijo** en `/configuracion/notificaciones` (`a508e66`): queda pegado bajo el encabezado superior al hacer scroll.
+
 ## 2026-11-20 · Notificaciones: acciones masivas y filtro por tipo (Fase 5)
 
 Requiere el backend de la Fase 5 desplegado (los endpoints nuevos dan `404` antes). Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.

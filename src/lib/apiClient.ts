@@ -223,6 +223,8 @@ export type Operacion =
   | 'eliminar_todas_notificaciones'
   | 'cargar_dispositivos'
   | 'cerrar_dispositivo'
+  | 'cargar_preferencias'
+  | 'guardar_preferencias'
   | 'recuperar_password'
   | 'restablecer_password'
   | 'registro'
@@ -260,6 +262,8 @@ const MENSAJES_POR_DEFECTO: Record<Operacion, string> = {
   eliminar_todas_notificaciones: 'No se pudieron eliminar las notificaciones. Intenta de nuevo.',
   cargar_dispositivos: 'No se pudieron cargar tus dispositivos con notificaciones.',
   cerrar_dispositivo: 'No se pudo desactivar el dispositivo. Intenta de nuevo.',
+  cargar_preferencias: 'No se pudieron cargar tus preferencias de notificaciones.',
+  guardar_preferencias: 'No se pudo guardar el cambio. Intenta de nuevo.',
   recuperar_password: 'No se pudo procesar la solicitud. Intenta de nuevo.',
   restablecer_password: 'No se pudo restablecer la contraseña. Intenta de nuevo.',
   registro: 'No se pudo completar el registro. Intenta de nuevo.',
