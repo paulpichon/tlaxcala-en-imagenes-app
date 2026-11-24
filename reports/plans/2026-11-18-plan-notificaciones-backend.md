@@ -20,7 +20,7 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 | 1 | Servicio central `notificar()` (BD + push + correo) | **Hecha y desplegada (2026-11-19).** Los tres productores (seguir, comentar, moderación) ya lo usan. Deuda en backend: tests de integración con BD | Ninguno. Payload de push estandarizado (`title`, `body`, `icon`, `badge`, `tag`, `url`, `data.tipo`); el service worker debe usar `tag` y `data.tipo`. |
 | 2 | Seguir envía correo; comentar crea notificación en `/notificaciones`; moderación envía push | **Hecha y desplegada (2026-11-19); seguir, comentar y moderación probados en producción** | Renderizar el tipo `comentario` en `/notificaciones`. |
 | 3 | Likes: notificación agrupada por posteo + push con `tag` (sin correo) | Pendiente | Renderizar el tipo `like` con contador ("X y N más"). |
-| 4 | Preferencias por tipo y canal; límite de correos | **Implementada en el backend (2026-11-20), pendiente de desplegar** | Pantalla de preferencias en `/configuracion/notificaciones` (ver «Fase 4: contrato»). |
+| 4 | Preferencias por tipo y canal; límite de correos | **Implementada en el backend (2026-11-20), pendiente de desplegar** | Pantalla de preferencias en `/configuracion/notificaciones` (ver «Fase 4: contrato»). Frontend implementado (2026-11-23), pendiente de probar con el backend desplegado. |
 | 5 | Marcar todas leídas, borrar todas, filtro por tipo, limpieza de viejas | **Hecha y desplegada (2026-11-20); pruebas manuales en producción superadas** | Botones y filtro en `/notificaciones` (ver «Fase 5: contrato»). Frontend implementado y probado con el backend desplegado. |
 | 6 | Tipos nuevos: `reporte_resuelto`, `reporte_descartado`, `nueva_publicacion`, `sistema` | Pendiente | Renderizar los tipos nuevos; los de `sistema` no tienen emisor. |
 | 7 | `GET /api/notificaciones/estado`, dispositivos, `subscribe` idempotente | **Hecha y desplegada (2026-11-19).** Frontend: activación en iOS probada en iPhone; `/estado`, reconciliación y lista de dispositivos implementados (2026-11-20, probado en producción) | Flujo de activación y arreglo de iOS (ver «Estado del frontend en la Fase 7» y «Fase 7: contrato»). |
@@ -100,6 +100,8 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 
 - 2026-11-23: Fase 4 implementada en el backend (commits `d807884` y `2c59424`, este último por su code review), pendiente de desplegar. Ver «Fase 4: contrato para el frontend». Siguiente en el frontend: interruptores de preferencias en `ConfiguracionNotificaciones`.
 
+- 2026-11-23: frontend de la Fase 4 implementado (`e221723`), pendiente de probar con el backend desplegado. Además (`a508e66`): las pantallas de configuración pasan de `vh-100` a `min-vh-100` (el contenido se salía del borde) y el título de `/configuracion/notificaciones` queda fijo al hacer scroll.
+
 ## Fase 4: contrato para el frontend
 
 - **`GET /api/notificaciones/preferencias`** (sesión): `data.preferencias = { push: { follow, comentario, like, nueva_publicacion, sistema }, correo: { follow, comentario, sistema } }`, todos booleanos y siempre completos (los usuarios sin configurar reciben los defaults: push todo `true`; correo `true`).
@@ -108,7 +110,15 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 - Las preferencias solo afectan al **push y al correo**; `/notificaciones` siempre muestra todo. Los avisos de moderación no se pueden silenciar: no mostrar interruptor para ellos.
 - Los correos de seguir y comentar ya enlazan a `/configuracion/notificaciones`; no hay enlace de baja de un clic.
 - Code review (2026-11-23): el `PUT` con un canal heredado (`__proto__`, `constructor`) daba `500`; corregido, ahora da `400`. Sin otros cambios de contrato.
-- Pendiente en el frontend: interruptores por tipo y canal en `ConfiguracionNotificaciones`. No depende del orden de despliegue, pero la pantalla dará `404` hasta que el backend esté desplegado.
+- No depende del orden de despliegue: hasta que el backend esté desplegado, `GET /preferencias` da `404` y la pantalla oculta la sección.
+
+### Hecho en el frontend (2026-11-23, commit `e221723`; pendiente de probar con el backend desplegado)
+
+- Hook `usePreferenciasNotificaciones` (`src/app/hooks/`): `GET /preferencias` al montar y `PUT` parcial por interruptor. El cambio es optimista y se revierte si falla. Solo un `PUT` en curso a la vez, porque cada respuesta trae las preferencias completas y dos en paralelo podrían llegar desordenadas. Un `404` en el `GET` oculta la sección (backend sin la Fase 4).
+- Es independiente de `usePushNotifications`: las preferencias de correo valen aunque el navegador no admita push, y `/estado` se recarga tras cada acción de push, lo que podría pisar un cambio en curso. Por eso no se usa `/estado.preferencias`.
+- `ConfiguracionNotificaciones`: tarjeta «Qué te avisamos» con columnas Push y Correo. Solo lista `follow` y `comentario`, los tipos que el backend ya produce; `like` (Fase 3), `nueva_publicacion` y `sistema` (Fase 6) se añaden a `TIPOS_PREFERENCIA` al implementarse. Moderación no tiene interruptor; un texto aclara que siempre se envía.
+- Tipos `PreferenciasNotificaciones` y `CanalNotificacion` en `types.ts`; operaciones `cargar_preferencias` y `guardar_preferencias` en `apiClient.ts`.
+- Pendiente: probar en producción tras desplegar el backend (cargar, apagar y encender cada interruptor, comprobar que deja de llegar el push o el correo).
 
 ## Fase 5: contrato para el frontend
 

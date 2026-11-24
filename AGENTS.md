@@ -68,6 +68,7 @@ Copied from `.env.example`. Key vars: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_API_UR
 - Full Spanish UI (`lang="es"`, locale `es_MX`)
 - Viewport locks `userScalable: false` (mobile-first)
 - Route groups: `(perfil)/[url]` for user profiles
+- Pantallas con `HeaderSuperior` (`sticky-top`, 56 px): la raíz usa `min-vh-100`, nunca `vh-100` (fija la altura y el contenido extra se sale del borde) ni `overflow-auto` propio (doble scroll). Un título fijo de la pantalla va con `position: sticky; top: 56; zIndex: 1010` (ver `/notificaciones` y `/configuracion/notificaciones`).
 - No test infrastructure at all
 - Documentation management: see section `## Gestión documental` below
 - Existing OpenCode subagents: `documentador` (writes to `reports/documentador/`), `technical-analysis` (writes to `reports/technical-analysis/`)
@@ -145,7 +146,14 @@ Seguimiento del rediseño del backend: `reports/plans/2026-11-18-plan-notificaci
   - `apple-touch-icon` de 180×180 **opaco** con fondo blanco (el PNG transparente se veía sobre negro). El manifest declara iconos 192, 512 y maskable para Android.
   - Los PNG se generan con `sharp` a partir de `icono-tlaxapp-beige.png`; `sharp` no es dependencia directa, así que el script no vive en el repo. Si cambia el logo hay que regenerarlos. iOS guarda estos recursos al instalar: para verlos hay que quitar la app de inicio y volver a añadirla.
 - **Verificado en iPhone** (2026-11-19/20): instalar la PWA, activar, y recibir push de seguir y comentar funcionan.
-- **Pendiente:** Fases 3, 4, 6 y 8 del backend (likes agrupados, preferencias, tipos nuevos, contrato final); ver plan de seguimiento.
+- **Preferencias por tipo y canal** (Fase 4, `usePreferenciasNotificaciones` + tarjeta «Qué te avisamos» en `ConfiguracionNotificaciones`):
+  - `GET /api/notificaciones/preferencias` al montar y `PUT` parcial por interruptor (p. ej. `{ "push": { "follow": false } }`). El backend responde siempre las preferencias completas.
+  - Solo afectan al push y al correo; `/notificaciones` siempre muestra todo. No existen `correo.like` ni `correo.nueva_publicacion`.
+  - El cambio es optimista y se revierte si el `PUT` falla. Solo hay un `PUT` en curso a la vez para que dos respuestas desordenadas no reviertan otro cambio.
+  - Hook independiente de `usePushNotifications`: el correo vale sin soporte de push, y `/estado` (que también trae `preferencias`) se recarga tras cada acción de push.
+  - Un `404` en el `GET` oculta la sección (backend sin la Fase 4).
+  - `TIPOS_PREFERENCIA` solo lista `follow` y `comentario`. `like` (Fase 3), `nueva_publicacion` y `sistema` (Fase 6) se añaden al implementarse. Moderación no lleva interruptor: no se puede silenciar.
+- **Pendiente:** probar la Fase 4 con el backend desplegado; Fases 3, 6 y 8 del backend (likes agrupados, tipos nuevos, contrato final); ver plan de seguimiento.
 
 ## Error Handling
 
