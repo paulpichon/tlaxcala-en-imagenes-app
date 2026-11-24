@@ -182,6 +182,25 @@ export interface DispositivoPush {
   endpointHash: string;
   esEste: boolean;
 }
+// Preferencias de notificaciones por canal y tipo (Fase 4 del backend).
+// Solo afectan al push y al correo; `/notificaciones` siempre muestra todo.
+// No existen `correo.like` ni `correo.nueva_publicacion` (esos tipos nunca
+// envían correo) y la moderación no tiene clave: no se puede silenciar.
+export interface PreferenciasNotificaciones {
+  push: {
+    follow: boolean;
+    comentario: boolean;
+    like: boolean;
+    nueva_publicacion: boolean;
+    sistema: boolean;
+  };
+  correo: {
+    follow: boolean;
+    comentario: boolean;
+    sistema: boolean;
+  };
+}
+export type CanalNotificacion = keyof PreferenciasNotificaciones;
 // Password
 export interface PasswordConfirm extends UsuarioLogueado {
   confirmPassword: string;
