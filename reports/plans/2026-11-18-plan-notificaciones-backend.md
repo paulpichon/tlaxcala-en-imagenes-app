@@ -10,7 +10,7 @@ branch: "Fix-Notificaciones"
 # Plan: rediseño del sistema de notificaciones (seguimiento del backend)
 
 Espejo del plan del backend: `login-autenticacion/engineering/working/implementation-plans/2026-11-18-plan-sistema-notificaciones.md`.
-Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actualización: 2026-11-23.
+Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actualización: 2026-11-24.
 
 ## Estado de las fases
 
@@ -19,7 +19,7 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 | 0 | Corrige bugs críticos: el cron borraba las suscripciones push cada domingo; el filtro borraba suscripciones válidas; `subscribe` idempotente | **Hecha y desplegada (2026-11-18)** | Ninguno obligatorio (ver abajo). Los usuarios dejarán de perder el push. |
 | 1 | Servicio central `notificar()` (BD + push + correo) | **Hecha y desplegada (2026-11-19).** Los tres productores (seguir, comentar, moderación) ya lo usan. Deuda en backend: tests de integración con BD | Ninguno. Payload de push estandarizado (`title`, `body`, `icon`, `badge`, `tag`, `url`, `data.tipo`); el service worker debe usar `tag` y `data.tipo`. |
 | 2 | Seguir envía correo; comentar crea notificación en `/notificaciones`; moderación envía push | **Hecha y desplegada (2026-11-19); seguir, comentar y moderación probados en producción** | Renderizar el tipo `comentario` en `/notificaciones`. |
-| 3 | Likes: notificación agrupada por posteo + push con `tag` (sin correo) | Pendiente | Renderizar el tipo `like` con contador ("X y N más"). |
+| 3 | Likes: notificación agrupada por posteo + push con `tag` (sin correo) | **Implementada en el backend (2026-11-24; commits `869f664` y `2aa097b`), pendiente de desplegar** | Renderizar `like`, interruptor de push y chip de filtro (ver «Fase 3: contrato»). Frontend implementado (2026-11-24, sin commit), pendiente de probar con el backend desplegado. |
 | 4 | Preferencias por tipo y canal; límite de correos | **Hecha y desplegada (2026-11-23); pruebas en producción superadas** | Pantalla de preferencias en `/configuracion/notificaciones` (ver «Fase 4: contrato»). Frontend implementado y probado con el backend desplegado. |
 | 5 | Marcar todas leídas, borrar todas, filtro por tipo, limpieza de viejas | **Hecha y desplegada (2026-11-20); pruebas manuales en producción superadas** | Botones y filtro en `/notificaciones` (ver «Fase 5: contrato»). Frontend implementado y probado con el backend desplegado. |
 | 6 | Tipos nuevos: `reporte_resuelto`, `reporte_descartado`, `nueva_publicacion`, `sistema` | Pendiente | Renderizar los tipos nuevos; los de `sistema` no tienen emisor. |
@@ -32,7 +32,7 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 |---|---|---|
 | `follow` | Sí | Sin cambio |
 | `comentario` | Sí (render y navegación; probado en producción) | Hecho (Fase 2) |
-| `like` | No | Fase 3 (agrupado) |
+| `like` | Sí (corazón, navegación al posteo y chip «Me gusta»; pendiente de probar en producción) | Fase 3 (agrupado) |
 | `posteo_eliminado_moderacion` | Sí (sin emisor) | Sin cambio; se añade push |
 | `reporte_resuelto` / `reporte_descartado` | No | Fase 6 |
 | `nueva_publicacion` | No | Fase 6 |
@@ -104,6 +104,33 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 
 - 2026-11-23: Fase 4 desplegada (backend y frontend, incluidos los arreglos de `a508e66`) y probada en producción: las preferencias y las pantallas de configuración funcionan como se espera. Pendientes: Fases 3, 6 y 8.
 
+- 2026-11-24: Fase 3 implementada en el backend (pendiente de desplegar). Ver «Fase 3: contrato para el frontend». El frontend actual ya muestra los likes con el render genérico; faltan el interruptor de push, el chip de filtro y, opcionalmente, el icono y `contador`.
+
+- 2026-11-24: frontend de la Fase 3 implementado (sin commit). Corrige además que el clic en un `like` habría abierto el perfil de la última persona en lugar del posteo. Pendiente de probar con el backend desplegado. Ver «Hecho en el frontend» de la Fase 3.
+
+## Fase 3: contrato para el frontend
+
+- **Una sola notificación `like` por posteo** (por receptor), que se actualiza con cada persona nueva: `emisor` = la última persona, `contador` = personas distintas (campo nuevo en `GET /api/notificaciones`, solo en `like`; no baja al quitar un like), `notificacion_leida` vuelve a `false` y `createdAt` pasa a ser la fecha del último like, así que la notificación sube en la lista.
+- **`mensaje` ya viene redactado** para el render actual (`<strong>nombre</strong> {mensaje}`): `contador` 1 → «le dio me gusta a tu publicación»; N → «y N−1 más dieron me gusta a tu publicación». No hace falta construir el texto en el frontend.
+- **`referencia`** es el posteo (`tipoReferencia: 'Posteo'`): navegar a `/posteo/<referencia._id>` como en `comentario` (si `referencia` es `null`, no navegar).
+- La misma persona dando like → unlike → like no cuenta dos veces ni vuelve a avisar. Si el usuario borra la notificación, el siguiente like abre una nueva.
+- **Push**: `tag: like-<posteoId>` (reemplaza al anterior; el service worker ya pone `renotify`), `data: { tipo: 'like', posteoId, contador }`, `url: /posteo/<id>`. Como mucho un push por posteo cada 10 min; los likes de esa ventana solo se ven en `/notificaciones`. Sin correo.
+- **Preferencias**: la clave `push.like` ya existe desde la Fase 4: añadir `like` a `TIPOS_PREFERENCIA` (solo columna Push; no hay `correo.like`).
+- **Filtro**: `GET /api/notificaciones?tipo=like` ya es válido; añadir el chip.
+- **Tipos**: añadir `contador?: number` a `Notificacion` en `src/types/types.ts`. Icono opcional para `like` (p. ej. corazón) en `NotificacionItem`.
+
+### Hecho en el frontend (2026-11-24; sin commit, pendiente de probar con el backend desplegado)
+
+- **Navegación** (`Notificaciones.tsx`): el clic en un `like` abre `/posteo/<referencia._id>`, igual que `comentario`; si `referencia` es `null` solo la marca como leída. Antes caía en la rama genérica y habría abierto el perfil del emisor (la última persona que dio like).
+- **Filtro**: chip «Me gusta» (`?tipo=like`) en `FILTROS`.
+- **Preferencias** (`ConfiguracionNotificaciones`): fila «Me gusta en tus publicaciones» en `TIPOS_PREFERENCIA` con `soloPush`. La celda de Correo queda vacía (no existe `correo.like`) y el interruptor de Push envía `PUT { push: { like } }`.
+- **Render** (`NotificacionItem`): avatar de la última persona con un corazón rojo en la esquina. El texto sigue siendo `<strong>nombre</strong> {mensaje}`; no se usa `contador`.
+- **Tipos**: `Notificacion.contador?: number` en `types.ts`.
+- Sin cambios en `public/sw.js`: ya aplica `tag` con `renotify`, que es lo que necesita `like-<posteoId>`.
+- `pnpm build` sin errores.
+- Orden de despliegue indiferente: sin el backend de la Fase 3 no llegan notificaciones `like`, el chip devuelve una lista vacía y `push.like` ya existe desde la Fase 4.
+- **Por probar tras desplegar:** varios likes al mismo posteo forman una sola notificación que sube en la lista y vuelve a no leída; el push reemplaza al anterior (como mucho uno cada 10 min); apagar «Me gusta» en Push corta el push pero no la notificación en `/notificaciones`.
+
 ## Fase 4: contrato para el frontend
 
 - **`GET /api/notificaciones/preferencias`** (sesión): `data.preferencias = { push: { follow, comentario, like, nueva_publicacion, sistema }, correo: { follow, comentario, sistema } }`, todos booleanos y siempre completos (los usuarios sin configurar reciben los defaults: push todo `true`; correo `true`).
@@ -135,7 +162,7 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 
 - `useNotifications` + `Notificaciones.tsx`: botones «Marcar todas como leídas» y «Eliminar todas» (confirmación inline), chips de filtro (Todas, Seguidores, Comentarios, Moderación) y `404` al eliminar una = éxito.
 - El filtro reinicia la paginación, «Ver más» lo conserva y se descartan respuestas obsoletas. Las acciones masivas aplican a todas las notificaciones, no solo al filtro.
-- Los chips de `like` y `nueva_publicacion` se añaden cuando se rendericen (Fases 3 y 6).
+- El chip de `nueva_publicacion` se añade cuando se renderice (Fase 6). El de `like` («Me gusta») se añadió en la Fase 3.
 - Backend y frontend ya desplegados; el orden dejó de importar.
 - Probado en producción (2026-11-20): marcar todas, borrar todas, filtrar y paginar con filtro.
 
