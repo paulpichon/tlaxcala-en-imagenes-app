@@ -7,12 +7,13 @@ import { useNotifications, FiltroNotificaciones } from "@/app/hooks/useNotificat
 import Spinner from "../spinner";
 import NotificacionItem from "./NotificacionItem";
 
-// `like` y `nueva_publicacion` aún no se renderizan (Fases 3 y 6 del backend): se
-// añaden aquí cuando existan.
+// `nueva_publicacion` aún no se renderiza (Fase 6 del backend): se añade aquí
+// cuando exista.
 const FILTROS: { valor: FiltroNotificaciones; etiqueta: string }[] = [
   { valor: null, etiqueta: "Todas" },
   { valor: "follow", etiqueta: "Seguidores" },
   { valor: "comentario", etiqueta: "Comentarios" },
+  { valor: "like", etiqueta: "Me gusta" },
   { valor: "posteo_eliminado_moderacion", etiqueta: "Moderación" },
 ];
 
@@ -191,9 +192,10 @@ export default function ListaNotificaciones() {
                           notif={notif}
                           onClick={(id, urlUsuario) => {
                             marcarComoLeida(id);
-                            // Comentario: abre el posteo comentado. Si el posteo ya no
-                            // existe (referencia null), no navega.
-                            if (notif.tipo === "comentario") {
+                            // Comentario y like: abren el posteo (no el perfil del
+                            // emisor, que en `like` es solo la última persona). Si el
+                            // posteo ya no existe (referencia null), no navega.
+                            if (notif.tipo === "comentario" || notif.tipo === "like") {
                               const posteoId = notif.referencia?._id;
                               if (posteoId) router.push(`/posteo/${posteoId}`);
                               return;
