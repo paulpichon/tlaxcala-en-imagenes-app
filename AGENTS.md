@@ -131,7 +131,11 @@ Seguimiento del rediseño del backend: `reports/plans/2026-11-18-plan-notificaci
   - Llama a `showNotification` en **cada** push, aunque el payload venga vacío o inválido: iOS revoca la suscripción si recibe pushes silenciosos. No añadir ramas que omitan la notificación.
   - `tag` reemplaza la notificación anterior con el mismo tag (`renotify: true`). `icon` por defecto: asset local `/assets/icono-tlaxapp-beige.png`.
   - `url` solo se abre si es del mismo origen (si no, la raíz). `notificationclick` reutiliza una ventana abierta (`focus` + `navigate`) antes de abrir otra.
-- **Tipos en `/notificaciones`:** `follow` navega al perfil del emisor; `comentario` navega a `/posteo/<referencia._id>` (si `referencia` es `null` solo se marca como leída); `posteo_eliminado_moderacion` no navega (ver Moderación). `like`, `nueva_publicacion`, `reporte_*` y `sistema` aún no se renderizan (Fases 3 y 6 del backend).
+- **Tipos en `/notificaciones`:** `follow` navega al perfil del emisor; `comentario` navega a `/posteo/<referencia._id>` (si `referencia` es `null` solo se marca como leída); `posteo_eliminado_moderacion` no navega (ver Moderación). `nueva_publicacion`, `reporte_*` y `sistema` aún no se renderizan (Fase 6 del backend).
+- **Likes agrupados** (Fase 3): una sola notificación `like` por posteo. `emisor` es la **última** persona, `contador` el total de personas distintas (no baja al quitar un like), y cada like nuevo la vuelve a no leída y la sube (`createdAt` = último like).
+  - El `mensaje` ya viene redactado («y N−1 más dieron me gusta…»): el render es `<strong>nombre</strong> {mensaje}` con un corazón sobre el avatar; no construir el texto con `contador`.
+  - El clic abre `/posteo/<referencia._id>` como `comentario`, **nunca** el perfil del emisor. Si `referencia` es `null`, no navega.
+  - Push con `tag: like-<posteoId>` (reemplaza al anterior), como mucho uno por posteo cada 10 min; sin correo. Chip de filtro «Me gusta» (`?tipo=like`).
 - **Acciones en `/notificaciones`** (`useNotifications`, Fase 5): «Marcar todas como leídas» (`PATCH /marcar-todas-leidas`), «Eliminar todas» (`DELETE /api/notificaciones`, con confirmación; no se deshace desde la app) y filtro por tipo (`?tipo=`). Las acciones masivas aplican a todas, no solo al filtro. Eliminar una es soft delete: un `404` cuenta como éxito. El backend borra físicamente las leídas a los 90 días, las no leídas a los 180 y las eliminadas a los 30, así que las muy antiguas desaparecen sin aviso.
 - **Suscripción:** `POST /api/notificaciones/subscribe` es idempotente (mismo `endpoint` actualiza y reactiva `notificaciones_activadas`); máximo 10 dispositivos por usuario. Si `notificaciones_activadas` llega en `false`, mostrar el botón de activar.
 - **Activación** (`usePushNotifications` + `ConfiguracionNotificaciones`, `af4a5c6`): estados `cargando`, `no_soportado`, `instalar_pwa`, `permiso_pendiente`, `bloqueado` y `activo`.
@@ -152,8 +156,9 @@ Seguimiento del rediseño del backend: `reports/plans/2026-11-18-plan-notificaci
   - El cambio es optimista y se revierte si el `PUT` falla. Solo hay un `PUT` en curso a la vez para que dos respuestas desordenadas no reviertan otro cambio.
   - Hook independiente de `usePushNotifications`: el correo vale sin soporte de push, y `/estado` (que también trae `preferencias`) se recarga tras cada acción de push.
   - Un `404` en el `GET` oculta la sección (backend sin la Fase 4).
-  - `TIPOS_PREFERENCIA` solo lista `follow` y `comentario`. `like` (Fase 3), `nueva_publicacion` y `sistema` (Fase 6) se añaden al implementarse. Moderación no lleva interruptor: no se puede silenciar.
-- **Pendiente:** probar la Fase 4 con el backend desplegado; Fases 3, 6 y 8 del backend (likes agrupados, tipos nuevos, contrato final); ver plan de seguimiento.
+  - `TIPOS_PREFERENCIA` lista `follow`, `comentario` y `like`. `like` lleva `soloPush`: su celda de Correo queda vacía porque no existe `correo.like`. `nueva_publicacion` y `sistema` (Fase 6) se añaden al implementarse. Moderación no lleva interruptor: no se puede silenciar.
+- **Verificado en producción** (2026-11-23): preferencias de la Fase 4 con el backend desplegado.
+- **Pendiente:** probar la Fase 3 (likes) en producción tras desplegar el backend; Fases 6 y 8 del backend (tipos nuevos, contrato final). Ver el plan de seguimiento.
 
 ## Error Handling
 

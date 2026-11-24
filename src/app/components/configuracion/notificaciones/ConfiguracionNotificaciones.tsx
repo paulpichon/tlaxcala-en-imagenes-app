@@ -15,14 +15,20 @@ import notificacionesdStyles from "@/app/ui/configuracion/notificaciones/Notific
 type ToastState = { message: string; type?: "success" | "danger" | "warning" };
 
 /**
- * Tipos con interruptor. Solo se listan los que el backend ya produce: `like`
- * (Fase 3), `nueva_publicacion` y `sistema` (Fase 6) se añaden al implementarse
- * para no ofrecer un ajuste que aún no tiene efecto. Moderación no se lista: no
- * se puede silenciar.
+ * Tipos con interruptor. Solo se listan los que el backend ya produce:
+ * `nueva_publicacion` y `sistema` (Fase 6) se añaden al implementarse para no
+ * ofrecer un ajuste que aún no tiene efecto. Moderación no se lista: no se puede
+ * silenciar. `like` solo tiene push (no existe `correo.like`): su celda de correo
+ * queda vacía.
  */
-const TIPOS_PREFERENCIA: { tipo: "follow" | "comentario"; etiqueta: string }[] = [
+const TIPOS_PREFERENCIA: {
+  tipo: "follow" | "comentario" | "like";
+  etiqueta: string;
+  soloPush?: boolean;
+}[] = [
   { tipo: "follow", etiqueta: "Nuevos seguidores" },
   { tipo: "comentario", etiqueta: "Comentarios en tus publicaciones" },
+  { tipo: "like", etiqueta: "Me gusta en tus publicaciones", soloPush: true },
 ];
 
 const CANALES: { canal: CanalNotificacion; etiqueta: string }[] = [
@@ -268,25 +274,44 @@ export default function ConfiguracionNotificaciones() {
                   </div>
 
                   <ul className="list-unstyled mb-0">
-                    {TIPOS_PREFERENCIA.map(({ tipo, etiqueta }) => (
+                    {TIPOS_PREFERENCIA.map(({ tipo, etiqueta, soloPush }) => (
                       <li key={tipo} className="d-flex align-items-center py-3 border-bottom">
                         <span className="flex-grow-1 pe-2">{etiqueta}</span>
-                        {CANALES.map(({ canal, etiqueta: etiquetaCanal }) => (
-                          <div
-                            key={canal}
-                            className={`form-check form-switch d-flex justify-content-center m-0 p-0 ${notificacionesdStyles.columna_canal}`}
-                          >
-                            <input
-                              className={`form-check-input m-0 ${notificacionesdStyles.check_notificaciones}`}
-                              type="checkbox"
-                              role="switch"
-                              aria-label={`${etiquetaCanal}: ${etiqueta}`}
-                              checked={preferencias[canal][tipo]}
-                              disabled={guardandoPreferencia}
-                              onChange={(e) => cambiarPreferencia(canal, tipo, e.target.checked)}
+                        {CANALES.map(({ canal, etiqueta: etiquetaCanal }) =>
+                          canal === "correo" && soloPush ? (
+                            // Sin correo para este tipo: celda vacía para alinear columnas.
+                            <span
+                              key={canal}
+                              className={notificacionesdStyles.columna_canal}
+                              aria-hidden="true"
                             />
-                          </div>
-                        ))}
+                          ) : (
+                            <div
+                              key={canal}
+                              className={`form-check form-switch d-flex justify-content-center m-0 p-0 ${notificacionesdStyles.columna_canal}`}
+                            >
+                              <input
+                                className={`form-check-input m-0 ${notificacionesdStyles.check_notificaciones}`}
+                                type="checkbox"
+                                role="switch"
+                                aria-label={`${etiquetaCanal}: ${etiqueta}`}
+                                checked={
+                                  (preferencias[canal] as Record<string, boolean>)[tipo]
+                                }
+                                disabled={guardandoPreferencia}
+                                onChange={(e) =>
+                                  canal === "push"
+                                    ? cambiarPreferencia("push", tipo, e.target.checked)
+                                    : cambiarPreferencia(
+                                        "correo",
+                                        tipo as "follow" | "comentario",
+                                        e.target.checked
+                                      )
+                                }
+                              />
+                            </div>
+                          )
+                        )}
                       </li>
                     ))}
                   </ul>

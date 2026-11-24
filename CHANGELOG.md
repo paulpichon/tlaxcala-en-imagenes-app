@@ -8,9 +8,23 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## 2026-11-24 · Notificaciones: likes agrupados (Fase 3)
+
+Sin commit todavía; pendiente de probar con el backend de la Fase 3 desplegado. El orden de despliegue es indiferente. Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
+
+### Añadido
+
+- **Notificaciones de «me gusta»** en `/notificaciones`: una por posteo, con el avatar de la última persona y un corazón. El texto llega redactado del backend («y N−1 más dieron me gusta a tu publicación»). Tipo `Notificacion.contador`.
+- **Chip «Me gusta»** en el filtro por tipo (`?tipo=like`).
+- **Interruptor «Me gusta en tus publicaciones»** en la tarjeta «Qué te avisamos» de `/configuracion/notificaciones`. Solo hay Push: los likes nunca envían correo.
+
+### Corregido
+
+- El clic en una notificación `like` abre el posteo. Sin este cambio, habría abierto el perfil de la última persona que dio like.
+
 ## 2026-11-23 · Notificaciones: preferencias por tipo y canal (Fase 4)
 
-Funciona con o sin el backend de la Fase 4 desplegado: antes del despliegue la sección no aparece. Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
+Desplegado junto con el backend de la Fase 4 y probado en producción el 2026-11-23: las preferencias y las pantallas de configuración funcionan como se espera. Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
 
 ### Añadido
 

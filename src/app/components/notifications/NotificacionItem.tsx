@@ -7,7 +7,7 @@ import { avatarMiniLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Notificacion } from "@/types/types";
-import { FiMoreVertical, FiTrash2, FiShield } from "react-icons/fi";
+import { FiMoreVertical, FiTrash2, FiShield, FiHeart } from "react-icons/fi";
 import ToastGlobal from "../ToastGlobal";
 
 interface Props {
@@ -29,6 +29,9 @@ export default function NotificacionItem({ notif, onClick, onEliminar }: Props) 
   // Si en el futuro se añade miniatura/preview, comprobar `notif.referencia?.public_id`
   // con optional chaining y fallback, sin renderizar "undefined".
   const esSistema = notif.tipo === "posteo_eliminado_moderacion";
+  // Like (Fase 3): una notificación por posteo; `mensaje` ya trae «y N−1 más…»,
+  // así que el texto no usa `contador`.
+  const esLike = notif.tipo === "like";
 
   const handleEliminar = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -66,14 +69,26 @@ export default function NotificacionItem({ notif, onClick, onEliminar }: Props) 
             <FiShield size={24} />
           </div>
         ) : (
-          <Image
-            src={obtenerImagenPerfilUsuario(notif.emisor)}
-            loader={avatarMiniLoader}
-            alt={notif.emisor?.nombre_completo?.nombre ?? "Usuario"}
-            width={50}
-            height={50}
-            className="rounded-circle border"
-          />
+          <div className="position-relative flex-shrink-0" style={{ width: 50, height: 50 }}>
+            <Image
+              src={obtenerImagenPerfilUsuario(notif.emisor)}
+              loader={avatarMiniLoader}
+              alt={notif.emisor?.nombre_completo?.nombre ?? "Usuario"}
+              width={50}
+              height={50}
+              className="rounded-circle border"
+            />
+            {/* Like agrupado: corazón sobre el avatar de la última persona. */}
+            {esLike && (
+              <span
+                className="position-absolute d-flex align-items-center justify-content-center rounded-circle bg-white border"
+                style={{ width: 22, height: 22, right: -4, bottom: -4, color: "#dc3545" }}
+                aria-hidden="true"
+              >
+                <FiHeart size={12} fill="currentColor" />
+              </span>
+            )}
+          </div>
         )}
 
         <div className="flex-grow-1">

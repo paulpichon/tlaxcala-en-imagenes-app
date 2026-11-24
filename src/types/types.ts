@@ -415,6 +415,10 @@ export interface Notificacion {
   // El render NUNCA debe asumir su presencia ni mostrar "undefined".
   // `_id` es el id del posteo (lo usa el tipo 'comentario' para abrir /posteo/:id).
   referencia?: { _id?: string; public_id?: string; texto?: string } | null;
+  // Solo en `like` (Fase 3): personas distintas que dieron like al posteo. Una
+  // sola notificación por posteo; `emisor` es la última persona y `mensaje` ya
+  // viene redactado con el total. No baja al quitar un like.
+  contador?: number;
 };
 // ======================================
 // 📦 Favoritos
