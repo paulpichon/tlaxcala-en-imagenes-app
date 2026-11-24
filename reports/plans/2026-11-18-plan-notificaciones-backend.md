@@ -1,7 +1,16 @@
+---
+title: "Plan: rediseño del sistema de notificaciones (seguimiento del backend)"
+type: plan
+status: working
+created: "2026-11-18"
+related: "Backend: engineering/working/implementation-plans/2026-11-18-plan-sistema-notificaciones.md"
+branch: "Fix-Notificaciones"
+---
+
 # Plan: rediseño del sistema de notificaciones (seguimiento del backend)
 
 Espejo del plan del backend: `login-autenticacion/engineering/working/implementation-plans/2026-11-18-plan-sistema-notificaciones.md`.
-Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actualización: 2026-11-20.
+Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actualización: 2026-11-23.
 
 ## Estado de las fases
 
@@ -11,8 +20,8 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 | 1 | Servicio central `notificar()` (BD + push + correo) | **Hecha y desplegada (2026-11-19).** Los tres productores (seguir, comentar, moderación) ya lo usan. Deuda en backend: tests de integración con BD | Ninguno. Payload de push estandarizado (`title`, `body`, `icon`, `badge`, `tag`, `url`, `data.tipo`); el service worker debe usar `tag` y `data.tipo`. |
 | 2 | Seguir envía correo; comentar crea notificación en `/notificaciones`; moderación envía push | **Hecha y desplegada (2026-11-19); seguir, comentar y moderación probados en producción** | Renderizar el tipo `comentario` en `/notificaciones`. |
 | 3 | Likes: notificación agrupada por posteo + push con `tag` (sin correo) | Pendiente | Renderizar el tipo `like` con contador ("X y N más"). |
-| 4 | Preferencias por tipo y canal; límite de correos | Pendiente | Pantalla de preferencias en `/configuracion/notificaciones` (`GET/PUT /api/notificaciones/preferencias`). |
-| 5 | Marcar todas leídas, borrar todas, filtro por tipo, limpieza de viejas | **Implementada en el backend (2026-11-20), pendiente de desplegar** | Botones y filtro en `/notificaciones` (ver «Fase 5: contrato»). Frontend implementado (2026-11-20), pendiente de probar con el backend desplegado. |
+| 4 | Preferencias por tipo y canal; límite de correos | **Implementada en el backend (2026-11-20), pendiente de desplegar** | Pantalla de preferencias en `/configuracion/notificaciones` (ver «Fase 4: contrato»). |
+| 5 | Marcar todas leídas, borrar todas, filtro por tipo, limpieza de viejas | **Hecha y desplegada (2026-11-20); pruebas manuales en producción superadas** | Botones y filtro en `/notificaciones` (ver «Fase 5: contrato»). Frontend implementado y probado con el backend desplegado. |
 | 6 | Tipos nuevos: `reporte_resuelto`, `reporte_descartado`, `nueva_publicacion`, `sistema` | Pendiente | Renderizar los tipos nuevos; los de `sistema` no tienen emisor. |
 | 7 | `GET /api/notificaciones/estado`, dispositivos, `subscribe` idempotente | **Hecha y desplegada (2026-11-19).** Frontend: activación en iOS probada en iPhone; `/estado`, reconciliación y lista de dispositivos implementados (2026-11-20, probado en producción) | Flujo de activación y arreglo de iOS (ver «Estado del frontend en la Fase 7» y «Fase 7: contrato»). |
 | 8 | Documentación, Postman, `SPECS-FRONTEND-NOTIFICACIONES.md` | Pendiente | Contrato final. |
@@ -46,7 +55,7 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 | Decisión | Fase |
 |---|---|
 | ~~Retención de notificaciones~~ Decidido: leídas 90 días, no leídas 180, eliminadas 30 | 5 |
-| Enlace de baja de un clic en correos | 4 |
+| ~~Enlace de baja de un clic en correos~~ Decidido: basta el enlace a `/configuracion/notificaciones` | 4 |
 | `nueva_publicacion` activada o no por defecto | 6 |
 | Correo al reportante por reporte resuelto | 6 |
 
@@ -87,6 +96,20 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 
 - 2026-11-20: desplegado y probado en producción; la Fase 7 queda completa en backend y frontend. Siguiente: Fase 3 (likes agrupados), a la espera del backend.
 
+- 2026-11-20: Fase 5 desplegada (backend y frontend) y probada manualmente en producción. Pendientes: Fases 3, 4, 6 y 8 (orden recomendado: 4, luego 3 y 6).
+
+- 2026-11-23: Fase 4 implementada en el backend (commits `d807884` y `2c59424`, este último por su code review), pendiente de desplegar. Ver «Fase 4: contrato para el frontend». Siguiente en el frontend: interruptores de preferencias en `ConfiguracionNotificaciones`.
+
+## Fase 4: contrato para el frontend
+
+- **`GET /api/notificaciones/preferencias`** (sesión): `data.preferencias = { push: { follow, comentario, like, nueva_publicacion, sistema }, correo: { follow, comentario, sistema } }`, todos booleanos y siempre completos (los usuarios sin configurar reciben los defaults: push todo `true`; correo `true`).
+- **`PUT /api/notificaciones/preferencias`**: body parcial, p. ej. `{ "push": { "like": false }, "correo": { "follow": false } }`. Solo canales `push`/`correo`, claves de arriba (no existe `correo.like` ni `correo.nueva_publicacion`) y booleanos; cualquier otra cosa o un body vacío da `400`. Responde `data.preferencias` completo.
+- **`GET /estado`** ahora incluye `preferencias` (mismo formato).
+- Las preferencias solo afectan al **push y al correo**; `/notificaciones` siempre muestra todo. Los avisos de moderación no se pueden silenciar: no mostrar interruptor para ellos.
+- Los correos de seguir y comentar ya enlazan a `/configuracion/notificaciones`; no hay enlace de baja de un clic.
+- Code review (2026-11-23): el `PUT` con un canal heredado (`__proto__`, `constructor`) daba `500`; corregido, ahora da `400`. Sin otros cambios de contrato.
+- Pendiente en el frontend: interruptores por tipo y canal en `ConfiguracionNotificaciones`. No depende del orden de despliegue, pero la pantalla dará `404` hasta que el backend esté desplegado.
+
 ## Fase 5: contrato para el frontend
 
 - **`PATCH /api/notificaciones/marcar-todas-leidas`** (sin body): `data: { actualizadas }`. Tras la respuesta, poner el contador de no leídas en 0.
@@ -96,18 +119,18 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 - **Retención:** el backend borra físicamente las leídas a los 90 días, las no leídas a los 180 y las eliminadas a los 30. Las notificaciones muy antiguas desaparecen de `/notificaciones` sin aviso.
 - Sin cuenta de no leídas por tipo (opcional, no implementado).
 
-### Hecho en el frontend (2026-11-20, sin probar con el backend desplegado)
+### Hecho en el frontend (2026-11-20; probado en producción con el backend desplegado)
 
 - `useNotifications` + `Notificaciones.tsx`: botones «Marcar todas como leídas» y «Eliminar todas» (confirmación inline), chips de filtro (Todas, Seguidores, Comentarios, Moderación) y `404` al eliminar una = éxito.
 - El filtro reinicia la paginación, «Ver más» lo conserva y se descartan respuestas obsoletas. Las acciones masivas aplican a todas las notificaciones, no solo al filtro.
 - Los chips de `like` y `nueva_publicacion` se añaden cuando se rendericen (Fases 3 y 6).
-- **No desplegar el frontend antes que el backend de la Fase 5:** los endpoints nuevos darían `404`.
-- Pendiente: probar con el backend desplegado (marcar todas, borrar todas, filtrar y paginar con filtro).
+- Backend y frontend ya desplegados; el orden dejó de importar.
+- Probado en producción (2026-11-20): marcar todas, borrar todas, filtrar y paginar con filtro.
 
 ## Fase 7: contrato para el frontend
 
 - **`GET /api/notificaciones/vapidPublicKey`** ya **no requiere sesión**: se puede pedir al cargar la pantalla, antes del click. Respuesta igual: `data.key`.
-- **`GET /api/notificaciones/estado`** (con sesión): `data = { activadas: boolean, dispositivos: [{ id, userAgent, creadoAt, ultimoUso, endpointHash }] }`, del más reciente al más antiguo. `activadas` es `true` solo si hay al menos un dispositivo. No trae `endpoint` ni claves. **`preferencias` se añadirá en la Fase 4.**
+- **`GET /api/notificaciones/estado`** (con sesión): `data = { activadas: boolean, dispositivos: [{ id, userAgent, creadoAt, ultimoUso, endpointHash }] }`, del más reciente al más antiguo. `activadas` es `true` solo si hay al menos un dispositivo. No trae `endpoint` ni claves. **Desde la Fase 4 incluye también `preferencias`** (ver «Fase 4: contrato»).
 - **Reconciliación**: calcular `SHA-256` hexadecimal (minúsculas) del `subscription.endpoint` del navegador, p. ej. con `crypto.subtle.digest('SHA-256', new TextEncoder().encode(endpoint))`, y compararlo con `dispositivos[].endpointHash`. Casos: hay suscripción local y está en BD → `activo`; hay local pero no en BD → volver a llamar `POST /subscribe` (es idempotente); en BD pero no local (otro dispositivo) → mostrarlo en la lista de dispositivos.
 - **`POST /api/notificaciones/subscribe`**: la respuesta ahora incluye `data: { id }` (id del dispositivo). Sigue siendo idempotente; el resto del contrato no cambia.
 - **`DELETE /api/notificaciones/dispositivos/:id`** (con sesión): cierra un dispositivo. `200` ok; `404` si no existe o no es del usuario; `422` si el `id` no es válido. Si era el último, `activadas` pasa a `false`.
@@ -123,7 +146,7 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 - PWA: `manifest.ts` (`display: standalone`), `appleWebApp` e icono de Apple en `layout.tsx`.
 - Reconciliación: si hay suscripción local, repite `POST /subscribe` (idempotente) al abrir la pantalla.
 
-**Hecho (2026-11-20, sin commitear aún):** `GET /estado` con reconciliación por `endpointHash` (`hashEndpoint`, `src/lib/dispositivos.ts`) y lista de dispositivos con `DELETE /dispositivos/:id` en `ConfiguracionNotificaciones`. `/estado` solo se pide al montar y tras cada acción. Si falla, se mantiene el `POST /subscribe` a ciegas. Probado en producción tras el merge a la rama de despliegue: funciona correctamente.
+**Hecho (2026-11-20, commit `833d9b7`):** `GET /estado` con reconciliación por `endpointHash` (`hashEndpoint`, `src/lib/dispositivos.ts`) y lista de dispositivos con `DELETE /dispositivos/:id` en `ConfiguracionNotificaciones`. `/estado` solo se pide al montar y tras cada acción. Si falla, se mantiene el `POST /subscribe` a ciegas. Probado en producción tras el merge a la rama de despliegue: funciona correctamente.
 
 **Hecho tras la prueba en iPhone (2026-11-20):** iOS mostraba solo blanco al abrir la PWA porque ignora el manifest para la pantalla de arranque. Se añadieron 22 imágenes de arranque (`public/assets/splash/`, lista en `src/lib/pwa.ts`), un `apple-touch-icon` de 180×180 con fondo blanco (el PNG transparente se veía sobre negro) y los iconos 192, 512 y maskable del manifest (`public/assets/pwa/`). Solo orientación vertical; un modelo nuevo de iPhone o iPad requiere una fila en `src/lib/pwa.ts` y su PNG.
 
