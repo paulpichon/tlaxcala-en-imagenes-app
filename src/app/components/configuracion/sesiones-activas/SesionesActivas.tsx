@@ -188,7 +188,7 @@ export default function SesionesActivas() {
   };
 
   return (
-    <div className="d-flex flex-column bg-light vh-100">
+    <div className="d-flex flex-column bg-light min-vh-100">
       <div className="bg-white border-bottom p-3">
         <div className="d-flex align-items-center justify-content-between">
           <button

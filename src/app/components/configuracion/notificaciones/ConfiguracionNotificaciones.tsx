@@ -70,7 +70,7 @@ export default function ConfiguracionNotificaciones() {
   const puedeAlternar = estado === "permiso_pendiente" || estado === "activo";
 
   return (
-    <div className="d-flex flex-column bg-light vh-100">
+    <div className="d-flex flex-column bg-light min-vh-100">
       {/* Toast de estado */}
       {toast.message && (
         <ToastGlobal
@@ -80,8 +80,12 @@ export default function ConfiguracionNotificaciones() {
         />
       )}
 
-      {/* Header superior */}
-      <div className="bg-white border-bottom p-3">
+      {/* Header superior: queda «pegado» bajo el HeaderSuperior (56 px, z-index 1020
+          de `sticky-top`), mismo patrón que /notificaciones. */}
+      <div
+        className="bg-white border-bottom p-3"
+        style={{ position: "sticky", top: 56, zIndex: 1010 }}
+      >
         <div className="d-flex align-items-center justify-content-between">
           <button
             onClick={() => router.back()}
