@@ -50,6 +50,17 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 7. Estados de UI: `no_soportado` → `instalar_pwa` → `permiso_pendiente` → `bloqueado` → `activo`.
 8. El service worker debe llamar `showNotification` en **cada** push (iOS revoca la suscripción si recibe pushes silenciosos) y abrir `data.url` en `notificationclick`.
 
+## Pendiente: el push sigue llegando tras cerrar sesión o cambiar de cuenta (detectado 2026-11-24)
+
+**Estado: pendiente, sin fase asignada; no implementar sin orden del usuario.** Al probar la Fase 3 (like a un posteo «Solo perfil»), el click en el push pareció cerrar la sesión. El click no cierra sesiones: se ve la pantalla «Inicia sesión para ver este posteo» porque el navegador que abre la notificación no tiene sesión. Causa probable (falta confirmar con el dispositivo de la prueba):
+
+- `logout` (`src/context/AuthContext.tsx`) no da de baja la suscripción push del dispositivo: sigue recibiendo los avisos de la cuenta que cerró sesión.
+- En el backend, el mismo dispositivo puede quedar suscrito en dos cuentas (A y B en el mismo navegador).
+
+Tareas del frontend:
+1. En `logout`, **antes** de `POST /api/auth/logout` (mientras la sesión sigue válida): `getSubscription()` → `POST /api/notificaciones/unsubscribe` con el `endpoint` → `subscription.unsubscribe()`. *Best-effort*: un fallo no debe impedir el logout. Reutilizar la lógica de desactivar de `usePushNotifications`.
+2. Verificar en producción junto con el arreglo del backend (en `subscribe`, quitar el endpoint de las demás cuentas): cerrar sesión con A → sus avisos ya no llegan a ese dispositivo; entrar con B y activar push → solo llegan los de B.
+
 ## Decisiones abiertas (se resuelven al llegar a la fase)
 
 | Decisión | Fase |
