@@ -153,7 +153,8 @@ Seguimiento del rediseño del backend: `reports/plans/2026-11-18-plan-notificaci
   - Hook independiente de `usePushNotifications`: el correo vale sin soporte de push, y `/estado` (que también trae `preferencias`) se recarga tras cada acción de push.
   - Un `404` en el `GET` oculta la sección (backend sin la Fase 4).
   - `TIPOS_PREFERENCIA` solo lista `follow` y `comentario`. `like` (Fase 3), `nueva_publicacion` y `sistema` (Fase 6) se añaden al implementarse. Moderación no lleva interruptor: no se puede silenciar.
-- **Pendiente:** probar la Fase 4 con el backend desplegado; Fases 3, 6 y 8 del backend (likes agrupados, tipos nuevos, contrato final); ver plan de seguimiento.
+- **Verificado en producción** (2026-11-23): preferencias de la Fase 4 con el backend desplegado.
+- **Pendiente:** Fases 3, 6 y 8 del backend (likes agrupados, tipos nuevos, contrato final); ver plan de seguimiento.
 
 ## Error Handling
 

@@ -10,7 +10,7 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ## 2026-11-23 · Notificaciones: preferencias por tipo y canal (Fase 4)
 
-Funciona con o sin el backend de la Fase 4 desplegado: antes del despliegue la sección no aparece. Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
+Desplegado junto con el backend de la Fase 4 y probado en producción el 2026-11-23: las preferencias y las pantallas de configuración funcionan como se espera. Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
 
 ### Añadido
 
