@@ -10,7 +10,7 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ## 2026-11-24 · Notificaciones: likes agrupados (Fase 3)
 
-Sin commit todavía; pendiente de probar con el backend de la Fase 3 desplegado. El orden de despliegue es indiferente. Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
+Desplegado junto con el backend de la Fase 3 y probado en producción el 2026-11-24: funciona correctamente (`8f87b00`). Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
 
 ### Añadido
 
