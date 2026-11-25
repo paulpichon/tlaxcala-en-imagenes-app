@@ -8,6 +8,14 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## 2026-11-24 · Notificaciones: baja del push al cerrar sesión
+
+Desplegado junto con el backend (`904f67c`) y probado en producción el 2026-11-24: funciona correctamente (`74c1051`). Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
+
+### Corregido
+
+- **El push seguía llegando tras cerrar sesión o cambiar de cuenta.** Al cerrar sesión, el navegador da de baja su suscripción push antes del logout, y el backend deja cada dispositivo en una sola cuenta. Un dispositivo ya no recibe los avisos de la cuenta que salió. Al volver a entrar hay que reactivar las notificaciones en `/configuracion/notificaciones`.
+
 ## 2026-11-24 · Notificaciones: likes agrupados (Fase 3)
 
 Desplegado junto con el backend de la Fase 3 y probado en producción el 2026-11-24: funciona correctamente (`8f87b00`). Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.

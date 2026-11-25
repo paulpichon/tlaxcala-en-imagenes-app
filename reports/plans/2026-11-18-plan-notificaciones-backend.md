@@ -50,9 +50,9 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 7. Estados de UI: `no_soportado` → `instalar_pwa` → `permiso_pendiente` → `bloqueado` → `activo`.
 8. El service worker debe llamar `showNotification` en **cada** push (iOS revoca la suscripción si recibe pushes silenciosos) y abrir `data.url` en `notificationclick`.
 
-## Pendiente: el push sigue llegando tras cerrar sesión o cambiar de cuenta (detectado 2026-11-24)
+## Resuelto: el push seguía llegando tras cerrar sesión o cambiar de cuenta (detectado y resuelto 2026-11-24)
 
-**Estado: implementado en backend (commit `904f67c`) y frontend el 2026-11-24, sin desplegar; falta la verificación en producción (tarea 2).** Al probar la Fase 3 (like a un posteo «Solo perfil»), el click en el push pareció cerrar la sesión. El click no cierra sesiones: se ve la pantalla «Inicia sesión para ver este posteo» porque el navegador que abre la notificación no tiene sesión. Causa probable (falta confirmar con el dispositivo de la prueba):
+**Estado: completado. Backend (`904f67c`) y frontend (`74c1051`) desplegados y verificados en producción el 2026-11-24: funciona como se espera.** Al probar la Fase 3 (like a un posteo «Solo perfil»), el click en el push pareció cerrar la sesión. El click no cierra sesiones: se ve la pantalla «Inicia sesión para ver este posteo» porque el navegador que abre la notificación no tiene sesión. Causa probable (falta confirmar con el dispositivo de la prueba):
 
 - `logout` (`src/context/AuthContext.tsx`) no da de baja la suscripción push del dispositivo: sigue recibiendo los avisos de la cuenta que cerró sesión.
 - En el backend, el mismo dispositivo puede quedar suscrito en dos cuentas (A y B en el mismo navegador).
@@ -61,7 +61,7 @@ Tareas del frontend:
 1. En `logout`, **antes** de `POST /api/auth/logout` (mientras la sesión sigue válida): `getSubscription()` → `POST /api/notificaciones/unsubscribe` con el `endpoint` → `subscription.unsubscribe()`. *Best-effort*: un fallo no debe impedir el logout. Reutilizar la lógica de desactivar de `usePushNotifications`.
    **Hecho (2026-11-24):** `darDeBajaPushDelDispositivo(fetch)` en `src/lib/dispositivos.ts` (usa `getRegistration`, no `ready`, para no colgarse sin service worker; tope de 3 s; nunca lanza). `logout` la espera antes de `POST /api/auth/logout`; `cerrarSesionPorMotivo` también la llama (la sesión ya no vale, así que solo da de baja el navegador y el backend borra el endpoint con el 404/410 del siguiente envío). Al volver a entrar, el usuario debe reactivar el push en `/configuracion/notificaciones`.
    **Backend (`904f67c`):** `subscribe` quita el endpoint de las demás cuentas y apaga `notificaciones_activadas` en las que se quedan sin dispositivos. Sin cambios de contrato.
-2. Verificar en producción junto con el arreglo del backend (en `subscribe`, quitar el endpoint de las demás cuentas): cerrar sesión con A → sus avisos ya no llegan a ese dispositivo; entrar con B y activar push → solo llegan los de B.
+2. Verificar en producción junto con el arreglo del backend (en `subscribe`, quitar el endpoint de las demás cuentas): cerrar sesión con A → sus avisos ya no llegan a ese dispositivo; entrar con B y activar push → solo llegan los de B. **Hecho (2026-11-24):** verificado en producción por el usuario.
 
 ## Decisiones abiertas (se resuelven al llegar a la fase)
 
@@ -122,6 +122,8 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 - 2026-11-24: frontend de la Fase 3 implementado (`8f87b00`). Corrige además que el clic en un `like` habría abierto el perfil de la última persona en lugar del posteo. Ver «Hecho en el frontend» de la Fase 3.
 
 - 2026-11-24: Fase 3 desplegada (backend y frontend) y probada en producción: funciona correctamente. Pendientes: Fases 6 y 8.
+
+- 2026-11-24: resuelto el push que seguía llegando tras cerrar sesión o cambiar de cuenta (backend `904f67c`, frontend `74c1051`); desplegado y verificado en producción. Pendientes: Fases 6 y 8.
 
 ## Fase 3: contrato para el frontend
 
