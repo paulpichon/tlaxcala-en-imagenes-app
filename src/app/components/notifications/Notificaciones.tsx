@@ -7,8 +7,8 @@ import { useNotifications, FiltroNotificaciones } from "@/app/hooks/useNotificat
 import Spinner from "../spinner";
 import NotificacionItem from "./NotificacionItem";
 
-// `nueva_publicacion` aún no se renderiza (Fase 6 del backend): se añade aquí
-// cuando exista.
+// Los chips de la Fase 6 (`nueva_publicacion`, `seguridad`) se añaden cuando el
+// backend con esa fase esté desplegado: antes, `?tipo=` con esos valores da `422`.
 const FILTROS: { valor: FiltroNotificaciones; etiqueta: string }[] = [
   { valor: null, etiqueta: "Todas" },
   { valor: "follow", etiqueta: "Seguidores" },
@@ -192,15 +192,39 @@ export default function ListaNotificaciones() {
                           notif={notif}
                           onClick={(id, urlUsuario) => {
                             marcarComoLeida(id);
-                            // Comentario y like: abren el posteo (no el perfil del
-                            // emisor, que en `like` es solo la última persona). Si el
-                            // posteo ya no existe (referencia null), no navega.
-                            if (notif.tipo === "comentario" || notif.tipo === "like") {
+                            // Comentario, like y nueva publicación: abren el posteo
+                            // (no el perfil del emisor, que en `like` es solo la
+                            // última persona). Si el posteo ya no existe
+                            // (referencia null), no navega.
+                            if (
+                              notif.tipo === "comentario" ||
+                              notif.tipo === "like" ||
+                              notif.tipo === "nueva_publicacion"
+                            ) {
                               const posteoId = notif.referencia?._id;
                               if (posteoId) router.push(`/posteo/${posteoId}`);
                               return;
                             }
-                            // Notificación de sistema (sin emisor): no navegar a un perfil.
+                            // Seguridad: el aviso de inicio de sesión nuevo abre las
+                            // sesiones activas. El backend solo distingue el subtipo
+                            // por el `mensaje`; el de contraseña no navega.
+                            if (notif.tipo === "seguridad") {
+                              if (notif.mensaje.startsWith("Nuevo inicio de sesión")) {
+                                router.push("/configuracion/sesiones");
+                              }
+                              return;
+                            }
+                            // Resto de avisos de sistema (moderación, reportes,
+                            // bienvenida): sin emisor, no navegan. Anonimato de
+                            // reportes: nunca abrir el posteo reportado.
+                            if (
+                              notif.tipo === "posteo_eliminado_moderacion" ||
+                              notif.tipo === "reporte_resuelto" ||
+                              notif.tipo === "reporte_descartado" ||
+                              notif.tipo === "sistema"
+                            ) {
+                              return;
+                            }
                             if (urlUsuario) router.push(`/${urlUsuario}`);
                           }}
                           onEliminar={eliminarNotificacion} // 👈 pasamos la función al hijo

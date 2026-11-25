@@ -8,27 +8,37 @@ import { FiArrowLeft, FiBell, FiBellOff, FiMonitor, FiSmartphone } from "react-i
 import { usePushNotifications } from "@/app/hooks/usePushNotifications";
 import { usePreferenciasNotificaciones } from "@/app/hooks/usePreferenciasNotificaciones";
 import { describirUserAgent } from "@/lib/dispositivos";
-import type { CanalNotificacion, DispositivoPush } from "@/types/types";
+import type {
+  CanalNotificacion,
+  DispositivoPush,
+  PreferenciasNotificaciones,
+} from "@/types/types";
 import ToastGlobal from "../../ToastGlobal";
 import notificacionesdStyles from "@/app/ui/configuracion/notificaciones/Notificaciones.module.css"
 
 type ToastState = { message: string; type?: "success" | "danger" | "warning" };
 
 /**
- * Tipos con interruptor. Solo se listan los que el backend ya produce:
- * `nueva_publicacion` y `sistema` (Fase 6) se añaden al implementarse para no
- * ofrecer un ajuste que aún no tiene efecto. Moderación no se lista: no se puede
- * silenciar. `like` solo tiene push (no existe `correo.like`): su celda de correo
- * queda vacía.
+ * Tipos con interruptor. Moderación, seguridad y el resultado de los reportes no
+ * se listan: no tienen clave y no se pueden silenciar. `like` y
+ * `nueva_publicacion` solo tienen push (no existen `correo.like` ni
+ * `correo.nueva_publicacion`): su celda de correo queda vacía.
+ * `nueva_publicacion` llega desactivada por defecto (Fase 6).
  */
 const TIPOS_PREFERENCIA: {
-  tipo: "follow" | "comentario" | "like";
+  tipo: keyof PreferenciasNotificaciones["push"];
   etiqueta: string;
   soloPush?: boolean;
 }[] = [
   { tipo: "follow", etiqueta: "Nuevos seguidores" },
   { tipo: "comentario", etiqueta: "Comentarios en tus publicaciones" },
   { tipo: "like", etiqueta: "Me gusta en tus publicaciones", soloPush: true },
+  {
+    tipo: "nueva_publicacion",
+    etiqueta: "Publicaciones de quienes sigues",
+    soloPush: true,
+  },
+  { tipo: "sistema", etiqueta: "Avisos de TlaxApp" },
 ];
 
 const CANALES: { canal: CanalNotificacion; etiqueta: string }[] = [
@@ -304,7 +314,7 @@ export default function ConfiguracionNotificaciones() {
                                     ? cambiarPreferencia("push", tipo, e.target.checked)
                                     : cambiarPreferencia(
                                         "correo",
-                                        tipo as "follow" | "comentario",
+                                        tipo as keyof PreferenciasNotificaciones["correo"],
                                         e.target.checked
                                       )
                                 }
@@ -318,7 +328,8 @@ export default function ConfiguracionNotificaciones() {
 
                   <p className="text-secondary small mt-3 mb-0">
                     Los avisos push solo llegan a los dispositivos donde activaste las
-                    notificaciones. Los avisos sobre la moderación de tus publicaciones
+                    notificaciones. Los avisos de seguridad de tu cuenta, los de la
+                    moderación de tus publicaciones y el resultado de tus reportes
                     siempre se envían.
                   </p>
                 </>

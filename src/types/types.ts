@@ -393,7 +393,12 @@ export type TipoNotificacion =
   | "like"
   | "comentario"
   | "nueva_publicacion"
-  | "posteo_eliminado_moderacion";
+  | "posteo_eliminado_moderacion"
+  // Fase 6: avisos de sistema (sin `emisor`, `referencia` null, `mensaje` completo).
+  | "reporte_resuelto"
+  | "reporte_descartado"
+  | "seguridad"
+  | "sistema";
 // Iterface para las notificaciones
 export interface Notificacion {
   _id: string;
