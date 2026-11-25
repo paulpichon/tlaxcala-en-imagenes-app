@@ -8,6 +8,29 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## 2026-11-25 · Notificaciones: avisos de sistema y publicaciones nuevas (Fase 6)
+
+Implementado (`ce83790`) y probado en local junto con el backend de la Fase 6. **Pendiente de desplegar**: el backend debe salir antes que este frontend o a la vez. Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
+
+### Añadido
+
+- **Avisos de sistema** en `/notificaciones`, sin nombre de emisor y con icono propio: resultado de tus reportes (`reporte_resuelto`, `reporte_descartado`), avisos de seguridad de la cuenta (`seguridad`: cambio de contraseña e inicio de sesión desde un navegador nuevo) y bienvenida (`sistema`).
+- **Publicaciones de quienes sigues** (`nueva_publicacion`): se muestran con el nombre del autor y el clic abre el posteo.
+- **Interruptores nuevos** en la tarjeta «Qué te avisamos» de `/configuracion/notificaciones`: «Publicaciones de quienes sigues» (solo Push, desactivado por defecto) y «Avisos de TlaxApp» (Push y Correo).
+
+### Cambiado
+
+- El clic en el aviso de inicio de sesión nuevo abre `/configuracion/sesiones`. Los avisos de reporte, contraseña y bienvenida no navegan; los de reporte nunca abren la publicación reportada.
+- El texto de la tarjeta de preferencias aclara que los avisos de seguridad, de moderación y el resultado de tus reportes siempre se envían.
+
+## 2026-11-24 · Notificaciones: baja del push al cerrar sesión
+
+Desplegado junto con el backend (`904f67c`) y probado en producción el 2026-11-24: funciona correctamente (`74c1051`). Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
+
+### Corregido
+
+- **El push seguía llegando tras cerrar sesión o cambiar de cuenta.** Al cerrar sesión, el navegador da de baja su suscripción push antes del logout, y el backend deja cada dispositivo en una sola cuenta. Un dispositivo ya no recibe los avisos de la cuenta que salió. Al volver a entrar hay que reactivar las notificaciones en `/configuracion/notificaciones`.
+
 ## 2026-11-24 · Notificaciones: likes agrupados (Fase 3)
 
 Desplegado junto con el backend de la Fase 3 y probado en producción el 2026-11-24: funciona correctamente (`8f87b00`). Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.

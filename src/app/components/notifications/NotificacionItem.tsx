@@ -7,8 +7,19 @@ import { avatarMiniLoader } from "@/lib/cloudinary/cloudinaryLoader";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Notificacion } from "@/types/types";
-import { FiMoreVertical, FiTrash2, FiShield, FiHeart } from "react-icons/fi";
+import { FiMoreVertical, FiTrash2, FiShield, FiHeart, FiLock, FiFlag, FiBell } from "react-icons/fi";
+import type { IconType } from "react-icons";
 import ToastGlobal from "../ToastGlobal";
+
+// Tipos 100% sistema (sin emisor): el `mensaje` ya es la frase completa y no se
+// antepone nombre. Cada uno lleva su icono en lugar del avatar.
+const ICONOS_SISTEMA: Partial<Record<Notificacion["tipo"], { Icono: IconType; color: string }>> = {
+  posteo_eliminado_moderacion: { Icono: FiShield, color: "#856404" },
+  reporte_resuelto: { Icono: FiFlag, color: "#856404" },
+  reporte_descartado: { Icono: FiFlag, color: "#856404" },
+  seguridad: { Icono: FiLock, color: "#0d6efd" },
+  sistema: { Icono: FiBell, color: "#6c757d" },
+};
 
 interface Props {
   notif: Notificacion;
@@ -22,13 +33,16 @@ export default function NotificacionItem({ notif, onClick, onEliminar }: Props) 
   const [toast, setToast] = useState<{ message: string; type: "success" | "danger" | "creacion" } | null>(null);
 
   // Notificación de sistema (100% backend): sin identidad de emisor.
-  // Ej.: 'posteo_eliminado_moderacion' (mensaje genérico, no se antepone nombre).
+  // Ej.: 'posteo_eliminado_moderacion' y, desde la Fase 6, 'reporte_resuelto',
+  // 'reporte_descartado', 'seguridad' y 'sistema' (mensaje completo, no se
+  // antepone nombre).
   // CONTRATO: `emisor` puede llegar undefined y `referencia` puede llegar
   // null/ausente (el cron de hard-delete borra el posteo referenciado pasado el
   // plazo). Este render usa SOLO `mensaje`, `createdAt` y `notificacion_leida`.
   // Si en el futuro se añade miniatura/preview, comprobar `notif.referencia?.public_id`
   // con optional chaining y fallback, sin renderizar "undefined".
-  const esSistema = notif.tipo === "posteo_eliminado_moderacion";
+  const iconoSistema = ICONOS_SISTEMA[notif.tipo];
+  const esSistema = iconoSistema !== undefined;
   // Like (Fase 3): una notificación por posteo; `mensaje` ya trae «y N−1 más…»,
   // así que el texto no usa `contador`.
   const esLike = notif.tipo === "like";
@@ -60,13 +74,13 @@ export default function NotificacionItem({ notif, onClick, onEliminar }: Props) 
         onClick={() => onClick(notif._id, notif.emisor?.url ?? "")}
         style={{ cursor: "pointer" }}
       >
-        {esSistema ? (
+        {iconoSistema ? (
           <div
-            className="d-flex align-items-center justify-content-center rounded-circle border bg-light"
-            style={{ width: 50, height: 50, color: "#856404" }}
+            className="d-flex align-items-center justify-content-center rounded-circle border bg-light flex-shrink-0"
+            style={{ width: 50, height: 50, color: iconoSistema.color }}
             aria-hidden="true"
           >
-            <FiShield size={24} />
+            <iconoSistema.Icono size={24} />
           </div>
         ) : (
           <div className="position-relative flex-shrink-0" style={{ width: 50, height: 50 }}>
