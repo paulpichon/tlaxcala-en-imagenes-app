@@ -10,7 +10,7 @@ branch: "Fix-Notificaciones"
 # Plan: rediseño del sistema de notificaciones (seguimiento del backend)
 
 Espejo del plan del backend: `login-autenticacion/engineering/working/implementation-plans/2026-11-18-plan-sistema-notificaciones.md`.
-Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actualización: 2026-11-24.
+Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actualización: 2026-11-25.
 
 ## Estado de las fases
 
@@ -22,7 +22,7 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 | 3 | Likes: notificación agrupada por posteo + push con `tag` (sin correo) | **Hecha y desplegada (2026-11-24; commits del backend `869f664` y `2aa097b`); pruebas en producción superadas** | Renderizar `like`, interruptor de push y chip de filtro (ver «Fase 3: contrato»). Frontend implementado (`8f87b00`) y probado con el backend desplegado. |
 | 4 | Preferencias por tipo y canal; límite de correos | **Hecha y desplegada (2026-11-23); pruebas en producción superadas** | Pantalla de preferencias en `/configuracion/notificaciones` (ver «Fase 4: contrato»). Frontend implementado y probado con el backend desplegado. |
 | 5 | Marcar todas leídas, borrar todas, filtro por tipo, limpieza de viejas | **Hecha y desplegada (2026-11-20); pruebas manuales en producción superadas** | Botones y filtro en `/notificaciones` (ver «Fase 5: contrato»). Frontend implementado y probado con el backend desplegado. |
-| 6 | Tipos nuevos: `reporte_resuelto`, `reporte_descartado`, `seguridad`, `sistema` y difusión de `nueva_publicacion` | **Implementada en el backend (2026-11-24), sin commit ni despliegue; probada en local (backend + frontend): funciona** | Renderizar los tipos nuevos (sin emisor salvo `nueva_publicacion`), interruptores de `nueva_publicacion` y `sistema`, chips (ver «Fase 6: contrato»). |
+| 6 | Tipos nuevos: `reporte_resuelto`, `reporte_descartado`, `seguridad`, `sistema` y difusión de `nueva_publicacion` | **Implementada en el backend (2026-11-24), sin commit ni despliegue; probada en local (backend + frontend): funciona** | Renderizar los tipos nuevos (sin emisor salvo `nueva_publicacion`), interruptores de `nueva_publicacion` y `sistema`, chips (ver «Fase 6: contrato»). Frontend implementado (`ce83790`) salvo los chips, que esperan al despliegue. |
 | 7 | `GET /api/notificaciones/estado`, dispositivos, `subscribe` idempotente | **Hecha y desplegada (2026-11-19).** Frontend: activación en iOS probada en iPhone; `/estado`, reconciliación y lista de dispositivos implementados (2026-11-20, probado en producción) | Flujo de activación y arreglo de iOS (ver «Estado del frontend en la Fase 7» y «Fase 7: contrato»). |
 | 8 | Documentación, Postman, `SPECS-FRONTEND-NOTIFICACIONES.md` | Pendiente | Contrato final. |
 
@@ -34,10 +34,10 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 | `comentario` | Sí (render y navegación; probado en producción) | Hecho (Fase 2) |
 | `like` | Sí (agrupado por posteo, corazón, navegación al posteo y chip «Me gusta»; probado en producción) | Hecho (Fase 3) |
 | `posteo_eliminado_moderacion` | Sí (sin emisor) | Sin cambio; se añade push |
-| `reporte_resuelto` / `reporte_descartado` | No | Fase 6 (backend listo): sin emisor, sin navegación |
-| `seguridad` | No | Fase 6 (backend listo): sin emisor, no silenciable |
-| `sistema` | No | Fase 6 (backend listo): sin emisor (bienvenida) |
-| `nueva_publicacion` | No | Fase 6 (backend listo): con emisor, navega al posteo |
+| `reporte_resuelto` / `reporte_descartado` | Sí en local (`ce83790`): sin emisor, icono de bandera, no navega | Fase 6: falta desplegar |
+| `seguridad` | Sí en local (`ce83790`): sin emisor, candado; el de inicio de sesión abre `/configuracion/sesiones` | Fase 6: falta desplegar y chip |
+| `sistema` | Sí en local (`ce83790`): sin emisor, campana, no navega | Fase 6: falta desplegar |
+| `nueva_publicacion` | Sí en local (`ce83790`): con emisor, navega al posteo | Fase 6: falta desplegar y chip |
 
 ## Tareas del frontend (se detallan por fase al completarse)
 
@@ -131,6 +131,8 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 
 - 2026-11-24: prueba local de la Fase 6 (backend + frontend): `nueva_publicacion` no llegaba porque el primer posteo, subido antes de activar la opción, gastaba el turno de 60 min del autor. El backend ahora devuelve el turno cuando la difusión no notifica a nadie; tras el cambio, todo funciona.
 
+- 2026-11-25: frontend de la Fase 6 implementado (`ce83790`): tareas 1 a 4 y el texto de la tarjeta de preferencias. Documentado en `AGENTS.md` y `CHANGELOG.md`. Faltan los chips (tarea 5), que se añaden tras desplegar el backend, y la prueba en producción. Pendientes: despliegue de la Fase 6 y Fase 8.
+
 ## Fase 6: contrato para el frontend
 
 Backend implementado el 2026-11-24 (pendiente de commit y despliegue). Sin endpoints nuevos: cambian los tipos de `GET /api/notificaciones`, un default de preferencias y los push.
@@ -166,6 +168,14 @@ Backend implementado el 2026-11-24 (pendiente de commit y despliegue). Sin endpo
 6. `public/sw.js`: sin cambios (ya usa `tag`, `renotify` y `url` del mismo origen).
 
 **Orden de despliegue:** desplegar primero el backend o ambos a la vez. Si el frontend sale antes, los chips nuevos darían `422` y `PUT` de las claves existentes sigue funcionando. Si el backend sale antes, el frontend actual muestra los tipos nuevos con el render genérico (nombre vacío + `mensaje`), legible pero sin icono de sistema.
+
+### Hecho en el frontend (2026-11-25, commit `ce83790`; probado en local con el backend, pendiente de desplegar)
+
+- **Tipos** (`types.ts`): `TipoNotificacion` incluye `reporte_resuelto`, `reporte_descartado`, `seguridad` y `sistema`.
+- **Render** (`NotificacionItem.tsx`): `ICONOS_SISTEMA` define qué tipos son de sistema y su icono (escudo para moderación, bandera para reportes, candado para `seguridad`, campana para `sistema`). Se muestran sin emisor, solo con `mensaje`.
+- **Navegación** (`Notificaciones.tsx`): `nueva_publicacion` abre el posteo como `comentario`/`like`. `seguridad` abre `/configuracion/sesiones` solo si `mensaje` empieza por «Nuevo inicio de sesión»: el backend no manda subtipo, así que si cambia ese texto el clic deja de navegar (mejora posible en el backend: un campo de subtipo). Reportes, bienvenida y moderación no navegan.
+- **Preferencias** (`ConfiguracionNotificaciones`): «Publicaciones de quienes sigues» (`nueva_publicacion`, `soloPush`) y «Avisos de TlaxApp» (`sistema`, Push y Correo). El tipo de `TIPOS_PREFERENCIA` sale de `keyof PreferenciasNotificaciones["push"]`. El texto al pie menciona seguridad, moderación y reportes como avisos que siempre se envían.
+- **Pendiente**: chips `?tipo=nueva_publicacion` y `?tipo=seguridad` tras el despliegue del backend (antes dan `422`), y prueba en producción.
 
 ## Fase 3: contrato para el frontend
 
@@ -221,7 +231,7 @@ Backend implementado el 2026-11-24 (pendiente de commit y despliegue). Sin endpo
 
 - `useNotifications` + `Notificaciones.tsx`: botones «Marcar todas como leídas» y «Eliminar todas» (confirmación inline), chips de filtro (Todas, Seguidores, Comentarios, Moderación) y `404` al eliminar una = éxito.
 - El filtro reinicia la paginación, «Ver más» lo conserva y se descartan respuestas obsoletas. Las acciones masivas aplican a todas las notificaciones, no solo al filtro.
-- El chip de `nueva_publicacion` se añade cuando se renderice (Fase 6). El de `like` («Me gusta») se añadió en la Fase 3.
+- El chip de `nueva_publicacion` (y el de `seguridad`) se añade tras desplegar el backend de la Fase 6. El de `like` («Me gusta») se añadió en la Fase 3.
 - Backend y frontend ya desplegados; el orden dejó de importar.
 - Probado en producción (2026-11-20): marcar todas, borrar todas, filtrar y paginar con filtro.
 
