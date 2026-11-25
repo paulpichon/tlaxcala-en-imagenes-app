@@ -21,6 +21,7 @@ import {
   getApiErrorCode,
   ApiErrorCode,
 } from '@/lib/apiClient';
+import { darDeBajaPushDelDispositivo } from '@/lib/dispositivos';
 
 const AuthContext = createContext<IAuthContext | undefined>(undefined);
 
@@ -215,9 +216,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     CLAVES_SESION.forEach((clave) => sessionStorage.removeItem(clave));
     sessionStorage.setItem(CLAVE_MOTIVO_CIERRE, motivo);
-    apiPost(fetch, '/api/auth/logout').catch(() => {
-      // Best-effort: el estado local ya está cerrado.
-    });
+    // La sesión ya no es válida, así que el backend no recibirá el unsubscribe;
+    // basta la baja en el navegador (el endpoint muerto se limpia con 404/410).
+    darDeBajaPushDelDispositivo(fetch)
+      .then(() => apiPost(fetch, '/api/auth/logout'))
+      .catch(() => {
+        // Best-effort: el estado local ya está cerrado.
+      });
   }, []);
 
   /** Reintenta la petición ante errores de red con backoff lineal. */
@@ -354,6 +359,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = useCallback(async () => {
     try {
+      // Antes del logout, con la sesión aún válida: este dispositivo deja de
+      // recibir los push de la cuenta que sale. Best-effort, nunca lanza.
+      await darDeBajaPushDelDispositivo(fetch);
       await apiPost(fetch, '/api/auth/logout');
     } catch {
       // Desde E1d el logout siempre limpia las cookies; si falla la red, la

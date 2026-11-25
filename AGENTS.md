@@ -158,7 +158,8 @@ Seguimiento del rediseño del backend: `reports/plans/2026-11-18-plan-notificaci
   - Un `404` en el `GET` oculta la sección (backend sin la Fase 4).
   - `TIPOS_PREFERENCIA` lista `follow`, `comentario` y `like`. `like` lleva `soloPush`: su celda de Correo queda vacía porque no existe `correo.like`. `nueva_publicacion` y `sistema` (Fase 6) se añaden al implementarse. Moderación no lleva interruptor: no se puede silenciar.
 - **Verificado en producción** (2026-11-23): preferencias de la Fase 4 con el backend desplegado.
-- **Pendiente:** probar la Fase 3 (likes) en producción tras desplegar el backend; Fases 6 y 8 del backend (tipos nuevos, contrato final). Ver el plan de seguimiento.
+- **Verificado en producción** (2026-11-24): likes agrupados de la Fase 3 con el backend desplegado.
+- **Pendiente:** Fases 6 y 8 del backend (tipos nuevos, contrato final); ver plan de seguimiento.
 
 ## Error Handling
 

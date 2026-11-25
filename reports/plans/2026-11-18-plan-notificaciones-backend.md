@@ -19,7 +19,7 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 | 0 | Corrige bugs críticos: el cron borraba las suscripciones push cada domingo; el filtro borraba suscripciones válidas; `subscribe` idempotente | **Hecha y desplegada (2026-11-18)** | Ninguno obligatorio (ver abajo). Los usuarios dejarán de perder el push. |
 | 1 | Servicio central `notificar()` (BD + push + correo) | **Hecha y desplegada (2026-11-19).** Los tres productores (seguir, comentar, moderación) ya lo usan. Deuda en backend: tests de integración con BD | Ninguno. Payload de push estandarizado (`title`, `body`, `icon`, `badge`, `tag`, `url`, `data.tipo`); el service worker debe usar `tag` y `data.tipo`. |
 | 2 | Seguir envía correo; comentar crea notificación en `/notificaciones`; moderación envía push | **Hecha y desplegada (2026-11-19); seguir, comentar y moderación probados en producción** | Renderizar el tipo `comentario` en `/notificaciones`. |
-| 3 | Likes: notificación agrupada por posteo + push con `tag` (sin correo) | **Implementada en el backend (2026-11-24; commits `869f664` y `2aa097b`), pendiente de desplegar** | Renderizar `like`, interruptor de push y chip de filtro (ver «Fase 3: contrato»). Frontend implementado (2026-11-24, sin commit), pendiente de probar con el backend desplegado. |
+| 3 | Likes: notificación agrupada por posteo + push con `tag` (sin correo) | **Hecha y desplegada (2026-11-24; commits del backend `869f664` y `2aa097b`); pruebas en producción superadas** | Renderizar `like`, interruptor de push y chip de filtro (ver «Fase 3: contrato»). Frontend implementado (`8f87b00`) y probado con el backend desplegado. |
 | 4 | Preferencias por tipo y canal; límite de correos | **Hecha y desplegada (2026-11-23); pruebas en producción superadas** | Pantalla de preferencias en `/configuracion/notificaciones` (ver «Fase 4: contrato»). Frontend implementado y probado con el backend desplegado. |
 | 5 | Marcar todas leídas, borrar todas, filtro por tipo, limpieza de viejas | **Hecha y desplegada (2026-11-20); pruebas manuales en producción superadas** | Botones y filtro en `/notificaciones` (ver «Fase 5: contrato»). Frontend implementado y probado con el backend desplegado. |
 | 6 | Tipos nuevos: `reporte_resuelto`, `reporte_descartado`, `nueva_publicacion`, `sistema` | Pendiente | Renderizar los tipos nuevos; los de `sistema` no tienen emisor. |
@@ -32,7 +32,7 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 |---|---|---|
 | `follow` | Sí | Sin cambio |
 | `comentario` | Sí (render y navegación; probado en producción) | Hecho (Fase 2) |
-| `like` | Sí (corazón, navegación al posteo y chip «Me gusta»; pendiente de probar en producción) | Fase 3 (agrupado) |
+| `like` | Sí (agrupado por posteo, corazón, navegación al posteo y chip «Me gusta»; probado en producción) | Hecho (Fase 3) |
 | `posteo_eliminado_moderacion` | Sí (sin emisor) | Sin cambio; se añade push |
 | `reporte_resuelto` / `reporte_descartado` | No | Fase 6 |
 | `nueva_publicacion` | No | Fase 6 |
@@ -49,6 +49,19 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 6. Si `POST /subscribe` falla, llamar `subscription.unsubscribe()`. Al abrir la pantalla, reconciliar `getSubscription()` con `GET /estado` (cuando exista).
 7. Estados de UI: `no_soportado` → `instalar_pwa` → `permiso_pendiente` → `bloqueado` → `activo`.
 8. El service worker debe llamar `showNotification` en **cada** push (iOS revoca la suscripción si recibe pushes silenciosos) y abrir `data.url` en `notificationclick`.
+
+## Pendiente: el push sigue llegando tras cerrar sesión o cambiar de cuenta (detectado 2026-11-24)
+
+**Estado: implementado en backend (commit `904f67c`) y frontend el 2026-11-24, sin desplegar; falta la verificación en producción (tarea 2).** Al probar la Fase 3 (like a un posteo «Solo perfil»), el click en el push pareció cerrar la sesión. El click no cierra sesiones: se ve la pantalla «Inicia sesión para ver este posteo» porque el navegador que abre la notificación no tiene sesión. Causa probable (falta confirmar con el dispositivo de la prueba):
+
+- `logout` (`src/context/AuthContext.tsx`) no da de baja la suscripción push del dispositivo: sigue recibiendo los avisos de la cuenta que cerró sesión.
+- En el backend, el mismo dispositivo puede quedar suscrito en dos cuentas (A y B en el mismo navegador).
+
+Tareas del frontend:
+1. En `logout`, **antes** de `POST /api/auth/logout` (mientras la sesión sigue válida): `getSubscription()` → `POST /api/notificaciones/unsubscribe` con el `endpoint` → `subscription.unsubscribe()`. *Best-effort*: un fallo no debe impedir el logout. Reutilizar la lógica de desactivar de `usePushNotifications`.
+   **Hecho (2026-11-24):** `darDeBajaPushDelDispositivo(fetch)` en `src/lib/dispositivos.ts` (usa `getRegistration`, no `ready`, para no colgarse sin service worker; tope de 3 s; nunca lanza). `logout` la espera antes de `POST /api/auth/logout`; `cerrarSesionPorMotivo` también la llama (la sesión ya no vale, así que solo da de baja el navegador y el backend borra el endpoint con el 404/410 del siguiente envío). Al volver a entrar, el usuario debe reactivar el push en `/configuracion/notificaciones`.
+   **Backend (`904f67c`):** `subscribe` quita el endpoint de las demás cuentas y apaga `notificaciones_activadas` en las que se quedan sin dispositivos. Sin cambios de contrato.
+2. Verificar en producción junto con el arreglo del backend (en `subscribe`, quitar el endpoint de las demás cuentas): cerrar sesión con A → sus avisos ya no llegan a ese dispositivo; entrar con B y activar push → solo llegan los de B.
 
 ## Decisiones abiertas (se resuelven al llegar a la fase)
 
@@ -106,7 +119,9 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 
 - 2026-11-24: Fase 3 implementada en el backend (pendiente de desplegar). Ver «Fase 3: contrato para el frontend». El frontend actual ya muestra los likes con el render genérico; faltan el interruptor de push, el chip de filtro y, opcionalmente, el icono y `contador`.
 
-- 2026-11-24: frontend de la Fase 3 implementado (sin commit). Corrige además que el clic en un `like` habría abierto el perfil de la última persona en lugar del posteo. Pendiente de probar con el backend desplegado. Ver «Hecho en el frontend» de la Fase 3.
+- 2026-11-24: frontend de la Fase 3 implementado (`8f87b00`). Corrige además que el clic en un `like` habría abierto el perfil de la última persona en lugar del posteo. Ver «Hecho en el frontend» de la Fase 3.
+
+- 2026-11-24: Fase 3 desplegada (backend y frontend) y probada en producción: funciona correctamente. Pendientes: Fases 6 y 8.
 
 ## Fase 3: contrato para el frontend
 
@@ -119,7 +134,7 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 - **Filtro**: `GET /api/notificaciones?tipo=like` ya es válido; añadir el chip.
 - **Tipos**: añadir `contador?: number` a `Notificacion` en `src/types/types.ts`. Icono opcional para `like` (p. ej. corazón) en `NotificacionItem`.
 
-### Hecho en el frontend (2026-11-24; sin commit, pendiente de probar con el backend desplegado)
+### Hecho en el frontend (2026-11-24, commit `8f87b00`; probado en producción con el backend desplegado)
 
 - **Navegación** (`Notificaciones.tsx`): el clic en un `like` abre `/posteo/<referencia._id>`, igual que `comentario`; si `referencia` es `null` solo la marca como leída. Antes caía en la rama genérica y habría abierto el perfil del emisor (la última persona que dio like).
 - **Filtro**: chip «Me gusta» (`?tipo=like`) en `FILTROS`.
@@ -129,7 +144,7 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 - Sin cambios en `public/sw.js`: ya aplica `tag` con `renotify`, que es lo que necesita `like-<posteoId>`.
 - `pnpm build` sin errores.
 - Orden de despliegue indiferente: sin el backend de la Fase 3 no llegan notificaciones `like`, el chip devuelve una lista vacía y `push.like` ya existe desde la Fase 4.
-- **Por probar tras desplegar:** varios likes al mismo posteo forman una sola notificación que sube en la lista y vuelve a no leída; el push reemplaza al anterior (como mucho uno cada 10 min); apagar «Me gusta» en Push corta el push pero no la notificación en `/notificaciones`.
+- **Probado en producción (2026-11-24), funciona correctamente.** Lo previsto para la prueba: varios likes al mismo posteo forman una sola notificación que sube en la lista y vuelve a no leída; el push reemplaza al anterior (como mucho uno cada 10 min); apagar «Me gusta» en Push corta el push pero no la notificación en `/notificaciones`.
 
 ## Fase 4: contrato para el frontend
 
