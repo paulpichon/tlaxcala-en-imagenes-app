@@ -52,13 +52,15 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 
 ## Pendiente: el push sigue llegando tras cerrar sesión o cambiar de cuenta (detectado 2026-11-24)
 
-**Estado: pendiente, sin fase asignada; no implementar sin orden del usuario.** Al probar la Fase 3 (like a un posteo «Solo perfil»), el click en el push pareció cerrar la sesión. El click no cierra sesiones: se ve la pantalla «Inicia sesión para ver este posteo» porque el navegador que abre la notificación no tiene sesión. Causa probable (falta confirmar con el dispositivo de la prueba):
+**Estado: implementado en backend (commit `904f67c`) y frontend el 2026-11-24, sin desplegar; falta la verificación en producción (tarea 2).** Al probar la Fase 3 (like a un posteo «Solo perfil»), el click en el push pareció cerrar la sesión. El click no cierra sesiones: se ve la pantalla «Inicia sesión para ver este posteo» porque el navegador que abre la notificación no tiene sesión. Causa probable (falta confirmar con el dispositivo de la prueba):
 
 - `logout` (`src/context/AuthContext.tsx`) no da de baja la suscripción push del dispositivo: sigue recibiendo los avisos de la cuenta que cerró sesión.
 - En el backend, el mismo dispositivo puede quedar suscrito en dos cuentas (A y B en el mismo navegador).
 
 Tareas del frontend:
 1. En `logout`, **antes** de `POST /api/auth/logout` (mientras la sesión sigue válida): `getSubscription()` → `POST /api/notificaciones/unsubscribe` con el `endpoint` → `subscription.unsubscribe()`. *Best-effort*: un fallo no debe impedir el logout. Reutilizar la lógica de desactivar de `usePushNotifications`.
+   **Hecho (2026-11-24):** `darDeBajaPushDelDispositivo(fetch)` en `src/lib/dispositivos.ts` (usa `getRegistration`, no `ready`, para no colgarse sin service worker; tope de 3 s; nunca lanza). `logout` la espera antes de `POST /api/auth/logout`; `cerrarSesionPorMotivo` también la llama (la sesión ya no vale, así que solo da de baja el navegador y el backend borra el endpoint con el 404/410 del siguiente envío). Al volver a entrar, el usuario debe reactivar el push en `/configuracion/notificaciones`.
+   **Backend (`904f67c`):** `subscribe` quita el endpoint de las demás cuentas y apaga `notificaciones_activadas` en las que se quedan sin dispositivos. Sin cambios de contrato.
 2. Verificar en producción junto con el arreglo del backend (en `subscribe`, quitar el endpoint de las demás cuentas): cerrar sesión con A → sus avisos ya no llegan a ese dispositivo; entrar con B y activar push → solo llegan los de B.
 
 ## Decisiones abiertas (se resuelven al llegar a la fase)

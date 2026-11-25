@@ -1,3 +1,5 @@
+import { apiPost, type FetchFunction } from "@/lib/apiClient";
+
 /**
  * Utilidades para la lista de dispositivos con notificaciones push
  * (`GET /api/notificaciones/estado`, Fase 7 del backend).
@@ -61,4 +63,42 @@ export function describirUserAgent(ua: string | null | undefined): {
 
   if (navegador && sistema) return { nombre: `${navegador} en ${sistema}`, movil };
   return { nombre: navegador ?? sistema ?? "Dispositivo desconocido", movil };
+}
+
+/** Tope para la baja del push al cerrar sesión: nunca debe retrasar el logout. */
+const TIMEOUT_BAJA_PUSH_MS = 3000;
+
+/**
+ * Da de baja la suscripción push de ESTE navegador al cerrar sesión, para que
+ * el dispositivo deje de recibir los avisos de la cuenta que salió (privacidad
+ * en dispositivos compartidos). Llamar ANTES de `POST /api/auth/logout`,
+ * mientras la sesión sigue siendo válida, para que el backend pueda quitar el
+ * endpoint de la cuenta. Si el aviso al backend falla (p. ej. sesión ya
+ * revocada), la baja en el navegador basta: el endpoint queda muerto y el
+ * backend lo borra al recibir 404/410 en el siguiente envío.
+ *
+ * Best-effort: nunca lanza y como mucho espera `TIMEOUT_BAJA_PUSH_MS`.
+ */
+export async function darDeBajaPushDelDispositivo(fetchFn: FetchFunction): Promise<void> {
+  const baja = async () => {
+    if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
+    // `getRegistration` (no `ready`): `ready` no resuelve nunca si no hay SW.
+    const registro = await navigator.serviceWorker.getRegistration();
+    const suscripcion = await registro?.pushManager?.getSubscription();
+    if (!suscripcion) return;
+
+    await apiPost(fetchFn, "/api/notificaciones/unsubscribe", {
+      endpoint: suscripcion.endpoint,
+    }).catch(() => {});
+    await suscripcion.unsubscribe().catch(() => {});
+  };
+
+  try {
+    await Promise.race([
+      baja(),
+      new Promise<void>((resolver) => setTimeout(resolver, TIMEOUT_BAJA_PUSH_MS)),
+    ]);
+  } catch {
+    // Best-effort: el logout sigue aunque falle la baja del push.
+  }
 }
