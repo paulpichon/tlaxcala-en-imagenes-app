@@ -10,7 +10,7 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ## 2026-11-25 · Notificaciones: avisos de sistema y publicaciones nuevas (Fase 6)
 
-Implementado (`ce83790`) y probado en local junto con el backend de la Fase 6. **Pendiente de desplegar**: el backend debe salir antes que este frontend o a la vez. Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
+Implementado (`ce83790`), probado en local junto con el backend de la Fase 6 y **desplegado con el backend el 2026-11-25; probado en producción: funciona correctamente.** Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
 
 ### Añadido
 

@@ -132,7 +132,7 @@ Seguimiento del rediseño del backend: `reports/plans/2026-11-18-plan-notificaci
   - `tag` reemplaza la notificación anterior con el mismo tag (`renotify: true`). `icon` por defecto: asset local `/assets/icono-tlaxapp-beige.png`.
   - `url` solo se abre si es del mismo origen (si no, la raíz). `notificationclick` reutiliza una ventana abierta (`focus` + `navigate`) antes de abrir otra.
 - **Tipos en `/notificaciones`:** `follow` navega al perfil del emisor; `comentario` navega a `/posteo/<referencia._id>` (si `referencia` es `null` solo se marca como leída); `posteo_eliminado_moderacion` no navega (ver Moderación).
-- **Tipos de la Fase 6** (frontend `ce83790`; backend probado en local, **pendiente de desplegar**):
+- **Tipos de la Fase 6** (frontend `ce83790`; desplegado con el backend y probado en producción el 2026-11-25):
   - Avisos de sistema **sin emisor** y con `referencia: null`: `reporte_resuelto`, `reporte_descartado`, `seguridad` y `sistema`. El `mensaje` ya es la frase completa: no se antepone nombre. `NotificacionItem` los reconoce con `ICONOS_SISTEMA` (icono por tipo en lugar del avatar); un tipo de sistema nuevo se añade ahí.
   - Clic: los de reporte, `sistema` y moderación no navegan (anonimato: los avisos al reportante nunca abren el posteo). `seguridad` abre `/configuracion/sesiones` solo si `mensaje` empieza por «Nuevo inicio de sesión» (el backend no manda subtipo); el de contraseña no navega.
   - `nueva_publicacion` lleva emisor (el autor) y se renderiza como `follow` (`<strong>nombre</strong> {mensaje}`), pero el clic abre `/posteo/<referencia._id>` como `comentario`/`like`. Solo llega a quien la activó (apagada por defecto).
@@ -165,7 +165,7 @@ Seguimiento del rediseño del backend: `reports/plans/2026-11-18-plan-notificaci
   - `TIPOS_PREFERENCIA` lista `follow`, `comentario`, `like`, `nueva_publicacion` («Publicaciones de quienes sigues») y `sistema` («Avisos de TlaxApp»). `like` y `nueva_publicacion` llevan `soloPush`: su celda de Correo queda vacía porque no existen `correo.like` ni `correo.nueva_publicacion`. `push.nueva_publicacion` es `false` por defecto (Fase 6). Moderación, `seguridad` y los avisos de reporte no tienen clave ni interruptor: no se pueden silenciar (el texto al pie de la tarjeta lo dice).
 - **Verificado en producción** (2026-11-23): preferencias de la Fase 4 con el backend desplegado.
 - **Verificado en producción** (2026-11-24): likes agrupados de la Fase 3 con el backend desplegado.
-- **Pendiente:** desplegar la Fase 6 (backend y frontend) y probarla en producción; añadir entonces los chips de `nueva_publicacion` y `seguridad`. Fase 8 del backend (contrato final). Ver plan de seguimiento.
+- **Pendiente:** chips opcionales de `nueva_publicacion` y `seguridad` (el backend desplegado ya los acepta). Fase 8 del backend (contrato final). Ver plan de seguimiento.
 
 ## Error Handling
 
