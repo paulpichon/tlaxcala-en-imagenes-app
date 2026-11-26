@@ -24,7 +24,7 @@ Se actualiza al terminar cada fase del backend. Creado: 2026-11-18. Última actu
 | 5 | Marcar todas leídas, borrar todas, filtro por tipo, limpieza de viejas | **Hecha y desplegada (2026-11-20); pruebas manuales en producción superadas** | Botones y filtro en `/notificaciones` (ver «Fase 5: contrato»). Frontend implementado y probado con el backend desplegado. |
 | 6 | Tipos nuevos: `reporte_resuelto`, `reporte_descartado`, `seguridad`, `sistema` y difusión de `nueva_publicacion` | **Hecha y desplegada (2026-11-25; backend `35ece87`, `3bd9356` y `c4167a2`); pruebas en producción superadas** | Renderizar los tipos nuevos (sin emisor salvo `nueva_publicacion`), interruptores de `nueva_publicacion` y `sistema`, chips (ver «Fase 6: contrato»). Frontend implementado (`ce83790`) y probado con el backend desplegado; los chips quedan como opcional. |
 | 7 | `GET /api/notificaciones/estado`, dispositivos, `subscribe` idempotente | **Hecha y desplegada (2026-11-19).** Frontend: activación en iOS probada en iPhone; `/estado`, reconciliación y lista de dispositivos implementados (2026-11-20, probado en producción) | Flujo de activación y arreglo de iOS (ver «Estado del frontend en la Fase 7» y «Fase 7: contrato»). |
-| 8 | Documentación, Postman, `SPECS-FRONTEND-NOTIFICACIONES.md` | Pendiente | Contrato final. |
+| 8 | Documentación, Postman, `SPECS-FRONTEND-NOTIFICACIONES.md` | **Hecha (2026-11-25)** en el backend: `docs/api/` (13 endpoints de notificaciones y efectos en seguir, comentar, likes, posteos, auth, usuarios, reportes y moderación), Postman sincronizado, `README.md`, `AGENTS.md` y el contrato final | Ninguno nuevo. Contrato final de referencia: `login-autenticacion/docs/specs/SPECS-FRONTEND-NOTIFICACIONES.md` (tipos, payload push, preferencias, activación, límites). Sin cambios de contrato. |
 
 ## Tipos de notificación (contrato actual y previsto)
 
@@ -136,6 +136,8 @@ Decidido: likes = `/notificaciones` + push agrupado, sin correo.
 - 2026-11-25: code review de la Fase 6 en el backend (`c4167a2`): correcciones internas, sin cambios de contrato ni impacto en el frontend.
 
 - 2026-11-25: Fase 6 desplegada (backend y frontend) y probada en producción: funciona correctamente. Pendientes: chips opcionales de la Fase 6 y Fase 8.
+
+- 2026-11-25: Fase 8 (documentación) hecha en el backend: contrato final en `docs/specs/SPECS-FRONTEND-NOTIFICACIONES.md`, referencia de API y Postman al día. Sin cambios de contrato. Pendiente del frontend solo lo opcional: chips `?tipo=nueva_publicacion` y `?tipo=seguridad`. Nota del contrato: que una notificación traiga `referencia` no garantiza que el posteo siga visible; si `/posteo/:id` da `404`, mostrar «Esta publicación ya no está disponible».
 
 ## Fase 6: contrato para el frontend
 
