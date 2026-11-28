@@ -16,8 +16,10 @@ Montaje: `models/server.js:130` (municipios) y `:132` (ubicación). Modelo: `mod
 
 ### Autenticación y permisos
 - Requiere token: **Sí**.
-- Cadena de middlewares: `verificarTokenSesion` → `obtenerMunicipios`.
-- Rate limiter: **ninguno**.
+- Cadena de middlewares: `floodLecturaIpLimiter` → `verificarTokenSesion` → `catalogoUsuarioLimiter` → `obtenerMunicipios`.
+- Rate limiters:
+  - `floodLecturaIpLimiter` (`middlewares/rate-limiter.js:270-279`), 15 min / **3000** por IP (env `FLOOD_LECTURA_IP_MAX`), código `FLOOD_BLOCKED`.
+  - `catalogoUsuarioLimiter`, 15 min / 100, código `READ_BLOCKED`.
 
 ### Parámetros de entrada
 Ninguno.
@@ -53,7 +55,10 @@ Cookie: accessToken=…
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:14,45` |
+| 429 | `READ_BLOCKED` | Rate Limit Exceeded | "Demasiadas solicitudes, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:341-346` |
+| 429 | `FLOOD_BLOCKED` | Rate Limit Exceeded | "Demasiadas solicitudes desde esta conexión, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:270-279` |
+| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:60,34` |
+| 401 / 403 / 500 | `SESSION_REVOKED` · `ACCOUNT_RESTRICTED` · `FORBIDDEN` · `INTERNAL_ERROR` | — | Errores comunes de la sesión (sesión cerrada o vencida, cuenta restringida o no activada, fallo de BD): ver [README § Errores comunes de la sesión de usuario](README.md#errores-comunes-de-la-sesión-de-usuario) | `middlewares/validar-jwt-cookies-sesion.js:38,46,48-49,67-68` |
 | 500 | `INTERNAL_ERROR` | Internal Server Error | "Error al obtener los municipios" | `controllers/municipios.js:21` |
 
 ### Notas para el Frontend
@@ -71,8 +76,10 @@ Cookie: accessToken=…
 
 ### Autenticación y permisos
 - Requiere token: **Sí**.
-- Cadena de middlewares: `verificarTokenSesion` → `check('claveMunicipio').isInt({min:1, max:60})` → `validarCampos` → `obtenerLocalidadesPorMunicipio`.
-- Rate limiter: **ninguno**.
+- Cadena de middlewares: `floodLecturaIpLimiter` → `verificarTokenSesion` → `catalogoUsuarioLimiter` → `check('claveMunicipio').isInt({min:1, max:60})` → `validarCampos` → `obtenerLocalidadesPorMunicipio`.
+- Rate limiters:
+  - `floodLecturaIpLimiter` (`middlewares/rate-limiter.js:270-279`), 15 min / **3000** por IP (env `FLOOD_LECTURA_IP_MAX`), código `FLOOD_BLOCKED`.
+  - `catalogoUsuarioLimiter`, 15 min / 100, código `READ_BLOCKED`.
 
 ### Parámetros de entrada
 | Ubicación | Campo | Tipo | Requerido | Validación exacta |
@@ -109,7 +116,10 @@ Cookie: accessToken=…
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:14,45` |
+| 429 | `READ_BLOCKED` | Rate Limit Exceeded | "Demasiadas solicitudes, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:341-346` |
+| 429 | `FLOOD_BLOCKED` | Rate Limit Exceeded | "Demasiadas solicitudes desde esta conexión, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:270-279` |
+| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:60,34` |
+| 401 / 403 / 500 | `SESSION_REVOKED` · `ACCOUNT_RESTRICTED` · `FORBIDDEN` · `INTERNAL_ERROR` | — | Errores comunes de la sesión (sesión cerrada o vencida, cuenta restringida o no activada, fallo de BD): ver [README § Errores comunes de la sesión de usuario](README.md#errores-comunes-de-la-sesión-de-usuario) | `middlewares/validar-jwt-cookies-sesion.js:38,46,48-49,67-68` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | "La clave del municipio debe ser un numero entre 1 y 60" | `routes/municipios.js:15` + `middlewares/validar-campos.js:28` |
 | 404 | `NOT_FOUND` | Resource Not Found | "Municipio no encontrado" | `controllers/municipios.js:37` |
 | 500 | `INTERNAL_ERROR` | Internal Server Error | "Error al obtener las localidades" | `controllers/municipios.js:49` |
@@ -129,8 +139,10 @@ Cookie: accessToken=…
 
 ### Autenticación y permisos
 - Requiere token: **Sí**.
-- Cadena de middlewares: `verificarTokenSesion` → `check('lat').isFloat().notEmpty()` → `check('lng').isFloat().notEmpty()` → `validarCampos` → `obtenerMunicipioPorCoords`.
-- Rate limiter: **ninguno**.
+- Cadena de middlewares: `floodEscrituraIpLimiter` → `verificarTokenSesion` → `catalogoUsuarioLimiter` → `check('lat').isFloat().notEmpty()` → `check('lng').isFloat().notEmpty()` → `validarCampos` → `obtenerMunicipioPorCoords`.
+- Rate limiters:
+  - `floodEscrituraIpLimiter` (`middlewares/rate-limiter.js:282-291`), 15 min / **600** por IP (env `FLOOD_ESCRITURA_IP_MAX`), código `FLOOD_BLOCKED`.
+  - `catalogoUsuarioLimiter`, 15 min / 100, código `READ_BLOCKED`.
 
 ### Parámetros de entrada
 | Ubicación | Campo | Tipo | Requerido | Validación exacta |
@@ -175,7 +187,10 @@ Si la intersección falla y el respaldo de cercanía sí encuentra municipio: `"
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:14,45` |
+| 429 | `FLOOD_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones desde esta conexión, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:282-291` |
+| 429 | `READ_BLOCKED` | Rate Limit Exceeded | "Demasiadas solicitudes, intenta de nuevo más tarde" | `middlewares/rate-limiter.js` (`catalogoUsuarioLimiter`) |
+| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:60,34` |
+| 401 / 403 / 500 | `SESSION_REVOKED` · `ACCOUNT_RESTRICTED` · `FORBIDDEN` · `INTERNAL_ERROR` | — | Errores comunes de la sesión (sesión cerrada o vencida, cuenta restringida o no activada, fallo de BD): ver [README § Errores comunes de la sesión de usuario](README.md#errores-comunes-de-la-sesión-de-usuario) | `middlewares/validar-jwt-cookies-sesion.js:38,46,48-49,67-68` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | "La latitud es obligatoria y debe ser un número" / "La longitud es obligatoria y debe ser un número" | `routes/ubicacion.js:14-15` |
 | 404 | `NOT_FOUND` | Resource Not Found | "Ubicación fuera de la zona de cobertura (Tlaxcala)" | `controllers/ubicacion.js:84` |
 | 500 | `INTERNAL_ERROR` | Internal Server Error | "Error interno al obtener la ubicación" (incluye coordenadas inválidas que rechaza MongoDB, derivado) | `controllers/ubicacion.js:103` |
@@ -196,8 +211,10 @@ Si la intersección falla y el respaldo de cercanía sí encuentra municipio: `"
 
 ### Autenticación y permisos
 - Requiere token: **Sí**.
-- Cadena de middlewares: `verificarTokenSesion` → `obtenerMunicipios`.
-- Rate limiter: **ninguno**.
+- Cadena de middlewares: `floodLecturaIpLimiter` → `verificarTokenSesion` → `catalogoUsuarioLimiter` → `obtenerMunicipios`.
+- Rate limiters:
+  - `floodLecturaIpLimiter` (`middlewares/rate-limiter.js:270-279`), 15 min / **3000** por IP (env `FLOOD_LECTURA_IP_MAX`), código `FLOOD_BLOCKED`.
+  - `catalogoUsuarioLimiter`, 15 min / 100, código `READ_BLOCKED`.
 
 ### Parámetros de entrada
 Ninguno.
@@ -215,7 +232,10 @@ Cookie: accessToken=…
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:14,45` |
+| 429 | `READ_BLOCKED` | Rate Limit Exceeded | "Demasiadas solicitudes, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:341-346` |
+| 429 | `FLOOD_BLOCKED` | Rate Limit Exceeded | "Demasiadas solicitudes desde esta conexión, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:270-279` |
+| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:60,34` |
+| 401 / 403 / 500 | `SESSION_REVOKED` · `ACCOUNT_RESTRICTED` · `FORBIDDEN` · `INTERNAL_ERROR` | — | Errores comunes de la sesión (sesión cerrada o vencida, cuenta restringida o no activada, fallo de BD): ver [README § Errores comunes de la sesión de usuario](README.md#errores-comunes-de-la-sesión-de-usuario) | `middlewares/validar-jwt-cookies-sesion.js:38,46,48-49,67-68` |
 | 500 | `INTERNAL_ERROR` | Internal Server Error | "Error al obtener los municipios" | `controllers/municipios.js:21` |
 
 ### Notas para el Frontend

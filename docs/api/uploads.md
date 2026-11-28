@@ -17,14 +17,17 @@ Montaje: `models/server.js:125`. Multer en memoria: `helpers/multer.js` (límite
 ### Autenticación y permisos
 - Requiere token: **Sí** (cookie `accessToken`).
 - Cadena de middlewares, en orden:
-  1. `imagenPerfilLimiter` (`middlewares/rate-limiter.js:191`)
+  1. `floodEscrituraIpLimiter` (`middlewares/rate-limiter.js:282`)
   2. `verificarTokenSesion`
-  3. `upload.single('img')` (`helpers/multer.js`)
-  4. `validarCampoImg` (`middlewares/validar-imagen-posteo.js:16`)
-  5. `validarImagenesMulter` (`middlewares/validar-imagen-posteo.js:25`)
-  6. `check('coleccion').custom(coleccionesPermitidas(c, ['usuarios']))` (`helpers/colecciones-permitidas.js:6`)
-  7. `validarCampos` → `actualizarImagen`
-- Rate limiter: `imagenPerfilLimiter`, 15 min / 10, código `IMAGEN_BLOCKED`.
+  3. `imagenUsuarioLimiter` (`middlewares/rate-limiter.js:373`)
+  4. `upload.single('img')` (`helpers/multer.js`)
+  5. `validarCampoImg` (`middlewares/validar-imagen-posteo.js:16`)
+  6. `validarImagenesMulter` (`middlewares/validar-imagen-posteo.js:25`)
+  7. `check('coleccion').custom(coleccionesPermitidas(c, ['usuarios']))` (`helpers/colecciones-permitidas.js:6`)
+  8. `validarCampos` → `actualizarImagen`
+- Rate limiters:
+  - `floodEscrituraIpLimiter` (`middlewares/rate-limiter.js:282-291`), 15 min / **600** por IP (env `FLOOD_ESCRITURA_IP_MAX`), código `FLOOD_BLOCKED`.
+  - `imagenUsuarioLimiter`, 15 min / 10, código `IMAGEN_BLOCKED`.
 
 ### Parámetros de entrada
 | Ubicación | Campo | Tipo | Requerido | Validación exacta |
@@ -65,8 +68,10 @@ Content-Type: image/jpeg
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 429 | `IMAGEN_BLOCKED` | Rate Limit Exceeded | "Demasiadas subidas de imagen de perfil, intenta de nuevo en 15 minutos" | `middlewares/rate-limiter.js:198-200` |
-| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" / "Sesión expirada - inicia sesión nuevamente" | `middlewares/validar-jwt-cookies-sesion.js:14,45,35` |
+| 429 | `IMAGEN_BLOCKED` | Rate Limit Exceeded | "Demasiadas subidas de imagen de perfil, intenta de nuevo en 15 minutos" | `middlewares/rate-limiter.js:373-378` |
+| 429 | `FLOOD_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones desde esta conexión, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:282-291` |
+| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" / "Sesión expirada - inicia sesión nuevamente" | `middlewares/validar-jwt-cookies-sesion.js:60,34,52` |
+| 401 / 403 / 500 | `SESSION_REVOKED` · `ACCOUNT_RESTRICTED` · `FORBIDDEN` · `INTERNAL_ERROR` | — | Errores comunes de la sesión (sesión cerrada o vencida, cuenta restringida o no activada, fallo de BD): ver [README § Errores comunes de la sesión de usuario](README.md#errores-comunes-de-la-sesión-de-usuario) | `middlewares/validar-jwt-cookies-sesion.js:38,46,48-49,67-68` |
 | 404 | `NOT_FOUND` | Resource Not Found | "No hay ninguna imagen para subir" (no llega archivo en `img`) | `middlewares/validar-imagen-posteo.js:19` |
 | 400 | `BAD_REQUEST` | Bad Request | "La imagen excede el tamaño máximo permitido (8 MB)" (`LIMIT_FILE_SIZE`) | `middlewares/validar-imagen-posteo.js:7,27` |
 | 400 | `BAD_REQUEST` | Bad Request | `Campo de archivo no esperado: "img"` (`LIMIT_UNEXPECTED_FILE`: el archivo viene en otro nombre de campo) | `middlewares/validar-imagen-posteo.js:12,27` |

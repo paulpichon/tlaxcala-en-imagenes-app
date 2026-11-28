@@ -16,8 +16,10 @@ Montaje: `models/server.js:129`. Modelo: `models/Favorito.js` (índice único pa
 
 ### Autenticación y permisos
 - Requiere token: **Sí**.
-- Cadena de middlewares: `verificarTokenSesion` → `check('page'|'limite'|'limit').optional().isNumeric()` → `validarCampos` → `obtenerFavoritosUsuario`.
-- Rate limiter: **ninguno**.
+- Cadena de middlewares: `floodLecturaIpLimiter` → `verificarTokenSesion` → `socialUsuarioLimiter` → `check('page'|'limite'|'limit').optional().isNumeric()` → `validarCampos` → `obtenerFavoritosUsuario`.
+- Rate limiters:
+  - `floodLecturaIpLimiter` (`middlewares/rate-limiter.js:270-279`), 15 min / **3000** por IP (env `FLOOD_LECTURA_IP_MAX`), código `FLOOD_BLOCKED`.
+  - `socialUsuarioLimiter`, 15 min / 300, código `READ_BLOCKED`.
 
 ### Parámetros de entrada
 | Ubicación | Campo | Tipo | Requerido | Validación exacta |
@@ -53,7 +55,10 @@ Cookie: accessToken=…
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:14,45` |
+| 429 | `READ_BLOCKED` | Rate Limit Exceeded | "Demasiadas solicitudes, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:333-338` |
+| 429 | `FLOOD_BLOCKED` | Rate Limit Exceeded | "Demasiadas solicitudes desde esta conexión, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:270-279` |
+| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:60,34` |
+| 401 / 403 / 500 | `SESSION_REVOKED` · `ACCOUNT_RESTRICTED` · `FORBIDDEN` · `INTERNAL_ERROR` | — | Errores comunes de la sesión (sesión cerrada o vencida, cuenta restringida o no activada, fallo de BD): ver [README § Errores comunes de la sesión de usuario](README.md#errores-comunes-de-la-sesión-de-usuario) | `middlewares/validar-jwt-cookies-sesion.js:38,46,48-49,67-68` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | "El parametro PAGE / LIMITE / LIMIT debe ser de tipo numerico" | `routes/favoritos.js:17-19` |
 | 500 | `INTERNAL_ERROR` | Internal Server Error | "Hubo un problema al realizar la peticion, favor de contactar a soporte." | `controllers/favoritos.js:97` |
 
@@ -73,8 +78,10 @@ Cookie: accessToken=…
 
 ### Autenticación y permisos
 - Requiere token: **Sí**.
-- Cadena de middlewares: `verificarTokenSesion` → `check('posteoId').isMongoId()` → `check('autorId').isMongoId()` → `validarCampos` → `validarIdPosteo` → `validarIdUsuario` (lee `req.body.autorId`) → `agregarPosteoFavorito`.
-- Rate limiter: **ninguno**.
+- Cadena de middlewares: `floodEscrituraIpLimiter` → `verificarTokenSesion` → `socialUsuarioLimiter` → `check('posteoId').isMongoId()` → `check('autorId').isMongoId()` → `validarCampos` → `validarIdPosteo` → `validarIdUsuario` (lee `req.body.autorId`) → `agregarPosteoFavorito`.
+- Rate limiters:
+  - `floodEscrituraIpLimiter` (`middlewares/rate-limiter.js:282-291`), 15 min / **600** por IP (env `FLOOD_ESCRITURA_IP_MAX`), código `FLOOD_BLOCKED`.
+  - `socialUsuarioLimiter`, 15 min / 300, código `READ_BLOCKED`.
 
 ### Parámetros de entrada
 | Ubicación | Campo | Tipo | Requerido | Validación exacta |
@@ -101,7 +108,10 @@ Cookie: accessToken=…
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:14,45` |
+| 429 | `READ_BLOCKED` | Rate Limit Exceeded | "Demasiadas solicitudes, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:333-338` |
+| 429 | `FLOOD_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones desde esta conexión, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:282-291` |
+| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:60,34` |
+| 401 / 403 / 500 | `SESSION_REVOKED` · `ACCOUNT_RESTRICTED` · `FORBIDDEN` · `INTERNAL_ERROR` | — | Errores comunes de la sesión (sesión cerrada o vencida, cuenta restringida o no activada, fallo de BD): ver [README § Errores comunes de la sesión de usuario](README.md#errores-comunes-de-la-sesión-de-usuario) | `middlewares/validar-jwt-cookies-sesion.js:38,46,48-49,67-68` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | "El posteoId debe ser válido" / "El autorId es obligatorio" | `routes/favoritos.js:29,31` |
 | 404 | `NOT_FOUND` | Resource Not Found | `El posteo con ID: <id> …` | `helpers/validar-id-posteo.js:19,23,30` |
 | 404 | `NOT_FOUND` | Resource Not Found | `El ID <autorId> no existe en la BD` / `no está activo` | `helpers/validar-id-usuario.js:10,14` |
@@ -125,8 +135,10 @@ Cookie: accessToken=…
 
 ### Autenticación y permisos
 - Requiere token: **Sí**.
-- Cadena de middlewares: `verificarTokenSesion` → `check('posteoId').isMongoId()` → `validarCampos` → `validarIdPosteo` → `eliminarPosteoFavorito`.
-- Rate limiter: **ninguno**.
+- Cadena de middlewares: `floodEscrituraIpLimiter` → `verificarTokenSesion` → `socialUsuarioLimiter` → `check('posteoId').isMongoId()` → `validarCampos` → `validarIdPosteo` → `eliminarPosteoFavorito`.
+- Rate limiters:
+  - `floodEscrituraIpLimiter` (`middlewares/rate-limiter.js:282-291`), 15 min / **600** por IP (env `FLOOD_ESCRITURA_IP_MAX`), código `FLOOD_BLOCKED`.
+  - `socialUsuarioLimiter`, 15 min / 300, código `READ_BLOCKED`.
 
 ### Parámetros de entrada
 | Ubicación | Campo | Tipo | Requerido | Validación exacta |
@@ -149,7 +161,10 @@ Cookie: accessToken=…
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:14,45` |
+| 429 | `READ_BLOCKED` | Rate Limit Exceeded | "Demasiadas solicitudes, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:333-338` |
+| 429 | `FLOOD_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones desde esta conexión, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:282-291` |
+| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:60,34` |
+| 401 / 403 / 500 | `SESSION_REVOKED` · `ACCOUNT_RESTRICTED` · `FORBIDDEN` · `INTERNAL_ERROR` | — | Errores comunes de la sesión (sesión cerrada o vencida, cuenta restringida o no activada, fallo de BD): ver [README § Errores comunes de la sesión de usuario](README.md#errores-comunes-de-la-sesión-de-usuario) | `middlewares/validar-jwt-cookies-sesion.js:38,46,48-49,67-68` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | "El posteoId debe ser valido" | `routes/favoritos.js:43` |
 | 404 | `NOT_FOUND` | Resource Not Found | `El posteo con ID: <id> …` | `helpers/validar-id-posteo.js:19,23,30` |
 | 404 | `NOT_FOUND` | Resource Not Found | `El posteo con id <id> no existe en favoritos` | `controllers/favoritos.js:154` |

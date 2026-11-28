@@ -4,11 +4,13 @@ Volver al [índice](README.md). Convenciones globales: [README § Convenciones g
 
 Montaje: `admin/routes/index.js:142` → `admin/routes/influencers.js`. Controlador: `admin/controllers/influencers.js`. Helpers: `admin/helpers/campos-editables.js`, `admin/helpers/eliminar-influencer.js`, `helpers/metricas-atribucion.js`, `helpers/validar-rango-fechas.js`. Modelos: `models/Influencer.js`, `models/Earlyaccess.js`, `admin/models/AuditoriaEliminacion.js`.
 
-**Temporal:** este módulo se eliminará al terminar el acceso anticipado (`models/server.js:53-55`).
+**Temporal:** este módulo se eliminará al terminar el acceso anticipado (`models/server.js:55-57`).
 
 **Todas las rutas:** sesión completa + permiso específico. Limiter después del permiso. `MODERADOR` **no** tiene permisos de influencers. Solo `SUPERADMIN` (`*`) puede usar este módulo.
 
 > **Ejemplos:** **[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]**.
+
+> **Revisión 2026-11-25 (verificación del dominio admin):** dominio revisado contra HEAD `dd88f4b` sin cambios de contrato; citas `archivo:línea` re-baselizadas. Rutas `admin/routes/influencers.js:27,47,61,84,105`, limiter `admin/middlewares/rate-limiter.js:116,134` y controlador verificados.
 
 ---
 
@@ -22,7 +24,7 @@ Montaje: `admin/routes/index.js:142` → `admin/routes/influencers.js`. Controla
 - Requiere token: **Sí**, sesión completa.
 - Permiso: **`influencers:leer`**.
 - Cadena de middlewares: `verificarSesionAdmin` → `verificarPermisoAdmin('influencers:leer')` → `adminInfluencersLecturaLimiter` → validadores de query → `validarCampos` → `listarInfluencers`.
-- Rate limiter: `adminInfluencersLecturaLimiter` (`admin/middlewares/rate-limiter.js:111`), 15 min / 300, clave `Admin._id`, código `ADMIN_INFLUENCERS_BLOCKED`.
+- Rate limiter: `adminInfluencersLecturaLimiter` (`admin/middlewares/rate-limiter.js:116`), 15 min / 300, clave `Admin._id`, código `ADMIN_INFLUENCERS_BLOCKED`.
 
 ### Parámetros de entrada
 | Ubicación | Campo | Tipo | Requerido | Validación exacta |
@@ -64,11 +66,11 @@ Cookie: adminAccessToken=…
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 429 | `ADMIN_INFLUENCERS_BLOCKED` | Rate Limit Exceeded | "Demasiadas consultas a influencers, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:118-120` |
+| 429 | `ADMIN_INFLUENCERS_BLOCKED` | Rate Limit Exceeded | "Demasiadas consultas a influencers, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:122-125` |
 | 401 | `UNAUTHORIZED` | Authentication Required | "No hay sesión del panel en la petición" / "Sesión del panel no válida" | `admin/middlewares/verificar-sesion.js:21,28` |
 | 403 | `FORBIDDEN` | Forbidden | "No tienes el permiso requerido: influencers:leer" | `admin/middlewares/verificar-permiso.js:26` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | Mensajes de `admin/routes/influencers.js:31-38` | `middlewares/validar-campos.js:28` |
-| 500 | `INTERNAL_ERROR` | Internal Server Error | "Ocurrió un error inesperado. Por favor, intente más tarde." (el controlador delega cualquier error con `next(error)`) | `middlewares/error-handler.js:108-118` |
+| 500 | `INTERNAL_ERROR` | Internal Server Error | "Ocurrió un error inesperado. Por favor, intente más tarde." (el controlador delega cualquier error con `next(error)`) | `middlewares/error-handler.js:113-123` |
 
 ### Notas para el Frontend
 - `totalAtribuciones` cuenta todas las atribuciones históricas, incluidas las de códigos eliminados (no aplica a este listado).
@@ -80,7 +82,7 @@ Cookie: adminAccessToken=…
 
 **Descripción:** Métricas agregadas de atribución: totales, por influencer, por `utm_source`, por `utm_content`, por combinación y serie diaria. Solo conteos; nunca datos personales.
 **Archivo de ruta:** `admin/routes/influencers.js:47`
-**Controlador:** `admin/controllers/influencers.js` — `obtenerMetricasInfluencers` (línea 196) → `helpers/metricas-atribucion.js` — `calcularMetricasAtribucion`
+**Controlador:** `admin/controllers/influencers.js` — `obtenerMetricasInfluencers` (línea 200) → `helpers/metricas-atribucion.js` — `calcularMetricasAtribucion`
 
 ### Autenticación y permisos
 - Requiere token: **Sí**, sesión completa.
@@ -123,12 +125,12 @@ Cookie: adminAccessToken=…
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 429 | `ADMIN_INFLUENCERS_BLOCKED` | Rate Limit Exceeded | "Demasiadas consultas a influencers, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:118-120` |
+| 429 | `ADMIN_INFLUENCERS_BLOCKED` | Rate Limit Exceeded | "Demasiadas consultas a influencers, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:122-125` |
 | 401 | `UNAUTHORIZED` | Authentication Required | "No hay sesión del panel en la petición" / "Sesión del panel no válida" | `admin/middlewares/verificar-sesion.js:21,28` |
 | 403 | `FORBIDDEN` | Forbidden | "No tienes el permiso requerido: influencers:leer" | `admin/middlewares/verificar-permiso.js:26` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | "La fecha \"desde\" debe tener formato ISO 8601" / "…\"hasta\"…" | `admin/routes/influencers.js:51-54` |
-| 422 | `VALIDATION_FAILED` | Validation Failed | `La fecha "desde" debe ser anterior o igual a "hasta"` (rango invertido; `errors` vacío) | `helpers/validar-rango-fechas.js:19` → `admin/controllers/influencers.js:208` |
-| 500 | `INTERNAL_ERROR` | Internal Server Error | "Ocurrió un error inesperado…" | `middlewares/error-handler.js:108-118` |
+| 422 | `VALIDATION_FAILED` | Validation Failed | `La fecha "desde" debe ser anterior o igual a "hasta"` (rango invertido; `errors` vacío) | `helpers/validar-rango-fechas.js:19` → `admin/controllers/influencers.js:212` |
+| 500 | `INTERNAL_ERROR` | Internal Server Error | "Ocurrió un error inesperado…" | `middlewares/error-handler.js:113-123` |
 
 ### Notas para el Frontend
 - Rango invertido → 422 **sin** `errors`. Valida en la UI antes de enviar.
@@ -147,7 +149,7 @@ Cookie: adminAccessToken=…
 - Requiere token: **Sí**, sesión completa.
 - Permiso: **`influencers:crear`**.
 - Cadena de middlewares: `verificarSesionAdmin` → `verificarPermisoAdmin('influencers:crear')` → `adminInfluencersEscrituraLimiter` → validadores → `validarCampos` → `crearInfluencer`.
-- Rate limiter: `adminInfluencersEscrituraLimiter` (`admin/middlewares/rate-limiter.js:130`), 15 min / **60**, clave `Admin._id`, código `ADMIN_INFLUENCERS_BLOCKED`.
+- Rate limiter: `adminInfluencersEscrituraLimiter` (`admin/middlewares/rate-limiter.js:134`), 15 min / **60**, clave `Admin._id`, código `ADMIN_INFLUENCERS_BLOCKED`.
 
 ### Parámetros de entrada
 | Ubicación | Campo | Tipo | Requerido | Validación exacta |
@@ -191,16 +193,19 @@ Origin: https://admin.tlaxapp.example
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 429 | `ADMIN_INFLUENCERS_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones de influencers, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:137-139` |
+| 429 | `ADMIN_INFLUENCERS_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones de influencers, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:140-143` |
 | 401 | `UNAUTHORIZED` | Authentication Required | "No hay sesión del panel en la petición" / "Sesión del panel no válida" | `admin/middlewares/verificar-sesion.js:21,28` |
 | 403 | `FORBIDDEN` | Forbidden | "No tienes el permiso requerido: influencers:crear" | `admin/middlewares/verificar-permiso.js:26` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | Mensajes de `admin/routes/influencers.js:65-76` | `middlewares/validar-campos.js:28` |
-| 409 | `CONFLICT` | Conflict | "El código de influencer ya está registrado" | `admin/controllers/influencers.js:86` |
-| 409 | `CONFLICT` | Conflict | "El código ya fue usado y no puede reutilizarse" (con atribuciones históricas; antes o después del alta) | `admin/controllers/influencers.js:95,117` |
-| 500 | `INTERNAL_ERROR` | Internal Server Error | "Ocurrió un error inesperado…" | `middlewares/error-handler.js:108-118` |
+| 409 | `CONFLICT` | Conflict | "El código de influencer ya está registrado" (duplicado registrado; conserva el code genérico) | `admin/controllers/influencers.js:86` |
+| 409 | `INFLUENCER_CODE_NOT_REUSABLE` | Conflict | "El código ya fue usado y no puede reutilizarse" (con atribuciones históricas; antes o después del alta; clase `InfluencerCodeNotReusableError`) | `admin/controllers/influencers.js:97,121` |
+| 500 | `INTERNAL_ERROR` | Internal Server Error | "Ocurrió un error inesperado…" | `middlewares/error-handler.js:113-123` |
 
 ### Notas para el Frontend
 - Envía el código en cualquier caso; el backend lo convierte a mayúsculas.
+- **Distingue los dos `409` por `code`, no por `detail`** (la redacción de `detail` NO es contrato y puede cambiar sin aviso):
+  - `CONFLICT` → el código ya existe como influencer registrado.
+  - `INFLUENCER_CODE_NOT_REUSABLE` → el código tuvo atribuciones históricas y no puede reutilizarse.
 - Un código eliminado con historial **no** puede volver a usarse: muéstralo como "código reutilizado" y pide otro.
 - `creadoPor` apunta al administrador que lo creó; `actualizadoPor` se rellena al editar.
 
@@ -210,7 +215,7 @@ Origin: https://admin.tlaxapp.example
 
 **Descripción:** Edita nombre, activo y/o notas. Al menos uno de los tres campos debe venir. Registra `actualizadoPor`.
 **Archivo de ruta:** `admin/routes/influencers.js:84`
-**Controlador:** `admin/controllers/influencers.js` — `actualizarInfluencer` (línea 133). Helper: `admin/helpers/campos-editables.js` — `extraerCamposEditables` (línea 16).
+**Controlador:** `admin/controllers/influencers.js` — `actualizarInfluencer` (línea 137). Helper: `admin/helpers/campos-editables.js` — `extraerCamposEditables` (línea 16).
 
 ### Autenticación y permisos
 - Requiere token: **Sí**, sesión completa.
@@ -260,13 +265,13 @@ Cookie: adminAccessToken=…
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 429 | `ADMIN_INFLUENCERS_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones de influencers, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:137-139` |
+| 429 | `ADMIN_INFLUENCERS_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones de influencers, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:140-143` |
 | 401 | `UNAUTHORIZED` | Authentication Required | "No hay sesión del panel en la petición" / "Sesión del panel no válida" | `admin/middlewares/verificar-sesion.js:21,28` |
 | 403 | `FORBIDDEN` | Forbidden | "No tienes el permiso requerido: influencers:editar" | `admin/middlewares/verificar-permiso.js:26` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | "El ID del influencer no es valido" / "El nombre no puede exceder 80 caracteres" / "El campo activo debe booleano" / "Las notas no pueden exceder 200 caracteres" | `admin/routes/influencers.js:88-97` |
-| 422 | `VALIDATION_FAILED` | Validation Failed | "Debes enviar al menos un campo editable: nombre, activo o notas" (body sin campos editables) | `admin/controllers/influencers.js:140` |
-| 404 | `NOT_FOUND` | Resource Not Found | "Influencer no encontrado" | `admin/controllers/influencers.js:152` |
-| 500 | `INTERNAL_ERROR` | Internal Server Error | "Ocurrió un error inesperado…" (incluye validación de Mongoose al persistir) | `middlewares/error-handler.js:108-118` |
+| 422 | `VALIDATION_FAILED` | Validation Failed | "Debes enviar al menos un campo editable: nombre, activo o notas" (body sin campos editables) | `admin/controllers/influencers.js:144` |
+| 404 | `NOT_FOUND` | Resource Not Found | "Influencer no encontrado" | `admin/controllers/influencers.js:156` |
+| 500 | `INTERNAL_ERROR` | Internal Server Error | "Ocurrió un error inesperado…" (incluye validación de Mongoose al persistir) | `middlewares/error-handler.js:113-123` |
 
 ### Notas para el Frontend
 - ⚠ **`nombre: ""` (vacío) pasa el validador** porque la regla está marcada como `optional({values:'falsy'})`. El controlador lo envía a Mongoose, donde `nombre` es obligatorio; el resultado esperado es **500**, no 422 (**[REQUIERE VERIFICACIÓN MANUAL]**, derivado del esquema `models/Influencer.js:16-21`). No envíes nombres vacíos.
@@ -280,7 +285,7 @@ Cookie: adminAccessToken=…
 
 **Descripción:** Elimina físicamente el influencer. En la **misma transacción** escribe un registro en `AuditoriaEliminacion` (snapshot, total de atribuciones y quién lo eliminó, con TTL de 90 días). Conserva los snapshots históricos de `Earlyaccess`.
 **Archivo de ruta:** `admin/routes/influencers.js:105`
-**Controlador:** `admin/controllers/influencers.js` — `eliminarInfluencer` (línea 167) → `admin/helpers/eliminar-influencer.js` — `eliminarInfluencerPorId` (línea 53)
+**Controlador:** `admin/controllers/influencers.js` — `eliminarInfluencer` (línea 171) → `admin/helpers/eliminar-influencer.js` — `eliminarInfluencerPorId` (línea 53)
 
 ### Autenticación y permisos
 - Requiere token: **Sí**, sesión completa.
@@ -314,14 +319,14 @@ Origin: https://admin.tlaxapp.example
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 429 | `ADMIN_INFLUENCERS_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones de influencers, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:137-139` |
+| 429 | `ADMIN_INFLUENCERS_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones de influencers, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:140-143` |
 | 401 | `UNAUTHORIZED` | Authentication Required | "No hay sesión del panel en la petición" / "Sesión del panel no válida" | `admin/middlewares/verificar-sesion.js:21,28` |
 | 403 | `FORBIDDEN` | Forbidden | "No tienes el permiso requerido: influencers:eliminar" | `admin/middlewares/verificar-permiso.js:26` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | "El ID del influencer no es valido" | `admin/routes/influencers.js:109` |
-| 404 | `NOT_FOUND` | Resource Not Found | "Influencer no encontrado" | `admin/controllers/influencers.js:178` |
-| 500 | `INTERNAL_ERROR` | Internal Server Error | "Ocurrió un error inesperado…" (la transacción se revierte) | `middlewares/error-handler.js:108-118` |
+| 404 | `NOT_FOUND` | Resource Not Found | "Influencer no encontrado" | `admin/controllers/influencers.js:182` |
+| 500 | `INTERNAL_ERROR` | Internal Server Error | "Ocurrió un error inesperado…" (la transacción se revierte) | `middlewares/error-handler.js:113-123` |
 
 ### Notas para el Frontend
 - **Irreversible** desde la API: el documento desaparece y el código deja de estar disponible para capturas nuevas (las cookies ya emitidas pueden seguir vigentes hasta caducar; la conversión revalida contra BD).
-- El código eliminado **no** puede reutilizarse si tuvo atribuciones (ver `POST`).
+- El código eliminado **no** puede reutilizarse si tuvo atribuciones (ver `POST`; rechazo con `409 INFLUENCER_CODE_NOT_REUSABLE`).
 - Respuesta `200` con `_id` y `codigo`: úsalos para quitar la fila del listado.

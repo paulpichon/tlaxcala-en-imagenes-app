@@ -19,16 +19,19 @@ Montaje: `models/server.js:135`. Modelo: `models/ReportePosteo.js` (índice úni
 ### Autenticación y permisos
 - Requiere token: **Sí**.
 - Cadena de middlewares, en orden:
-  1. `reporteLimiter` (`middlewares/rate-limiter.js:206`)
+  1. `floodEscrituraIpLimiter` (`middlewares/rate-limiter.js:282`)
   2. `verificarTokenSesion`
-  3. `check('posteoId').isMongoId()`
-  4. `check('categoria').notEmpty().isIn(CATEGORIAS_VALIDAS)`
-  5. `check('descripcion')` opcional, `isString`, `trim`, máx. 200 UTF-16
-  6. `check('descripcion')` obligatoria si `categoria === 'otro'`
-  7. `validarCampos`
-  8. `validarIdPosteo` (ocultos → 404 a no-autores; eliminados → 404)
-  9. `reportarPosteo`
-- Rate limiter: `reporteLimiter`, **15 min / 10**, código `REPORTE_BLOCKED`.
+  3. `reporteUsuarioLimiter` (`middlewares/rate-limiter.js:365`)
+  4. `check('posteoId').isMongoId()`
+  5. `check('categoria').notEmpty().isIn(CATEGORIAS_VALIDAS)`
+  6. `check('descripcion')` opcional, `isString`, `trim`, máx. 200 UTF-16
+  7. `check('descripcion')` obligatoria si `categoria === 'otro'`
+  8. `validarCampos`
+  9. `validarIdPosteo` (ocultos → 404 a no-autores; eliminados → 404)
+  10. `reportarPosteo`
+- Rate limiters:
+  - `floodEscrituraIpLimiter` (`middlewares/rate-limiter.js:282-291`), 15 min / **600** por IP (env `FLOOD_ESCRITURA_IP_MAX`), código `FLOOD_BLOCKED`.
+  - `reporteUsuarioLimiter` (`middlewares/rate-limiter.js:365-370`), **15 min / 10** por usuario, código `REPORTE_BLOCKED`.
 
 ### Parámetros de entrada
 | Ubicación | Campo | Tipo | Requerido | Validación exacta |
@@ -64,8 +67,10 @@ No devuelve reportero ni autor (anonimato).
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 429 | `REPORTE_BLOCKED` | Rate Limit Exceeded | "Demasiados reportes enviados, intenta de nuevo en 15 minutos" | `middlewares/rate-limiter.js:213-215` |
-| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:14,45` |
+| 429 | `REPORTE_BLOCKED` | Rate Limit Exceeded | "Demasiados reportes enviados, intenta de nuevo en 15 minutos" | `middlewares/rate-limiter.js:365-370` |
+| 429 | `FLOOD_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones desde esta conexión, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:282-291` |
+| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:60,34` |
+| 401 / 403 / 500 | `SESSION_REVOKED` · `ACCOUNT_RESTRICTED` · `FORBIDDEN` · `INTERNAL_ERROR` | — | Errores comunes de la sesión (sesión cerrada o vencida, cuenta restringida o no activada, fallo de BD): ver [README § Errores comunes de la sesión de usuario](README.md#errores-comunes-de-la-sesión-de-usuario) | `middlewares/validar-jwt-cookies-sesion.js:38,46,48-49,67-68` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | "El posteoId debe ser válido" | `routes/reportes.js:17` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | `La categoria es obligatoria: [contenido_inapropiado, contenido_ofensivo, acoso_bullying, suplantacion_identidad, informacion_falsa, spam, otro]` | `routes/reportes.js:19-21` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | "La descripcion debe ser texto de maximo 200 caracteres" | `routes/reportes.js:25-29` |
@@ -81,3 +86,5 @@ No devuelve reportero ni autor (anonimato).
 - El enlace directo `/api/posteos/post/:id` **sigue funcionando** para ese posteo.
 - Repetir el reporte devuelve 409: trátalo como "ya reportado".
 - **Anonimato:** el backend nunca expone el reportero fuera de la moderación. No intentes mostrarlo.
+- **Notificación al reportante (2026-11-25, Fase 6):** este endpoint **no** notifica. Cuando un moderador resuelve o descarta el reporte desde el panel, **todos** los que reportaron ese posteo reciben una `Notificacion` in-app `reporte_resuelto` o `reporte_descartado` (in-app + push, **sin correo**), con mensaje genérico, **sin** `referencia`, sin categoría y sin datos del autor ni de otros reporteros (anonimato; `admin/controllers/moderacion.js:320-356,449-451,527-528`). No son silenciables.
+- El contrato de `POST /api/reportes/:posteoId` no cambia por esa notificación: sigue respondiendo `201` con `data.reporteId`.

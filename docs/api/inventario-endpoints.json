@@ -1,8 +1,8 @@
 {
   "$esquema": "Baseline de inventario de endpoints de TlaxApp. El agente sincronizador hace diff contra este archivo: nuevos/modificados/eliminados. Actualizar SIEMPRE desde el código (routes/ + admin/routes/ + middlewares), nunca a mano desde memoria.",
   "$fuente": "Ruta de fuentes: routes/*.js, admin/routes/{index,influencers,moderacion}.js, middlewares/*, controllers/*, models/*, admin/*",
-  "actualizado": "2026-10-27",
-  "total": 80,
+  "actualizado": "2026-11-27",
+  "total": 90,
   "convenciones": {
     "auth": {
       "público": "sin middleware de sesión (verificar si tiene token opcional)",
@@ -12,118 +12,129 @@
       "sesion_o_preauth": "verificarSesionOPreAuth (sesión completa o preAuthToken en body; body tiene prioridad)"
     },
     "pagina": "query param canónico 'limite'; 'limit' aceptado como alias en TODO lo paginado",
-    "errores": "RFC 9457 via middlewares/error-handler.js; 429 con códigos propios de cada limiter"
+    "errores": "RFC 9457 via middlewares/error-handler.js; 429 con códigos propios de cada limiter",
+    "limiters_doble_capa": "Todo limiter con clave que incluye un valor controlado por el cliente (token, correo, sid) lleva delante una capa techo solo-IP: flujoTokenIpLimiter (15m/60 compartido, FLOOD_BLOCKED) para los 5 endpoints de flujo de token, recuperacionSolicitudIpLimiter (15m/10 dedicado, RECOVERY_BLOCKED) para password-olvidado y refreshIpLimiter (15m/300 solo IP, REFRESH_BLOCKED) delante de refreshLimiter, cuya clave es el sid de la cookie refreshToken leído SIN verificar la firma (solo clave de cubo, nunca autorización). Clave de token vía claveToken (SHA-256, 32 hex). IP real siempre con ipCliente(req), nunca req.ip. Los topes por IP de lectura/escritura autenticadas (floodLecturaIpLimiter, floodEscrituraIpLimiter) y el del polling (pollingIpLimiter) se leen de env con enteroPositivoEnv: FLOOD_LECTURA_IP_MAX, FLOOD_ESCRITURA_IP_MAX y POLLING_IP_MAX."
   },
   "módulos": [
     {
       "modulo": "bienvenida",
       "endpoints": [
         { "metodo": "GET", "ruta": "/", "auth": "público", "notas": "JSON {name,status,auth,message}. Sin limiter." },
-        { "metodo": "GET", "ruta": "/api/health", "auth": "público", "limiter": "lecturaLimiter 15m/100", "notas": "{status:'ok',uptime,timestamp,version,db:{status}}" }
+        { "metodo": "GET", "ruta": "/api/health", "auth": "público", "limiter": "healthLimiter 1m/60", "notas": "Respuesta mínima: {status:'ok'} 200 si la BD está conectada, {status:'degraded'} 503 si no (estaDbConectada). 429 HEALTH_BLOCKED." }
       ]
     },
     {
       "modulo": "auth",
       "endpoints": [
-        { "metodo": "GET", "ruta": "/api/auth/verificar-correo/:token", "auth": "público", "limiter": "verificacionLimiter 15m/5", "notas": "JWT de verificación por URL (obligatorio pese a ser opcional en Express 5). 403 si ya verificada. 429 VERIFICATION_BLOCKED." },
-        { "metodo": "POST", "ruta": "/api/auth/reenviar-correo", "auth": "público", "limiter": "reenvioCorreoLimiter 5m/3", "body": { "token": "JWT de verificación (req)" }, "notas": "429 EMAIL_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/auth/verificar-correo/:token", "auth": "público", "limiter": "flujoTokenIpLimiter 15m/60 solo IP + verificacionLimiter 15m/20 clave IP+token", "notas": "JWT de verificación por URL (obligatorio pese a ser opcional en Express 5). 403 si ya verificada. Token vencido → 401 TOKEN_EXPIRED; inválido → 401 UNAUTHORIZED (H6, antes 500). 429 FLOOD_BLOCKED/VERIFICATION_BLOCKED. Umbral holgado para escáneres que precargan el link." },
+        { "metodo": "POST", "ruta": "/api/auth/reenviar-correo", "auth": "público", "limiter": "flujoTokenIpLimiter 15m/60 solo IP + reenvioCorreoLimiter 5m/3 clave IP+token", "body": { "token": "JWT de verificación (req)" }, "notas": "429 FLOOD_BLOCKED/EMAIL_BLOCKED" },
         { "metodo": "POST", "ruta": "/api/auth/login", "auth": "público", "limiter": "loginLimiter 15m/5 clave IP+correo", "body": { "correo": "email req", "password": "req" }, "notas": "Requiere estatus=1 y email_validated=true. Éxito: cookies httpOnly. 403 sin verificar/estado≠1. 429 LOGIN_BLOCKED." },
-        { "metodo": "POST", "ruta": "/api/auth/cuentas/password-olvidado", "auth": "público", "limiter": "recoveryLimiter 15m/3", "body": { "correo": "email req" }, "notas": "Respuesta genérica aunque el correo no exista" },
-        { "metodo": "POST", "ruta": "/api/auth/reenviar-correo-restablecer-password", "auth": "público", "limiter": "recoveryLimiter", "body": { "token": "JWT reset req" } },
-        { "metodo": "GET", "ruta": "/api/auth/cuentas/restablecer-password/validar-token-reset-password/:token", "auth": "público", "limiter": "recoveryLimiter", "notas": "Valida JWT de reset" },
-        { "metodo": "POST", "ruta": "/api/auth/cuentas/reestablecer-password/:token", "auth": "público", "limiter": "recoveryLimiter", "body": { "password": "min 8 req" }, "notas": "Token por URL" },
-        { "metodo": "POST", "ruta": "/api/auth/refresh", "auth": "público", "limiter": "refreshLimiter 15m/10", "notas": "Sin body; cookie refreshToken; rotación; 401 reuso→tokenVersion++" },
-        { "metodo": "POST", "ruta": "/api/auth/logout", "auth": "público (validarRefreshToken)", "notas": "Limpia cookies" },
-        { "metodo": "GET", "ruta": "/api/auth/me", "auth": "usuario" }
+        { "metodo": "POST", "ruta": "/api/auth/cuentas/password-olvidado", "auth": "público", "limiter": "recuperacionSolicitudIpLimiter 15m/10 solo IP (techo dedicado, H2) + recuperacionSolicitudLimiter 15m/3 clave IP+correo", "body": { "correo": "email req" }, "notas": "Respuesta genérica aunque el correo no exista (anti-enumeración). Éxito devuelve data.token: token OPACO de 64 hex sin PII, sesión de recuperación de 60 min (O1); su hash se guarda en reset_sesion_token solo si la cuenta es elegible. Cubo independiente del resto del flujo. 429 RECOVERY_BLOCKED" },
+        { "metodo": "POST", "ruta": "/api/auth/reenviar-correo-restablecer-password", "auth": "público", "limiter": "flujoTokenIpLimiter 15m/60 solo IP + recuperacionReenvioLimiter 15m/3 clave IP+token", "body": { "token": "token OPACO 64 hex req (regex ^[a-f0-9]{64}$), NO es JWT (O1)" }, "notas": "Busca al usuario por el SHA-256 del token (reset_sesion_token vigente); no rota la sesión. Token inexistente/vencido/cuenta no elegible → mismo 200 genérico sin enviar correo. Cubo independiente. 429 FLOOD_BLOCKED/RECOVERY_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/auth/cuentas/restablecer-password/validar-token-reset-password/:token", "auth": "público", "limiter": "flujoTokenIpLimiter 15m/60 solo IP + recuperacionValidarTokenLimiter 15m/20 clave IP+token", "notas": "Valida JWT de reset. Holgado para escáneres. Vencido → 401 TOKEN_EXPIRED; inválido → 401 UNAUTHORIZED (H6). 429 FLOOD_BLOCKED/RECOVERY_BLOCKED" },
+        { "metodo": "POST", "ruta": "/api/auth/cuentas/reestablecer-password/:token", "auth": "público", "limiter": "flujoTokenIpLimiter 15m/60 solo IP + recuperacionResetLimiter 15m/5 clave IP+token", "body": { "password": "min 8 req" }, "notas": "Token JWT por URL. Vencido → 401 TOKEN_EXPIRED; inválido → 401 UNAUTHORIZED (H6). Éxito limpia reset_sesion_token. Cubo independiente. 429 FLOOD_BLOCKED/RECOVERY_BLOCKED" },
+        { "metodo": "POST", "ruta": "/api/auth/refresh", "auth": "público", "limiter": "refreshIpLimiter 15m/300 solo IP + refreshLimiter 15m/10 clave sid (cookie refreshToken)", "notas": "Sin body; cookie refreshToken; rotación atómica. El sid se lee sin verificar la firma (solo clave de cubo). 401 reuso → se borra solo esa sesión; 409 refresh anterior dentro de 30 s. 429 REFRESH_BLOCKED" },
+        { "metodo": "POST", "ruta": "/api/auth/logout", "auth": "público (sin sesión requerida)", "notas": "Siempre 200 limpiando accessToken y refreshToken. Borra la fila de UserToken solo si la cookie refreshToken tiene firma válida (acepta expirada). 500 solo si falla el borrado en UserToken. E1d." },
+        { "metodo": "GET", "ruta": "/api/auth/me", "auth": "usuario" },
+        { "metodo": "GET", "ruta": "/api/auth/sesiones", "auth": "usuario", "limiter": "floodLecturaIpLimiter 15m/3000 + sesionesUsuarioLimiter 15m/30", "notas": "Sesiones vigentes (expiraEn > now), más reciente primero. Campos: sessionId, deviceName, paisUltimo (null hasta E5b), ipUltima enmascarada (nunca en claro), lastUsed, esActual. 429 SESIONES_BLOCKED/FLOOD_BLOCKED. E6." },
+        { "metodo": "DELETE", "ruta": "/api/auth/sesiones/otras", "auth": "usuario", "body": { "passwordActual": "string obligatoria, máx 128 (step-up)" }, "limiter": "floodEscrituraIpLimiter 15m/600 + sesionesUsuarioLimiter 15m/30 + passwordUsuarioLimiter 15m/5", "notas": "Cierra todas las sesiones menos la actual (req.sessionId). Sin tokenVersion++. Éxito data.cerradas. 401 INVALID_CURRENT_PASSWORD, 404 usuario no encontrado, 422 validación, 429 PASSWORD_BLOCKED/SESIONES_BLOCKED/FLOOD_BLOCKED. E6." },
+        { "metodo": "DELETE", "ruta": "/api/auth/sesiones/:sessionId", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + sesionesUsuarioLimiter 15m/30", "notas": "sessionId UUID v4 propio. Si es la actual equivale a logout (limpia cookies). Ajena, vencida o inexistente → 404. 400 si no es UUID. 429 SESIONES_BLOCKED/FLOOD_BLOCKED. E6." }
       ]
     },
     {
       "modulo": "usuarios",
       "endpoints": [
-        { "metodo": "POST", "ruta": "/api/usuarios", "auth": "público", "limiter": "registroLimiter 1h/3", "body": { "nombre_completo": { "nombre": "1-60 regex req", "apellido": "req" }, "correo": "email único req", "password": "min 8 mayús+minús+número+especial req" }, "notas": "Auto-login (cookies). 409 DUPLICATE_KEY, 429 REGISTER_BLOCKED" },
-        { "metodo": "GET", "ruta": "/api/usuarios/:url", "auth": "usuario", "notas": "Perfil proyectado; url kebab-case con índice único + url_history" },
-        { "metodo": "PUT", "ruta": "/api/usuarios/update", "auth": "usuario", "body": { "nombre_completo": "opc parcial", "password": "opc min 8", "lugar_radicacion": "opc", "genero": "MASCULINO|FEMENINO|PREFIERO NO DECIR opc", "fecha_nacimiento": "opc date" }, "notas": "url se regenera solo si cambia nombre_completo; cooldown 30 días (429)" },
-        { "metodo": "DELETE", "ruta": "/api/usuarios/delete", "auth": "usuario", "notas": "Soft-delete en transacción + cascada; limpia cookies; ReportePosteo.deleteMany" },
-        { "metodo": "GET", "ruta": "/api/usuarios/registrados/nuevos-usuarios-registrados", "auth": "usuario", "notas": "Últimos 3" }
+        { "metodo": "POST", "ruta": "/api/usuarios", "auth": "público", "limiter": "registroLimiter 1h/10", "body": { "nombre_completo": { "nombre": "1-60 regex req", "apellido": "req" }, "correo": "email único req", "password": "min 8 mayús+minús+número+especial req" }, "notas": "Auto-login (cookies). 409 DUPLICATE_KEY, 429 REGISTER_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/usuarios/:url", "auth": "usuario", "limiter": "floodLecturaIpLimiter 15m/3000 + catalogoUsuarioLimiter 15m/100", "notas": "Perfil proyectado; url kebab-case con índice único + url_history. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "PUT", "ruta": "/api/usuarios/update", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + cuentaUsuarioLimiter 15m/10", "body": { "nombre_completo": "opc parcial", "lugar_radicacion": "opc", "genero": "MASCULINO|FEMENINO|PREFIERO NO DECIR opc", "fecha_nacimiento": "opc date" }, "notas": "password ya no se acepta aquí: 422 USE_PASSWORD_ENDPOINT (usar PUT /api/usuarios/password). url se regenera solo si cambia nombre_completo; cooldown 30 días (429 RATE_LIMIT_EXCEEDED). 429 CUENTA_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "PUT", "ruta": "/api/usuarios/password", "auth": "usuario + cookie refresh", "limiter": "floodEscrituraIpLimiter 15m/600 + passwordUsuarioLimiter 15m/5", "body": { "passwordActual": "string", "passwordNueva": "min 8, mayúscula+minúscula+número+especial" }, "notas": "Cierra las demás sesiones (la actual se identifica por el hash de la cookie refresh). 401 INVALID_CURRENT_PASSWORD, 403 sin refresh, 422 nueva igual a la actual, 429 PASSWORD_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "DELETE", "ruta": "/api/usuarios/delete", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + cuentaUsuarioLimiter 15m/10 + passwordUsuarioLimiter 15m/5", "body": { "passwordActual": "string (obligatoria, máx 128)" }, "notas": "Soft-delete en transacción + cascada; borra todas las UserToken del usuario; limpia cookies; ReportePosteo.deleteMany. 401 INVALID_CURRENT_PASSWORD, 403 sin refresh, 422 sin passwordActual, 429 PASSWORD_BLOCKED/CUENTA_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/usuarios/registrados/nuevos-usuarios-registrados", "auth": "usuario", "limiter": "pollingIpLimiter 15m/3000 (env POLLING_IP_MAX) + catalogoUsuarioLimiter 15m/100", "notas": "Últimos 3. Polling del frontend con cubo por IP propio (no consume floodLecturaIpLimiter). 429 FLOOD_BLOCKED/READ_BLOCKED" }
       ]
     },
     {
       "modulo": "uploads",
       "endpoints": [
-        { "metodo": "PUT", "ruta": "/api/uploads/:coleccion", "auth": "usuario", "limiter": "imagenPerfilLimiter 15m/10", "body": { "img": "multipart form-data file req, 8MB, jpg/jpeg/png/webp" }, "notas": ":coleccion solo 'usuarios'. Cloudinary sin transformaciones. 429 IMAGEN_BLOCKED" }
+        { "metodo": "PUT", "ruta": "/api/uploads/:coleccion", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + imagenUsuarioLimiter 15m/10", "body": { "img": "multipart form-data file req, 8MB, jpg/jpeg/png/webp" }, "notas": ":coleccion solo 'usuarios'. Cloudinary sin transformaciones. 429 IMAGEN_BLOCKED/FLOOD_BLOCKED" }
       ]
     },
     {
       "modulo": "posteos",
       "endpoints": [
-        { "metodo": "GET", "ruta": "/api/posteos", "auth": "usuario", "limiter": "lecturaLimiter", "query": { "page": "numérico opc", "limite": "def 15 opc", "municipio": "mongoid opc", "localidadClave": "INEGI 4 dígitos opc (requiere municipio)" }, "notas": "Feed visibilidad:'publico'; $nin reportados; $ne ocultos" },
+        { "metodo": "GET", "ruta": "/api/posteos", "auth": "usuario", "limiter": "floodLecturaIpLimiter 15m/3000 + feedUsuarioLimiter 15m/200", "query": { "page": "int 1-1000 opc", "limite": "int 1-50 def 15 opc", "municipio": "mongoid opc", "localidadClave": "INEGI 4 dígitos opc (requiere municipio)" }, "notas": "Feed visibilidad:'publico'; $nin reportados; $ne ocultos. Cada posteo incluye totalComentarios. 429 READ_BLOCKED/FLOOD_BLOCKED; 422 si page/limite fuera de rango" },
         { "metodo": "GET", "ruta": "/api/posteos/post/:id", "auth": "opcional", "limiter": "posteoPublicoLimiter 15m/100", "notas": "perfil sin sesión 401; oculto→404 si no autor; 429 POST_DETAIL_BLOCKED" },
-        { "metodo": "GET", "ruta": "/api/posteos/usuario/:idUsuario", "auth": "usuario", "query": { "page": "opc", "limite": "def 15" }, "notas": "dueño y visitantes ven publico+perfil; grilla proyecta public_id+visibilidad" },
-        { "metodo": "POST", "ruta": "/api/posteos", "auth": "usuario", "limiter": "posteoLimiter 15m/20", "body": { "img": "file req", "texto": "≤500 UTF-16 opc", "visibilidad": "publico|perfil def publico", "municipio": "mongoid opc", "localidadClave": "INEGI opc", "lat": "float opc (solo GPS)", "lng": "float opc" }, "notas": "Regla de Oro: municipio manual→coordinates null; GPS→redondeo 3 decimales. 429 POSTEO_BLOCKED" },
-        { "metodo": "PUT", "ruta": "/api/posteos/:id", "auth": "usuario", "body": { "texto": "≤500 opc", "visibilidad": "opc", "municipio": "opc", "localidadClave": "opc", "lat": "opc", "lng": "opc" }, "notas": "solo autor; multipart o JSON; null/'' = no tocado. 403/404" },
-        { "metodo": "DELETE", "ruta": "/api/posteos/:id/ubicacion", "auth": "usuario", "notas": "solo autor; quita ubicación" },
-        { "metodo": "DELETE", "ruta": "/api/posteos/:id", "auth": "usuario", "notas": "solo autor; soft delete deleteReason 'manual' + cascada" }
+        { "metodo": "GET", "ruta": "/api/posteos/usuario/:idUsuario", "auth": "usuario", "limiter": "floodLecturaIpLimiter 15m/3000 + feedUsuarioLimiter 15m/200", "query": { "page": "int 1-1000 opc", "limite": "int 1-50 def 15 opc" }, "notas": "dueño y visitantes ven publico+perfil; grilla proyecta public_id+visibilidad. Cada posteo incluye totalComentarios. 429 READ_BLOCKED/FLOOD_BLOCKED; 422 si page/limite fuera de rango" },
+        { "metodo": "POST", "ruta": "/api/posteos", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + posteoUsuarioLimiter 15m/20", "body": { "img": "file req", "texto": "≤500 UTF-16 opc", "visibilidad": "publico|perfil def publico", "municipio": "mongoid opc", "localidadClave": "INEGI opc", "lat": "float opc (solo GPS)", "lng": "float opc" }, "notas": "Regla de Oro: municipio manual→coordinates null; GPS→redondeo 3 decimales; solo enlaces de Google Maps en texto (otra URL → 422 URL_NOT_ALLOWED). 429 POSTEO_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "PUT", "ruta": "/api/posteos/:id", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + posteoUsuarioLimiter 15m/20", "body": { "texto": "≤500 opc", "visibilidad": "opc", "municipio": "opc", "localidadClave": "opc", "lat": "opc", "lng": "opc" }, "notas": "solo autor; multipart o JSON; null/'' = no tocado; solo enlaces de Google Maps en texto (otra URL → 422 URL_NOT_ALLOWED). 403/404. 429 POSTEO_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "DELETE", "ruta": "/api/posteos/:id/ubicacion", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + posteoUsuarioLimiter 15m/20", "notas": "solo autor; quita ubicación. 429 POSTEO_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "DELETE", "ruta": "/api/posteos/:id", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + posteoUsuarioLimiter 15m/20", "notas": "solo autor; soft delete deleteReason 'manual' + cascada. 429 POSTEO_BLOCKED/FLOOD_BLOCKED" }
       ]
     },
     {
       "modulo": "comentarios",
       "endpoints": [
-        { "metodo": "POST", "ruta": "/api/comentarios/:posteoId/comentarios", "auth": "usuario", "limiter": "comentarioLimiter 1m/10", "body": { "texto": "≤250 UTF-16 req no vacío tras trim" }, "notas": "regex comparte validar-texto.js con posteos. 403 desactivados, 429 COMENTARIO_BLOCKED" },
-        { "metodo": "GET", "ruta": "/api/comentarios/:posteoId/comentarios", "auth": "usuario", "query": { "page": "opc", "limite": "def 10 cap 100" } },
-        { "metodo": "GET", "ruta": "/api/comentarios/:posteoId/comentarios/count", "auth": "usuario" },
-        { "metodo": "DELETE", "ruta": "/api/comentarios/:comentarioId", "auth": "usuario", "notas": "soft delete; autor comentario o posteo. 400 ya eliminado, 403, 404" },
-        { "metodo": "PUT", "ruta": "/api/comentarios/:posteoId/comentarios/toggle", "auth": "usuario (dueño posteo)", "body": { "activar": "boolean estricto req" }, "notas": "403 no-dueño" }
+        { "metodo": "POST", "ruta": "/api/comentarios/:posteoId/comentarios", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + comentarioUsuarioLimiter 1m/10", "body": { "texto": "≤250 UTF-16 req no vacío tras trim" }, "notas": "regex comparte validar-texto.js con posteos; solo enlaces de Google Maps en texto (otra URL → 422 URL_NOT_ALLOWED). 403 desactivados, 429 COMENTARIO_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/comentarios/:posteoId/comentarios", "auth": "usuario", "limiter": "floodLecturaIpLimiter 15m/3000 + comentariosUsuarioLimiter 15m/300", "query": { "page": "opc (compat; ignorado como skip si hay cursor)", "limite": "def 10 cap 100", "limit": "alias", "orden": "opc 'asc'|'desc' def 'desc'", "cursor": "opc mongoid (_id del último comentario; viene en pagination.next)" }, "notas": "paginación por cursor: pagination.next lleva orden+cursor+limite, prev=null con cursor; evita duplicar/saltar con altas/bajas concurrentes. 422 validación. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/comentarios/:posteoId/comentarios/count", "auth": "usuario", "limiter": "floodLecturaIpLimiter 15m/3000 + comentariosUsuarioLimiter 15m/300", "notas": "429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "DELETE", "ruta": "/api/comentarios/:comentarioId", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + comentarioUsuarioLimiter 1m/10", "notas": "soft delete; autor comentario o posteo. 400 ya eliminado, 403, 404. 429 COMENTARIO_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "PUT", "ruta": "/api/comentarios/:posteoId/comentarios/toggle", "auth": "usuario (dueño posteo)", "limiter": "floodEscrituraIpLimiter 15m/600 + comentarioUsuarioLimiter 1m/10", "body": { "activar": "boolean estricto req" }, "notas": "403 no-dueño. 429 COMENTARIO_BLOCKED/FLOOD_BLOCKED" }
       ]
     },
     {
       "modulo": "likes",
       "endpoints": [
-        { "metodo": "POST", "ruta": "/api/likes/:id/like", "auth": "usuario", "notas": "toggle. 404" },
-        { "metodo": "GET", "ruta": "/api/likes/posteo/:id", "auth": "usuario" },
-        { "metodo": "GET", "ruta": "/api/likes/:id/likes/usuarios", "auth": "usuario" }
+        { "metodo": "POST", "ruta": "/api/likes/:id/like", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + socialUsuarioLimiter 15m/300", "notas": "toggle. 404. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/likes/posteo/:id", "auth": "usuario", "limiter": "floodLecturaIpLimiter 15m/3000 + socialUsuarioLimiter 15m/300", "notas": "429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/likes/:id/likes/usuarios", "auth": "usuario", "limiter": "floodLecturaIpLimiter 15m/3000 + socialUsuarioLimiter 15m/300", "notas": "429 READ_BLOCKED/FLOOD_BLOCKED" }
       ]
     },
     {
       "modulo": "favoritos",
       "endpoints": [
-        { "metodo": "GET", "ruta": "/api/favoritos", "auth": "usuario", "query": { "page": "opc", "limite": "def 15" }, "notas": "$nin reportados" },
-        { "metodo": "POST", "ruta": "/api/favoritos/:posteoId", "auth": "usuario", "body": { "autorId": "mongoid req" }, "notas": "400 propio, 409 duplicado" },
-        { "metodo": "DELETE", "ruta": "/api/favoritos/:posteoId", "auth": "usuario", "notas": "404" }
+        { "metodo": "GET", "ruta": "/api/favoritos", "auth": "usuario", "limiter": "floodLecturaIpLimiter 15m/3000 + socialUsuarioLimiter 15m/300", "query": { "page": "opc", "limite": "def 15" }, "notas": "$nin reportados. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "POST", "ruta": "/api/favoritos/:posteoId", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + socialUsuarioLimiter 15m/300", "body": { "autorId": "mongoid req" }, "notas": "400 propio, 409 duplicado. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "DELETE", "ruta": "/api/favoritos/:posteoId", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + socialUsuarioLimiter 15m/300", "notas": "404. 429 READ_BLOCKED/FLOOD_BLOCKED" }
       ]
     },
     {
       "modulo": "followers",
       "endpoints": [
-        { "metodo": "POST", "ruta": "/api/followers/follow/:id", "auth": "usuario", "notas": "400 a sí mismo/ya seguido, 404" },
-        { "metodo": "DELETE", "ruta": "/api/followers/unfollow/:id", "auth": "usuario", "notas": "400 no seguido" },
-        { "metodo": "GET", "ruta": "/api/followers/usuario/lista-followers/:id", "auth": "usuario" },
-        { "metodo": "GET", "ruta": "/api/followers/usuario/lista-followings/:id", "auth": "usuario" }
+        { "metodo": "POST", "ruta": "/api/followers/follow/:id", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + socialUsuarioLimiter 15m/300", "notas": "400 a sí mismo/ya seguido, 404. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "DELETE", "ruta": "/api/followers/unfollow/:id", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + socialUsuarioLimiter 15m/300", "notas": "400 no seguido. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/followers/usuario/lista-followers/:id", "auth": "usuario", "limiter": "floodLecturaIpLimiter 15m/3000 + socialUsuarioLimiter 15m/300", "notas": "429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/followers/usuario/lista-followings/:id", "auth": "usuario", "limiter": "floodLecturaIpLimiter 15m/3000 + socialUsuarioLimiter 15m/300", "notas": "429 READ_BLOCKED/FLOOD_BLOCKED" }
       ]
     },
     {
       "modulo": "municipios",
       "endpoints": [
-        { "metodo": "GET", "ruta": "/api/municipios", "auth": "usuario", "notas": "catálogo 60 municipios" },
-        { "metodo": "GET", "ruta": "/api/municipios/:claveMunicipio/localidades", "auth": "usuario", "notas": "clave 1-60; 404/400" }
+        { "metodo": "GET", "ruta": "/api/municipios", "auth": "usuario", "limiter": "floodLecturaIpLimiter 15m/3000 + catalogoUsuarioLimiter 15m/100", "notas": "catálogo 60 municipios. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/municipios/:claveMunicipio/localidades", "auth": "usuario", "limiter": "floodLecturaIpLimiter 15m/3000 + catalogoUsuarioLimiter 15m/100", "notas": "clave 1-60; 404/400. 429 READ_BLOCKED/FLOOD_BLOCKED" }
       ]
     },
     {
       "modulo": "ubicacion",
       "endpoints": [
-        { "metodo": "POST", "ruta": "/api/ubicacion/reverse", "auth": "usuario", "body": { "lat": "float req", "lng": "float req" }, "notas": "polígonos GeoJSON + haversine embedded. 404 fuera de cobertura" },
-        { "metodo": "GET", "ruta": "/api/ubicacion", "auth": "usuario", "notas": "mismo handler que municipios" }
+        { "metodo": "POST", "ruta": "/api/ubicacion/reverse", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + catalogoUsuarioLimiter 15m/100", "body": { "lat": "float req", "lng": "float req" }, "notas": "polígonos GeoJSON + haversine embedded. 404 fuera de cobertura. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/ubicacion", "auth": "usuario", "limiter": "floodLecturaIpLimiter 15m/3000 + catalogoUsuarioLimiter 15m/100", "notas": "mismo handler que municipios. 429 READ_BLOCKED/FLOOD_BLOCKED" }
       ]
     },
     {
       "modulo": "notificaciones",
       "endpoints": [
-        { "metodo": "POST", "ruta": "/api/notificaciones/subscribe", "auth": "usuario", "body": { "subscription": "PushSubscriptionJSON req (endpoint+keys)", "userAgent": "opc" }, "notas": "400 inválida/sin endpoint, 404 usuario" },
-        { "metodo": "POST", "ruta": "/api/notificaciones/unsubscribe", "auth": "usuario", "body": { "endpoint": "req" } },
-        { "metodo": "GET", "ruta": "/api/notificaciones/vapidPublicKey", "auth": "usuario", "notas": "{publicKey}" },
-        { "metodo": "GET", "ruta": "/api/notificaciones", "auth": "usuario", "query": { "page": "opc", "limite": "def 20" } },
-        { "metodo": "PATCH", "ruta": "/api/notificaciones/marcar-notificacion-leida/:id", "auth": "usuario", "notas": "404" },
-        { "metodo": "GET", "ruta": "/api/notificaciones/nuevas-notificaciones", "auth": "usuario", "notas": "total no leídas" },
-        { "metodo": "DELETE", "ruta": "/api/notificaciones/eliminar-notificacion/:id", "auth": "usuario", "notas": "404, 400 id" }
+        { "metodo": "POST", "ruta": "/api/notificaciones/subscribe", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + notificacionesUsuarioLimiter 15m/120", "body": { "subscription": "PushSubscriptionJSON req (endpoint + keys.p256dh/keys.auth)", "userAgent": "opc (fallback header User-Agent)" }, "notas": "Devuelve data.id = _id de la suscripción (para DELETE /dispositivos/:id; null en una carrera muy concreta). Tope 10 dispositivos por cuenta (conserva los 10 más recientes). Un endpoint pertenece a una sola cuenta: antes del alta se quita de las demás y se apaga su switch si quedan sin dispositivos. 400 suscripción inválida, 404 usuario. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "POST", "ruta": "/api/notificaciones/unsubscribe", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + notificacionesUsuarioLimiter 15m/120", "body": { "endpoint": "URL de la suscripción req (no el id del dispositivo)" }, "notas": "Idempotente; si la cuenta queda sin dispositivos apaga notificaciones_activadas. 400 falta el endpoint, 400 endpoint inválido (no https, >2048 o no string), 404 usuario. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/notificaciones/vapidPublicKey", "auth": "público", "limiter": "floodLecturaIpLimiter 15m/3000 (sin limiter por usuario)", "notas": "Sin sesión a propósito: clave pública que el frontend necesita antes del gesto del usuario (iOS). Devuelve data.key. 500 si falta VAPID_PUBLIC_KEY. 429 FLOOD_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/notificaciones/estado", "auth": "usuario", "limiter": "floodLecturaIpLimiter 15m/3000 + notificacionesUsuarioLimiter 15m/120", "notas": "data: { activadas, dispositivos[], preferencias }. Dispositivos [{ id, userAgent, creadoAt, ultimoUso, endpointHash }] más reciente primero; nunca endpoint ni keys (endpointHash = SHA-256 hex). activadas = switch encendido y ≥1 dispositivo. 404 usuario. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/notificaciones/preferencias", "auth": "usuario", "limiter": "floodLecturaIpLimiter 15m/3000 + notificacionesUsuarioLimiter 15m/120", "notas": "data.preferencias efectivas (lo guardado sobre defaults). Canales push/correo. 404 usuario. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "PUT", "ruta": "/api/notificaciones/preferencias", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + notificacionesUsuarioLimiter 15m/120", "body": { "push": "{ follow|comentario|like|nueva_publicacion|sistema: bool } opc", "correo": "{ follow|comentario|sistema: bool } opc" }, "notas": "Actualización parcial y estricta: al menos una clave, solo booleanos, solo claves conocidas. Devuelve data.preferencias efectivas. 400 BAD_REQUEST (validación manual en el controlador, NO 422), 404 usuario. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "DELETE", "ruta": "/api/notificaciones/dispositivos/:id", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + notificacionesUsuarioLimiter 15m/120", "notas": ":id = _id del dispositivo (data.id de subscribe o de GET /estado). $pull acotado al propietario; si queda sin dispositivos apaga el switch. 422 si no es MongoId, 404 ajeno/inexistente. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/notificaciones", "auth": "usuario", "limiter": "floodLecturaIpLimiter 15m/3000 + notificacionesUsuarioLimiter 15m/120", "query": { "page": ">=1 def 1 opc", "limite": "1-100 def 20 opc (limit alias)", "tipo": "enum 9 opc: follow|like|comentario|nueva_publicacion|posteo_eliminado_moderacion|reporte_resuelto|reporte_descartado|seguridad|sistema" }, "notas": "isDeleted:false, createdAt desc; el tipo se conserva en los links next/prev. Referencia solo si tipoReferencia=Posteo. 422 fuera de enum. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "PATCH", "ruta": "/api/notificaciones/marcar-todas-leidas", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + notificacionesUsuarioLimiter 15m/120", "notas": "updateMany de las no leídas y no eliminadas. data.actualizadas = modifiedCount. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "DELETE", "ruta": "/api/notificaciones", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + notificacionesUsuarioLimiter 15m/120", "notas": "Soft delete de TODAS las del usuario (isDeleted + deletedAt); el cron las borra físicamente después. data.eliminadas = modifiedCount. No confundir con DELETE /eliminar-notificacion/:id. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "PATCH", "ruta": "/api/notificaciones/marcar-notificacion-leida/:id", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + notificacionesUsuarioLimiter 15m/120", "notas": "Atómico e idempotente. 404 ajena/inexistente/eliminada, 422 si no es MongoId. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "GET", "ruta": "/api/notificaciones/nuevas-notificaciones", "auth": "usuario", "limiter": "pollingIpLimiter 15m/3000 (env POLLING_IP_MAX) + notificacionesUsuarioLimiter 15m/120", "notas": "Polling del frontend con cubo por IP propio (no consume floodLecturaIpLimiter). data.totalNoLeidas. 429 READ_BLOCKED/FLOOD_BLOCKED" },
+        { "metodo": "DELETE", "ruta": "/api/notificaciones/eliminar-notificacion/:id", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + notificacionesUsuarioLimiter 15m/120", "notas": "Soft delete de una propia (isDeleted + deletedAt); mismo contrato externo 200/404 que antes. El cron la borra físicamente después. 404 ajena/inexistente/ya eliminada, 422 si no es MongoId. 429 READ_BLOCKED/FLOOD_BLOCKED" }
       ]
     },
     {
@@ -135,7 +146,7 @@
     {
       "modulo": "reportes",
       "endpoints": [
-        { "metodo": "POST", "ruta": "/api/reportes/:posteoId", "auth": "usuario", "limiter": "reporteLimiter 15m/10", "body": { "categoria": "enum 7 req", "descripcion": "≤200 opc (obligatoria si otro)" }, "notas": "anónimo; ocultamiento permanente en feed/perfil/favoritos ($nin). 409 propio/duplicado, 429 REPORTE_BLOCKED" }
+        { "metodo": "POST", "ruta": "/api/reportes/:posteoId", "auth": "usuario", "limiter": "floodEscrituraIpLimiter 15m/600 + reporteUsuarioLimiter 15m/10", "body": { "categoria": "enum 7 req", "descripcion": "≤200 opc (obligatoria si otro)" }, "notas": "anónimo; ocultamiento permanente en feed/perfil/favoritos ($nin). 409 propio/duplicado, 429 REPORTE_BLOCKED/FLOOD_BLOCKED" }
       ]
     },
     {
@@ -192,7 +203,7 @@
       "endpoints": [
         { "metodo": "GET", "ruta": "/api/v1/admin/influencers", "auth": "panel + influencers:leer", "limiter": "adminInfluencersLecturaLimiter 15m/300", "query": { "page": "opc", "limite": "opc" } },
         { "metodo": "GET", "ruta": "/api/v1/admin/influencers/metricas", "auth": "panel + influencers:leer, lecturaLimiter", "query": { "desde": "ISO opc", "hasta": "ISO opc" }, "notas": "422 desde>hasta" },
-        { "metodo": "POST", "ruta": "/api/v1/admin/influencers", "auth": "panel + influencers:crear, escrituraLimiter 15m/60", "body": { "codigo": "3-32 [A-Z0-9-_] uppercase req", "nombre": "≤80 req", "activo": "bool opc", "notas": "≤200 opc" }, "notas": "creadoPor Admin._id. 409 código" },
+        { "metodo": "POST", "ruta": "/api/v1/admin/influencers", "auth": "panel + influencers:crear, escrituraLimiter 15m/60", "body": { "codigo": "3-32 [A-Z0-9-_] uppercase req", "nombre": "≤80 req", "activo": "bool opc", "notas": "≤200 opc" }, "notas": "creadoPor Admin._id. Dos 409: CONFLICT (código ya registrado) e INFLUENCER_CODE_NOT_REUSABLE (código con atribuciones históricas; pre-check y re-check post-insert ante carrera con conversión simultánea). Distinguir por code, nunca por detail" },
         { "metodo": "PATCH", "ruta": "/api/v1/admin/influencers/:id", "auth": "panel + influencers:editar, escrituraLimiter", "body": { "nombre": "≤80 opc", "activo": "bool opc", "notas": "≤200 opc, vacío→null" }, "notas": "≥1 campo req (422), actualizadoPor. 404" },
         { "metodo": "DELETE", "ruta": "/api/v1/admin/influencers/:id", "auth": "panel + influencers:eliminar, escrituraLimiter", "notas": "isMongoId en :id. Eliminación física (conserva histórico Earlyaccess). Responde 200 { success, msg, data: { _id, codigo } }. Errores: 401/403/404/422/429." }
       ]

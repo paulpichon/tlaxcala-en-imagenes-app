@@ -51,14 +51,16 @@ GET /
 
 ## [GET] /api/health
 
-**Descripción:** Health check: estado del proceso, uptime, memoria, PID y estado de la conexión a MongoDB.
+**Descripción:** Health check mínimo: reporta `ok` si la conexión a MongoDB está activa o `degraded` si no. Pensado para monitoreo, no para lógica de negocio.
 **Archivo de ruta:** `routes/bienvenida.js:8`
-**Controlador:** `controllers/bienvenida.js` — `getHealth` (línea 12)
+**Controlador:** `controllers/bienvenida.js` — `getHealth` (líneas 12-15)
+
+> **Actualizado 2026-11-10 (sync Postman):** corrección de metadata. El limiter real es `healthLimiter` (1 min / 60, `HEALTH_BLOCKED`) y la respuesta se redujo a `{ "status": "ok" | "degraded" }` con 200/503. La versión anterior de esta doc describía `lecturaLimiter` y una respuesta extensa con `uptime`, `pid` y `memory`, que ya no existe en el código.
 
 ### Autenticación y permisos
 - Requiere token: **No**
-- Cadena de middlewares: `lecturaLimiter` → `getHealth`.
-- Rate limiter: `lecturaLimiter` (`middlewares/rate-limiter.js:131`), 15 min / 100, código `READ_BLOCKED`.
+- Cadena de middlewares: `healthLimiter` → `getHealth`.
+- Rate limiter: `healthLimiter` (`middlewares/rate-limiter.js:233-242`), **1 minuto / 60 por IP**, código `HEALTH_BLOCKED`.
 
 ### Parámetros de entrada
 Ninguno.
@@ -70,30 +72,27 @@ GET /api/health
 [EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]
 
 ### Ejemplo de response — éxito
-- Código de estado: `200`
-- Cuerpo (forma según `controllers/bienvenida.js:15-35`; **sin envelope `success`**):
+- Código de estado: `200` si `mongoose.connection.readyState === 1` (`helpers/estado-db.js:25`); `503` en cualquier otro estado.
+- Cuerpo (**sin envelope `success`**; forma exacta de `controllers/bienvenida.js:14`).
+
+Conexión activa (200):
 ```json
-{
-  "status": "ok",
-  "uptime": 1234.56,
-  "timestamp": "2026-10-27T19:10:34.000Z",
-  "service": "TlaxApp API",
-  "version": "1.0.0",
-  "environment": "development",
-  "memory": { "rss": 0, "heapTotal": 0, "heapUsed": 0, "external": 0 },
-  "heapUsedPercentage": "00.00%",
-  "pid": 12345,
-  "db": { "status": "connected" }
-}
+{ "status": "ok" }
+```
+
+Conexión caída (503):
+```json
+{ "status": "degraded" }
 ```
 
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 429 | `READ_BLOCKED` | Rate Limit Exceeded | "Demasiadas solicitudes, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:137-139` |
+| 429 | `HEALTH_BLOCKED` | Rate Limit Exceeded | "Demasiadas solicitudes de health check, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:236-240` (limiter :233-242) |
+| 503 | — | — | **No es un error RFC 9457:** la degradación se expresa con `503` + `{ "status": "degraded" }`, sin `code` ni `title` | `controllers/bienvenida.js:14` |
 
 ### Notas para el Frontend
-- `db.status` es `connected` solo si `mongoose.connection.readyState === 1`; cualquier otro estado devuelve `disconnected` **con HTTP 200** (el endpoint no cambia el status code).
-- Úsalo para monitoreo, no para lógica de negocio.
-- ⚠ Hallazgo: expone `pid`, `memory` y `environment` sin autenticación (ver [README § Hallazgos](README.md#resumen-de-la-documentación-inconsistencias-y-hallazgos)).
-- ⚠ Discrepancia: el inventario base describe la respuesta como `{status, uptime, timestamp, version, db}`; el código devuelve además `service`, `environment`, `memory`, `heapUsedPercentage` y `pid`.
+- ✅ **Actualizado 2026-11-10:** la respuesta ya **no** incluye `uptime`, `timestamp`, `pid`, `memory`, `version`, `environment` ni `db.status`; solo `{ "status": "ok" | "degraded" }`. Decidir por el par status HTTP + campo `status`.
+- `200` no implica que el resto del backend funcione: solo mide `mongoose.connection.readyState === 1`.
+- El `503` **no** viene en formato RFC 9457 (respuesta directa del controlador, sin `code`): no intentar parsear `title`/`detail` en ese caso.
+- Headers `RateLimit-*` disponibles; con más de 60 peticiones/min por IP responde `429 HEALTH_BLOCKED` en formato RFC 9457.

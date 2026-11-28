@@ -57,7 +57,8 @@ Cookie: accessToken=…
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
 | 429 | `SOPORTE_BLOCKED` | Rate Limit Exceeded | "Demasiados tickets de soporte, intenta de nuevo más tarde" | `middlewares/rate-limiter.js:122-124` |
-| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:14,45` |
+| 401 | `UNAUTHORIZED` | Authentication Required | "No hay token en la petición" / "Token no válido" | `middlewares/validar-jwt-cookies-sesion.js:60,34` |
+| 401 / 403 / 500 | `SESSION_REVOKED` · `ACCOUNT_RESTRICTED` · `FORBIDDEN` · `INTERNAL_ERROR` | — | Errores comunes de la sesión (sesión cerrada o vencida, cuenta restringida o no activada, fallo de BD): ver [README § Errores comunes de la sesión de usuario](README.md#errores-comunes-de-la-sesión-de-usuario) | `middlewares/validar-jwt-cookies-sesion.js:38,46,48-49,67-68` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | "El tipo_problema es obligatorio: [cuenta, publicacion, seguridad, reporte, otro]" | `routes/soporte.js:13` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | "La descripcion_problema_usuario es obligatoria: minimo 10 caracteres, maximo 1000" (aplica min 15) | `routes/soporte.js:15` |
 | 400 | `BAD_REQUEST` | Bad Request | "Tipo de problema no válido" (inalcanzable: lo valida la ruta) | `controllers/soporte.js:30` |

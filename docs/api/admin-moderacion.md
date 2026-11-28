@@ -2,15 +2,17 @@
 
 Volver al [índice](README.md). Convenciones globales: [README § Convenciones globales](README.md#convenciones-globales).
 
-Montaje: `admin/routes/index.js:137` → `admin/routes/moderacion.js`. Controlador: `admin/controllers/moderacion.js`. Helpers: `admin/helpers/proyeccion-posteo-moderacion.js` (lista blanca del posteo), `helpers/categorias-reporte.js`. Modelos: `models/ReportePosteo.js`, `models/Posteo.js`, `models/Notificacion.js`.
+Montaje: `admin/routes/index.js:137` → `admin/routes/moderacion.js`. Controlador: `admin/controllers/moderacion.js`. Helpers: `admin/helpers/proyeccion-posteo-moderacion.js` (lista blanca del posteo), `helpers/categorias-reporte.js`, y para las notificaciones `helpers/notificar.js` + `helpers/en-paralelo.js` + `helpers/tras-responder.js`. Modelos: `models/ReportePosteo.js`, `models/Posteo.js`, `models/Notificacion.js`.
 
 **Todas las rutas:** sesión completa del panel (`adminAccessToken`) **+** permiso específico. El orden es `verificarSesionAdmin` → `verificarPermisoAdmin` → limiter → validadores → controlador: un request sin permiso **no consume cuota** del limiter.
 
 **Anonimato (decisión de producto):** el reportero se expone **solo dentro de este módulo**. El autor del posteo nunca sabe quién reportó.
 
-**Cola de prioridad:** `score = (PRIORIDAD_MAX + 1 − prioridad) × 1000 + min(volumen, 10) × 100`, orden `score` descendente y `createdAt` ascendente como desempate. Se calcula en cada consulta (`controllers/moderacion.js:24-44`).
+**Cola de prioridad:** `score = (PRIORIDAD_MAX + 1 − prioridad) × 1000 + min(volumen, 10) × 100`, orden `score` descendente y `createdAt` ascendente como desempate. Se calcula en cada consulta (`controllers/moderacion.js:23-46`).
 
 > **Ejemplos:** **[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]**.
+
+> **Revisión 2026-11-25 (verificación del dominio admin):** drift corregido en `resolver` y `descartar` (notificación `reporte_resuelto`/`reporte_descartado` a los reportantes, después de responder). `recategorizar`, `ocultar` y `restaurar` **no** notifican. Citas `archivo:línea` re-baselizadas al HEAD `dd88f4b`. Sin cambios de contrato de request/response.
 
 ---
 
@@ -18,13 +20,13 @@ Montaje: `admin/routes/index.js:137` → `admin/routes/moderacion.js`. Controlad
 
 **Descripción:** Cola paginada de reportes **pendientes**, priorizada por score. Excluye reportes cuyo posteo esté eliminado.
 **Archivo de ruta:** `admin/routes/moderacion.js:28`
-**Controlador:** `admin/controllers/moderacion.js` — `obtenerColaReportes` (línea 52)
+**Controlador:** `admin/controllers/moderacion.js` — `obtenerColaReportes` (línea 54)
 
 ### Autenticación y permisos
 - Requiere token: **Sí**, sesión completa.
 - Permiso: **`moderacion:leer`**.
 - Cadena de middlewares: `verificarSesionAdmin` → `verificarPermisoAdmin('moderacion:leer')` → `adminModeracionLecturaLimiter` → validadores de query → `validarCampos` → `obtenerColaReportes`.
-- Rate limiter: `adminModeracionLecturaLimiter` (`admin/middlewares/rate-limiter.js:73`), 15 min / **300**, clave `Admin._id`, código `ADMIN_MODERACION_BLOCKED`.
+- Rate limiter: `adminModeracionLecturaLimiter` (`admin/middlewares/rate-limiter.js:80`), 15 min / **300**, clave `Admin._id`, código `ADMIN_MODERACION_BLOCKED`.
 
 ### Parámetros de entrada
 | Ubicación | Campo | Tipo | Requerido | Validación exacta |
@@ -70,11 +72,11 @@ Cookie: adminAccessToken=…
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 429 | `ADMIN_MODERACION_BLOCKED` | Rate Limit Exceeded | "Demasiadas consultas a la moderacion, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:80-82` |
+| 429 | `ADMIN_MODERACION_BLOCKED` | Rate Limit Exceeded | "Demasiadas consultas a la moderacion, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:86-89` |
 | 401 | `UNAUTHORIZED` | Authentication Required | "No hay sesión del panel en la petición" / "Sesión del panel no válida" | `admin/middlewares/verificar-sesion.js:21,28` |
 | 403 | `FORBIDDEN` | Forbidden | "No tienes el permiso requerido: moderacion:leer" | `admin/middlewares/verificar-permiso.js:26` |
-| 422 | `VALIDATION_FAILED` | Validation Failed | Mensajes de `admin/routes/moderacion.js:32-38` | `middlewares/validar-campos.js:28` |
-| 500 | `INTERNAL_ERROR` | Internal Server Error | "Hubo un error al obtener la cola de reportes" | `admin/controllers/moderacion.js:163` |
+| 422 | `VALIDATION_FAILED` | Validation Failed | Mensajes de `admin/routes/moderacion.js:32-40` | `middlewares/validar-campos.js:28` |
+| 500 | `INTERNAL_ERROR` | Internal Server Error | "Hubo un error al obtener la cola de reportes" | `admin/controllers/moderacion.js:165` |
 
 ### Notas para el Frontend
 - `reportero` solo existe aquí. No lo muestres fuera de la moderación.
@@ -87,7 +89,7 @@ Cookie: adminAccessToken=…
 
 **Descripción:** Detalle de un reporte: posteo (lista blanca), autor, reportero, y hasta 10 reportes **pendientes** adicionales sobre el mismo posteo (`otrosPendientes`) con su total (`otrosPendientesTotal`).
 **Archivo de ruta:** `admin/routes/moderacion.js:45`
-**Controlador:** `admin/controllers/moderacion.js` — `obtenerDetalleReporte` (línea 170)
+**Controlador:** `admin/controllers/moderacion.js` — `obtenerDetalleReporte` (línea 172)
 
 ### Autenticación y permisos
 - Requiere token: **Sí**, sesión completa.
@@ -137,12 +139,12 @@ Sin `msg`.
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 429 | `ADMIN_MODERACION_BLOCKED` | Rate Limit Exceeded | "Demasiadas consultas a la moderacion, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:80-82` |
+| 429 | `ADMIN_MODERACION_BLOCKED` | Rate Limit Exceeded | "Demasiadas consultas a la moderacion, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:86-89` |
 | 401 | `UNAUTHORIZED` | Authentication Required | "No hay sesión del panel en la petición" / "Sesión del panel no válida" | `admin/middlewares/verificar-sesion.js:21,28` |
 | 403 | `FORBIDDEN` | Forbidden | "No tienes el permiso requerido: moderacion:leer" | `admin/middlewares/verificar-permiso.js:26` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | "El ID del reporte no es valido" | `admin/routes/moderacion.js:49` |
-| 404 | `NOT_FOUND` | Resource Not Found | "El reporte no existe" (inexistente o eliminado) | `admin/controllers/moderacion.js:273` |
-| 500 | `INTERNAL_ERROR` | Internal Server Error | "Hubo un error al obtener el detalle del reporte" | `admin/controllers/moderacion.js:280` |
+| 404 | `NOT_FOUND` | Resource Not Found | "El reporte no existe" (inexistente o eliminado) | `admin/controllers/moderacion.js:275` |
+| 500 | `INTERNAL_ERROR` | Internal Server Error | "Hubo un error al obtener el detalle del reporte" | `admin/controllers/moderacion.js:282` |
 
 ### Notas para el Frontend
 - Usa `otrosPendientesTotal` para mostrar "y N reportes más".
@@ -152,15 +154,15 @@ Sin `msg`.
 
 ## [PUT] /api/v1/admin/moderacion/reportes/:id/resolver
 
-**Descripción:** Confirma la infracción. En **una transacción**: marca este reporte y todos los pendientes del mismo posteo como `resuelto`, y elimina el posteo (`isDeleted: true`, `deleteReason: 'moderation'`). Después de confirmar la transacción, notifica al autor por correo y por notificación in-app (`posteo_eliminado_moderacion`), sin revelar reportes ni reporteros. Las notificaciones son *best-effort*.
+**Descripción:** Confirma la infracción. En **una transacción**: marca este reporte y todos los pendientes del mismo posteo como `resuelto`, y elimina el posteo (`isDeleted: true`, `deleteReason: 'moderation'`). **Después de responder** (best-effort): (a) notifica al autor por correo y por notificación in-app (`posteo_eliminado_moderacion`) y (b) avisa a **todos los reportantes** del posteo (el reclamado y los pendientes de la cascada) con `reporte_resuelto`: in-app + push, **sin correo**, mensaje genérico y **sin referencia** al posteo. Ninguna notificación revela reportes ni reporteros, y un fallo de notificación **no** revierte la transacción ni cambia la respuesta.
 **Archivo de ruta:** `admin/routes/moderacion.js:54`
-**Controlador:** `admin/controllers/moderacion.js` — `resolverReporte` (línea 321); reclamo atómico en `reclamarReportePendiente` (línea 291)
+**Controlador:** `admin/controllers/moderacion.js` — `resolverReporte` (línea 361); reclamo atómico en `reclamarReportePendiente` (línea 293)
 
 ### Autenticación y permisos
 - Requiere token: **Sí**, sesión completa.
 - Permiso: **`moderacion:resolver`**.
 - Cadena de middlewares: `verificarSesionAdmin` → `verificarPermisoAdmin('moderacion:resolver')` → `adminModeracionEscrituraLimiter` → `check('id').isMongoId()` → `validarCampos` → `resolverReporte`.
-- Rate limiter: `adminModeracionEscrituraLimiter` (`admin/middlewares/rate-limiter.js:92`), 15 min / **60**, clave `Admin._id`, código `ADMIN_MODERACION_BLOCKED`.
+- Rate limiter: `adminModeracionEscrituraLimiter` (`admin/middlewares/rate-limiter.js:98`), 15 min / **60**, clave `Admin._id`, código `ADMIN_MODERACION_BLOCKED`.
 
 ### Parámetros de entrada
 | Ubicación | Campo | Tipo | Requerido | Validación exacta |
@@ -186,27 +188,29 @@ Origin: https://admin.tlaxapp.example
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 429 | `ADMIN_MODERACION_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones de moderacion, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:98-100` |
+| 429 | `ADMIN_MODERACION_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones de moderacion, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:104-107` |
 | 401 | `UNAUTHORIZED` | Authentication Required | "No hay sesión del panel en la petición" / "Sesión del panel no válida" | `admin/middlewares/verificar-sesion.js:21,28` |
 | 403 | `FORBIDDEN` | Forbidden | "No tienes el permiso requerido: moderacion:resolver" | `admin/middlewares/verificar-permiso.js:26` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | "El ID del reporte no es valido" | `admin/routes/moderacion.js:58` |
-| 404 | `NOT_FOUND` | Resource Not Found | "El reporte no existe" | `admin/controllers/moderacion.js:308` |
-| 400 | `BAD_REQUEST` | Bad Request | "Este reporte ya fue atendido (resuelto o descartado)" | `admin/controllers/moderacion.js:311` |
-| 500 | `INTERNAL_ERROR` | Internal Server Error | "Hubo un error al resolver el reporte" (incluye fallo de transacción) | `admin/controllers/moderacion.js:397` |
+| 404 | `NOT_FOUND` | Resource Not Found | "El reporte no existe" | `admin/controllers/moderacion.js:310` |
+| 400 | `BAD_REQUEST` | Bad Request | "Este reporte ya fue atendido (resuelto o descartado)" | `admin/controllers/moderacion.js:313` |
+| 500 | `INTERNAL_ERROR` | Internal Server Error | "Hubo un error al resolver el reporte" (incluye fallo de transacción) | `admin/controllers/moderacion.js:458` |
 
 ### Notas para el Frontend
 - Es **irreversible desde el panel**: el posteo queda eliminado. Pide confirmación explícita.
-- Si el posteo ya estaba eliminado, la respuesta sigue siendo 200 con el mismo mensaje (no se notifica de nuevo).
-- Los demás reportes pendientes del mismo posteo quedan resueltos sin que se muestren.
+- Si el posteo ya estaba eliminado, la respuesta sigue siendo 200 con el mismo mensaje y **no se vuelve a avisar al autor**; aun así los reportantes **sí** reciben `reporte_resuelto`, porque su reporte quedó atendido (`admin/controllers/moderacion.js:449-451`).
+- Los demás reportes pendientes del mismo posteo quedan resueltos sin que se muestren, y **sus reporteros también reciben el aviso** (el conjunto se calcula antes de la cascada, `:323-330,390`).
+- **Los efectos externos ocurren después de la respuesta** (`responder` en `:414`; `trasResponder` en `:416`): un fallo de SMTP o de push no cambia el `200`, no revierte la moderación y no llega al `catch` del controlador.
+- Aviso al reportante (`notificarResultadoReporte`, `:343-356`): `Notificacion.tipo: 'reporte_resuelto'`, `mensaje: "Gracias por tu reporte. Revisamos la publicación y tomamos medidas."`, push genérico con `tag: 'reporte'`, **sin correo**, **sin `referencia`**, sin categoría ni datos del autor ni de otros reporteros. **No es silenciable** (el tipo no tiene clave de preferencia).
 - Tras el 200, refresca la cola: el reporte ya no aparece.
 
 ---
 
 ## [PUT] /api/v1/admin/moderacion/reportes/:id/descartar
 
-**Descripción:** Descarta el reporte (no hay infracción). En una transacción marca este reporte y los pendientes del mismo posteo como `descartado`. Si no quedan pendientes **y** el posteo estaba oculto **por un reporte** (`ocultadoPorReporteId != null`), lo restaura. Los ocultamientos manuales no se restauran solos.
+**Descripción:** Descarta el reporte (no hay infracción). En una transacción marca este reporte y los pendientes del mismo posteo como `descartado`. Si no quedan pendientes **y** el posteo estaba oculto **por un reporte** (`ocultadoPorReporteId != null`), lo restaura. Los ocultamientos manuales no se restauran solos. **Después de responder** avisa a todos los reportantes con `reporte_descartado` (in-app + push, sin correo, mensaje genérico y sin referencia).
 **Archivo de ruta:** `admin/routes/moderacion.js:63`
-**Controlador:** `admin/controllers/moderacion.js` — `descartarReporte` (línea 406)
+**Controlador:** `admin/controllers/moderacion.js` — `descartarReporte` (línea 467)
 
 ### Autenticación y permisos
 - Requiere token: **Sí**, sesión completa.
@@ -235,17 +239,19 @@ Cookie: adminAccessToken=…
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 429 | `ADMIN_MODERACION_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones de moderacion, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:98-100` |
+| 429 | `ADMIN_MODERACION_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones de moderacion, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:104-107` |
 | 401 | `UNAUTHORIZED` | Authentication Required | "No hay sesión del panel en la petición" / "Sesión del panel no válida" | `admin/middlewares/verificar-sesion.js:21,28` |
 | 403 | `FORBIDDEN` | Forbidden | "No tienes el permiso requerido: moderacion:descartar" | `admin/middlewares/verificar-permiso.js:26` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | "El ID del reporte no es valido" | `admin/routes/moderacion.js:67` |
-| 404 | `NOT_FOUND` | Resource Not Found | "El reporte no existe" | `admin/controllers/moderacion.js:308` |
-| 400 | `BAD_REQUEST` | Bad Request | "Este reporte ya fue atendido (resuelto o descartado)" | `admin/controllers/moderacion.js:311` |
-| 500 | `INTERNAL_ERROR` | Internal Server Error | "Hubo un error al descartar el reporte" | `admin/controllers/moderacion.js:468` |
+| 404 | `NOT_FOUND` | Resource Not Found | "El reporte no existe" | `admin/controllers/moderacion.js:310` |
+| 400 | `BAD_REQUEST` | Bad Request | "Este reporte ya fue atendido (resuelto o descartado)" | `admin/controllers/moderacion.js:313` |
+| 500 | `INTERNAL_ERROR` | Internal Server Error | "Hubo un error al descartar el reporte" | `admin/controllers/moderacion.js:534` |
 
 ### Notas para el Frontend
-- ⚠ Tras descartar, el reportero **no** recibe ninguna señal; el posteo sigue oculto para él (regla de producto).
-- Si el posteo se restaura, vuelve a aparecer en feed y perfil de todos.
+- **El reportante sí recibe una señal (corregido el 2026-11-25):** tras el commit y después de la respuesta se crea una `Notificacion` in-app `tipo: 'reporte_descartado'` con push (`mensaje: "Gracias por tu reporte. Revisamos la publicación y no encontramos una infracción a nuestras normas."`, `tag: 'reporte'`), **sin correo**, **sin `referencia`**, sin categoría ni datos del autor ni de otros reporteros (`admin/controllers/moderacion.js:343-356,528`). La nota anterior ("el reportero no recibe ninguna señal") ya **no** es cierta.
+- Lo que **no** cambia: el posteo sigue oculto para quien lo reportó (regla de producto del reporte). El aviso no lo vuelve a mostrar en su feed.
+- La respuesta se envía antes de los efectos externos (`responder` en `:526`; `trasResponder` en `:528`): un fallo de notificación no altera el `200` ni revierte la transacción.
+- Si el posteo se restaura (no quedan pendientes y el ocultamiento venía de un reporte), vuelve a aparecer en feed y perfil de todos, salvo para quien lo reportó.
 
 ---
 
@@ -253,7 +259,7 @@ Cookie: adminAccessToken=…
 
 **Descripción:** Cambia la categoría de un reporte **pendiente** y recalcula su prioridad. Si la nueva categoría es `otro`, exige una descripción: la enviada en el body o una ya existente. La comprobación es atómica en la propia actualización.
 **Archivo de ruta:** `admin/routes/moderacion.js:73`
-**Controlador:** `admin/controllers/moderacion.js` — `recategorizarReporte` (línea 477)
+**Controlador:** `admin/controllers/moderacion.js` — `recategorizarReporte` (línea 543)
 
 ### Autenticación y permisos
 - Requiere token: **Sí**, sesión completa.
@@ -292,19 +298,20 @@ Si no se envió `descripcion`, `data` solo trae `categoria` y `prioridad`.
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 429 | `ADMIN_MODERACION_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones de moderacion, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:98-100` |
+| 429 | `ADMIN_MODERACION_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones de moderacion, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:104-107` |
 | 401 | `UNAUTHORIZED` | Authentication Required | "No hay sesión del panel en la petición" / "Sesión del panel no válida" | `admin/middlewares/verificar-sesion.js:21,28` |
 | 403 | `FORBIDDEN` | Forbidden | "No tienes el permiso requerido: moderacion:recategorizar" | `admin/middlewares/verificar-permiso.js:26` |
-| 422 | `VALIDATION_FAILED` | Validation Failed | "El ID del reporte no es valido" / "La categoria es obligatoria: [...]" / "La descripcion debe ser texto de maximo 200 caracteres" | `admin/routes/moderacion.js:77-81` |
-| 422 | `VALIDATION_FAILED` | Validation Failed | `La descripcion es obligatoria cuando la categoria es "otro"` (sin descripción previa ni enviada) | `admin/controllers/moderacion.js:494` |
-| 404 | `NOT_FOUND` | Resource Not Found | "El reporte no existe" | `admin/controllers/moderacion.js:308` |
-| 400 | `BAD_REQUEST` | Bad Request | "Este reporte ya fue atendido (resuelto o descartado)" | `admin/controllers/moderacion.js:311` |
-| 500 | `INTERNAL_ERROR` | Internal Server Error | "Hubo un error al recategorizar el reporte" | `admin/controllers/moderacion.js:512` |
+| 422 | `VALIDATION_FAILED` | Validation Failed | "El ID del reporte no es valido" / "La categoria es obligatoria: [...]" / "La descripcion debe ser texto de maximo 200 caracteres" | `admin/routes/moderacion.js:77-85` |
+| 422 | `VALIDATION_FAILED` | Validation Failed | `La descripcion es obligatoria cuando la categoria es "otro"` (sin descripción previa ni enviada) | `admin/controllers/moderacion.js:560` |
+| 404 | `NOT_FOUND` | Resource Not Found | "El reporte no existe" | `admin/controllers/moderacion.js:310` |
+| 400 | `BAD_REQUEST` | Bad Request | "Este reporte ya fue atendido (resuelto o descartado)" | `admin/controllers/moderacion.js:313` |
+| 500 | `INTERNAL_ERROR` | Internal Server Error | "Hubo un error al recategorizar el reporte" | `admin/controllers/moderacion.js:578` |
 
 ### Notas para el Frontend
 - **Diferencia de código:** el 422 de "descripción obligatoria" viene del controlador (`errors` vacío y `detail` con el texto), no del validador (que devuelve `errors` con los campos).
 - Para `otro` sin descripción previa, envía una `descripcion` en la misma petición.
 - Solo funciona sobre reportes pendientes.
+- **No genera notificaciones** ni avisa al reportero ni al autor (`admin/controllers/moderacion.js:543-580`, sin llamadas a `notificar`).
 
 ---
 
@@ -312,7 +319,7 @@ Si no se envió `descripcion`, `data` solo trae `categoria` y `prioridad`.
 
 **Descripción:** Oculta un posteo **globalmente** (preventivo y reversible). Ya no lo ven los demás usuarios, pero el autor sí (con `ocultoPorModeracion: true`). Si se envía `reporteId`, el ocultamiento queda ligado a ese reporte y se restaura automáticamente al descartar todos sus pendientes.
 **Archivo de ruta:** `admin/routes/moderacion.js:95`
-**Controlador:** `admin/controllers/moderacion.js` — `ocultarPosteo` (línea 519)
+**Controlador:** `admin/controllers/moderacion.js` — `ocultarPosteo` (línea 585)
 
 ### Autenticación y permisos
 - Requiere token: **Sí**, sesión completa.
@@ -345,18 +352,19 @@ Cookie: adminAccessToken=…
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 429 | `ADMIN_MODERACION_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones de moderacion, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:98-100` |
+| 429 | `ADMIN_MODERACION_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones de moderacion, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:104-107` |
 | 401 | `UNAUTHORIZED` | Authentication Required | "No hay sesión del panel en la petición" / "Sesión del panel no válida" | `admin/middlewares/verificar-sesion.js:21,28` |
 | 403 | `FORBIDDEN` | Forbidden | "No tienes el permiso requerido: posteos:ocultar" | `admin/middlewares/verificar-permiso.js:26` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | "El ID del posteo no es valido" / "El ID del reporte no es valido" | `admin/routes/moderacion.js:99-100` |
-| 400 | `BAD_REQUEST` | Bad Request | "El reporte no corresponde a este posteo o ya fue atendido" | `admin/controllers/moderacion.js:536` |
-| 404 | `NOT_FOUND` | Resource Not Found | "El posteo no existe o fue eliminado" | `admin/controllers/moderacion.js:559` |
-| 500 | `INTERNAL_ERROR` | Internal Server Error | "Hubo un error al ocultar el posteo" | `admin/controllers/moderacion.js:566` |
+| 400 | `BAD_REQUEST` | Bad Request | "El reporte no corresponde a este posteo o ya fue atendido" | `admin/controllers/moderacion.js:602` |
+| 404 | `NOT_FOUND` | Resource Not Found | "El posteo no existe o fue eliminado" | `admin/controllers/moderacion.js:625` |
+| 500 | `INTERNAL_ERROR` | Internal Server Error | "Hubo un error al ocultar el posteo" | `admin/controllers/moderacion.js:632` |
 
 ### Notas para el Frontend
-- ⚠ **Llamar sin `reporteId` borra el vínculo con un reporte previo** (`ocultadoPorReporteId: null`, `controllers/moderacion.js:552`). Si el posteo ya estaba oculto por un reporte, envía el `reporteId` otra vez para conservar la restauración automática.
+- ⚠ **Llamar sin `reporteId` borra el vínculo con un reporte previo** (`ocultadoPorReporteId: null`, `controllers/moderacion.js:618`). Si el posteo ya estaba oculto por un reporte, envía el `reporteId` otra vez para conservar la restauración automática.
 - El autor ve el posteo con el badge "En revisión" (`ocultoPorModeracion: true`).
 - Oculto no es eliminado: restaurable con el endpoint siguiente.
+- **No notifica** al autor ni a los reportantes (`admin/controllers/moderacion.js:585-634`, sin llamadas a `notificar`).
 
 ---
 
@@ -364,7 +372,7 @@ Cookie: adminAccessToken=…
 
 **Descripción:** Quita el ocultamiento global de un posteo. Lo vuelve visible para todos.
 **Archivo de ruta:** `admin/routes/moderacion.js:105`
-**Controlador:** `admin/controllers/moderacion.js` — `restaurarPosteo` (línea 573)
+**Controlador:** `admin/controllers/moderacion.js` — `restaurarPosteo` (línea 639)
 
 ### Autenticación y permisos
 - Requiere token: **Sí**, sesión completa.
@@ -393,13 +401,14 @@ Cookie: adminAccessToken=…
 ### Códigos de error posibles
 | Status | code | title | detail | Dónde se lanza |
 |---|---|---|---|---|
-| 429 | `ADMIN_MODERACION_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones de moderacion, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:98-100` |
+| 429 | `ADMIN_MODERACION_BLOCKED` | Rate Limit Exceeded | "Demasiadas acciones de moderacion, intentalo de nuevo en 15 minutos" | `admin/middlewares/rate-limiter.js:104-107` |
 | 401 | `UNAUTHORIZED` | Authentication Required | "No hay sesión del panel en la petición" / "Sesión del panel no válida" | `admin/middlewares/verificar-sesion.js:21,28` |
 | 403 | `FORBIDDEN` | Forbidden | "No tienes el permiso requerido: posteos:restaurar" | `admin/middlewares/verificar-permiso.js:26` |
 | 422 | `VALIDATION_FAILED` | Validation Failed | "El ID del posteo no es valido" | `admin/routes/moderacion.js:109` |
-| 404 | `NOT_FOUND` | Resource Not Found | "El posteo no existe o fue eliminado" | `admin/controllers/moderacion.js:592` |
-| 500 | `INTERNAL_ERROR` | Internal Server Error | "Hubo un error al restaurar el posteo" | `admin/controllers/moderacion.js:599` |
+| 404 | `NOT_FOUND` | Resource Not Found | "El posteo no existe o fue eliminado" | `admin/controllers/moderacion.js:658` |
+| 500 | `INTERNAL_ERROR` | Internal Server Error | "Hubo un error al restaurar el posteo" | `admin/controllers/moderacion.js:665` |
 
 ### Notas para el Frontend
 - Restaurar un posteo que estaba oculto por un reporte **no** cierra ese reporte. Si quedan pendientes, la cola sigue mostrándolos.
 - Un posteo no oculto se "restaura" con 200 sin efecto real.
+- **No notifica** (`admin/controllers/moderacion.js:639-667`, sin llamadas a `notificar`).

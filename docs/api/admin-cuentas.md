@@ -8,6 +8,8 @@ Montaje: `admin/routes/index.js:111-132`. Controlador: `admin/controllers/cuenta
 
 > **Ejemplos:** **[EJEMPLO CONSTRUIDO A PARTIR DEL ESQUEMA — NO VERIFICADO EN EJECUCIÓN]**.
 
+> **Revisión 2026-11-25 (verificación del dominio admin):** sin drift. Rutas (`admin/routes/index.js:111-132`), controlador (`admin/controllers/cuentas.js`) y permisos verificados; las citas ya coincidían con HEAD `dd88f4b`.
+
 **Permisos de la cadena:** `SUPERADMIN` tiene `*` (todos). `MODERADOR` no tiene ningún permiso de `cuentas:*` (`admin/helpers/permisos.js:44-58`).
 
 ---
