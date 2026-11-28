@@ -77,6 +77,8 @@ export interface Pagination {
   limit: number;
   total: number;
   totalPages: number;
+  /** Orden aplicado (solo comentarios). */
+  orden?: 'asc' | 'desc';
   next: string | null;
   prev: string | null;
 }

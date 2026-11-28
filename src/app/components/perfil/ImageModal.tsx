@@ -118,6 +118,9 @@ const ImageModal: React.FC<PropsImageModal> = ({
   const [toastComentario, setToastComentario] = useState<{ message: string; type: "success" | "danger" } | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const activeInputRef = useRef<HTMLInputElement | null>(null);
+  // Contenedor con scroll de la lista. Solo se monta un layout a la vez
+  // (móvil o escritorio), así que un único ref basta.
+  const listaComentariosRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen && posteoActual?._id) {
@@ -149,6 +152,11 @@ const ImageModal: React.FC<PropsImageModal> = ({
 
     if (ok) {
       setComentarioTexto("");
+      // Orden cronológico: el comentario nuevo queda al final de la lista.
+      requestAnimationFrame(() => {
+        const el = listaComentariosRef.current;
+        el?.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+      });
     } else {
       setToastComentario({ message: "Error al publicar comentario", type: "danger" });
     }
@@ -331,7 +339,7 @@ const ImageModal: React.FC<PropsImageModal> = ({
               </div>
 
               {posteoActual.comentariosActivos !== false && (
-                <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }} className="bg-white px-3">
+                <div ref={listaComentariosRef} style={{ flex: 1, overflowY: "auto", minHeight: 0 }} className="bg-white px-3">
                   <small className="fw-bold text-muted d-block py-1">
                     {total} {total === 1 ? "comentario" : "comentarios"}
                   </small>
@@ -479,7 +487,7 @@ const ImageModal: React.FC<PropsImageModal> = ({
                 </div>
 
                 {posteoActual.comentariosActivos !== false && (
-                  <div className="flex-grow-1 overflow-auto px-3" style={{ minHeight: 0 }}>
+                  <div ref={listaComentariosRef} className="flex-grow-1 overflow-auto px-3" style={{ minHeight: 0 }}>
                     <small className="fw-bold text-muted d-block mb-1">
                       {total} {total === 1 ? "comentario" : "comentarios"}
                     </small>

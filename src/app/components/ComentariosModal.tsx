@@ -42,6 +42,7 @@ export default function ComentariosModal({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hasFetched = useRef(false);
+  const listaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen && !hasFetched.current) {
@@ -86,6 +87,11 @@ export default function ComentariosModal({
     if (ok) {
       setTexto("");
       if (inputRef.current) inputRef.current.focus();
+      // Orden cronológico: el comentario nuevo queda al final de la lista.
+      requestAnimationFrame(() => {
+        const el = listaRef.current;
+        el?.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+      });
     } else {
       setToast({ message: "Error al publicar comentario", type: "danger" });
     }
@@ -127,7 +133,7 @@ export default function ComentariosModal({
               <button type="button" className="btn-close" onClick={onClose} aria-label="Cerrar" />
             </div>
 
-            <div className={`modal-body ${styles.comentariosList}`}>
+            <div ref={listaRef} className={`modal-body ${styles.comentariosList}`}>
               {loadingList ? (
                 <div className="text-center py-4">
                   <div className="spinner-border text-secondary" role="status" />

@@ -34,7 +34,9 @@ export function useComentarios(postId: string) {
     try {
       const data = await apiGet<ApiResponsePaginado<Comentario>>(
         fetchWithAuth,
-        `/api/comentarios/${postId}/comentarios`
+        // Orden cronológico: más antiguos primero, para leer la conversación
+        // (pregunta → respuesta). `next` ya trae `orden` y `cursor`.
+        `/api/comentarios/${postId}/comentarios?orden=asc`
       );
       setComentarios(data.data);
       setTotal(data.pagination.total);
@@ -57,7 +59,13 @@ export function useComentarios(postId: string) {
     setLoadingMore(true);
     try {
       const data = await apiGet<ApiResponsePaginado<Comentario>>(fetchWithAuth, nextUrl);
-      setComentarios((prev) => [...prev, ...data.data]);
+      // Con `asc`, un comentario propio publicado mientras quedaban páginas
+      // vuelve a llegar en la última. Se quita de lo cargado y se respeta la
+      // posición que le da el servidor (el final).
+      setComentarios((prev) => {
+        const nuevos = new Set(data.data.map((c) => c._id));
+        return [...prev.filter((c) => !nuevos.has(c._id)), ...data.data];
+      });
       setNextUrl(data.pagination.next);
     } catch (err) {
       if (isNotFound(err)) {
@@ -93,7 +101,7 @@ export function useComentarios(postId: string) {
       },
     };
 
-    setComentarios((prev) => [tempComment, ...prev]);
+    setComentarios((prev) => [...prev, tempComment]);
     setTotal((prev) => prev + 1);
 
     try {
@@ -103,12 +111,13 @@ export function useComentarios(postId: string) {
         { texto: trimmedTexto }
       );
 
+      const { _id: realId, createdAt } = data.data.comentario;
+      // Si un «Cargar más» en paralelo ya trajo este comentario con su _id real,
+      // se descarta esa copia para no duplicarlo (ni repetir la key).
       setComentarios((prev) =>
-        prev.map((c) =>
-          c._id === tempId
-            ? { ...c, _id: data.data.comentario._id, createdAt: data.data.comentario.createdAt }
-            : c
-        )
+        prev
+          .filter((c) => c._id !== realId)
+          .map((c) => (c._id === tempId ? { ...c, _id: realId, createdAt } : c))
       );
 
       return true;

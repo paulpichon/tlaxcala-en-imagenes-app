@@ -38,6 +38,7 @@ export default function ComentariosSection({
   const [toast, setToast] = useState<{ message: string; type: "success" | "danger" } | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const listaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchComentarios();
@@ -60,6 +61,11 @@ export default function ComentariosSection({
     if (ok) {
       setTexto("");
       if (inputRef.current) inputRef.current.focus();
+      // Orden cronológico: el comentario nuevo queda al final de la lista.
+      requestAnimationFrame(() => {
+        const el = listaRef.current;
+        el?.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+      });
     } else {
       setToast({ message: "Error al publicar comentario", type: "danger" });
     }
@@ -93,7 +99,7 @@ export default function ComentariosSection({
           </small>
         </div>
 
-        <div className={styles.scrollArea}>
+        <div ref={listaRef} className={styles.scrollArea}>
           {loadingList ? (
             <div className="text-center py-3">
               <div className="spinner-border spinner-border-sm text-secondary" role="status" />
