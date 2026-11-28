@@ -89,13 +89,34 @@ Copied from `.env.example`. Key vars: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_API_UR
   - Posteos: `MAX_TEXTO_POSTEO = 500`.
   - Comentarios: `MAX_TEXTO_COMENTARIO = 250`.
 - Los contadores usan `String.length` (unidades UTF-16), igual que `maxLength` nativo y el backend.
-- Se mantuvo `spamRegex` en `editarPosteoSchema` y `comentarioSchema` para bloquear URLs/frases de spam; no afecta caracteres permitidos.
+- Se mantuvo `spamRegex` en `editarPosteoSchema` y `comentarioSchema` para bloquear frases de spam; no afecta caracteres permitidos. Ya **no** bloquea `http`/`www`: las URLs las valida `tieneUrlsNoPermitidas` (ver «Enlaces de Google Maps»).
 - Emoji picker:
   - Componente propio ligero en `src/app/components/EmojiPicker.tsx` con lista curada y "recientes" en `localStorage`.
   - Botón visible en todos los dispositivos; la lista curada permite insertar emojis sin depender del teclado nativo.
   - Inserta el emoji en la posición del cursor respetando `maxLength`.
   - Superficies con picker: `CrearPosteoModal`, `EditarPosteoModal`, `ComentariosSection`, `ComentariosModal` e `ImageModal` (mobile + desktop inputs).
   - El hook `useIsMobile` ya no existe; la detección móvil que aún necesitan `useCrearPosteo` e `ImageModal` sigue siendo local.
+
+## Enlaces de Google Maps en posteos y comentarios
+
+- El `texto` de posteos y comentarios solo admite URLs de **Google Maps**, para indicar dónde queda un negocio o lugar. El backend (`helpers/enlaces-permitidos.js`, commit `d14a611`) es quien manda: rechaza cualquier otra URL con `422 VALIDATION_FAILED` y `errors[].code: "URL_NOT_ALLOWED"`.
+- `src/lib/enlaces.ts` es el espejo en el frontend. **Si se agrega un dominio, hay que agregarlo en ambos lados.**
+  - Candidatos: palabras que empiezan con `http(s)://` o `www.`; se quita la puntuación pegada al final.
+  - `urlMapaPermitida` exige `https`, sin usuario, contraseña ni puerto, y compara el `hostname` ya normalizado por `URL` contra `HOSTS_MAPAS` (con regla de ruta por host, p. ej. `google.com` solo con `/maps`). Así `maps.app.goo.gl.evil.com` o `https://maps.app.goo.gl@evil.com` no pasan. Una URL con `www.` y sin `https://` se rechaza.
+  - `tieneUrlsNoPermitidas` se aplica en `posteoBaseSchema` (crear), `editarPosteoSchema` y `comentarioSchema`, con el mensaje `MENSAJE_URL_NO_PERMITIDA`.
+- **Render:** `TextoConEnlaces` (`src/app/components/TextoConEnlaces.tsx`) es el único lugar donde el texto se vuelve clicable. Usa `dividirTextoConEnlaces`, nunca `dangerouslySetInnerHTML`; las URLs no permitidas quedan como texto plano. El enlace muestra «📍 Ver en Google Maps» (la URL va en `title`), abre en otra pestaña con `rel="noopener noreferrer nofollow ugc"` y hace `stopPropagation`. Se usa en `PosteoCard`, `ImageModal` (móvil y escritorio) y `ComentarioItem`; un sitio nuevo que muestre `texto` debe usarlo.
+- **Leyenda:** `CrearPosteoModal` y `EditarPosteoModal` muestran bajo la descripción `AYUDA_ENLACE_MAPAS` (enlazada con `aria-describedby`), que sugiere pegar el enlace de Google Maps de un negocio o lugar.
+
+## Comentarios: orden y paginación
+
+- `GET /api/comentarios/:posteoId/comentarios` se pide con **`?orden=asc`** (más antiguos primero, para leer la conversación). El default del backend sigue siendo `desc` por compatibilidad; está pendiente que lo cambie a `asc` (`ORDEN_COMENTARIOS_DEFAULT`), sin efecto en el frontend porque ya lo pide explícito.
+- Paginación por **cursor** (backend `25899bf`): «Cargar más» sigue `pagination.next` tal cual (ya trae `orden` y `cursor`). **Nunca construir el cursor a mano.** `prev` es siempre `null` con cursor. `Pagination.orden` es opcional en `types.ts`.
+- `useComentarios`:
+  - El comentario nuevo (optimista) se agrega **al final**.
+  - Al cargar más se deduplica por `_id` **respetando la posición del servidor**: se quitan de lo cargado los `_id` que llegan y se añade la página. Así el comentario propio publicado con páginas pendientes termina en su lugar real.
+  - Al confirmar el `POST`, se descarta cualquier copia con el `_id` real que ya hubiera traído un «Cargar más» en paralelo (evita duplicados y keys repetidas).
+- `ComentariosModal`, `ComentariosSection` e `ImageModal` hacen scroll al final de la lista tras publicar (no al abrir). `ImageModal` usa un solo `ref` porque monta solo un layout a la vez. «Cargar más» va al final de la lista.
+- Plan: `reports/plans/2026-11-27-plan-comentarios-orden-cursor.md`.
 
 ## Reportes de publicación (Fase 1)
 

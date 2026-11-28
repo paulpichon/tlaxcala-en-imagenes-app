@@ -8,6 +8,25 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## 2026-11-27 · Enlaces de Google Maps y comentarios en orden cronológico
+
+Implementado (`6d604df`, `c1f1e5c`) en la rama `Feat-agregar-links-google-maps-posteo-comentarios`. Requiere el backend `d14a611` (enlaces) y `25899bf` (orden y cursor). **Pendiente de probar en la app y de desplegar.** Plan: `reports/plans/2026-11-27-plan-comentarios-orden-cursor.md`.
+
+### Añadido
+
+- **Enlaces de Google Maps** en posteos y comentarios: se muestran como «📍 Ver en Google Maps» y abren el mapa en otra pestaña. Cualquier otra URL se rechaza al publicar con el mensaje «Solo se permiten enlaces de Google Maps».
+- **Leyenda** bajo la descripción al crear y editar un posteo, que sugiere agregar el enlace de Google Maps de un negocio o lugar.
+
+### Cambiado
+
+- **Comentarios en orden cronológico:** el más antiguo arriba y el más reciente abajo, para que una respuesta aparezca después de la pregunta. El comentario nuevo se agrega al final y la lista baja hasta él.
+- El texto de comentarios y de edición de posteos ya no se bloquea por contener «http» o «www» en cualquier parte: solo se rechazan las URLs que no son de Google Maps.
+- Al **crear** un posteo, que antes aceptaba cualquier URL, ahora también se rechazan las que no son de Google Maps.
+
+### Corregido
+
+- **«Cargar más» duplicaba comentarios** cuando alguien comentaba mientras otro leía: ahora pagina por cursor.
+
 ## 2026-11-25 · Notificaciones: avisos de sistema y publicaciones nuevas (Fase 6)
 
 Implementado (`ce83790`), probado en local junto con el backend de la Fase 6 y **desplegado con el backend el 2026-11-25; probado en producción: funciona correctamente.** Plan: `reports/plans/2026-11-18-plan-notificaciones-backend.md`.
