@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { CrearPosteoModalProps } from "@/types/types";
 import ManualMunicipioSelector from "./ManualMunicipioSelector";
 import { MAX_TEXTO_POSTEO } from "@/lib/validaciones";
+import { AYUDA_ENLACE_MAPAS } from "@/lib/enlaces";
 import EmojiPicker from "./EmojiPicker";
 import { insertEmojiAtCursor } from "../lib/emoji";
 
@@ -334,7 +335,11 @@ export default function CrearPosteoModal({ show, onClose, onPostCreated }: Crear
                         value={texto}
                         onChange={(e) => setTexto(e.target.value)}
                         maxLength={MAX_TEXTO_POSTEO}
+                        aria-describedby="ayuda-enlace-mapas-crear"
                       />
+                      <p id="ayuda-enlace-mapas-crear" className="small text-muted mb-0 mt-1">
+                        📍 {AYUDA_ENLACE_MAPAS}
+                      </p>
 
                       <button
                         type="button"

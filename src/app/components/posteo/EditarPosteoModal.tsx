@@ -23,6 +23,7 @@ import {
 } from "@/lib/apiClient";
 import { invalidarCatalogos } from "@/lib/catalogos";
 import { MAX_TEXTO_POSTEO } from "@/lib/validaciones";
+import { AYUDA_ENLACE_MAPAS } from "@/lib/enlaces";
 import EmojiPicker from "../EmojiPicker";
 import { insertEmojiAtCursor } from "@/app/lib/emoji";
 import styles from "@/app/ui/posteo/EditarPosteoModal.module.css";
@@ -509,7 +510,11 @@ export default function EditarPosteoModal({
                     value={texto}
                     onChange={(e) => setTexto(e.target.value)}
                     placeholder="Escribe algo..."
+                    aria-describedby="ayuda-enlace-mapas-editar"
                   />
+                  <p id="ayuda-enlace-mapas-editar" className="small text-muted mb-0 mt-1">
+                    📍 {AYUDA_ENLACE_MAPAS}
+                  </p>
 
                   <button
                     type="button"

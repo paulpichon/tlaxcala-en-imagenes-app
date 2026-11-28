@@ -1,6 +1,7 @@
 // Funcion para validar formulario de registro
 // Zod
 import { z } from "zod";
+import { tieneUrlsNoPermitidas, MENSAJE_URL_NO_PERMITIDA } from "./enlaces";
 
 // ======================================
 // 📦 Constantes de subida de imágenes (compartidas con el backend)
@@ -99,6 +100,7 @@ export const posteoBaseSchema = z.object({
     texto: z
     .string()
     .max(MAX_TEXTO_POSTEO, { message: "El texto no puede exceder 500 caracteres" })
+    .refine((val) => !tieneUrlsNoPermitidas(val), { message: MENSAJE_URL_NO_PERMITIDA })
     .optional(),
     file: z
         .instanceof(File)
@@ -128,9 +130,10 @@ export const posteoSchema = posteoBaseSchema.refine(
 
 // Esquema para editar un posteo
 /**
- * Bloquea spam típico y contenido repetido
+ * Bloquea spam típico. Las URLs no van aquí: las valida tieneUrlsNoPermitidas
+ * (solo enlaces de Google Maps, misma regla que el backend).
  */
-const spamRegex = /(http|www|free money|click here|suscríbete|followers|porno|xxx)/i;
+const spamRegex = /(free money|click here|suscríbete|followers|porno|xxx)/i;
 export const editarPosteoSchema = z.object({
   visibilidad: z.enum(['publico', 'perfil']).optional(),
   texto: z
@@ -146,6 +149,9 @@ export const editarPosteoSchema = z.object({
       return !spamRegex.test(val);
     }, {
       message: "Tu texto parece contener spam ❌",
+    })
+    .refine((val) => !val || !tieneUrlsNoPermitidas(val), {
+      message: MENSAJE_URL_NO_PERMITIDA,
     })
 });
 
@@ -179,6 +185,9 @@ export const comentarioSchema = z.object({
     .max(MAX_TEXTO_COMENTARIO, "El comentario no puede exceder 250 caracteres")
     .refine((val) => !spamRegex.test(val), {
       message: "El comentario parece contener spam",
+    })
+    .refine((val) => !tieneUrlsNoPermitidas(val), {
+      message: MENSAJE_URL_NO_PERMITIDA,
     }),
 });
 export type ComentarioFormData = z.infer<typeof comentarioSchema>;

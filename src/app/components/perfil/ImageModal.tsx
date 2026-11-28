@@ -20,6 +20,7 @@ import { comentarioSchema, MAX_TEXTO_COMENTARIO } from "@/lib/validaciones";
 import { formatearEtiquetaUbicacion } from "@/lib/etiquetaUbicacion";
 import ToastGlobal from "../ToastGlobal";
 import EmojiPicker from "../EmojiPicker";
+import TextoConEnlaces from "../TextoConEnlaces";
 import { insertEmojiAtCursor } from "@/app/lib/emoji";
 
 interface PropsImageModal {
@@ -324,7 +325,7 @@ const ImageModal: React.FC<PropsImageModal> = ({
                   <span className="fw-bold text-dark">
                       {posteoActual._idUsuario.url} {" "}
                   </span>
-                  {posteoActual.texto}
+                  <TextoConEnlaces texto={posteoActual.texto} />
                 </p>
                 <p className="text-muted small mb-0">{fechaFormateada}</p>
               </div>
@@ -473,7 +474,7 @@ const ImageModal: React.FC<PropsImageModal> = ({
                     <span className="fw-bold text-dark">
                         {posteoActual._idUsuario.url} {" "}
                     </span>
-                    {posteoActual.texto}
+                    <TextoConEnlaces texto={posteoActual.texto} />
                   </p>
                 </div>
 

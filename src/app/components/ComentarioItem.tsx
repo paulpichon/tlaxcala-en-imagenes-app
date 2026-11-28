@@ -8,6 +8,7 @@ import { Comentario } from "@/types/types";
 import { useAuth } from "@/context/AuthContext";
 import { obtenerImagenPerfilUsuario } from "@/lib/cloudinary/obtenerImagenPerfilUsuario";
 import { avatarMiniLoader } from "@/lib/cloudinary/cloudinaryLoader";
+import TextoConEnlaces from "./TextoConEnlaces";
 
 interface ComentarioItemProps {
   comentario: Comentario;
@@ -66,7 +67,7 @@ export default function ComentarioItem({ comentario, onDelete, posteoAutorId }: 
         </div>
 
         <p className="mb-0 small" style={{ wordBreak: "break-word" }}>
-          {comentario.texto}
+          <TextoConEnlaces texto={comentario.texto} />
         </p>
       </div>
 

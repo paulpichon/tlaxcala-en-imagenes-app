@@ -17,6 +17,7 @@ import { avatarPerfilLoader, feedLoader, detalleLoader } from "@/lib/cloudinary/
 import { formatearEtiquetaUbicacion } from "@/lib/etiquetaUbicacion";
 import ComentariosModal from "./ComentariosModal";
 import ComentariosSection from "./posteo/ComentariosSection";
+import TextoConEnlaces from "./TextoConEnlaces";
 
 
 
@@ -267,7 +268,7 @@ export default function PosteoCard({ post, isDetail = false, showUserUrl = false
                 { posteoActual._idUsuario.url }
               </strong>
             </Link>
-            {posteoActual.texto}
+            <TextoConEnlaces texto={posteoActual.texto} />
           </p>
           <p className="text-muted small mb-0">{fechaFormateada}</p>
         </div>
